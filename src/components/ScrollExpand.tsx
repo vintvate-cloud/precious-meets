@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import tableStill from "@/assets/table-still.png.asset.json";
+import tableStill from "@/assets/table-still.jpg";
 
 /**
  * Pinned scroll-expand: a small rounded capsule photo grows to fill the
@@ -51,7 +51,7 @@ export function ScrollExpand() {
         <div data-frame className="relative z-0 overflow-hidden" style={{ width: "min(38vw,520px)", height: "min(26vw,340px)", borderRadius: 999 }}>
           <img
             data-img
-            src={tableStill.url}
+            src={tableStill}
             alt="A dark green table set with a half-finished plate, an olive, a glass of wine and a burgundy calla lily"
             className="absolute inset-0 size-full object-cover"
             loading="lazy"
