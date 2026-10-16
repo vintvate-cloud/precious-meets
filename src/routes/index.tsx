@@ -25,11 +25,11 @@ export const Route = createFileRoute("/")({
 });
 
 const links = [
-  ["How It Works", "#how"],
-  ["Our Philosophy", "#philosophy"],
-  ["Upcoming Meets", "#meets"],
-  ["Stories", "#stories"],
-  ["Join Precious Meets", "#join"],
+  ["Take the Quiz", "/quiz"],
+  ["Upcoming Meets", "/experiences"],
+  ["How It Works", "/how-it-works"],
+  ["Safety & SOS", "/safety"],
+  ["Member Sign In", "/login"],
 ] as const;
 
 // Illustrative sample meets — not real events.
@@ -112,7 +112,7 @@ function Hero() {
             Meet people beyond your usual circle. Share a table, discover unexpected perspectives, and make room for connections that matter.
           </p>
         </div>
-        <div data-hero="cta"><CtaButton>Discover your next meet</CtaButton></div>
+        <div data-hero="cta"><CtaButton href="/quiz">Discover your next meet</CtaButton></div>
       </div>
     </section>
   );
@@ -128,7 +128,7 @@ function Statement() {
           </span>
         ))}
       </h2>
-      <div className="mt-16"><CtaButton tone="ink">Find your people</CtaButton></div>
+      <div className="mt-16"><CtaButton href="/quiz" tone="ink">Find your people</CtaButton></div>
     </section>
   );
 }
