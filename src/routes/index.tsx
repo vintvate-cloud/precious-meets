@@ -183,10 +183,17 @@ function Hero() {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const syncBounds = () => {
+      const line = anchor.closest<HTMLElement>("[data-hero=line]");
+      let transformY = 0;
+      if (line) {
+        const curY = (gsap.getProperty(line, "y") as number) || 0;
+        const curYPercent = (gsap.getProperty(line, "yPercent") as number) || 0;
+        transformY = curY + (line.offsetHeight * curYPercent) / 100;
+      }
       const a = anchor.getBoundingClientRect();
       const s = sticky.getBoundingClientRect();
       return {
-        top: a.top - s.top,
+        top: a.top - transformY - s.top,
         left: a.left - s.left,
         width: a.width > 0 ? a.width : 140,
         height: a.height > 0 ? a.height : 60,
@@ -336,7 +343,7 @@ function Hero() {
                   {/* Anchor that reserves the exact space for the capsule in the text flow */}
                   <span
                     ref={anchorRef}
-                    className="inline-block h-[0.72em] w-[2.2em] md:h-[0.78em] md:w-[2.4em] mx-[0.18em] align-middle opacity-0 pointer-events-none"
+                    className="inline-block h-[0.72em] w-[2.2em] md:h-[0.78em] md:w-[2.4em] mx-[0.18em] -translate-y-[0.06em] align-middle opacity-0 pointer-events-none"
                   />
                 </div>
                 <span>strangers.</span>
@@ -1017,10 +1024,18 @@ function Index() {
       }
 
       // Hero entrance sequence (paused until preloader curtain reveals)
-      heroEntranceRef.current = gsap.timeline({ paused: true, defaults: { ease } })
+      heroEntranceRef.current = gsap.timeline({
+        paused: true,
+        defaults: { ease },
+        onComplete: () => {
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new Event("resize"));
+          }
+        },
+      })
         .from("[data-nav]", { y: -30, opacity: 0, duration: 1 })
         .from("[data-hero=line]", { yPercent: 110, duration: 1.2, stagger: 0.1 }, "-=0.5")
-        .from("[data-hero=pill]", { scale: 0.8, opacity: 0, duration: 1.1 }, "-=0.9")
+        .from("[data-hero=pill]", { yPercent: 110, scale: 0.8, opacity: 0, duration: 1.1 }, "-=1.1")
         .from("[data-hero=annotation]", { y: -12, opacity: 0, duration: 0.8, ease: "back.out(1.7)" }, "-=0.7")
         .to("[data-hero=underline-path]", { strokeDashoffset: 0, duration: 1.3, ease: "power2.inOut" }, "-=0.4")
         .from("[data-hero=copy]", { y: 20, opacity: 0, duration: 0.9 }, "-=0.7")
