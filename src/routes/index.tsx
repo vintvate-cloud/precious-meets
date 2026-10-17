@@ -12,6 +12,10 @@ import dusk from "@/assets/dusk.jpg";
 import tableStill from "@/assets/table-still.jpg";
 import footerBg from "@/assets/footer-bg.jpg";
 
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -172,6 +176,10 @@ function Hero() {
     const frame = expandFrameRef.current;
     if (!section || !sticky || !anchor || !frame) return;
 
+    if (typeof window !== "undefined") {
+      gsap.registerPlugin(ScrollTrigger);
+    }
+
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const syncBounds = () => {
@@ -180,8 +188,8 @@ function Hero() {
       return {
         top: a.top - s.top,
         left: a.left - s.left,
-        width: a.width,
-        height: a.height,
+        width: a.width > 0 ? a.width : 140,
+        height: a.height > 0 ? a.height : 60,
       };
     };
 
@@ -197,6 +205,7 @@ function Hero() {
     if (reduce) return;
 
     const tl = gsap.timeline({
+      paused: true,
       scrollTrigger: {
         trigger: section,
         start: "top top",
@@ -248,6 +257,7 @@ function Hero() {
     };
 
     window.addEventListener("resize", onResize);
+    document.fonts?.ready?.then(onResize);
 
     return () => {
       tl.kill();
@@ -951,12 +961,27 @@ function Footer() {
 function Index() {
   const root = useRef<HTMLDivElement>(null);
   const heroEntranceRef = useRef<gsap.core.Timeline | null>(null);
+  const preloaderDoneRef = useRef(false);
 
   const handlePreloaderComplete = () => {
-    heroEntranceRef.current?.play();
+    preloaderDoneRef.current = true;
+    if (typeof window !== "undefined") {
+      window.scrollTo(0, 0);
+      ScrollTrigger.refresh();
+    }
+    if (heroEntranceRef.current) {
+      heroEntranceRef.current.play();
+    }
   };
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      if ("scrollRestoration" in window.history) {
+        window.history.scrollRestoration = "manual";
+      }
+      window.scrollTo(0, 0);
+    }
+
     gsap.registerPlugin(ScrollTrigger);
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const lenis = reduce ? null : new Lenis({ lerp: 0.1 });
@@ -995,11 +1020,15 @@ function Index() {
       heroEntranceRef.current = gsap.timeline({ paused: true, defaults: { ease } })
         .from("[data-nav]", { y: -30, opacity: 0, duration: 1 })
         .from("[data-hero=line]", { yPercent: 110, duration: 1.2, stagger: 0.1 }, "-=0.5")
-        .from("[data-hero=pill]", { clipPath: "inset(0 50% 0 50% round 999px)", scale: 0.8, duration: 1.1 }, "-=0.9")
+        .from("[data-hero=pill]", { scale: 0.8, opacity: 0, duration: 1.1 }, "-=0.9")
         .from("[data-hero=annotation]", { y: -12, opacity: 0, duration: 0.8, ease: "back.out(1.7)" }, "-=0.7")
         .to("[data-hero=underline-path]", { strokeDashoffset: 0, duration: 1.3, ease: "power2.inOut" }, "-=0.4")
         .from("[data-hero=copy]", { y: 20, opacity: 0, duration: 0.9 }, "-=0.7")
         .from("[data-hero=cta]", { y: 20, opacity: 0, duration: 0.9 }, "-=0.7");
+
+      if (preloaderDoneRef.current) {
+        heroEntranceRef.current.play();
+      }
 
       gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((el, i) =>
         gsap.from(el, { yPercent: 110, duration: 1.2, ease, delay: (i % 4) * 0.08, scrollTrigger: { trigger: el, start: "top 88%" } }),
