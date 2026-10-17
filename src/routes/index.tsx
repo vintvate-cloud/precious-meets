@@ -27,11 +27,11 @@ export const Route = createFileRoute("/")({
 });
 
 const links = [
-  ["How It Works", "#how"],
-  ["Our Philosophy", "#philosophy"],
-  ["Upcoming Meets", "#meets"],
-  ["Stories", "#stories"],
-  ["Join Precious Meets", "#join"],
+  ["Take the Quiz", "/quiz"],
+  ["Upcoming Meets", "/experiences"],
+  ["How It Works", "/how-it-works"],
+  ["Safety & SOS", "/safety"],
+  ["Member Sign In", "/login"],
 ] as const;
 
 // Illustrative sample meets — not real events.
@@ -373,7 +373,7 @@ function Hero() {
                 Take a short quiz. Every week, we curate a table of five people worth meeting in your city.
               </p>
             </div>
-            <div data-hero="cta"><CtaButton tone="burgundy">Discover your next meet</CtaButton></div>
+            <div data-hero="cta"><CtaButton href="/quiz" tone="burgundy">Discover your next meet</CtaButton></div>
           </div>
         </div>
       </div>
