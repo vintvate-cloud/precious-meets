@@ -271,9 +271,8 @@ function Hero() {
               data-expand-img
               src={img.src}
               alt={img.alt}
-              className={`absolute inset-0 size-full object-cover transition-opacity duration-1000 ease-in-out ${
-                i === activeIdx ? "opacity-100" : "opacity-0 pointer-events-none"
-              }`}
+              className={`absolute inset-0 size-full object-cover transition-opacity duration-1000 ease-in-out ${i === activeIdx ? "opacity-100" : "opacity-0 pointer-events-none"
+                }`}
             />
           ))}
 
@@ -731,9 +730,8 @@ function How() {
                   <div
                     key={s.num}
                     data-how-nav-step={idx}
-                    className={`transition-all duration-500 cursor-pointer ${
-                      idx === 0 ? "opacity-100" : "opacity-40"
-                    }`}
+                    className={`transition-all duration-500 cursor-pointer ${idx === 0 ? "opacity-100" : "opacity-40"
+                      }`}
                   >
                     <span className="label-mono text-[11px] block text-ochre font-bold tracking-wider">
                       {s.num}
@@ -758,9 +756,8 @@ function How() {
                 <div
                   key={s.num}
                   data-how-card={i}
-                  className={`group relative lg:absolute lg:inset-0 w-full rounded-[2.5rem] border border-ivory/20 bg-[#3E4D2B]/85 p-8 sm:p-12 backdrop-blur-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] flex flex-col justify-between overflow-hidden transition-shadow hover:shadow-[0_30px_70px_-15px_rgba(217,119,6,0.25)] ${
-                    i === 0 ? "z-10" : i === 1 ? "z-20" : "z-30"
-                  }`}
+                  className={`group relative lg:absolute lg:inset-0 w-full rounded-[2.5rem] border border-ivory/20 bg-[#3E4D2B]/85 p-8 sm:p-12 backdrop-blur-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] flex flex-col justify-between overflow-hidden transition-shadow hover:shadow-[0_30px_70px_-15px_rgba(217,119,6,0.25)] ${i === 0 ? "z-10" : i === 1 ? "z-20" : "z-30"
+                    }`}
                   style={{
                     willChange: "transform, opacity",
                   }}
