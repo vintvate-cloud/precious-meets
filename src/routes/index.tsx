@@ -52,19 +52,69 @@ function Nav() {
 
   return (
     <>
-      <header data-nav className="fixed inset-x-0 top-4 z-50 flex justify-center px-4">
-        <nav data-nav-bar className="flex w-full max-w-3xl items-center justify-between rounded-full border bg-ivory/85 py-1.5 pl-6 pr-1.5 backdrop-blur-md transition-colors duration-500">
-          <a href="#top" className="font-display text-2xl">Precious<em className="text-burgundy">meets</em></a>
-          <span className="label-mono hidden text-muted-foreground sm:block">Mumbai · Bengaluru · Delhi</span>
-          <button
-            aria-label={open ? "Close menu" : "Open menu"}
-            aria-expanded={open}
-            onClick={() => setOpen((o) => !o)}
-            className="relative grid size-11 place-items-center rounded-full bg-ink text-ivory transition-colors hover:bg-burgundy"
-          >
-            <span className={`absolute h-px w-4 bg-ivory transition-transform duration-500 ${open ? "rotate-45" : "-translate-y-1"}`} />
-            <span className={`absolute h-px w-4 bg-ivory transition-transform duration-500 ${open ? "-rotate-45" : "translate-y-1"}`} />
-          </button>
+      <header data-nav className="fixed inset-x-0 top-4 z-50 flex justify-center px-4 pointer-events-none">
+        <nav
+          data-nav-bar
+          style={{
+            background: "linear-gradient(135deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.42) 100%)",
+            backdropFilter: "blur(28px) saturate(190%) contrast(95%)",
+            WebkitBackdropFilter: "blur(28px) saturate(190%) contrast(95%)",
+          }}
+          className="pointer-events-auto flex w-full max-w-4xl items-center justify-between rounded-full border border-white/70 py-2 pl-3.5 sm:pl-5 pr-2 text-[#171514] shadow-[0_16px_40px_-10px_rgba(23,21,20,0.12),_0_4px_12px_-2px_rgba(23,21,20,0.04),_inset_0_1px_2px_0_rgba(255,255,255,0.95),_inset_0_-1px_1px_0_rgba(255,255,255,0.3)] transition-all duration-300"
+        >
+          {/* Left: Brand Monogram + Logo */}
+          <div className="flex items-center gap-3">
+            <a href="#top" className="flex items-center gap-2.5 group">
+              <span className="grid size-8 place-items-center rounded-full bg-white/75 border border-white/80 shadow-[inset_0_1px_1px_rgba(255,255,255,1)] text-[#691C35] transition-transform duration-300 group-hover:scale-105">
+                <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="8" stroke="#691C35" strokeWidth="2" />
+                  <circle cx="12" cy="12" r="3" fill="#C6A568" />
+                </svg>
+              </span>
+              <span className="font-display text-xl sm:text-2xl text-[#171514] tracking-tight">
+                Precious<em className="text-[#691C35] not-italic font-serif"> meets</em>
+              </span>
+            </a>
+
+            {/* Hairline Divider */}
+            <div className="hidden lg:block h-4 w-px bg-[#171514]/15 mx-1" />
+
+            {/* Desktop Navigation Links (like Tourera reference) */}
+            <div className="hidden lg:flex items-center gap-5 text-[13px] font-medium text-[#171514]/75">
+              <a href="#how" className="transition-colors hover:text-[#691C35]">How It Works</a>
+              <a href="#philosophy" className="transition-colors hover:text-[#691C35]">Philosophy</a>
+              <a href="#meets" className="transition-colors hover:text-[#691C35]">Meets</a>
+              <a href="#stories" className="transition-colors hover:text-[#691C35]">Stories</a>
+            </div>
+          </div>
+
+          {/* Right: Ambient City Pill + Solid White Pill CTA Button + Menu Toggle */}
+          <div className="flex items-center gap-2">
+            {/* Ambient City Pill */}
+            <div className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-white/60 px-3 py-1.5 text-[11px] font-mono tracking-wider text-[#171514]/75 border border-white/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9)]">
+              <span className="size-1.5 rounded-full bg-[#5F7045] animate-pulse" />
+              <span>Delhi · Mumbai</span>
+            </div>
+
+            {/* Solid Pill CTA Button (as per "Get Started" in reference image) */}
+            <a
+              href="#join"
+              className="rounded-full bg-white text-[#171514] border border-white/80 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold tracking-tight shadow-[0_2px_8px_rgba(0,0,0,0.06),_inset_0_1px_1px_rgba(255,255,255,1)] transition-all duration-300 hover:bg-[#691C35] hover:text-white hover:scale-105 active:scale-95"
+            >
+              Save a seat
+            </a>
+
+            {/* Mobile / Full Menu Hamburger Button */}
+            <button
+              aria-label={open ? "Close menu" : "Open menu"}
+              aria-expanded={open}
+              onClick={() => setOpen((o) => !o)}
+              className="relative grid size-9 sm:size-10 place-items-center rounded-full bg-[#171514] text-white shadow-sm transition-all duration-300 hover:bg-[#691C35] hover:scale-105 active:scale-95"
+            >
+              <span className={`absolute h-px w-3.5 sm:w-4 bg-white transition-transform duration-500 ${open ? "rotate-45" : "-translate-y-1"}`} />
+              <span className={`absolute h-px w-3.5 sm:w-4 bg-white transition-transform duration-500 ${open ? "-rotate-45" : "translate-y-1"}`} />
+            </button>
+          </div>
         </nav>
       </header>
       <div
@@ -468,35 +518,33 @@ function Geometry() {
                     transform={`translate(${s.chairX}, ${s.chairY}) rotate(${s.deg + 90})`}
                   >
                     <g data-chair={s.id}>
-                      {/* Chair Cushion Pill */}
+                      {/* Full Chair Outline Base */}
                       <rect
-                        x="-27"
+                        x="-28"
                         y="-13"
-                        width="54"
+                        width="56"
                         height="26"
                         rx="8"
-                        fill="#FFFDF8"
-                        stroke="#8A735A"
-                        strokeWidth="1.2"
-                        style={{ filter: "drop-shadow(0 2px 4px rgba(60,40,20,0.06))" }}
+                        fill="#FFFFFF"
+                        stroke="#3E2C20"
+                        strokeWidth="1.5"
+                        style={{ filter: "drop-shadow(0 3px 8px rgba(62,44,32,0.1))" }}
                       />
-                      {/* Burgundy Backrest Top Cap along outer edge */}
+                      {/* Burgundy Backrest: Outer half of the chair facing outward */}
                       <path
-                        d="M -23 -13 L 23 -13"
-                        stroke="#691C35"
-                        strokeWidth="6"
-                        strokeLinecap="round"
+                        d="M -28 -4 L -28 -5 C -28 -9.4 -23.4 -13 -19 -13 L 19 -13 C 23.4 -13 28 -9.4 28 -5 L 28 -4 Z"
+                        fill="#962838"
+                        stroke="#3E2C20"
+                        strokeWidth="1.5"
                       />
-                      {/* Inner cushion contour seam */}
-                      <rect
-                        x="-21"
-                        y="-8"
-                        width="42"
-                        height="16"
-                        rx="5"
-                        fill="none"
-                        stroke="#EADECA"
-                        strokeWidth="0.8"
+                      {/* Seat Cushion Divider Line */}
+                      <line
+                        x1="-27.5"
+                        y1="-4"
+                        x2="27.5"
+                        y2="-4"
+                        stroke="#3E2C20"
+                        strokeWidth="1.2"
                       />
                       {/* Special YOU pill badge on Seat 0 */}
                       {s.isYou && (
@@ -953,13 +1001,7 @@ function Index() {
           backgroundColor: "#5F7045", // Pure Brand Forest Green
           color: "#F8F2E7", // Luminous Ivory
           ease: "none",
-        })
-        .to("[data-nav-bar]", {
-          backgroundColor: "rgba(95, 112, 69, 0.85)", // Forest Green glass
-          borderColor: "rgba(248, 242, 231, 0.2)",
-          color: "#F8F2E7",
-          ease: "none",
-        }, 0);
+        });
 
       // Stacking Cards animation for Meets
       const stackCards = gsap.utils.toArray<HTMLElement>("[data-stack-card]");
