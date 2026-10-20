@@ -1,24 +1,67 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { type SocialProfileScores } from "@/lib/scoring-engine";
+import { useAuth } from "@/lib/auth-context";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { Sparkles, Calendar, ArrowRight, ShieldCheck, Check } from "lucide-react";
+import { EmailService } from "@/lib/email-service";
+import { openRazorpaySubscriptionCheckout } from "@/lib/razorpay-client";
+import {
+  Sparkles,
+  ArrowRight,
+  ShieldCheck,
+  Check,
+  CreditCard,
+  Lock,
+  Calendar,
+  Wine,
+  Users,
+  CheckCircle2,
+  Heart,
+  Loader2,
+  Mail,
+  Compass,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/quiz/results")({
   head: () => ({
     meta: [
-      { title: "Your Social Discovery Profile — Precious Meets" },
-      { name: "description", content: "Your social archetype and compatible tables." },
+      { title: "Your Vibe Profile & Founding Membership — Precious Meets" },
+      {
+        name: "description",
+        content: "Discover your conversational archetype, social insights, and unlock founding member table access.",
+      },
     ],
   }),
   component: QuizResultsPage,
 });
 
-function QuizResultsPage() {
+export function QuizResultsPage() {
   const navigate = useNavigate();
+  const { user, profile: authProfile, isSubscribed, subscription, activateSubscription } = useAuth();
   const [profile, setProfile] = useState<SocialProfileScores | null>(null);
+
+  // Subscription Checkout Form State
+  const [name, setName] = useState(authProfile?.display_name || user?.user_metadata?.full_name || "");
+  const [email, setEmail] = useState(user?.email || "");
+  const [phone, setPhone] = useState(authProfile?.phone || "+91 ");
+  const [paying, setPaying] = useState(false);
+
+  // Success Dialog State
+  const [successData, setSuccessData] = useState<{
+    memberId: string;
+    email: string;
+    amount: string;
+  } | null>(null);
 
   useEffect(() => {
     const raw = localStorage.getItem("precious_meets_latest_profile");
@@ -26,23 +69,119 @@ function QuizResultsPage() {
       try {
         setProfile(JSON.parse(raw));
       } catch (e) {
-        // Ignore
+        // Ignore JSON error
       }
+    } else {
+      // Default fallback profile if user accessed directly
+      const fallback: SocialProfileScores = {
+        algorithmVersion: "v1.0.0",
+        archetype: {
+          title: "The Curious Flâneur",
+          description:
+            "You balance thoughtful observation with warm conversation, drawn to authentic stories and hidden creative corners.",
+          keyTraits: ["Observant", "Culture Enthusiast", "Unhurried Listener"],
+        },
+        dimensions: {
+          socialEnergy: 68,
+          conversationDepth: 84,
+          playfulness: 72,
+          curiosity: 88,
+          adventure: 75,
+          sharedInterests: ["Culinary Heritage & Wine", "Philosophy & Psychology", "Literature & Cinema"],
+          dietary: "Vegetarian",
+          allergies: [],
+          boundaries: [],
+          preferredCity: "Mumbai",
+        },
+      };
+      setProfile(fallback);
     }
   }, []);
+
+  useEffect(() => {
+    if (user?.email && !email) {
+      setEmail(user.email);
+    }
+    if (authProfile?.display_name && !name) {
+      setName(authProfile.display_name);
+    }
+  }, [user, authProfile]);
+
+  const handleSubscribe = async () => {
+    if (!name.trim()) {
+      toast.error("Please enter your full name for your Member Pass.");
+      return;
+    }
+    if (!email.trim() || !email.includes("@")) {
+      toast.error("Please enter a valid email address for subscription access.");
+      return;
+    }
+
+    setPaying(true);
+
+    try {
+      await openRazorpaySubscriptionCheckout({
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        amountInr: 1999,
+        archetypeTitle: profile?.archetype.title,
+        onSuccess: async (result) => {
+          // 1. Activate membership in app state & localStorage
+          const newSub = activateSubscription({
+            name: name.trim(),
+            email: email.trim(),
+            paymentId: result.paymentId,
+            memberId: result.memberId,
+          });
+
+          // 2. Dispatch automated subscription confirmation email
+          await EmailService.send({
+            to: email.trim(),
+            subject: "Welcome to Precious Meets — Your Membership is Active ✨",
+            template: "subscription_activated",
+            data: {
+              name: name.trim(),
+              email: email.trim(),
+              amount: "₹1,999",
+              plan: "Annual Founding Member",
+              memberId: result.memberId,
+              archetype: profile?.archetype.title || "Curious Flâneur",
+              dashboardUrl: `${window.location.origin}/dashboard`,
+            },
+          });
+
+          setPaying(false);
+          setSuccessData({
+            memberId: result.memberId,
+            email: email.trim(),
+            amount: "₹1,999",
+          });
+          toast.success("Payment successful! Founding Membership activated.");
+        },
+        onError: (err) => {
+          setPaying(false);
+          toast.error(err || "Payment could not be completed.");
+        },
+      });
+    } catch (e: any) {
+      setPaying(false);
+      toast.error(e.message || "An unexpected error occurred during checkout.");
+    }
+  };
 
   if (!profile) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-ivory px-4 text-center">
-        <h1 className="font-display text-3xl">No Quiz Results Found</h1>
+        <h1 className="font-display text-3xl">Calculating Your Vibe Profile...</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Take our 5-minute discovery quiz to uncover your social archetype.
+          Curating your conversational archetype and complementary seating.
         </p>
         <Link
           to="/quiz"
           className="mt-6 rounded-full bg-burgundy px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-ivory hover:bg-burgundy/90"
         >
-          Take the Quiz
+          Take the 10-Question Quiz
         </Link>
       </div>
     );
@@ -54,127 +193,401 @@ function QuizResultsPage() {
     <div className="flex min-h-screen flex-col bg-ivory text-foreground">
       <Navbar />
 
-      <main className="mx-auto w-full max-w-4xl flex-1 px-6 pb-24 pt-28">
-        {/* Header Hero */}
-        <div className="text-center">
-          <span className="label-mono rounded-full bg-sage/80 px-4 py-1.5 text-xs text-forest">
-            Social Discovery Insights · Algorithm {profile.algorithmVersion}
-          </span>
-          <h1 className="font-display mt-6 text-4xl leading-tight md:text-6xl">
-            You are <em className="italic text-burgundy">{archetype.title}</em>
+      <main className="mx-auto w-full max-w-5xl flex-1 px-6 pb-28 pt-28">
+        {/* Step Progression Breadcrumb */}
+        <div className="mx-auto mb-8 flex max-w-md items-center justify-center gap-3 text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+          <span className="text-forest">1. Quiz Completed</span>
+          <span>&rarr;</span>
+          <span className="font-bold text-burgundy">2. Vibe Score</span>
+          <span>&rarr;</span>
+          <span className="text-foreground">3. Member Unlock</span>
+        </div>
+
+        {/* Hero Section: Archetype & Vibe */}
+        <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-card p-8 sm:p-12 shadow-sm text-center">
+          <div className="inline-flex items-center gap-2 rounded-full bg-sage/70 px-4 py-1.5 text-xs font-semibold text-forest">
+            <Sparkles className="size-3.5 text-ochre" /> Social Chemistry Archetype · Precious Algorithm v1.0
+          </div>
+
+          <h1 className="font-display mt-6 text-4xl leading-tight sm:text-6xl md:text-7xl">
+            You are <em className="italic text-burgundy font-serif">{archetype.title}</em>
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
+
+          <p className="mx-auto mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             {archetype.description}
           </p>
 
-          <div className="mt-6 flex flex-wrap justify-center gap-2">
+          <div className="mt-6 flex flex-wrap justify-center gap-2.5">
             {archetype.keyTraits.map((t) => (
               <span
                 key={t}
-                className="rounded-full border border-border/80 bg-card px-3.5 py-1 text-xs font-medium text-foreground"
+                className="rounded-full border border-border/80 bg-background px-4 py-1.5 text-xs font-medium text-foreground shadow-xs"
               >
                 ✦ {t}
               </span>
             ))}
+            <span className="rounded-full bg-burgundy/10 px-4 py-1.5 text-xs font-semibold text-burgundy">
+              ✦ 98% Compatibility in {dimensions.preferredCity}
+            </span>
           </div>
         </div>
 
-        {/* 5 Dimension Breakdown */}
-        <div className="mt-16 rounded-2xl border border-border/80 bg-card/70 p-8 shadow-sm">
-          <h2 className="font-display text-2xl">Your Social Spectrum</h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            These traits are used to seat complementary minds together without echo chambers.
-          </p>
-
-          <div className="mt-8 space-y-5">
+        {/* 4 Social Spectrum Dimensions */}
+        <div className="mt-12 rounded-3xl border border-border/80 bg-card/80 p-8 shadow-sm">
+          <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
             <div>
-              <div className="flex justify-between text-xs font-semibold">
-                <span>Social Energy</span>
+              <h2 className="font-display text-2xl sm:text-3xl">Your Social Spectrum & Insights</h2>
+              <p className="mt-1 text-xs text-muted-foreground">
+                How our algorithm balances your dinner table to ensure vibrant, flowing conversation.
+              </p>
+            </div>
+            <span className="label-mono text-xs text-forest bg-sage/40 px-3 py-1 rounded-full w-fit">
+              City Hub: {dimensions.preferredCity}
+            </span>
+          </div>
+
+          <div className="mt-8 grid gap-6 sm:grid-cols-2">
+            {/* Social Energy */}
+            <div className="rounded-2xl border border-border/60 bg-background p-5">
+              <div className="flex items-center justify-between text-xs font-semibold">
+                <span className="text-foreground">Social Energy</span>
                 <span className="font-mono text-burgundy">{dimensions.socialEnergy}%</span>
               </div>
-              <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-sage/50">
+              <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-sage/50">
                 <div
-                  className="h-full bg-burgundy rounded-full transition-all"
+                  className="h-full bg-burgundy rounded-full transition-all duration-700"
                   style={{ width: `${dimensions.socialEnergy}%` }}
                 />
               </div>
-              <div className="mt-1 flex justify-between text-[10px] text-muted-foreground">
-                <span>Reflective & Grounded</span>
+              <div className="mt-2 flex justify-between text-[11px] text-muted-foreground">
+                <span>Reflective & Mindful</span>
                 <span>Vibrant & Expressive</span>
               </div>
             </div>
 
-            <div>
-              <div className="flex justify-between text-xs font-semibold">
-                <span>Conversation Depth</span>
-                <span className="font-mono text-burgundy">{dimensions.conversationDepth}%</span>
+            {/* Conversation Depth */}
+            <div className="rounded-2xl border border-border/60 bg-background p-5">
+              <div className="flex items-center justify-between text-xs font-semibold">
+                <span className="text-foreground">Conversation Depth</span>
+                <span className="font-mono text-forest">{dimensions.conversationDepth}%</span>
               </div>
-              <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-sage/50">
+              <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-sage/50">
                 <div
-                  className="h-full bg-forest rounded-full transition-all"
+                  className="h-full bg-forest rounded-full transition-all duration-700"
                   style={{ width: `${dimensions.conversationDepth}%` }}
                 />
               </div>
-              <div className="mt-1 flex justify-between text-[10px] text-muted-foreground">
+              <div className="mt-2 flex justify-between text-[11px] text-muted-foreground">
                 <span>Playful Banter</span>
                 <span>Existential & Philosophical</span>
               </div>
             </div>
 
-            <div>
-              <div className="flex justify-between text-xs font-semibold">
-                <span>Curiosity & Breadth</span>
-                <span className="font-mono text-burgundy">{dimensions.curiosity}%</span>
+            {/* Polymathic Curiosity */}
+            <div className="rounded-2xl border border-border/60 bg-background p-5">
+              <div className="flex items-center justify-between text-xs font-semibold">
+                <span className="text-foreground">Polymathic Curiosity</span>
+                <span className="font-mono text-ochre">{dimensions.curiosity}%</span>
               </div>
-              <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-sage/50">
+              <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-sage/50">
                 <div
-                  className="h-full bg-ochre rounded-full transition-all"
+                  className="h-full bg-[#B8860B] rounded-full transition-all duration-700"
                   style={{ width: `${dimensions.curiosity}%` }}
                 />
               </div>
-              <div className="mt-1 flex justify-between text-[10px] text-muted-foreground">
-                <span>Specialized</span>
-                <span>Eclectic & Polymathic</span>
+              <div className="mt-2 flex justify-between text-[11px] text-muted-foreground">
+                <span>Focused Specialist</span>
+                <span>Eclectic Mind</span>
               </div>
             </div>
 
-            <div>
-              <div className="flex justify-between text-xs font-semibold">
-                <span>Adventure & Spontaneity</span>
-                <span className="font-mono text-burgundy">{dimensions.adventure}%</span>
+            {/* Adventure & Spontaneity */}
+            <div className="rounded-2xl border border-border/60 bg-background p-5">
+              <div className="flex items-center justify-between text-xs font-semibold">
+                <span className="text-foreground">Adventure & Spontaneity</span>
+                <span className="font-mono text-ink">{dimensions.adventure}%</span>
               </div>
-              <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-sage/50">
+              <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-sage/50">
                 <div
-                  className="h-full bg-ink rounded-full transition-all"
+                  className="h-full bg-ink rounded-full transition-all duration-700"
                   style={{ width: `${dimensions.adventure}%` }}
                 />
               </div>
-              <div className="mt-1 flex justify-between text-[10px] text-muted-foreground">
-                <span>Structured & Familiar</span>
-                <span>Bold & Spontaneous</span>
+              <div className="mt-2 flex justify-between text-[11px] text-muted-foreground">
+                <span>Structured & Cozy</span>
+                <span>Sensory & Bold</span>
               </div>
+            </div>
+          </div>
+
+          {/* Qualitative Insights */}
+          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+            <div className="rounded-2xl border border-border/60 bg-background/80 p-5">
+              <div className="flex items-center gap-2 text-xs font-bold text-burgundy uppercase tracking-wider font-mono">
+                <Users className="size-4" /> Seating Synergy
+              </div>
+              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                You pair exquisitely opposite grounded listeners, balanced alongside an expressive catalyst who naturally bridges ideas.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-border/60 bg-background/80 p-5">
+              <div className="flex items-center gap-2 text-xs font-bold text-forest uppercase tracking-wider font-mono">
+                <Sparkles className="size-4" /> Conversational Gift
+              </div>
+              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                You make dinner companions feel seen. You ask thoughtful follow-ups rather than merely waiting for your turn to speak.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-border/60 bg-background/80 p-5">
+              <div className="flex items-center gap-2 text-xs font-bold text-ochre uppercase tracking-wider font-mono">
+                <Wine className="size-4" /> Ideal Ambience
+              </div>
+              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                An intimate candlelit loft or wine cellar, unhurried 4-course tasting, soft jazz vinyl, and zero corporate posturing.
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Recommended Matches CTA */}
-        <div className="mt-14 rounded-2xl border border-burgundy/30 bg-burgundy p-8 text-ivory">
-          <div className="flex flex-col items-center justify-between gap-6 text-center md:flex-row md:text-left">
-            <div>
-              <h3 className="font-display text-2xl md:text-3xl">Tables Compatible with Your Rhythm</h3>
-              <p className="mt-2 text-xs leading-relaxed text-ivory/80">
-                We have 3 curated upcoming meets in {dimensions.preferredCity} with seats matched to your profile.
-              </p>
+        {/* ------------------------------------------------------------- */}
+        {/* BEAUTIFUL SUBSCRIPTION CARD (₹1,999) WITH RAZORPAY CHECKOUT */}
+        {/* ------------------------------------------------------------- */}
+        <section id="subscription-card" className="mt-16 scroll-mt-24">
+          <div className="relative overflow-hidden rounded-3xl border-2 border-[#C6A568]/70 bg-gradient-to-br from-[#2D0D17] via-[#1A060C] to-[#120308] p-8 sm:p-12 text-ivory shadow-2xl">
+            {/* Subtle background luxury glow */}
+            <div className="pointer-events-none absolute -right-20 -top-20 size-80 rounded-full bg-[#C6A568]/15 blur-3xl" />
+            <div className="pointer-events-none absolute -left-20 -bottom-20 size-80 rounded-full bg-[#691C35]/30 blur-3xl" />
+
+            <div className="relative z-10 grid gap-10 lg:grid-cols-12 lg:items-center">
+              {/* Left Column: Perks & Value Proposition */}
+              <div className="lg:col-span-7">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[#C6A568]/40 bg-[#C6A568]/10 px-3.5 py-1 text-[11px] font-mono tracking-widest uppercase text-[#C6A568]">
+                  <Sparkles className="size-3" /> Exclusive Founding Membership · 2026 Pass
+                </div>
+
+                <h2 className="font-display mt-4 text-3xl sm:text-4xl md:text-5xl leading-tight text-ivory">
+                  Unlock Your Seat at the <em className="text-[#C6A568] italic font-serif">Table</em>
+                </h2>
+
+                <p className="mt-3 text-sm leading-relaxed text-ivory/80">
+                  Join our curated private circle across Mumbai, Bengaluru & Delhi. One annual pass unlocks unlimited invites to weekly 6-person suppers with compatible conversationalists.
+                </p>
+
+                {/* Benefits Bullet Grid */}
+                <div className="mt-6 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="grid size-5 shrink-0 place-items-center rounded-full bg-[#C6A568]/20 text-[#C6A568] mt-0.5">
+                      <Check className="size-3 stroke-[3]" />
+                    </div>
+                    <span className="text-xs leading-relaxed text-ivory/90">
+                      <strong>Guaranteed Priority Table Access:</strong> Weekly curated suppers in Mumbai, Bengaluru & Delhi.
+                    </span>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="grid size-5 shrink-0 place-items-center rounded-full bg-[#C6A568]/20 text-[#C6A568] mt-0.5">
+                      <Check className="size-3 stroke-[3]" />
+                    </div>
+                    <span className="text-xs leading-relaxed text-ivory/90">
+                      <strong>Hand-Matched Seating:</strong> Paired directly with complementary vibes ({archetype.title}).
+                    </span>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="grid size-5 shrink-0 place-items-center rounded-full bg-[#C6A568]/20 text-[#C6A568] mt-0.5">
+                      <Check className="size-3 stroke-[3]" />
+                    </div>
+                    <span className="text-xs leading-relaxed text-ivory/90">
+                      <strong>Complimentary Welcome Drinks & Chef Tasting Course:</strong> At every attended meet.
+                    </span>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="grid size-5 shrink-0 place-items-center rounded-full bg-[#C6A568]/20 text-[#C6A568] mt-0.5">
+                      <Check className="size-3 stroke-[3]" />
+                    </div>
+                    <span className="text-xs leading-relaxed text-ivory/90">
+                      <strong>Strict Privacy & Zero Pitching:</strong> Safe, identity-verified community with zero corporate solicitations.
+                    </span>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="grid size-5 shrink-0 place-items-center rounded-full bg-[#C6A568]/20 text-[#C6A568] mt-0.5">
+                      <Check className="size-3 stroke-[3]" />
+                    </div>
+                    <span className="text-xs leading-relaxed text-ivory/90">
+                      <strong>Full Attendee Dashboard Access:</strong> Secret venue reveals, gate pass codes & booking manager.
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Checkout Pricing Card */}
+              <div className="lg:col-span-5">
+                <div className="rounded-2xl border border-ivory/20 bg-ivory/5 p-6 backdrop-blur-md shadow-xl">
+                  {isSubscribed ? (
+                    <div className="text-center py-6">
+                      <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-forest/20 text-[#82C341]">
+                        <CheckCircle2 className="size-8" />
+                      </div>
+                      <h3 className="font-display mt-4 text-2xl text-ivory">Active Member</h3>
+                      <p className="mt-1 text-xs text-ivory/80">
+                        You hold an active Founding Member Pass (ID: {subscription?.memberId || "PM-FOUNDER"}).
+                      </p>
+                      <Button
+                        onClick={() => navigate({ to: "/dashboard" })}
+                        className="mt-6 w-full rounded-full bg-[#C6A568] font-bold text-[#171514] hover:bg-[#C6A568]/90"
+                      >
+                        Enter Member Dashboard &rarr;
+                      </Button>
+                    </div>
+                  ) : (
+                    <div>
+                      {/* Pricing Tag */}
+                      <div className="flex items-baseline justify-between border-b border-ivory/15 pb-4">
+                        <div>
+                          <span className="label-mono text-[10px] uppercase text-[#C6A568]">
+                            Annual Founding Pass
+                          </span>
+                          <div className="flex items-baseline gap-2 mt-1">
+                            <span className="font-display text-4xl sm:text-5xl font-bold text-ivory">
+                              ₹1,999
+                            </span>
+                            <span className="text-xs line-through text-ivory/50">₹4,999</span>
+                            <span className="text-[11px] text-ivory/70">/ year</span>
+                          </div>
+                        </div>
+                        <span className="rounded-full bg-[#C6A568]/20 px-2.5 py-1 text-[10px] font-bold text-[#C6A568]">
+                          60% OFF
+                        </span>
+                      </div>
+
+                      {/* Inputs */}
+                      <div className="mt-5 space-y-3">
+                        <div>
+                          <label className="text-[11px] font-medium text-ivory/80">
+                            Your Name (for Member ID)
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Aria Sharma"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            className="mt-1 w-full rounded-lg border border-ivory/20 bg-black/40 px-3 py-2 text-xs text-ivory placeholder:text-ivory/40 focus:border-[#C6A568] focus:outline-none"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-[11px] font-medium text-ivory/80">
+                            Email (for Pass Receipt & Invites)
+                          </label>
+                          <input
+                            type="email"
+                            placeholder="you@example.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="mt-1 w-full rounded-lg border border-ivory/20 bg-black/40 px-3 py-2 text-xs text-ivory placeholder:text-ivory/40 focus:border-[#C6A568] focus:outline-none"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-[11px] font-medium text-ivory/80">
+                            Phone (for Meet Venue SMS/WhatsApp)
+                          </label>
+                          <input
+                            type="tel"
+                            placeholder="+91 98765 43210"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            className="mt-1 w-full rounded-lg border border-ivory/20 bg-black/40 px-3 py-2 text-xs text-ivory placeholder:text-ivory/40 focus:border-[#C6A568] focus:outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      {/* CTA Button */}
+                      <Button
+                        onClick={handleSubscribe}
+                        disabled={paying}
+                        className="mt-6 w-full rounded-full bg-gradient-to-r from-[#C6A568] to-[#E5C17D] py-6 text-xs sm:text-sm font-bold uppercase tracking-wider text-[#171514] shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                      >
+                        {paying ? (
+                          <>
+                            <Loader2 className="size-4 animate-spin" />
+                            Connecting to Razorpay...
+                          </>
+                        ) : (
+                          <>
+                            <CreditCard className="size-4 text-[#171514]" />
+                            Join for ₹1,999 · Open Razorpay
+                          </>
+                        )}
+                      </Button>
+
+                      {/* Razorpay Trust Badges */}
+                      <div className="mt-4 flex items-center justify-center gap-2 text-[10px] text-ivory/70">
+                        <Lock className="size-3 text-[#C6A568]" />
+                        <span>Razorpay 256-Bit SSL Encrypted · Instant Email & Platform Access</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-            <Link
-              to="/experiences"
-              className="flex items-center gap-2 rounded-full bg-ivory px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-burgundy shadow-sm hover:bg-card"
-            >
-              Explore Compatible Meets <ArrowRight className="size-4" />
-            </Link>
           </div>
-        </div>
+        </section>
       </main>
+
+      {/* Subscription Success & Email Dispatched Modal */}
+      {successData && (
+        <Dialog open={true} onOpenChange={() => navigate({ to: "/dashboard" })}>
+          <DialogContent className="max-w-md bg-card text-foreground">
+            <DialogHeader className="text-center">
+              <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-forest/20 text-forest mb-2">
+                <CheckCircle2 className="size-10" />
+              </div>
+              <DialogTitle className="font-display text-3xl">
+                Welcome to Precious Meets!
+              </DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground">
+                Your Founding Membership has been activated and your seat at the table is reserved.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-3 text-center">
+              <div className="rounded-2xl border border-border bg-sage/30 p-4">
+                <span className="text-[10px] uppercase font-mono text-muted-foreground">
+                  Your Founding Member ID
+                </span>
+                <p className="font-mono text-2xl font-bold text-burgundy mt-0.5">
+                  {successData.memberId}
+                </p>
+                <p className="mt-1 text-xs text-forest font-semibold">
+                  Payment Confirmed: {successData.amount} (Annual Pass)
+                </p>
+              </div>
+
+              <div className="flex items-start gap-3 rounded-xl border border-border/80 bg-background p-3 text-left">
+                <Mail className="size-5 text-burgundy shrink-0 mt-0.5" />
+                <div className="text-xs">
+                  <p className="font-semibold text-foreground">Subscription Email Sent!</p>
+                  <p className="text-muted-foreground mt-0.5">
+                    We just dispatched your official membership package, receipt, and welcome guide to <strong>{successData.email}</strong>.
+                  </p>
+                </div>
+              </div>
+
+              <Button
+                onClick={() => navigate({ to: "/dashboard" })}
+                className="w-full rounded-full bg-burgundy py-5 font-semibold text-ivory hover:bg-burgundy/90"
+              >
+                Enter Member Dashboard & Explore Meets &rarr;
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
       <Footer />
     </div>

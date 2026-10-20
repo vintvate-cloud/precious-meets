@@ -6,6 +6,7 @@ export interface EmailPayload {
   template:
     | "welcome"
     | "quiz_completed"
+    | "subscription_activated"
     | "identity_verified"
     | "booking_confirmed"
     | "booking_cancelled"
@@ -71,6 +72,49 @@ export class EmailService {
             <p style="font-family: monospace; font-size: 11px; text-transform: uppercase; margin: 0; color: #5f7045;">Archetype</p>
             <h3 style="font-family: Georgia, serif; font-size: 20px; margin: 4px 0; color: #171514;">${data.archetype || "The Curious Flâneur"}</h3>
             <p style="margin: 0; color: #4a453f; font-size: 14px;">${data.archetypeDescription || ""}</p>
+          </div>
+        `;
+        break;
+
+      case "subscription_activated":
+        bodyContent = `
+          <div style="background: #fbf8f3; border: 1px solid #c6a568; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
+            <div style="display: inline-block; background: #691c35; color: #f8f2e7; font-family: monospace; font-size: 10px; padding: 4px 10px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">
+              Founding Member Confirmed
+            </div>
+            <h2 style="font-family: Georgia, serif; color: #171514; font-size: 24px; margin: 0 0 8px 0;">Welcome to the circle, ${data.name || "Member"}.</h2>
+            <p style="color: #4a453f; line-height: 1.6; margin: 0 0 16px 0;">Your annual subscription of <strong>${data.amount || "₹1,999"}</strong> has been processed successfully via Razorpay. Your table is set and your platform access is now unlocked.</p>
+            
+            <div style="background: #ffffff; border: 1px solid #e0d7c7; border-radius: 6px; padding: 16px; margin: 16px 0;">
+              <table style="width: 100%; font-size: 13px; color: #4a453f; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 6px 0; color: #6b6357;">Membership Pass ID:</td>
+                  <td style="padding: 6px 0; text-align: right; font-family: monospace; font-weight: bold; color: #691c35;">${data.memberId || "PM-FOUNDER-001"}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #6b6357;">Plan Tier:</td>
+                  <td style="padding: 6px 0; text-align: right; font-weight: bold; color: #171514;">${data.plan || "Annual Founding Member"}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #6b6357;">Vibe Archetype:</td>
+                  <td style="padding: 6px 0; text-align: right; font-weight: bold; color: #5f7045;">${data.archetype || "Curious Flâneur"}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #6b6357;">Validity:</td>
+                  <td style="padding: 6px 0; text-align: right; font-weight: bold; color: #171514;">1 Full Year (365 Days)</td>
+                </tr>
+              </table>
+            </div>
+
+            <p style="color: #4a453f; font-size: 13px; line-height: 1.6;">
+              <strong>What's Next?</strong> Head to your Member Dashboard to browse upcoming secret suppers and RSVP for seats curated specifically to your conversational rhythm.
+            </p>
+
+            <div style="margin: 24px 0 8px 0; text-align: center;">
+              <a href="${data.dashboardUrl || "http://localhost:5173/dashboard"}" style="background-color: #691c35; color: #f8f2e7; padding: 12px 28px; border-radius: 9999px; text-decoration: none; font-size: 13px; font-weight: bold; display: inline-block;">
+                Access Member Dashboard &rarr;
+              </a>
+            </div>
           </div>
         `;
         break;

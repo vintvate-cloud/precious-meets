@@ -1,25 +1,57 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { supabase, type DatabaseProfile } from "./supabase";
 
+export interface SubscriptionDetails {
+  status: "active" | "inactive";
+  plan: string;
+  amount: number;
+  memberId: string;
+  subscribedAt: string;
+  validUntil: string;
+  paymentId?: string;
+}
+
 interface AuthContextType {
   user: any | null;
   profile: DatabaseProfile | null;
+  subscription: SubscriptionDetails | null;
+  isSubscribed: boolean;
   loading: boolean;
   isAdmin: boolean;
   signInWithGoogle: (redirectTo?: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   simulateLoginAs: (role?: "user" | "admin") => void;
+  activateSubscription: (details: {
+    name: string;
+    email: string;
+    paymentId?: string;
+    memberId?: string;
+  }) => SubscriptionDetails;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const LOCAL_STORAGE_MOCK_USER_KEY = "precious_meets_mock_user";
+const LOCAL_STORAGE_SUBSCRIPTION_KEY = "precious_meets_subscription";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any | null>(null);
   const [profile, setProfile] = useState<DatabaseProfile | null>(null);
+  const [subscription, setSubscription] = useState<SubscriptionDetails | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Load existing subscription on mount
+  useEffect(() => {
+    const savedSub = localStorage.getItem(LOCAL_STORAGE_SUBSCRIPTION_KEY);
+    if (savedSub) {
+      try {
+        setSubscription(JSON.parse(savedSub));
+      } catch (e) {
+        localStorage.removeItem(LOCAL_STORAGE_SUBSCRIPTION_KEY);
+      }
+    }
+  }, []);
 
   const fetchProfile = async (userId: string, email: string) => {
     try {
@@ -171,6 +203,69 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  const activateSubscription = (details: {
+    name: string;
+    email: string;
+    paymentId?: string;
+    memberId?: string;
+  }): SubscriptionDetails => {
+    const memberId = details.memberId || `PM-FOUNDER-${Math.floor(1000 + Math.random() * 9000)}`;
+    const now = new Date();
+    const expiry = new Date();
+    expiry.setFullYear(expiry.getFullYear() + 1);
+
+    const newSub: SubscriptionDetails = {
+      status: "active",
+      plan: "Annual Founding Member",
+      amount: 1999,
+      memberId,
+      subscribedAt: now.toISOString(),
+      validUntil: expiry.toISOString(),
+      paymentId: details.paymentId || `pay_${Date.now()}`,
+    };
+
+    setSubscription(newSub);
+    localStorage.setItem(LOCAL_STORAGE_SUBSCRIPTION_KEY, JSON.stringify(newSub));
+
+    // Ensure user session exists so they have immediate platform access
+    const currentUser = user || {
+      id: "u_" + Math.random().toString(36).substring(2, 9),
+      email: details.email,
+      user_metadata: {
+        full_name: details.name,
+        name: details.name.split(" ")[0] || "Member",
+      },
+    };
+
+    const currentProfile: DatabaseProfile = profile || {
+      id: currentUser.id,
+      email: details.email,
+      full_name: details.name,
+      display_name: details.name.split(" ")[0] || "Member",
+      avatar_url: null,
+      bio: "Founding member of Precious Meets dining circle.",
+      city: "Mumbai",
+      phone: "+91 98765 43210",
+      role: "user",
+      identity_verified: true,
+      identity_status: "verified",
+      onboarding_completed: true,
+      quiz_completed: true,
+      created_at: now.toISOString(),
+      updated_at: now.toISOString(),
+    };
+
+    setUser(currentUser);
+    setProfile(currentProfile);
+    localStorage.setItem(
+      LOCAL_STORAGE_MOCK_USER_KEY,
+      JSON.stringify({ user: currentUser, profile: currentProfile }),
+    );
+
+    return newSub;
+  };
+
+  const isSubscribed = subscription?.status === "active";
   const isAdmin = profile?.role === "admin" || user?.email?.includes("admin");
 
   return (
@@ -178,12 +273,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         profile,
+        subscription,
+        isSubscribed,
         loading,
         isAdmin,
         signInWithGoogle,
         signOut,
         refreshProfile,
         simulateLoginAs,
+        activateSubscription,
       }}
     >
       {children}

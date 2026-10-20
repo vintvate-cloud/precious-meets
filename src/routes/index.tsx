@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
@@ -10,6 +11,7 @@ import hands from "@/assets/hands.jpg";
 import conversation from "@/assets/conversation.jpg";
 import dusk from "@/assets/dusk.jpg";
 import tableStill from "@/assets/table-still.jpg";
+import tableBurgundy from "@/assets/table-burgundy.jpg";
 import footerBg from "@/assets/footer-bg.jpg";
 
 if (typeof window !== "undefined") {
@@ -38,7 +40,7 @@ const links = [
   ["Member Sign In", "/login"],
 ] as const;
 
-// Illustrative sample meets — not real events.
+// Curated gatherings across cities.
 const meets = [
   { name: "The Long Table Supper", when: "Thursdays · 8 PM", where: "Bandra, Mumbai", img: tableLaugh, desc: "Six strangers, four courses, one candlelit table." },
   { name: "Slow Coffee Sundays", when: "Sundays · 10 AM", where: "Indiranagar, Bengaluru", img: conversation, desc: "Unhurried conversations over a single pour." },
@@ -100,9 +102,9 @@ function Nav() {
               <span>Delhi · Mumbai</span>
             </div>
 
-            {/* Solid Pill CTA Button (as per "Get Started" in reference image) */}
+            {/* Solid Pill CTA Button -> routes to /quiz */}
             <a
-              href="#join"
+              href="/quiz"
               className="rounded-full bg-white text-[#171514] border border-white/80 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold tracking-tight shadow-[0_2px_8px_rgba(0,0,0,0.06),_inset_0_1px_1px_rgba(255,255,255,1)] transition-all duration-300 hover:bg-[#691C35] hover:text-white hover:scale-105 active:scale-95"
             >
               Save a seat
@@ -145,6 +147,7 @@ function Nav() {
 }
 
 const heroPillImages = [
+  { src: tableBurgundy, alt: "Curated long dinner table set with wine and burgundy floral arrangements" },
   { src: tableLaugh, alt: "Friends laughing together around a dinner table" },
   { src: hands, alt: "Hands passing a shared plate across a candlelit table" },
   { src: tableStill, alt: "Curated dinner table set with wine and calla lily" },
@@ -399,28 +402,187 @@ function Hero() {
 
 
 
+const statementStaticLines = [
+  "Life gets busy.",
+  "Circles get smaller.",
+  "There is always room at the table.",
+];
+
+const statementRotatingLines = [
+  "Every meet counts.",
+  "Every meet matters.",
+  "Every stranger is a story.",
+  "Every seat has a story.",
+  "Every dinner leaves a mark.",
+  "Every connection is precious.",
+];
+
 function Statement() {
-  const lines = [
-    "Life gets busy.",
-    "Circles get smaller.",
-    "There is always room at the table.",
-    "Every meet counts.",
-  ];
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveIdx((prev) => (prev + 1) % statementRotatingLines.length);
+    }, 2800);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
-    <section className="flex min-h-screen flex-col items-center justify-center px-[4vw] py-32 text-center">
+    <section className="relative flex min-h-screen flex-col items-center justify-center px-[4vw] py-32 text-center overflow-hidden">
+      {/* Subtle ambient editorial watermark doodles in background */}
+      <div className="absolute top-16 left-[6vw] pointer-events-none select-none opacity-20 hidden lg:block">
+        <svg className="w-20 h-20 text-ochre" viewBox="0 0 80 80" fill="none">
+          <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="1" strokeDasharray="3 5" />
+          <path d="M 40 18 L 40 62 M 18 40 L 62 40" stroke="currentColor" strokeWidth="0.8" />
+        </svg>
+      </div>
+      <div className="absolute bottom-20 right-[8vw] pointer-events-none select-none opacity-25 hidden lg:block">
+        <svg className="w-24 h-24 text-burgundy -rotate-12" viewBox="0 0 80 80" fill="none">
+          <path d="M 15 65 Q 40 15 65 65" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+          <circle cx="40" cy="30" r="3" fill="currentColor" />
+        </svg>
+      </div>
+
       <h2 className="font-display text-[9vw] leading-[0.98] md:text-[6vw]">
-        {lines.map((l, i) => (
-          <span key={l} className="line-mask">
-            <span
-              data-reveal
-              className={`block ${i === 3 ? "italic text-burgundy font-serif" : ""}`}
-            >
-              {l}
+        {/* Line 1: Life gets busy. + kinetic sparkle doodle */}
+        <span className="line-mask overflow-visible">
+          <span data-reveal className="relative inline-block">
+            <span>Life gets busy.</span>
+            {/* Doodle: Kinetic editorial 4-point sparkle & swirl above 'busy' */}
+            <span className="absolute -top-5 -right-6 sm:-top-7 sm:-right-9 md:-top-9 md:-right-12 pointer-events-none select-none">
+              <svg className="w-8 h-8 md:w-11 md:h-11 text-ochre -rotate-6" viewBox="0 0 48 48" fill="none">
+                <path
+                  d="M 24 6 C 24 18, 24 18, 36 24 C 24 24, 24 24, 24 36 C 24 24, 24 24, 12 24 C 24 24, 24 18, 24 6 Z"
+                  fill="#C6A568"
+                  opacity="0.9"
+                />
+                <circle cx="37" cy="11" r="2.2" fill="#691C35" />
+                <circle cx="11" cy="35" r="1.6" fill="#C6A568" />
+              </svg>
             </span>
           </span>
-        ))}
+        </span>
+
+        {/* Line 2: Circles get smaller. + nesting concentric loop doodle */}
+        <span className="line-mask overflow-visible">
+          <span data-reveal className="relative inline-block">
+            <span>Circles get smaller.</span>
+            {/* Doodle: Hand-drawn concentric loops shrinking inward */}
+            <span className="absolute -top-3 -right-10 sm:-right-14 md:-right-18 pointer-events-none select-none hidden sm:inline-block">
+              <svg className="w-10 h-10 md:w-14 md:h-14 overflow-visible" viewBox="0 0 60 60" fill="none">
+                {/* Outer dashed hand-drawn circle */}
+                <path
+                  d="M 30 6 C 45 5, 54 16, 54 30 C 53 44, 43 54, 30 54 C 15 53, 6 43, 6 30 C 7 15, 17 6, 30 6"
+                  stroke="#691C35"
+                  strokeWidth="1.4"
+                  strokeDasharray="3 4"
+                  strokeLinecap="round"
+                  opacity="0.4"
+                />
+                {/* Middle organic loop */}
+                <path
+                  d="M 30 15 C 40 14, 46 22, 45 31 C 44 39, 37 46, 29 45 C 20 44, 15 38, 15 30 C 16 21, 22 15, 30 15"
+                  stroke="#691C35"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  opacity="0.8"
+                />
+                {/* Innermost focused dot */}
+                <circle cx="30" cy="30" r="4.5" fill="#691C35" />
+              </svg>
+            </span>
+          </span>
+        </span>
+
+        {/* Line 3: There is always room at the table. + minimalist table & candle emblem doodle */}
+        <span className="line-mask overflow-visible">
+          <span data-reveal className="relative inline-block">
+            <span>There is always room at the table.</span>
+            {/* Subtle hand-drawn table & candlelight doodle floating above 'table' */}
+            <span className="absolute -top-7 md:-top-9 right-4 md:right-8 pointer-events-none select-none hidden md:inline-block">
+              <svg className="w-14 h-8 md:w-16 md:h-9 text-ochre" viewBox="0 0 72 36" fill="none">
+                {/* Table top arc */}
+                <path d="M 14 20 Q 36 17 58 20" stroke="#C6A568" strokeWidth="2.2" strokeLinecap="round" />
+                {/* Table legs */}
+                <path d="M 22 20 L 20 32 M 50 20 L 52 32" stroke="#C6A568" strokeWidth="1.8" strokeLinecap="round" />
+                {/* Candle with flame */}
+                <line x1="36" y1="20" x2="36" y2="10" stroke="#171514" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
+                <path d="M 36 9 C 34 7, 34 5, 36 3 C 38 5, 38 7, 36 9 Z" fill="#691C35" />
+                {/* Pulled up chairs */}
+                <path d="M 6 28 L 6 15 Q 9 13 12 15" stroke="#691C35" strokeWidth="1.5" strokeLinecap="round" opacity="0.75" />
+                <path d="M 66 28 L 66 15 Q 63 13 60 15" stroke="#691C35" strokeWidth="1.5" strokeLinecap="round" opacity="0.75" />
+              </svg>
+            </span>
+          </span>
+        </span>
+
+        {/* Line 4: Automatically changing line with sliding up animation & dual-stroke doodle underline */}
+        <span className="line-mask overflow-visible pt-1">
+          <span data-reveal className="relative inline-block">
+            <span className="relative inline-flex items-center justify-center overflow-hidden h-[1.15em] align-baseline px-2">
+              <AnimatePresence mode="popLayout">
+                <motion.span
+                  key={activeIdx}
+                  initial={{ y: "115%", opacity: 0 }}
+                  animate={{ y: "0%", opacity: 1 }}
+                  exit={{ y: "-115%", opacity: 0 }}
+                  transition={{
+                    duration: 0.65,
+                    ease: [0.19, 1, 0.22, 1],
+                  }}
+                  className="inline-block italic text-burgundy font-serif whitespace-nowrap"
+                >
+                  {statementRotatingLines[activeIdx]}
+                </motion.span>
+              </AnimatePresence>
+            </span>
+
+            {/* Organic hand-drawn dual-stroke underline doodle */}
+            <svg
+              className="absolute -bottom-2 md:-bottom-3 left-0 w-full h-3 md:h-5 overflow-visible pointer-events-none"
+              viewBox="0 0 320 16"
+              fill="none"
+              preserveAspectRatio="none"
+            >
+              <path
+                d="M 6 10 C 80 4, 180 14, 314 6"
+                stroke="#691C35"
+                strokeWidth="2.6"
+                strokeLinecap="round"
+                opacity="0.8"
+              />
+              <path
+                d="M 32 14 C 115 9, 220 13, 290 9"
+                stroke="#C6A568"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                opacity="0.9"
+              />
+            </svg>
+          </span>
+        </span>
       </h2>
-      <div className="mt-16"><CtaButton tone="burgundy" href="#meets">Find your table</CtaButton></div>
+
+      {/* CTA Button with handwritten doodle arrow pointing to it */}
+      <div className="relative mt-16 flex flex-col items-center">
+        {/* Playful hand-drawn doodle arrow + annotation */}
+        <div className="absolute -top-11 right-1/2 translate-x-32 sm:translate-x-36 md:translate-x-42 hidden sm:flex items-center gap-1.5 pointer-events-none select-none">
+          <svg className="w-7 h-7 text-ochre -rotate-12 translate-y-2" viewBox="0 0 32 32" fill="none">
+            <path
+              d="M 6 8 C 14 6, 22 12, 18 24 M 14 20 L 18 25 L 23 21"
+              stroke="#C6A568"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <span className="font-serif italic text-xs md:text-sm text-ochre whitespace-nowrap">
+            a seat is waiting
+          </span>
+        </div>
+
+        <CtaButton tone="burgundy" href="#meets">Find your table</CtaButton>
+      </div>
     </section>
   );
 }
@@ -497,33 +659,64 @@ function Geometry() {
                   />
                 </g>
 
-                {/* 6 Porcelain Dinner Plates */}
+                {/* 6 Place Settings: Porcelain Dinner Plates & Cutlery (Fork + Spoon) */}
                 {tableSeats.map((s) => (
-                  <g key={`plate-${s.id}`} data-plate={s.id}>
-                    <circle
-                      cx={s.plateX}
-                      cy={s.plateY}
-                      r="17"
-                      fill="#FFFFFF"
-                      stroke="#D2C1AC"
-                      strokeWidth="1.2"
-                      style={{ filter: "drop-shadow(0 2px 3px rgba(60,40,20,0.08))" }}
-                    />
-                    <circle
-                      cx={s.plateX}
-                      cy={s.plateY}
-                      r="11"
-                      fill="#FAF6EF"
-                      stroke="#DFCFC0"
-                      strokeWidth="0.8"
-                    />
-                    <circle
-                      cx={s.plateX}
-                      cy={s.plateY}
-                      r="7"
-                      fill="#FFFFFF"
-                      opacity="0.5"
-                    />
+                  <g
+                    key={`setting-${s.id}`}
+                    transform={`translate(${s.plateX}, ${s.plateY}) rotate(${s.deg + 90})`}
+                  >
+                    {/* Cutlery beside plate: Fork on left (-X), Spoon on right (+X) */}
+                    <g data-cutlery={s.id}>
+                      {/* Left: Fork (Delicate, reduced size) */}
+                      <g data-cutlery-fork transform="translate(-22, 0)">
+                        {/* Fork handle */}
+                        <line x1="0" y1="-1" x2="0" y2="11" stroke="#7D674E" strokeWidth="0.9" strokeLinecap="round" />
+                        {/* Fork shoulder curve */}
+                        <path d="M -2.4 -2.8 Q 0 -0.8 2.4 -2.8" fill="none" stroke="#7D674E" strokeWidth="0.85" strokeLinecap="round" />
+                        {/* 3 Fork tines */}
+                        <line x1="-2.4" y1="-10" x2="-2.4" y2="-2.8" stroke="#7D674E" strokeWidth="0.75" strokeLinecap="round" />
+                        <line x1="0" y1="-10" x2="0" y2="-1.2" stroke="#7D674E" strokeWidth="0.75" strokeLinecap="round" />
+                        <line x1="2.4" y1="-10" x2="2.4" y2="-2.8" stroke="#7D674E" strokeWidth="0.75" strokeLinecap="round" />
+                      </g>
+
+                      {/* Right: Spoon (Delicate, reduced size) */}
+                      <g data-cutlery-spoon transform="translate(22, 0)">
+                        {/* Spoon handle */}
+                        <line x1="0" y1="-1" x2="0" y2="11" stroke="#7D674E" strokeWidth="0.9" strokeLinecap="round" />
+                        {/* Spoon bowl */}
+                        <ellipse cx="0" cy="-5.5" rx="3.2" ry="5.2" fill="#FAF6EF" stroke="#7D674E" strokeWidth="0.85" />
+                        {/* Inner reflection accent */}
+                        <path d="M -1.4 -7.5 Q -2 -5.5 -1 -3.5" fill="none" stroke="#D2C1AC" strokeWidth="0.6" strokeLinecap="round" />
+                      </g>
+                    </g>
+
+                    {/* Porcelain Dinner Plate */}
+                    <g data-plate={s.id}>
+                      <circle
+                        cx="0"
+                        cy="0"
+                        r="17"
+                        fill="#FFFFFF"
+                        stroke="#D2C1AC"
+                        strokeWidth="1.2"
+                        style={{ filter: "drop-shadow(0 2px 3px rgba(60,40,20,0.08))" }}
+                      />
+                      <circle
+                        cx="0"
+                        cy="0"
+                        r="11"
+                        fill="#FAF6EF"
+                        stroke="#DFCFC0"
+                        strokeWidth="0.8"
+                      />
+                      <circle
+                        cx="0"
+                        cy="0"
+                        r="7"
+                        fill="#FFFFFF"
+                        opacity="0.5"
+                      />
+                    </g>
                   </g>
                 ))}
 
@@ -718,7 +911,7 @@ function How() {
               <span className="block" data-how-title-line>
                 HOW
               </span>
-              <span className="block italic text-ochre font-light font-display" data-how-title-line>
+              <span className="block italic text-ochre font-display" data-how-title-line>
                 IT
               </span>
               <span className="block" data-how-title-line>
@@ -726,7 +919,7 @@ function How() {
               </span>
             </h2>
 
-            <p className="mt-6 max-w-sm text-sm sm:text-base leading-relaxed text-ivory/75 font-light">
+            <p className="mt-6 max-w-sm text-sm sm:text-base leading-relaxed text-ivory/80 font-normal">
               Making new connections <em className="text-ochre not-italic font-medium">should feel natural</em>. No
               endless swiping or awkward networking. Just thoughtful dinners where real stories unfold.
             </p>
@@ -750,10 +943,10 @@ function How() {
                     className={`transition-all duration-500 cursor-pointer ${idx === 0 ? "opacity-100" : "opacity-40"
                       }`}
                   >
-                    <span className="label-mono text-[11px] block text-ochre font-bold tracking-wider">
+                    <span className="label-mono text-[11px] block text-ochre font-medium tracking-wider">
                       {s.num}
                     </span>
-                    <span className="text-xs text-ivory/90 truncate block font-serif tracking-tight mt-0.5">
+                    <span className="text-xs text-ivory/90 truncate block font-sans font-medium tracking-tight mt-0.5">
                       {s.tag}
                     </span>
                   </div>
@@ -780,7 +973,7 @@ function How() {
                   }}
                 >
                   {/* Subtle Corner Watermark Number */}
-                  <span className="pointer-events-none absolute -bottom-6 -right-4 font-display text-[150px] sm:text-[200px] leading-none text-ivory/[0.04] font-bold select-none">
+                  <span className="pointer-events-none absolute -bottom-6 -right-4 font-display text-[150px] sm:text-[200px] leading-none text-ivory/[0.04] font-normal select-none">
                     {s.num}
                   </span>
 
@@ -791,13 +984,13 @@ function How() {
                   <div>
                     <div className="flex items-center justify-between">
                       <div className="overflow-hidden">
-                        <span data-how-card-num className="font-display text-5xl sm:text-6xl text-ochre block">
+                        <span data-how-card-num className="font-display text-5xl sm:text-6xl text-ochre block font-normal">
                           {s.num}
                         </span>
                       </div>
                       <span
                         data-how-card-badge
-                        className="label-mono text-xs px-4 py-1.5 rounded-full bg-ivory/10 text-ivory/90 border border-ivory/20 uppercase tracking-widest backdrop-blur-md"
+                        className="label-mono text-xs px-4 py-1.5 rounded-full bg-ivory/10 text-ivory/90 border border-ivory/20 uppercase tracking-widest backdrop-blur-md font-medium"
                       >
                         {s.badge}
                       </span>
@@ -807,19 +1000,19 @@ function How() {
                     <div className="mt-8 space-y-3">
                       <p
                         data-how-card-tag
-                        className="label-mono text-ochre text-xs uppercase tracking-widest font-semibold"
+                        className="label-mono text-ochre text-xs uppercase tracking-widest font-medium"
                       >
                         {s.tag}
                       </p>
                       <h3
                         data-how-card-title
-                        className="font-display text-3xl sm:text-4xl lg:text-[2.75rem] leading-[1.05] text-ivory"
+                        className="font-display text-3xl sm:text-4xl lg:text-[2.75rem] leading-[1.05] text-ivory font-normal"
                       >
                         {s.title}
                       </h3>
                       <p
                         data-how-card-desc
-                        className="mt-4 text-base sm:text-lg leading-relaxed text-ivory/80 font-light"
+                        className="mt-4 text-base sm:text-lg leading-relaxed text-ivory/80 font-normal"
                       >
                         {s.desc}
                       </p>
@@ -831,7 +1024,7 @@ function How() {
                     data-how-card-footer
                     className="pt-6 border-t border-ivory/15 mt-8 flex items-center justify-between text-xs label-mono text-ochre"
                   >
-                    <span className="tracking-wider">Step {i + 1} of 3</span>
+                    <span className="tracking-wider font-medium">Step {i + 1} of 3</span>
                     <div className="w-10 h-10 rounded-full border border-ochre/40 flex items-center justify-center text-ochre text-base transition-all duration-300 group-hover:bg-ochre group-hover:text-[#3E4D2B] group-hover:translate-x-1 group-hover:border-ochre shadow-sm">
                       →
                     </div>
@@ -891,7 +1084,7 @@ function Meets() {
                   </p>
                 </div>
                 <div className="mt-8 pt-6 border-t border-ivory/15 flex items-center justify-between">
-                  <CtaButton tone="burgundy" href="#join">Request your seat</CtaButton>
+                  <CtaButton tone="burgundy" href="/quiz">Request your seat</CtaButton>
                   <span className="label-mono text-xs text-ochre font-semibold">6 seats only</span>
                 </div>
               </div>
@@ -905,20 +1098,23 @@ function Meets() {
 
 function Footer() {
   return (
-    <footer id="join" className="relative bg-[#150409] px-[4vw] pb-12 pt-32 text-ivory overflow-hidden border-t border-ivory/15">
+    <footer
+      id="join"
+      className="relative min-h-screen w-full flex flex-col justify-center items-center bg-[#150409] px-[4vw] py-20 text-ivory overflow-hidden -mt-1"
+    >
       {/* Background Image Layer: Pure high-visibility velvet dinner table */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         <img
           data-footer-bg
           src={footerBg}
           alt="Precious Meets Table"
-          className="w-full h-full object-cover object-center scale-105"
+          className="w-full h-full object-cover object-center scale-110"
         />
-        {/* Crisp subtle dark vignette with ZERO green tinting so the velvet tabletop, wine glass, marble coaster and floral details remain brilliantly visible */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-black/35" />
+        {/* Crisp subtle dark vignette */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/45" />
       </div>
 
-      <div className="relative z-10 max-w-6xl mx-auto flex flex-col items-center text-center">
+      <div className="relative z-10 max-w-6xl w-full mx-auto flex flex-col items-center justify-center text-center my-auto">
         <p className="label-mono text-ochre uppercase tracking-widest font-semibold mb-6">
           Every meet matters. Every seat is held.
         </p>
@@ -952,13 +1148,8 @@ function Footer() {
         </div>
 
         <div className="mt-12 flex flex-wrap justify-center gap-4">
-          <CtaButton tone="burgundy" href="#top">Back to top</CtaButton>
-          <CtaButton tone="ivory" href="#meets">Explore upcoming meets</CtaButton>
-        </div>
-
-        <div className="mt-28 w-full flex flex-col justify-between items-center gap-4 border-t border-ivory/20 pt-8 label-mono text-xs text-ivory/70 sm:flex-row">
-          <span>Mumbai · Bengaluru · Delhi</span>
-          <span>© 2026 Precious Meets · Every meet counts.</span>
+          <CtaButton tone="burgundy" href="/quiz">Take the Quiz</CtaButton>
+          <CtaButton tone="ivory" href="/quiz">Explore upcoming meets</CtaButton>
         </div>
       </div>
     </footer>
@@ -1061,16 +1252,18 @@ function Index() {
       gsap.set("[data-geo-text='1']", { opacity: 0, y: 30 });
       gsap.set("[data-geo-text='2']", { opacity: 0, y: 30 });
 
-      // Initial state of chairs and plates
+      // Initial state of chairs, plates, and cutlery
       // Seat 0 (YOU): starts slightly pulled back, opacity 1
       gsap.set("[data-chair='0']", { y: -35 });
       gsap.set("[data-you-badge]", { opacity: 1, scale: 1 });
       gsap.set("[data-plate='0']", { opacity: 1, scale: 1 });
+      gsap.set("[data-cutlery='0']", { opacity: 1, scale: 1, transformOrigin: "center center" });
 
       // Seats 1 to 5: start retracted outward, faint opacity
       [1, 2, 3, 4, 5].forEach((id) => {
         gsap.set(`[data-chair='${id}']`, { y: -50, opacity: 0.15 });
         gsap.set(`[data-plate='${id}']`, { opacity: 0, scale: 0.4, transformOrigin: "center center" });
+        gsap.set(`[data-cutlery='${id}']`, { opacity: 0, scale: 0.4, transformOrigin: "center center" });
       });
 
       gsap.set("[data-table-center]", { opacity: 0.4 });
@@ -1109,6 +1302,13 @@ function Index() {
           duration: 0.6,
           ease: "back.out(1.5)",
         }, 1.3 + idx * 0.08);
+
+        g.to(`[data-cutlery='${id}']`, {
+          opacity: 1,
+          scale: 1,
+          duration: 0.6,
+          ease: "back.out(1.5)",
+        }, 1.34 + idx * 0.08);
       });
 
       // Outer guide rings rotate slightly with precision
@@ -1130,6 +1330,12 @@ function Index() {
           duration: 0.6,
           ease: "back.out(1.5)",
         }, 2.35)
+        .to("[data-cutlery='3']", {
+          opacity: 1,
+          scale: 1,
+          duration: 0.6,
+          ease: "back.out(1.5)",
+        }, 2.38)
         .to("[data-table-center]", { opacity: 1, duration: 0.6 }, 2.2)
         .to("[data-table-caption]", { opacity: 1, duration: 0.6 }, 2.3);
 

@@ -19,7 +19,7 @@ const preloaderSeats = SEAT_ANGLES.map((deg, id) => {
 export function Preloader({ onComplete }: { onComplete: () => void }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const curtainRef = useRef<HTMLDivElement>(null);
-  const tableGroupRef = useRef<SVGGElement>(null);
+  const rotatingSeatsRef = useRef<SVGGElement>(null);
   const [done, setDone] = useState(false);
 
   useEffect(() => {
@@ -66,11 +66,16 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
         y: 12,
         filter: "blur(3px)",
       });
+      gsap.set("[data-preload-table-stage]", {
+        autoAlpha: 1,
+        display: "flex",
+      });
       gsap.set("[data-preload-matters-wrap]", {
-        opacity: 0,
+        autoAlpha: 0,
+        display: "none",
       });
       gsap.set("[data-preload-matters-text]", {
-        scale: 0.85,
+        scale: 0.88,
         opacity: 0,
         filter: "blur(6px)",
         transformOrigin: "center center",
@@ -137,7 +142,7 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
           },
           0.55,
         )
-        // 5. Center serif inscription dissolves in with blur removal
+        // 5. Center serif inscription dissolves in (kept stationary & upright)
         .to(
           "[data-preload-text]",
           {
@@ -147,7 +152,7 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
             duration: 0.6,
             ease: "power2.out",
           },
-          0.8,
+          0.75,
         )
         // 6. Accent burgundy line expands outward
         .to(
@@ -157,7 +162,7 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
             duration: 0.45,
             ease: "power2.out",
           },
-          0.98,
+          0.95,
         )
         // 7. Bottom reference caption glides in
         .to(
@@ -169,77 +174,88 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
             duration: 0.6,
             ease: "power2.out",
           },
-          1.08,
+          1.05,
         );
 
-      // Continuous subtle ambient turntable rotation
-      gsap.to(tableGroupRef.current, {
-        rotation: 30,
-        duration: 2.4,
-        ease: "power1.inOut",
-        transformOrigin: "200px 200px",
-      });
+      // Subtle ambient turntable rotation of chairs & plates on the timeline
+      // Center table disc and text remain perfectly upright and readable
+      tl.to(
+        rotatingSeatsRef.current,
+        {
+          rotation: 24,
+          duration: 2.2,
+          ease: "power1.inOut",
+          transformOrigin: "200px 200px",
+        },
+        0.3,
+      );
 
-      // Phase 2: Architectural Table dissolves to Statement
+      // Phase 2: Architectural Table completely dissolves BEFORE Statement
+      // Users have a clear hold to read the table and caption with zero visual conflict
       tl.to(
         "[data-preload-table-stage]",
         {
-          opacity: 0,
+          autoAlpha: 0,
           scale: 0.94,
           filter: "blur(4px)",
-          duration: 0.5,
+          duration: 0.45,
           ease: "power2.inOut",
         },
-        2.1,
+        2.2,
       );
 
-      // Phase 3: "Every meet matters." with delay & size increase
-      // Text appears, stays with a delay, and continuously increases in size
-      tl.to(
-        "[data-preload-matters-wrap]",
-        {
-          opacity: 1,
-          duration: 0.2,
-        },
-        2.35,
-      )
+      // Completely hide and remove table stage from rendering before text appears
+      tl.set("[data-preload-table-stage]", { display: "none" }, 2.65);
+
+      // Phase 3: "Every meet matters." Statement Screen
+      // Completely isolated in time — table is 100% gone before this begins
+      tl.set("[data-preload-matters-wrap]", { display: "flex", autoAlpha: 0 }, 2.68)
+        .to(
+          "[data-preload-matters-wrap]",
+          {
+            autoAlpha: 1,
+            duration: 0.35,
+            ease: "power2.out",
+          },
+          2.7,
+        )
         .to(
           "[data-preload-matters-text]",
           {
             opacity: 1,
             filter: "blur(0px)",
-            scale: 1.25, // Text increases in size
-            duration: 1.8, // Generous delay to absorb the statement
+            scale: 1.18,
+            duration: 1.45,
             ease: "power1.out",
           },
-          2.35,
+          2.7,
         );
 
-      // Phase 4: Solid Purple Curtain Comes
+      // Phase 4: Solid Burgundy Rising & Lifting Theatre Curtain
       // Curtain sweeps up from bottom to blanket the screen
       tl.fromTo(
         curtainRef.current,
         { yPercent: 100 },
         {
           yPercent: 0,
-          duration: 0.85,
+          duration: 0.75,
           ease: "power4.inOut",
         },
         4.15,
       )
         // While screen is completely blanketed, wipe all preloader contents behind it
         .call(() => {
-          gsap.set("[data-preload-matters-wrap]", { opacity: 0 });
+          gsap.set("[data-preload-matters-wrap]", { autoAlpha: 0, display: "none" });
           gsap.set("[data-preload-bg]", { opacity: 0 });
         })
         // Right as curtain starts lifting, trigger hero animation sequence
         .call(() => {
           onComplete();
         })
-        // Phase 5: Curtain lifts up unveiling the pristine hero (no lingering text)
+        // Phase 5: Curtain lifts up unveiling the pristine hero
         .to(curtainRef.current, {
           yPercent: -100,
-          duration: 0.85,
+          duration: 0.75,
           ease: "power4.inOut",
         })
         // Fade out root wrapper and unmount
@@ -275,7 +291,7 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
           <div className="absolute inset-0 bg-[radial-gradient(#DEC7A8_1px,transparent_1px)] [background-size:24px_24px] opacity-35" />
         </div>
 
-        {/* Stage 1: Architectural Dinner Table Diagram matching reference image */}
+        {/* Stage 1: Architectural Dinner Table Diagram */}
         <div
           data-preload-table-stage
           className="relative z-10 flex flex-col items-center gap-6"
@@ -285,8 +301,8 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
             className="size-72 sm:size-84 md:size-96 overflow-visible"
             aria-hidden
           >
-            {/* Animated Table Group */}
-            <g ref={tableGroupRef}>
+            {/* Outer Orbit Group: Rings, Plates, Chairs rotate gracefully */}
+            <g ref={rotatingSeatsRef}>
               {/* 3 Concentric Architectural Guide Rings */}
               <g data-preload-rings>
                 {/* Outer guide ring */}
@@ -318,74 +334,7 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
                 />
               </g>
 
-              {/* Central Table Disc: Bevel + Warm Sand/Camel Top */}
-              <g data-preload-table>
-                {/* Outer table edge ring */}
-                <circle
-                  cx="200"
-                  cy="200"
-                  r="92"
-                  fill="#DFCAAC"
-                  stroke="#3E2C20"
-                  strokeWidth="1.2"
-                  style={{
-                    filter: "drop-shadow(0 4px 16px rgba(62,44,32,0.08))",
-                  }}
-                />
-                {/* Main Sand Table Surface */}
-                <circle
-                  cx="200"
-                  cy="200"
-                  r="90"
-                  fill="#DEC7A8"
-                  stroke="#3E2C20"
-                  strokeWidth="0.8"
-                />
-              </g>
-
-              {/* Center Table Inscription */}
-              <g data-preload-text className="select-none pointer-events-none">
-                <text
-                  x="200"
-                  y="190"
-                  textAnchor="middle"
-                  fill="#3E2C20"
-                  style={{
-                    fontFamily: "'Instrument Serif', serif",
-                    fontStyle: "italic",
-                    fontSize: "17.5px",
-                    letterSpacing: "0.015em",
-                  }}
-                >
-                  Every friend was
-                </text>
-                <text
-                  x="200"
-                  y="209"
-                  textAnchor="middle"
-                  fill="#3E2C20"
-                  style={{
-                    fontFamily: "'Instrument Serif', serif",
-                    fontStyle: "italic",
-                    fontSize: "17.5px",
-                    letterSpacing: "0.015em",
-                  }}
-                >
-                  once a stranger.
-                </text>
-                <line
-                  data-preload-line
-                  x1="187"
-                  y1="220"
-                  x2="213"
-                  y2="220"
-                  stroke="#962838"
-                  strokeWidth="1.3"
-                  strokeLinecap="round"
-                />
-              </g>
-
-              {/* 6 White Porcelain Dinner Plates on the Table Surface */}
+              {/* 6 White Porcelain Dinner Plates on Table Rim */}
               {preloaderSeats.map((s) => (
                 <g key={`plate-${s.id}`} data-preload-plate>
                   {/* Outer plate rim */}
@@ -455,6 +404,73 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
                 </g>
               ))}
             </g>
+
+            {/* Central Table Disc: Bevel + Warm Sand/Camel Top (Stays centered & steady) */}
+            <g data-preload-table>
+              {/* Outer table edge ring */}
+              <circle
+                cx="200"
+                cy="200"
+                r="92"
+                fill="#DFCAAC"
+                stroke="#3E2C20"
+                strokeWidth="1.2"
+                style={{
+                  filter: "drop-shadow(0 4px 16px rgba(62,44,32,0.08))",
+                }}
+              />
+              {/* Main Sand Table Surface */}
+              <circle
+                cx="200"
+                cy="200"
+                r="90"
+                fill="#DEC7A8"
+                stroke="#3E2C20"
+                strokeWidth="0.8"
+              />
+            </g>
+
+            {/* Center Table Inscription - Stays perfectly horizontal & level */}
+            <g data-preload-text className="select-none pointer-events-none">
+              <text
+                x="200"
+                y="190"
+                textAnchor="middle"
+                fill="#3E2C20"
+                style={{
+                  fontFamily: "'Instrument Serif', serif",
+                  fontStyle: "italic",
+                  fontSize: "17.5px",
+                  letterSpacing: "0.015em",
+                }}
+              >
+                Every friend was
+              </text>
+              <text
+                x="200"
+                y="209"
+                textAnchor="middle"
+                fill="#3E2C20"
+                style={{
+                  fontFamily: "'Instrument Serif', serif",
+                  fontStyle: "italic",
+                  fontSize: "17.5px",
+                  letterSpacing: "0.015em",
+                }}
+              >
+                once a stranger.
+              </text>
+              <line
+                data-preload-line
+                x1="187"
+                y1="220"
+                x2="213"
+                y2="220"
+                stroke="#962838"
+                strokeWidth="1.3"
+                strokeLinecap="round"
+              />
+            </g>
           </svg>
 
           {/* Exact Caption from Reference Image */}
@@ -468,6 +484,7 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
         {/* Stage 2: "Every meet matters." Statement Screen with Size Increase & Delay */}
         <div
           data-preload-matters-wrap
+          style={{ display: "none" }}
           className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none px-6 text-center"
         >
           <h1
@@ -478,7 +495,7 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
           </h1>
         </div>
 
-        {/* Stage 3: Solid Purple / Burgundy Rising & Lifting Theatre Curtain */}
+        {/* Stage 3: Solid Burgundy Rising & Lifting Theatre Curtain */}
         <div
           ref={curtainRef}
           className="absolute inset-0 bg-[#691C35] z-50 pointer-events-none"

@@ -58,8 +58,8 @@ export function calculateSocialProfile(answers: UserQuizAnswers): SocialProfileS
         if (q.dimension === "curiosity") curiosity += opt.scoreModifier;
         if (q.dimension === "adventure") adventure += opt.scoreModifier;
         if (q.dimension === "dietary") dietary = opt.value;
-        if (q.category === "scheduling" && q.id === "q20") {
-          preferredCity = opt.label;
+        if (q.category === "scheduling" && (q.id === "q10" || q.id === "q20")) {
+          preferredCity = opt.label.split(" ")[0];
         }
       }
     }
