@@ -36,7 +36,7 @@ describe("Social Scoring Engine", () => {
       dietary: "vegetarian",
       allergies: [],
       boundaries: [],
-      preferredCity: "Mumbai",
+      preferredCity: "Delhi NCR",
     };
 
     const userB = {
@@ -49,7 +49,7 @@ describe("Social Scoring Engine", () => {
       dietary: "vegetarian",
       allergies: [],
       boundaries: [],
-      preferredCity: "Mumbai",
+      preferredCity: "Delhi NCR",
     };
 
     const match = calculateGroupCompatibility(userA, userB);

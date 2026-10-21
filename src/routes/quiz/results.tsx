@@ -91,7 +91,7 @@ export function QuizResultsPage() {
           dietary: "Vegetarian",
           allergies: [],
           boundaries: [],
-          preferredCity: "Mumbai",
+          preferredCity: "Delhi NCR",
         },
       };
       setProfile(fallback);
@@ -99,6 +99,20 @@ export function QuizResultsPage() {
   }, []);
 
   useEffect(() => {
+    // Check saved contact from quiz first
+    const savedContact = localStorage.getItem("precious_meets_user_contact");
+    if (savedContact) {
+      try {
+        const c = JSON.parse(savedContact);
+        if (c.fullName) setName(c.fullName);
+        if (c.email) setEmail(c.email);
+        if (c.phone) setPhone("+91 " + c.phone);
+        return;
+      } catch (e) {
+        // Ignore
+      }
+    }
+
     if (user?.email && !email) {
       setEmail(user.email);
     }
@@ -125,7 +139,7 @@ export function QuizResultsPage() {
         email: email.trim(),
         phone: phone.trim(),
         amountInr: 1999,
-        archetypeTitle: profile?.archetype.title,
+        archetypeTitle: profile?.archetype.title || "The Curious Flâneur",
         onSuccess: async (result) => {
           // 1. Activate membership in app state & localStorage
           const newSub = activateSubscription({
@@ -372,7 +386,7 @@ export function QuizResultsPage() {
                 </h2>
 
                 <p className="mt-3 text-sm leading-relaxed text-ivory/80">
-                  Join our curated private circle across Mumbai, Bengaluru & Delhi. One annual pass unlocks unlimited invites to weekly 6-person suppers with compatible conversationalists.
+                  Join our curated private circle across Delhi NCR. One annual pass unlocks unlimited invites to weekly 6-person suppers with compatible conversationalists and uncompromising women-first security.
                 </p>
 
                 {/* Benefits Bullet Grid */}
@@ -382,7 +396,16 @@ export function QuizResultsPage() {
                       <Check className="size-3 stroke-[3]" />
                     </div>
                     <span className="text-xs leading-relaxed text-ivory/90">
-                      <strong>Guaranteed Priority Table Access:</strong> Weekly curated suppers in Mumbai, Bengaluru & Delhi.
+                      <strong>Guaranteed Priority Table Access:</strong> Weekly curated suppers across Delhi NCR & Bengaluru.
+                    </span>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="grid size-5 shrink-0 place-items-center rounded-full bg-[#C6A568]/20 text-[#C6A568] mt-0.5">
+                      <Check className="size-3 stroke-[3]" />
+                    </div>
+                    <span className="text-xs leading-relaxed text-ivory/90">
+                      <strong>100% Offline Aadhaar Verification:</strong> Every member is verified via DigiLocker. Zero anonymous attendees.
                     </span>
                   </div>
 

@@ -109,7 +109,7 @@ function DashboardSafetyPage() {
                     required
                     value={reportUser}
                     onChange={(e) => setReportUser(e.target.value)}
-                    placeholder="e.g. John at Bandra Supper Club"
+                    placeholder="e.g. Guest at Mehrauli Supper Club"
                     className="mt-1 w-full rounded-md border border-input bg-background p-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                   />
                 </div>

@@ -49,17 +49,17 @@ interface MeetEvent {
 
 const UPCOMING_MEETS: MeetEvent[] = [
   {
-    id: "meet_bandra_supper",
+    id: "meet_delhi_supper",
     title: "The Long Table Supper",
-    city: "Mumbai",
-    neighborhood: "Bandra West",
+    city: "Delhi NCR",
+    neighborhood: "Mehrauli",
     date: "This Thursday · 8:00 PM",
     seatsTotal: 6,
     seatsRemaining: 2,
     vibeMatch: 98,
     host: "Chef Tara Sen & Sommelier Kabir",
     theme: "Four seasonal courses, candlelight & natural wine",
-    desc: "Six strangers gathered around an unhurried candlelit table in a restored Ranwar loft. Seasonal autumn plates paired with small-batch natural wines.",
+    desc: "Six strangers gathered around an unhurried candlelit table in a secluded Mehrauli courtyard. Seasonal autumn plates paired with small-batch natural wines.",
     image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
     dressCode: "Smart Casual & Warm Tones",
   },
@@ -114,8 +114,8 @@ export function DashboardPage() {
       }
     } else {
       // Default to having reserved the first meet for founding members
-      setReservedMeetIds(["meet_bandra_supper"]);
-      localStorage.setItem(LOCAL_STORAGE_RESERVATIONS_KEY, JSON.stringify(["meet_bandra_supper"]));
+      setReservedMeetIds(["meet_delhi_supper"]);
+      localStorage.setItem(LOCAL_STORAGE_RESERVATIONS_KEY, JSON.stringify(["meet_delhi_supper"]));
     }
   }, []);
 
@@ -178,7 +178,7 @@ export function DashboardPage() {
                 </span>
                 <span>•</span>
                 <span className="flex items-center gap-1">
-                  <MapPin className="size-3.5 text-forest" /> {profile?.city || "Mumbai"} Member Circle
+                  <MapPin className="size-3.5 text-forest" /> {profile?.city || "Delhi NCR"} Member Circle
                 </span>
                 <span>•</span>
                 <span className="text-forest font-semibold">Active Access (Annual Subscription)</span>
@@ -190,7 +190,7 @@ export function DashboardPage() {
                 to="/quiz"
                 className="flex items-center gap-1.5 rounded-full border border-border bg-background px-4 py-2.5 text-xs font-semibold text-foreground hover:bg-sage/40 transition-colors"
               >
-                <Sparkles className="size-3.5 text-ochre" /> Retake 10-Q Quiz
+                <Sparkles className="size-3.5 text-ochre" /> Retake 9-Q Quiz
               </Link>
               <Link
                 to="/quiz/results"

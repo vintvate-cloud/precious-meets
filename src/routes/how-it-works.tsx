@@ -18,25 +18,25 @@ function HowItWorksPage() {
     {
       num: "01",
       title: "The Discovery Quiz",
-      desc: "Complete 21 questions examining your social energy, conversation depth, and culinary boundaries. No corporate resumes, only genuine human curiosity.",
+      desc: "Complete 9 intentional questions examining your conversational tempo, social battery, and emotional curiosity. Zero corporate credentials—strictly who you are beneath the noise.",
       icon: <Sparkles className="size-6 text-burgundy" />,
     },
     {
       num: "02",
-      title: "Algorithmic Table Curation",
+      title: "Psychometric Table Curation",
       desc: "Our matching engine curates tables of 4–6 compatible people. We balance energy levels to ensure everyone speaks, listens, and feels at ease.",
       icon: <Users className="size-6 text-forest" />,
     },
     {
       num: "03",
-      title: "Offline Aadhaar Verification",
-      desc: "Every attendee verifies their identity via consent-driven DigiLocker XML before stepping into a meet. We build safe, accountable real-world tables.",
+      title: "100% Offline Aadhaar Verification",
+      desc: "Zero anonymity. Every single guest verifies their legal identity via UIDAI DigiLocker before receiving a table pass. In Delhi NCR, this eliminates predatory behavior before you ever step through the door.",
       icon: <ShieldCheck className="size-6 text-ochre" />,
     },
     {
       num: "04",
       title: "The Long Table Gathering",
-      desc: "Arrive at a secluded culinary venue in Bandra, Indiranagar, or Hauz Khas. Share a 4-course meal with unhurried dialogue guided by thoughtful table hosts.",
+      desc: "Arrive at an intimate private venue in Mehrauli, Hauz Khas, Sunder Nursery, or Indiranagar. Share an unhurried 4-course meal guided by a vetted, trained host.",
       icon: <Utensils className="size-6 text-burgundy" />,
     },
   ];
@@ -52,7 +52,7 @@ function HowItWorksPage() {
             From Strangers to <em className="italic text-burgundy">Stories</em>
           </h1>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            Modern cities are crowded yet lonely. Precious Meets creates intentional small tables where authentic conversation replaces professional networking.
+            Modern cities are crowded yet lonely. Precious Meets creates intentional small tables where authentic conversation replaces superficial nightlife—backed by India's strictest trust and safety architecture.
           </p>
         </div>
 
@@ -74,15 +74,41 @@ function HowItWorksPage() {
           ))}
         </div>
 
+        {/* Women Safety & Aadhaar Verification Focus Banner */}
+        <div className="mt-16 rounded-3xl border border-forest/30 bg-sage/20 p-8 sm:p-10">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="max-w-xl">
+              <div className="inline-flex items-center gap-2 rounded-full bg-forest/10 px-3 py-1 text-xs font-semibold text-forest">
+                <ShieldCheck className="size-4" />
+                Delhi NCR Women-First Safety Architecture
+              </div>
+              <h2 className="font-display mt-3 text-2xl sm:text-3xl text-foreground">
+                Engineered for women who love meeting people, but rightfully distrust the city.
+              </h2>
+              <p className="mt-3 text-xs sm:text-sm leading-relaxed text-muted-foreground">
+                Delhi's social landscape is plagued by catfishing, aggressive clubs, and predatory anonymity. We fix this at the root: 100% offline Aadhaar verification through DigiLocker, strict 50:50 gender ratios, private secluded venues, and a 24/7 Safety SOS beacon.
+              </p>
+            </div>
+            <div className="shrink-0">
+              <Link
+                to="/philosophy"
+                className="inline-flex items-center gap-2 rounded-full bg-forest px-6 py-3 text-xs font-semibold uppercase tracking-wider text-ivory hover:bg-forest/90 transition-all shadow-md"
+              >
+                Read Our Safety Philosophy &rarr;
+              </Link>
+            </div>
+          </div>
+        </div>
+
         <div className="mt-16 rounded-3xl border border-border/80 bg-burgundy p-8 text-ivory text-center">
           <h2 className="font-display text-3xl">Ready to take a seat?</h2>
           <p className="mt-2 text-xs leading-relaxed text-ivory/80 max-w-md mx-auto">
-            Take 5 minutes to complete your Social Discovery Quiz and discover which tables align with your tempo.
+            Take 3 minutes to complete your 9-question Social Discovery Quiz and discover which tables align with your tempo.
           </p>
           <div className="mt-6">
             <Link
               to="/quiz"
-              className="inline-flex items-center gap-2 rounded-full bg-ivory px-6 py-3 text-xs font-semibold uppercase tracking-wider text-burgundy hover:bg-card"
+              className="inline-flex items-center gap-2 rounded-full bg-ivory px-6 py-3 text-xs font-semibold uppercase tracking-wider text-burgundy hover:bg-card transition-all"
             >
               Take the Quiz &rarr;
             </Link>

@@ -35,7 +35,7 @@ export function calculateSocialProfile(answers: UserQuizAnswers): SocialProfileS
   let dietary = "flexible";
   const allergies: string[] = [];
   const boundaries: string[] = [];
-  let preferredCity = "Mumbai";
+  let preferredCity = "Delhi NCR";
 
   QUIZ_QUESTIONS.forEach((q) => {
     const answer = answers[q.id];
@@ -59,7 +59,7 @@ export function calculateSocialProfile(answers: UserQuizAnswers): SocialProfileS
         if (q.dimension === "adventure") adventure += opt.scoreModifier;
         if (q.dimension === "dietary") dietary = opt.value;
         if (q.category === "scheduling" && (q.id === "q10" || q.id === "q20")) {
-          preferredCity = opt.label.split(" ")[0];
+          preferredCity = opt.label.split(" ")[0] ?? "Delhi NCR";
         }
       }
     }
@@ -72,7 +72,7 @@ export function calculateSocialProfile(answers: UserQuizAnswers): SocialProfileS
       if (q.category === "food_preferences" && q.id === "q12") {
         allergies.push(...answer.filter((a) => a !== "none"));
       }
-      if (q.category === "personal_boundaries") {
+      if ((q.category as string) === "personal_boundaries") {
         boundaries.push(...answer);
       }
     }
@@ -164,7 +164,7 @@ export function calculateGroupCompatibility(
   const score = Math.min(99, Math.max(50, Math.round(rawScore)));
 
   let matchReason = "Complementary conversational rhythms and shared curiosity.";
-  if (shared.length > 0) {
+  if (shared.length > 0 && shared[0]) {
     matchReason = `Bonded over shared appreciation for ${shared[0].replace("_", " ")} and deep conversation.`;
   }
 

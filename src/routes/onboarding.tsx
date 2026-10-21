@@ -20,8 +20,8 @@ export const Route = createFileRoute("/onboarding")({
 function OnboardingPage() {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
-  const [city, setCity] = useState("Mumbai");
-  const [phone, setPhone] = useState("+91 98200 12345");
+  const [city, setCity] = useState("Delhi NCR");
+  const [phone, setPhone] = useState("+91 98100 12345");
   const [bio, setBio] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -52,9 +52,8 @@ function OnboardingPage() {
                 onChange={(e) => setCity(e.target.value)}
                 className="mt-1 w-full rounded-md border border-input bg-background p-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
               >
-                <option value="Mumbai">Mumbai (Bandra, Juhu, Colaba)</option>
-                <option value="Bengaluru">Bengaluru (Indiranagar, Koramangala)</option>
-                <option value="Delhi">Delhi NCR (Hauz Khas, Mehrauli)</option>
+                <option value="Delhi NCR">Delhi NCR (Mehrauli, Hauz Khas, Sunder Nursery, CP)</option>
+                <option value="Bengaluru">Bengaluru (Indiranagar, Koramangala, Lavelle Rd)</option>
               </select>
             </div>
 

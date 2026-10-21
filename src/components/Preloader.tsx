@@ -32,15 +32,21 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
 
     const ctx = gsap.context(() => {
       // 0. Initial hidden states
+      gsap.set("[data-preload-rings]", {
+        transformOrigin: "50% 50%",
+        svgOrigin: "200 200",
+      });
       gsap.set("[data-preload-rings] circle", {
         opacity: 0,
         scale: 0.92,
-        transformOrigin: "200px 200px",
+        transformOrigin: "50% 50%",
+        svgOrigin: "200 200",
       });
       gsap.set("[data-preload-table]", {
         scale: 0.4,
         opacity: 0,
-        transformOrigin: "200px 200px",
+        transformOrigin: "50% 50%",
+        svgOrigin: "200 200",
       });
       gsap.set("[data-preload-plate]", {
         scale: 0,
@@ -177,15 +183,16 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
           1.05,
         );
 
-      // Subtle ambient turntable rotation of chairs & plates on the timeline
-      // Center table disc and text remain perfectly upright and readable
+      // Circles in the preloader rotate smoothly in their EXACT place (centered at 200, 200)
+      // Plates and chairs remain fixed in their seats without displacing
       tl.to(
-        rotatingSeatsRef.current,
+        "[data-preload-rings]",
         {
-          rotation: 24,
+          rotation: 36,
           duration: 2.2,
           ease: "power1.inOut",
-          transformOrigin: "200px 200px",
+          transformOrigin: "50% 50%",
+          svgOrigin: "200 200",
         },
         0.3,
       );
@@ -301,38 +308,42 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
             className="size-72 sm:size-84 md:size-96 overflow-visible"
             aria-hidden
           >
-            {/* Outer Orbit Group: Rings, Plates, Chairs rotate gracefully */}
-            <g ref={rotatingSeatsRef}>
-              {/* 3 Concentric Architectural Guide Rings */}
-              <g data-preload-rings>
-                {/* Outer guide ring */}
-                <circle
-                  cx="200"
-                  cy="200"
-                  r="184"
-                  fill="none"
-                  stroke="#E4D7CA"
-                  strokeWidth="1.1"
-                />
-                {/* Middle chair guide ring */}
-                <circle
-                  cx="200"
-                  cy="200"
-                  r="138"
-                  fill="none"
-                  stroke="#DCCBB9"
-                  strokeWidth="0.95"
-                />
-                {/* Inner table clearance ring */}
-                <circle
-                  cx="200"
-                  cy="200"
-                  r="104"
-                  fill="none"
-                  stroke="#E0D1C2"
-                  strokeWidth="0.85"
-                />
-              </g>
+            {/* 3 Concentric Architectural Guide Rings: Rotate in their exact place */}
+            <g data-preload-rings>
+              {/* Outer guide ring with delicate dashes */}
+              <circle
+                cx="200"
+                cy="200"
+                r="184"
+                fill="none"
+                stroke="#E4D7CA"
+                strokeWidth="1.1"
+                strokeDasharray="4 6"
+              />
+              {/* Middle chair guide ring with dashes */}
+              <circle
+                cx="200"
+                cy="200"
+                r="138"
+                fill="none"
+                stroke="#DCCBB9"
+                strokeWidth="0.95"
+                strokeDasharray="8 6"
+              />
+              {/* Inner table clearance ring with fine dashes */}
+              <circle
+                cx="200"
+                cy="200"
+                r="104"
+                fill="none"
+                stroke="#E0D1C2"
+                strokeWidth="0.85"
+                strokeDasharray="3 5"
+              />
+            </g>
+
+            {/* Static Chairs and Plates: Lock in exact position without displacement */}
+            <g>
 
               {/* 6 White Porcelain Dinner Plates on Table Rim */}
               {preloaderSeats.map((s) => (

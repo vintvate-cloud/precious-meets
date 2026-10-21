@@ -28,39 +28,42 @@ export const Route = createFileRoute("/experiences/$slug")({
   component: ExperienceDetailPage,
 });
 
-const EXPERIENCES_MAP: Record<string, any> = {
-  "the-long-table-supper-mumbai": {
-    id: "exp_1",
-    slug: "the-long-table-supper-mumbai",
-    title: "The Long Table Supper",
-    tagline: "Six strangers, four courses, one candlelit table.",
-    city: "Mumbai",
-    neighborhood: "Bandra West",
-    venueName: "The Loft at Chapel Road",
-    venueAddress: "Chapel Road, Ranwar Village, Bandra West, Mumbai 400050",
-    coverImage: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80",
-    priceInr: 249900, // paise
-    maxCapacity: 6,
-    bookedSeats: 2,
-    host: {
-      name: "Chef Tara Sen",
-      role: "Culinary Anthropologist & Supper Host",
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
-      bio: "Tara spent seven years documenting heritage recipes across coastal Konkan and Goa before founding this intimate salon table.",
-    },
-    menu: [
-      "Amuse-bouche: Smoked jackfruit tartlets with kokum glaze",
-      "First course: Spiced crab salad or charred heirloom pumpkin",
-      "Main course: Slow-cooked black cardamom lamb shank or wild mushroom biryani",
-      "Dessert: Fig leaf panna cotta with roasted pistachio crisp",
-    ],
-    dietary: ["Vegetarian", "Non-Vegetarian", "Jain Options Available"],
-    session: {
-      id: "sess_001",
-      startsAt: new Date(Date.now() + 3 * 24 * 3600 * 1000).toISOString(),
-      endsAt: new Date(Date.now() + 3 * 24 * 3600 * 1000 + 3 * 3600 * 1000).toISOString(),
-    },
+const DELHI_SUPPER = {
+  id: "exp_1",
+  slug: "the-long-table-supper-delhi",
+  title: "The Long Table Supper",
+  tagline: "Six strangers, four courses, one candlelit table in Mehrauli.",
+  city: "Delhi NCR",
+  neighborhood: "Mehrauli",
+  venueName: "The Banyan Courtyard at Mehrauli",
+  venueAddress: "Kalka Das Marg, Near Qutub Complex, Mehrauli, New Delhi 110030",
+  coverImage: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80",
+  priceInr: 249900, // paise
+  maxCapacity: 6,
+  bookedSeats: 2,
+  host: {
+    name: "Chef Tara Sen",
+    role: "Culinary Anthropologist & Supper Host",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+    bio: "Tara spent seven years documenting heritage recipes across North India and Old Delhi before founding this intimate salon table.",
   },
+  menu: [
+    "Amuse-bouche: Smoked jackfruit tartlets with kokum glaze",
+    "First course: Spiced burrata or charred heirloom pumpkin",
+    "Main course: Slow-cooked black cardamom lamb shank or wild mushroom saffron pulao",
+    "Dessert: Fig leaf panna cotta with roasted pistachio crisp",
+  ],
+  dietary: ["Vegetarian", "Non-Vegetarian", "Jain Options Available"],
+  session: {
+    id: "sess_001",
+    startsAt: new Date(Date.now() + 3 * 24 * 3600 * 1000).toISOString(),
+    endsAt: new Date(Date.now() + 3 * 24 * 3600 * 1000 + 3 * 3600 * 1000).toISOString(),
+  },
+};
+
+const EXPERIENCES_MAP: Record<string, any> = {
+  "the-long-table-supper-delhi": DELHI_SUPPER,
+  "the-long-table-supper-mumbai": DELHI_SUPPER, // backwards compatibility alias
   "slow-coffee-vinyl-bengaluru": {
     id: "exp_2",
     slug: "slow-coffee-vinyl-bengaluru",
@@ -130,7 +133,7 @@ function ExperienceDetailPage() {
   const { user, profile, signInWithGoogle } = useAuth();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
 
-  const exp = EXPERIENCES_MAP[slug] || EXPERIENCES_MAP["the-long-table-supper-mumbai"];
+  const exp = EXPERIENCES_MAP[slug] || EXPERIENCES_MAP["the-long-table-supper-delhi"];
   const seatsAvailable = exp.maxCapacity - exp.bookedSeats;
 
   const handleBookClick = () => {

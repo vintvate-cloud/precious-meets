@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as PhilosophyRouteImport } from './routes/philosophy'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SafetyRouteImport } from './routes/safety'
 import { Route as TermsRouteImport } from './routes/terms'
@@ -45,6 +46,11 @@ const LoginRoute = LoginRouteImport.update({
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PhilosophyRoute = PhilosophyRouteImport.update({
+  id: '/philosophy',
+  path: '/philosophy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/philosophy': typeof PhilosophyRoute
   '/privacy': typeof PrivacyRoute
   '/safety': typeof SafetyRoute
   '/terms': typeof TermsRoute
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/philosophy': typeof PhilosophyRoute
   '/privacy': typeof PrivacyRoute
   '/safety': typeof SafetyRoute
   '/terms': typeof TermsRoute
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/philosophy': typeof PhilosophyRoute
   '/privacy': typeof PrivacyRoute
   '/safety': typeof SafetyRoute
   '/terms': typeof TermsRoute
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
     | '/how-it-works'
     | '/login'
     | '/onboarding'
+    | '/philosophy'
     | '/privacy'
     | '/safety'
     | '/terms'
@@ -197,6 +207,7 @@ export interface FileRouteTypes {
     | '/how-it-works'
     | '/login'
     | '/onboarding'
+    | '/philosophy'
     | '/privacy'
     | '/safety'
     | '/terms'
@@ -216,6 +227,7 @@ export interface FileRouteTypes {
     | '/how-it-works'
     | '/login'
     | '/onboarding'
+    | '/philosophy'
     | '/privacy'
     | '/safety'
     | '/terms'
@@ -236,6 +248,7 @@ export interface RootRouteChildren {
   HowItWorksRoute: typeof HowItWorksRoute
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
+  PhilosophyRoute: typeof PhilosophyRoute
   PrivacyRoute: typeof PrivacyRoute
   SafetyRoute: typeof SafetyRoute
   TermsRoute: typeof TermsRoute
@@ -279,6 +292,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/philosophy': {
+      id: '/philosophy'
+      path: '/philosophy'
+      fullPath: '/philosophy'
+      preLoaderRoute: typeof PhilosophyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -380,6 +400,7 @@ const rootRouteChildren: RootRouteChildren = {
   HowItWorksRoute: HowItWorksRoute,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
+  PhilosophyRoute: PhilosophyRoute,
   PrivacyRoute: PrivacyRoute,
   SafetyRoute: SafetyRoute,
   TermsRoute: TermsRoute,

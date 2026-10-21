@@ -14,13 +14,10 @@ export function Footer() {
             </p>
             <div className="mt-6 flex items-center gap-3">
               <span className="label-mono rounded-full bg-sage/60 px-3 py-1 text-xs text-forest">
-                Mumbai
+                Delhi NCR
               </span>
               <span className="label-mono rounded-full bg-sage/60 px-3 py-1 text-xs text-forest">
                 Bengaluru
-              </span>
-              <span className="label-mono rounded-full bg-sage/60 px-3 py-1 text-xs text-forest">
-                Delhi NCR
               </span>
             </div>
           </div>
@@ -28,6 +25,11 @@ export function Footer() {
           <div>
             <h4 className="label-mono text-xs font-semibold text-foreground/70">Explore</h4>
             <ul className="mt-4 space-y-2.5 text-sm">
+              <li>
+                <Link to="/philosophy" className="text-muted-foreground hover:text-burgundy font-medium">
+                  Philosophy & Women Safety
+                </Link>
+              </li>
               <li>
                 <Link to="/experiences" className="text-muted-foreground hover:text-burgundy">
                   Upcoming Meets

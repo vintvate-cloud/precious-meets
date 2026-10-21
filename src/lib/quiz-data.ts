@@ -197,21 +197,4 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
       { id: "q9_3", label: "Salon Gathering: 8 people", sublabel: "Vibrant energy with multiple viewpoints and sparks", value: "8_people", scoreModifier: 7 },
     ],
   },
-
-  // 10. Scheduling & City
-  {
-    id: "q10",
-    order: 10,
-    category: "scheduling",
-    title: "Which city would you like to experience first?",
-    subtitle: "Where our culinary team will reserve your inaugural seat.",
-    type: "single_select",
-    dimension: "schedule",
-    isRequired: true,
-    options: [
-      { id: "q10_1", label: "Mumbai", sublabel: "Bandra, Colaba, Juhu, Lower Parel", value: "mumbai", scoreModifier: 0 },
-      { id: "q10_2", label: "Bengaluru", sublabel: "Indiranagar, Koramangala, Lavelle Road", value: "bengaluru", scoreModifier: 0 },
-      { id: "q10_3", label: "Delhi NCR", sublabel: "Hauz Khas, Mehrauli, Golf Course Road", value: "delhi", scoreModifier: 0 },
-    ],
-  },
 ];

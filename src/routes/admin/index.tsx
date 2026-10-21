@@ -42,7 +42,7 @@ function AdminConsolePage() {
       status: "open",
       createdAt: "14 mins ago",
       bookingRef: "PM-X92F8A",
-      location: "Bandra West, Mumbai (GPS Attached)",
+      location: "Mehrauli, Delhi NCR (GPS Attached)",
     },
     {
       id: "inc_02",
@@ -191,7 +191,7 @@ function AdminConsolePage() {
                   <tbody className="divide-y divide-border/60">
                     <tr>
                       <td className="py-3 font-medium">The Long Table Supper</td>
-                      <td className="py-3 text-muted-foreground">Bandra West, Mumbai</td>
+                      <td className="py-3 text-muted-foreground">Mehrauli, Delhi NCR</td>
                       <td className="py-3 font-mono">₹2,499</td>
                       <td className="py-3">2 / 6 seats</td>
                       <td className="py-3">

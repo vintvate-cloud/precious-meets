@@ -8,7 +8,7 @@ export const Route = createFileRoute("/experiences/")({
   head: () => ({
     meta: [
       { title: "Curated Meets & Shared Tables — Precious Meets" },
-      { name: "description", content: "Discover upcoming supper clubs, slow coffee tastings, and evening salons in Mumbai, Bengaluru, and Delhi." },
+      { name: "description", content: "Discover upcoming supper clubs, slow coffee tastings, and evening salons in Delhi NCR and Bengaluru." },
     ],
   }),
   component: ExperiencesPage,
@@ -17,14 +17,14 @@ export const Route = createFileRoute("/experiences/")({
 const CURATED_MEETS = [
   {
     id: "exp_1",
-    slug: "the-long-table-supper-mumbai",
+    slug: "the-long-table-supper-delhi",
     title: "The Long Table Supper",
-    city: "Mumbai",
-    neighborhood: "Bandra West",
+    city: "Delhi NCR",
+    neighborhood: "Mehrauli",
     category: "supper_club",
     date: "Thursday · 8:00 PM",
     coverImage: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
-    desc: "Six strangers, four courses, one candlelit table in a hidden Ranwar loft.",
+    desc: "Six strangers, four courses, one candlelit table in a private courtyard overlooking ancient stone arches.",
     priceInr: 2499,
     seatsLeft: 4,
     dietary: "Vegetarian & Non-Veg Available",
@@ -49,7 +49,7 @@ const CURATED_MEETS = [
     id: "exp_3",
     slug: "after-dark-walk-and-wine-delhi",
     title: "After-Dark Walk & Wine",
-    city: "Delhi",
+    city: "Delhi NCR",
     neighborhood: "Hauz Khas",
     category: "after_dark",
     date: "Saturday · 7:00 PM",
@@ -92,7 +92,7 @@ function ExperiencesPage() {
         <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-b border-border/70 pb-6">
           {/* City Tabs */}
           <div className="flex items-center gap-2">
-            {["All", "Mumbai", "Bengaluru", "Delhi"].map((city) => (
+            {["All", "Delhi NCR", "Bengaluru"].map((city) => (
               <button
                 key={city}
                 onClick={() => setSelectedCity(city)}

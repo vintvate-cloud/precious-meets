@@ -6,6 +6,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
 import { CtaButton } from "@/components/CtaButton";
 import { Preloader } from "@/components/Preloader";
+import { SosModal } from "@/components/SosModal";
+import { ShieldAlert, ShieldCheck, Sparkles, BookOpen, Utensils, User, ArrowRight, X } from "lucide-react";
 import tableLaugh from "@/assets/table-laugh.jpg";
 import hands from "@/assets/hands.jpg";
 import conversation from "@/assets/conversation.jpg";
@@ -21,8 +23,8 @@ if (typeof window !== "undefined") {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Precious Meets — Every meet matters" },
-      { name: "description", content: "Curated real-world meetups, shared meals and meaningful conversations with people beyond your usual circle." },
+      { title: "Precious Meets — Every meet matters | Safe Curated Tables in Delhi NCR" },
+      { name: "description", content: "Curated real-world meetups, shared meals and meaningful conversations. 100% Offline Aadhaar verified with women-first safety in Delhi NCR." },
       { property: "og:title", content: "Precious Meets — Every meet matters" },
       { property: "og:description", content: "Share a table, discover unexpected perspectives, and make room for connections that matter." },
       { property: "og:type", content: "website" },
@@ -32,41 +34,52 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const links = [
-  ["Take the Quiz", "/quiz"],
-  ["Upcoming Meets", "/experiences"],
-  ["How It Works", "/how-it-works"],
-  ["Safety & SOS", "/safety"],
-  ["Member Sign In", "/login"],
-] as const;
+const menuItems = [
+  { label: "Take the Quiz", href: "/quiz", highlight: true, icon: <Sparkles className="size-4 text-ochre" /> },
+  { label: "The Philosophy & Safety", href: "/philosophy", badge: "Women-First", icon: <ShieldCheck className="size-4 text-forest" /> },
+  { label: "How It Works", href: "/how-it-works", icon: <BookOpen className="size-4 text-foreground/70" /> },
+  { label: "Upcoming Meets", href: "/experiences", icon: <Utensils className="size-4 text-foreground/70" /> },
+  { label: "24/7 Safety & SOS", href: "/safety", icon: <ShieldAlert className="size-4 text-red-600" /> },
+  { label: "Member Sign In", href: "/login", icon: <User className="size-4 text-foreground/70" /> },
+];
 
-// Curated gatherings across cities.
+// Curated gatherings across cities (Delhi NCR & Bengaluru focus; Mumbai removed)
 const meets = [
-  { name: "The Long Table Supper", when: "Thursdays · 8 PM", where: "Bandra, Mumbai", img: tableLaugh, desc: "Six strangers, four courses, one candlelit table." },
+  { name: "The Sunder Nursery Supper", when: "Thursdays · 8 PM", where: "Mehrauli, Delhi NCR", img: tableLaugh, desc: "Six strangers, four courses, one candlelit table in a secluded heritage enclave." },
   { name: "Slow Coffee Sundays", when: "Sundays · 10 AM", where: "Indiranagar, Bengaluru", img: conversation, desc: "Unhurried conversations over a single pour." },
-  { name: "After-Dark Walk & Wine", when: "Saturdays · 7 PM", where: "Hauz Khas, Delhi", img: dusk, desc: "A short walk, a small bar, a few new friends." },
+  { name: "After-Dark Walk & Wine", when: "Saturdays · 7 PM", where: "Hauz Khas, Delhi NCR", img: dusk, desc: "A twilight heritage walk, a private wine room, a few new friends." },
 ];
 
 function Nav() {
   const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const onClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
     window.addEventListener("keydown", onKey);
-    document.documentElement.style.overflow = open ? "hidden" : "";
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+    document.addEventListener("mousedown", onClickOutside);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onClickOutside);
+    };
+  }, []);
 
   return (
-    <>
-      <header data-nav className="fixed inset-x-0 top-4 z-50 flex justify-center px-4 pointer-events-none">
+    <header data-nav className="fixed inset-x-0 top-4 z-50 flex justify-center px-4 pointer-events-none">
+      <div ref={menuRef} className="relative w-full max-w-4xl">
         <nav
           data-nav-bar
           style={{
-            background: "linear-gradient(135deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.42) 100%)",
+            background: "linear-gradient(135deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.48) 100%)",
             backdropFilter: "blur(28px) saturate(190%) contrast(95%)",
             WebkitBackdropFilter: "blur(28px) saturate(190%) contrast(95%)",
           }}
-          className="pointer-events-auto flex w-full max-w-4xl items-center justify-between rounded-full border border-white/70 py-2 pl-3.5 sm:pl-5 pr-2 text-[#171514] shadow-[0_16px_40px_-10px_rgba(23,21,20,0.12),_0_4px_12px_-2px_rgba(23,21,20,0.04),_inset_0_1px_2px_0_rgba(255,255,255,0.95),_inset_0_-1px_1px_0_rgba(255,255,255,0.3)] transition-all duration-300"
+          className="pointer-events-auto flex w-full items-center justify-between rounded-full border border-white/70 py-2 pl-3.5 sm:pl-5 pr-2 text-[#171514] shadow-[0_16px_40px_-10px_rgba(23,21,20,0.12),_0_4px_12px_-2px_rgba(23,21,20,0.04),_inset_0_1px_2px_0_rgba(255,255,255,0.95),_inset_0_-1px_1px_0_rgba(255,255,255,0.3)] transition-all duration-300"
         >
           {/* Left: Brand Monogram + Logo */}
           <div className="flex items-center gap-3">
@@ -82,24 +95,14 @@ function Nav() {
               </span>
             </a>
 
-            {/* Hairline Divider */}
-            <div className="hidden lg:block h-4 w-px bg-[#171514]/15 mx-1" />
-
-            {/* Desktop Navigation Links (like Tourera reference) */}
-            <div className="hidden lg:flex items-center gap-5 text-[13px] font-medium text-[#171514]/75">
-              <a href="#how" className="transition-colors hover:text-[#691C35]">How It Works</a>
-              <a href="#philosophy" className="transition-colors hover:text-[#691C35]">Philosophy</a>
-              <a href="#meets" className="transition-colors hover:text-[#691C35]">Meets</a>
-              <a href="#stories" className="transition-colors hover:text-[#691C35]">Stories</a>
-            </div>
           </div>
 
-          {/* Right: Ambient City Pill + Solid White Pill CTA Button + Menu Toggle */}
+          {/* Right Controls: Ambient City Pill + CTA Button + Dropdown Toggle */}
           <div className="flex items-center gap-2">
             {/* Ambient City Pill */}
             <div className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-white/60 px-3 py-1.5 text-[11px] font-mono tracking-wider text-[#171514]/75 border border-white/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9)]">
               <span className="size-1.5 rounded-full bg-[#5F7045] animate-pulse" />
-              <span>Delhi · Mumbai</span>
+              <span>Delhi NCR</span>
             </div>
 
             {/* Solid Pill CTA Button -> routes to /quiz */}
@@ -110,39 +113,65 @@ function Nav() {
               Save a seat
             </a>
 
-            {/* Mobile / Full Menu Hamburger Button */}
+            {/* Compact Dropdown Menu Toggle Button */}
             <button
               aria-label={open ? "Close menu" : "Open menu"}
               aria-expanded={open}
               onClick={() => setOpen((o) => !o)}
-              className="relative grid size-9 sm:size-10 place-items-center rounded-full bg-[#171514] text-white shadow-sm transition-all duration-300 hover:bg-[#691C35] hover:scale-105 active:scale-95"
+              className="relative grid size-9 sm:size-10 place-items-center rounded-full bg-[#171514] text-white shadow-sm transition-all duration-300 hover:bg-[#691C35] hover:scale-105 active:scale-95 cursor-pointer"
             >
               <span className={`absolute h-px w-3.5 sm:w-4 bg-white transition-transform duration-500 ${open ? "rotate-45" : "-translate-y-1"}`} />
               <span className={`absolute h-px w-3.5 sm:w-4 bg-white transition-transform duration-500 ${open ? "-rotate-45" : "translate-y-1"}`} />
             </button>
           </div>
         </nav>
-      </header>
-      <div
-        onClick={() => setOpen(false)}
-        className={`fixed inset-0 z-40 bg-burgundy text-ivory transition-[clip-path] duration-700 [transition-timing-function:var(--ease-out-expo)] ${open ? "[clip-path:inset(0_0_0_0)]" : "pointer-events-none [clip-path:inset(0_0_100%_0)]"}`}
-      >
-        <ul className="flex h-full flex-col justify-center gap-2 px-[8vw]">
-          {links.map(([label, href], i) => (
-            <li key={href} className="line-mask">
-              <a
-                href={href}
-                onClick={() => setOpen(false)}
-                style={{ transitionDelay: open ? `${150 + i * 70}ms` : "0ms" }}
-                className={`block font-display text-6xl transition-all duration-700 hover:translate-x-4 hover:italic hover:text-ochre md:text-8xl ${open ? "translate-y-0" : "translate-y-full"}`}
-              >
-                {label}
-              </a>
-            </li>
-          ))}
-        </ul>
+
+        {/* COMPACT DROPDOWN POPUP (Replaces full-page takeover) */}
+        {open && (
+          <div className="pointer-events-auto absolute top-full right-0 mt-2.5 w-72 sm:w-80 overflow-hidden rounded-2xl border border-white/80 bg-white/95 p-2.5 text-[#171514] shadow-[0_20px_50px_rgba(0,0,0,0.18)] backdrop-blur-2xl animate-in fade-in slide-in-from-top-3 duration-200">
+            <div className="px-3 py-2 border-b border-[#171514]/10 mb-1 flex items-center justify-between">
+              <span className="label-mono text-[10px] uppercase font-bold text-muted-foreground">
+                Navigation
+              </span>
+              <span className="text-[10px] text-forest font-semibold flex items-center gap-1">
+                <ShieldCheck className="size-3" /> 100% Aadhaar Verified
+              </span>
+            </div>
+
+            <div className="space-y-1">
+              {menuItems.map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-semibold transition-all ${
+                    item.highlight
+                      ? "bg-burgundy text-ivory hover:bg-burgundy/90 shadow-xs"
+                      : "text-foreground hover:bg-sage/40"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </div>
+                  {item.badge && (
+                    <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-forest/15 text-forest">
+                      {item.badge}
+                    </span>
+                  )}
+                  {item.highlight && <ArrowRight className="size-3.5" />}
+                </a>
+              ))}
+            </div>
+
+            <div className="mt-2 border-t border-[#171514]/10 pt-2 px-3 text-[11px] text-muted-foreground flex items-center justify-between">
+              <span>Delhi NCR · Active Circles</span>
+              <span className="font-mono text-[10px] text-forest">Verified Tables</span>
+            </div>
+          </div>
+        )}
       </div>
-    </>
+    </header>
   );
 }
 
@@ -429,94 +458,29 @@ function Statement() {
 
   return (
     <section className="relative flex min-h-screen flex-col items-center justify-center px-[4vw] py-32 text-center overflow-hidden">
-      {/* Subtle ambient editorial watermark doodles in background */}
-      <div className="absolute top-16 left-[6vw] pointer-events-none select-none opacity-20 hidden lg:block">
-        <svg className="w-20 h-20 text-ochre" viewBox="0 0 80 80" fill="none">
-          <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="1" strokeDasharray="3 5" />
-          <path d="M 40 18 L 40 62 M 18 40 L 62 40" stroke="currentColor" strokeWidth="0.8" />
-        </svg>
-      </div>
-      <div className="absolute bottom-20 right-[8vw] pointer-events-none select-none opacity-25 hidden lg:block">
-        <svg className="w-24 h-24 text-burgundy -rotate-12" viewBox="0 0 80 80" fill="none">
-          <path d="M 15 65 Q 40 15 65 65" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-          <circle cx="40" cy="30" r="3" fill="currentColor" />
-        </svg>
-      </div>
-
       <h2 className="font-display text-[9vw] leading-[0.98] md:text-[6vw]">
-        {/* Line 1: Life gets busy. + kinetic sparkle doodle */}
+        {/* Line 1: Life gets busy. (Pure typography, zero doodles) */}
         <span className="line-mask overflow-visible">
           <span data-reveal className="relative inline-block">
             <span>Life gets busy.</span>
-            {/* Doodle: Kinetic editorial 4-point sparkle & swirl above 'busy' */}
-            <span className="absolute -top-5 -right-6 sm:-top-7 sm:-right-9 md:-top-9 md:-right-12 pointer-events-none select-none">
-              <svg className="w-8 h-8 md:w-11 md:h-11 text-ochre -rotate-6" viewBox="0 0 48 48" fill="none">
-                <path
-                  d="M 24 6 C 24 18, 24 18, 36 24 C 24 24, 24 24, 24 36 C 24 24, 24 24, 12 24 C 24 24, 24 18, 24 6 Z"
-                  fill="#C6A568"
-                  opacity="0.9"
-                />
-                <circle cx="37" cy="11" r="2.2" fill="#691C35" />
-                <circle cx="11" cy="35" r="1.6" fill="#C6A568" />
-              </svg>
-            </span>
           </span>
         </span>
 
-        {/* Line 2: Circles get smaller. + nesting concentric loop doodle */}
+        {/* Line 2: Circles get smaller. (Pure typography, zero doodles) */}
         <span className="line-mask overflow-visible">
           <span data-reveal className="relative inline-block">
             <span>Circles get smaller.</span>
-            {/* Doodle: Hand-drawn concentric loops shrinking inward */}
-            <span className="absolute -top-3 -right-10 sm:-right-14 md:-right-18 pointer-events-none select-none hidden sm:inline-block">
-              <svg className="w-10 h-10 md:w-14 md:h-14 overflow-visible" viewBox="0 0 60 60" fill="none">
-                {/* Outer dashed hand-drawn circle */}
-                <path
-                  d="M 30 6 C 45 5, 54 16, 54 30 C 53 44, 43 54, 30 54 C 15 53, 6 43, 6 30 C 7 15, 17 6, 30 6"
-                  stroke="#691C35"
-                  strokeWidth="1.4"
-                  strokeDasharray="3 4"
-                  strokeLinecap="round"
-                  opacity="0.4"
-                />
-                {/* Middle organic loop */}
-                <path
-                  d="M 30 15 C 40 14, 46 22, 45 31 C 44 39, 37 46, 29 45 C 20 44, 15 38, 15 30 C 16 21, 22 15, 30 15"
-                  stroke="#691C35"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  opacity="0.8"
-                />
-                {/* Innermost focused dot */}
-                <circle cx="30" cy="30" r="4.5" fill="#691C35" />
-              </svg>
-            </span>
           </span>
         </span>
 
-        {/* Line 3: There is always room at the table. + minimalist table & candle emblem doodle */}
+        {/* Line 3: There is always room at the table. (Pure typography, zero doodles) */}
         <span className="line-mask overflow-visible">
           <span data-reveal className="relative inline-block">
             <span>There is always room at the table.</span>
-            {/* Subtle hand-drawn table & candlelight doodle floating above 'table' */}
-            <span className="absolute -top-7 md:-top-9 right-4 md:right-8 pointer-events-none select-none hidden md:inline-block">
-              <svg className="w-14 h-8 md:w-16 md:h-9 text-ochre" viewBox="0 0 72 36" fill="none">
-                {/* Table top arc */}
-                <path d="M 14 20 Q 36 17 58 20" stroke="#C6A568" strokeWidth="2.2" strokeLinecap="round" />
-                {/* Table legs */}
-                <path d="M 22 20 L 20 32 M 50 20 L 52 32" stroke="#C6A568" strokeWidth="1.8" strokeLinecap="round" />
-                {/* Candle with flame */}
-                <line x1="36" y1="20" x2="36" y2="10" stroke="#171514" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
-                <path d="M 36 9 C 34 7, 34 5, 36 3 C 38 5, 38 7, 36 9 Z" fill="#691C35" />
-                {/* Pulled up chairs */}
-                <path d="M 6 28 L 6 15 Q 9 13 12 15" stroke="#691C35" strokeWidth="1.5" strokeLinecap="round" opacity="0.75" />
-                <path d="M 66 28 L 66 15 Q 63 13 60 15" stroke="#691C35" strokeWidth="1.5" strokeLinecap="round" opacity="0.75" />
-              </svg>
-            </span>
           </span>
         </span>
 
-        {/* Line 4: Automatically changing line with sliding up animation & dual-stroke doodle underline */}
+        {/* Line 4: Automatically rotating line with smooth typography transition */}
         <span className="line-mask overflow-visible pt-1">
           <span data-reveal className="relative inline-block">
             <span className="relative inline-flex items-center justify-center overflow-hidden h-[1.15em] align-baseline px-2">
@@ -536,52 +500,13 @@ function Statement() {
                 </motion.span>
               </AnimatePresence>
             </span>
-
-            {/* Organic hand-drawn dual-stroke underline doodle */}
-            <svg
-              className="absolute -bottom-2 md:-bottom-3 left-0 w-full h-3 md:h-5 overflow-visible pointer-events-none"
-              viewBox="0 0 320 16"
-              fill="none"
-              preserveAspectRatio="none"
-            >
-              <path
-                d="M 6 10 C 80 4, 180 14, 314 6"
-                stroke="#691C35"
-                strokeWidth="2.6"
-                strokeLinecap="round"
-                opacity="0.8"
-              />
-              <path
-                d="M 32 14 C 115 9, 220 13, 290 9"
-                stroke="#C6A568"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                opacity="0.9"
-              />
-            </svg>
           </span>
         </span>
       </h2>
 
-      {/* CTA Button with handwritten doodle arrow pointing to it */}
+      {/* Clean CTA Button */}
       <div className="relative mt-16 flex flex-col items-center">
-        {/* Playful hand-drawn doodle arrow + annotation */}
-        <div className="absolute -top-11 right-1/2 translate-x-32 sm:translate-x-36 md:translate-x-42 hidden sm:flex items-center gap-1.5 pointer-events-none select-none">
-          <svg className="w-7 h-7 text-ochre -rotate-12 translate-y-2" viewBox="0 0 32 32" fill="none">
-            <path
-              d="M 6 8 C 14 6, 22 12, 18 24 M 14 20 L 18 25 L 23 21"
-              stroke="#C6A568"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <span className="font-serif italic text-xs md:text-sm text-ochre whitespace-nowrap">
-            a seat is waiting
-          </span>
-        </div>
-
-        <CtaButton tone="burgundy" href="#meets">Find your table</CtaButton>
+        <CtaButton tone="burgundy" href="/quiz">Find your table</CtaButton>
       </div>
     </section>
   );
@@ -1149,7 +1074,7 @@ function Footer() {
 
         <div className="mt-12 flex flex-wrap justify-center gap-4">
           <CtaButton tone="burgundy" href="/quiz">Take the Quiz</CtaButton>
-          <CtaButton tone="ivory" href="/quiz">Explore upcoming meets</CtaButton>
+          <CtaButton tone="ivory" href="/philosophy">Our Safety Philosophy</CtaButton>
         </div>
       </div>
     </footer>
@@ -1606,6 +1531,22 @@ function Index() {
         <Meets />
       </main>
       <Footer />
+
+      {/* Persistent On-Page Floating Safety SOS Button */}
+      <div className="fixed bottom-6 right-6 z-40">
+        <SosModal
+          triggerButton={
+            <button
+              type="button"
+              aria-label="24/7 Safety SOS & Host Escort"
+              className="flex items-center gap-2 rounded-full bg-red-700 hover:bg-red-800 text-white px-4 py-3 text-xs font-bold shadow-2xl transition-all hover:scale-105 active:scale-95 cursor-pointer border border-red-500/50"
+            >
+              <ShieldAlert className="size-4 animate-pulse text-white" />
+              <span>24/7 Safety SOS</span>
+            </button>
+          }
+        />
+      </div>
     </div>
   );
 }
