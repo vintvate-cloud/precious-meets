@@ -52,6 +52,29 @@ export interface AdminEvent {
   notes?: string;
 }
 
+export interface UserSeatInvitation {
+  id: string;
+  eventId: string;
+  eventTitle: string;
+  city: string;
+  neighborhood: string;
+  venueName: string;
+  venueAddress: string;
+  dateDisplay: string;
+  coverImage: string;
+  hostName: string;
+  hostRole: string;
+  theme: string;
+  secretAccessCode: string;
+  seatNumber: number; // 1 to 6
+  vibeMatch: number;
+  curatorNote: string;
+  status: "pending" | "accepted" | "declined";
+  declineReason?: string;
+  invitedAt: string;
+  respondedAt?: string;
+}
+
 export interface TableMetrics {
   totalSeats: number;
   seatedCount: number;
@@ -73,6 +96,51 @@ export interface TableMetrics {
 
 const STORAGE_EVENTS_KEY = "precious_meets_admin_events_v2";
 const STORAGE_ATTENDEES_KEY = "precious_meets_admin_attendees_v2";
+const STORAGE_USER_INVITATIONS_KEY = "precious_meets_user_invitations_v1";
+
+export const INITIAL_USER_INVITATIONS: UserSeatInvitation[] = [
+  {
+    id: "inv_supper_mehrauli",
+    eventId: "evt_delhi_supper",
+    eventTitle: "The Long Table Supper",
+    city: "Delhi NCR",
+    neighborhood: "Mehrauli",
+    venueName: "The Banyan Courtyard at Mehrauli",
+    venueAddress: "Kalka Das Marg, Near Qutub Complex, New Delhi 110030",
+    dateDisplay: "This Thursday · 8:00 PM",
+    coverImage: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80",
+    hostName: "Chef Tara Sen & Sommelier Kabir",
+    hostRole: "Culinary Anthropologist & Supper Host",
+    theme: "Four seasonal courses, candlelight & natural wine",
+    secretAccessCode: "COURTYARD-902",
+    seatNumber: 5,
+    vibeMatch: 98,
+    curatorNote: "Your conversational archetype was handpicked by our host curators to balance this table. 4 other verified members have confirmed.",
+    status: "pending",
+    invitedAt: new Date(Date.now() - 4 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: "inv_vinyl_indiranagar",
+    eventId: "evt_bengaluru_vinyl",
+    eventTitle: "Slow Coffee & Vinyl Sunday",
+    city: "Bengaluru",
+    neighborhood: "Indiranagar",
+    venueName: "Cask & Bean Roastery",
+    venueAddress: "12th Main Road, HAL 2nd Stage, Indiranagar, Bengaluru 560038",
+    dateDisplay: "This Sunday · 10:00 AM",
+    coverImage: "https://images.unsplash.com/photo-1442512595331-e89e73853f31?auto=format&fit=crop&w=1200&q=80",
+    hostName: "Nikhil & Sound Curator Dev",
+    hostRole: "Q-Grader & Vinyl Collector",
+    theme: "Unhurried conversations over single-origin pour-overs and rare jazz",
+    secretAccessCode: "VINYL-411",
+    seatNumber: 3,
+    vibeMatch: 95,
+    curatorNote: "An intimate Sunday morning salon for listeners and thinkers.",
+    status: "accepted",
+    invitedAt: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
+    respondedAt: new Date(Date.now() - 18 * 3600 * 1000).toISOString(),
+  },
+];
 
 // Seed Attendees Pool (Rich, verified profiles with varied archetypes)
 export const INITIAL_ATTENDEES: AdminAttendee[] = [
@@ -612,5 +680,89 @@ export class EventsService {
     });
 
     return { success: true, dispatchedCount: sentCount };
+  }
+
+  // 13. Get all user seat invitations (with localStorage persistence)
+  static getUserInvitations(): UserSeatInvitation[] {
+    if (typeof window === "undefined") return INITIAL_USER_INVITATIONS;
+    try {
+      const stored = localStorage.getItem(STORAGE_USER_INVITATIONS_KEY);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+      localStorage.setItem(STORAGE_USER_INVITATIONS_KEY, JSON.stringify(INITIAL_USER_INVITATIONS));
+      return INITIAL_USER_INVITATIONS;
+    } catch (e) {
+      console.error("[EventsService] Failed to load user invitations:", e);
+      return INITIAL_USER_INVITATIONS;
+    }
+  }
+
+  // 14. Save user invitations
+  static saveUserInvitations(invitations: UserSeatInvitation[]): void {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.setItem(STORAGE_USER_INVITATIONS_KEY, JSON.stringify(invitations));
+    } catch (e) {
+      console.error("[EventsService] Failed to save user invitations:", e);
+    }
+  }
+
+  // 15. Respond to a seat invitation (Accept or Decline)
+  static respondToInvitation(
+    invitationId: string,
+    status: "accepted" | "declined",
+    declineReason?: string
+  ): UserSeatInvitation {
+    const invitations = this.getUserInvitations();
+    const index = invitations.findIndex((i) => i.id === invitationId);
+    if (index === -1) throw new Error("Invitation not found");
+
+    const updatedInvitation: UserSeatInvitation = {
+      ...invitations[index],
+      status,
+      declineReason: declineReason || undefined,
+      respondedAt: new Date().toISOString(),
+    };
+
+    invitations[index] = updatedInvitation;
+    this.saveUserInvitations(invitations);
+
+    // If accepted, ensure the event reservation is recorded in member's active RSVPs
+    if (typeof window !== "undefined") {
+      try {
+        const LOCAL_STORAGE_RESERVATIONS_KEY = "precious_meets_member_rsvps";
+        const saved = localStorage.getItem(LOCAL_STORAGE_RESERVATIONS_KEY);
+        const rsvps: string[] = saved ? JSON.parse(saved) : [];
+        if (status === "accepted") {
+          if (!rsvps.includes(updatedInvitation.eventId)) {
+            rsvps.push(updatedInvitation.eventId);
+            localStorage.setItem(LOCAL_STORAGE_RESERVATIONS_KEY, JSON.stringify(rsvps));
+          }
+        } else if (status === "declined") {
+          const filtered = rsvps.filter((id) => id !== updatedInvitation.eventId);
+          localStorage.setItem(LOCAL_STORAGE_RESERVATIONS_KEY, JSON.stringify(filtered));
+        }
+      } catch (err) {
+        console.warn("[EventsService] Could not sync RSVP list:", err);
+      }
+    }
+
+    return updatedInvitation;
+  }
+
+  // 16. Create a new invitation for a user (called by Admin or Curator)
+  static createInvitationForUser(
+    invitationData: Omit<UserSeatInvitation, "id" | "invitedAt">
+  ): UserSeatInvitation {
+    const invitations = this.getUserInvitations();
+    const newInvitation: UserSeatInvitation = {
+      ...invitationData,
+      id: "inv_" + Math.random().toString(36).substring(2, 9),
+      invitedAt: new Date().toISOString(),
+    };
+    const updated = [newInvitation, ...invitations];
+    this.saveUserInvitations(updated);
+    return newInvitation;
   }
 }
