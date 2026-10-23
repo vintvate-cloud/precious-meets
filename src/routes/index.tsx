@@ -45,89 +45,11 @@ const menuItems = [
   { label: "Member Sign In", href: "/login", icon: <User className="size-4 text-foreground/70" /> },
 ];
 
-// Curated gatherings across Delhi NCR heritage enclaves mapped to brand color palette
-// Palette: #5F7045 (Forest Sage), #691C35 (Burgundy), #C6A568 (Warm Ochre), #E8ECD8 (Light Sage), #F8F2E7 (Ivory Cream)
+// Curated gatherings across Delhi NCR heritage enclaves
 const meets = [
-  {
-    name: "The Sunder Nursery Supper",
-    when: "Thursdays · 8 PM",
-    where: "Mehrauli, Delhi NCR",
-    img: tableLaugh,
-    desc: "Six strangers, four courses, one candlelit table in a secluded heritage enclave.",
-    bgColor: "#5F7045",
-    colorName: "Forest Sage",
-    titleClass: "text-[#F8F2E7]",
-    descClass: "text-[#F8F2E7]/85",
-    badgeClass: "bg-[#F8F2E7]/15 text-[#E8ECD8] border border-[#F8F2E7]/20",
-    seatsClass: "text-[#C6A568]",
-    borderClass: "border-[#E8ECD8]/25",
-    dividerClass: "border-[#F8F2E7]/15",
-    btnClass: "bg-[#691C35] text-[#F8F2E7] hover:bg-[#171514] shadow-lg",
-  },
-  {
-    name: "After-Dark Walk & Wine",
-    when: "Saturdays · 7 PM",
-    where: "Hauz Khas Terraces, Delhi NCR",
-    img: tableBurgundy,
-    desc: "A twilight heritage walk, a private sommelier room, and unhurried conversations that linger long past dessert.",
-    bgColor: "#691C35",
-    colorName: "Deep Burgundy",
-    titleClass: "text-[#F8F2E7]",
-    descClass: "text-[#F8F2E7]/85",
-    badgeClass: "bg-[#F8F2E7]/15 text-[#C6A568] border border-[#F8F2E7]/20",
-    seatsClass: "text-[#C6A568]",
-    borderClass: "border-[#C6A568]/30",
-    dividerClass: "border-[#F8F2E7]/15",
-    btnClass: "bg-[#C6A568] text-[#171514] hover:bg-[#F8F2E7] shadow-lg font-semibold",
-  },
-  {
-    name: "Slow Pour Sundays",
-    when: "Sundays · 10 AM",
-    where: "Sunder Nursery Pavilion, Delhi NCR",
-    img: conversation,
-    desc: "Unhurried conversations over single-origin pour-overs and fresh artisanal bakes beneath ancient garden trees.",
-    bgColor: "#C6A568",
-    colorName: "Warm Ochre",
-    titleClass: "text-[#171514]",
-    descClass: "text-[#171514]/85",
-    badgeClass: "bg-[#171514]/10 text-[#171514] border border-[#171514]/15",
-    seatsClass: "text-[#691C35] font-bold",
-    borderClass: "border-[#171514]/15",
-    dividerClass: "border-[#171514]/15",
-    btnClass: "bg-[#691C35] text-[#F8F2E7] hover:bg-[#171514] shadow-lg",
-  },
-  {
-    name: "The Poets & Engineers Salon",
-    when: "Fridays · 7:30 PM",
-    where: "Civil Lines Courtyard, Delhi NCR",
-    img: hands,
-    desc: "A gathering of contrasting curiosities—breaking bread, sharing ideas, and bridging different worlds over artisanal pasta.",
-    bgColor: "#E8ECD8",
-    colorName: "Light Sage",
-    titleClass: "text-[#171514]",
-    descClass: "text-[#171514]/85",
-    badgeClass: "bg-[#5F7045]/15 text-[#5F7045] border border-[#5F7045]/20",
-    seatsClass: "text-[#5F7045] font-bold",
-    borderClass: "border-[#5F7045]/20",
-    dividerClass: "border-[#5F7045]/20",
-    btnClass: "bg-[#5F7045] text-[#F8F2E7] hover:bg-[#171514] shadow-lg",
-  },
-  {
-    name: "Twilight Supper & Vinyl",
-    when: "Wednesdays · 8 PM",
-    where: "Lodhi Verandas, Delhi NCR",
-    img: dusk,
-    desc: "Gentle jazz on analog vinyl, seasonal tasting plates, and six open-hearted guests welcoming the evening.",
-    bgColor: "#F8F2E7",
-    colorName: "Ivory Cream",
-    titleClass: "text-[#171514]",
-    descClass: "text-[#171514]/85",
-    badgeClass: "bg-[#691C35]/10 text-[#691C35] border border-[#691C35]/15",
-    seatsClass: "text-[#691C35] font-bold",
-    borderClass: "border-[#691C35]/20",
-    dividerClass: "border-[#171514]/15",
-    btnClass: "bg-[#691C35] text-[#F8F2E7] hover:bg-[#5F7045] shadow-lg",
-  },
+  { name: "The Sunder Nursery Supper", when: "Thursdays · 8 PM", where: "Mehrauli, Delhi NCR", img: tableLaugh, desc: "Six strangers, four courses, one candlelit table in a secluded heritage enclave." },
+  { name: "Slow Pour Sundays", when: "Sundays · 10 AM", where: "Sunder Nursery Pavilion, Delhi NCR", img: conversation, desc: "Unhurried conversations over single-origin pour-overs beneath the garden trees." },
+  { name: "After-Dark Walk & Wine", when: "Saturdays · 7 PM", where: "Hauz Khas, Delhi NCR", img: dusk, desc: "A twilight heritage walk, a private wine room, a few new friends." },
 ];
 
 // React Bits Pro Concave Carousel 3D Testimonials
@@ -285,8 +207,8 @@ function Nav() {
                   href={item.href}
                   onClick={() => setOpen(false)}
                   className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-semibold transition-all ${item.highlight
-                      ? "bg-burgundy text-ivory hover:bg-burgundy/90 shadow-xs"
-                      : "text-foreground hover:bg-sage/40"
+                    ? "bg-burgundy text-ivory hover:bg-burgundy/90 shadow-xs"
+                    : "text-foreground hover:bg-sage/40"
                     }`}
                 >
                   <div className="flex items-center gap-2.5">
@@ -402,12 +324,9 @@ function Hero() {
   const centerTileSlotRef = useRef<HTMLDivElement>(null);
   const expandFrameRef = useRef<HTMLDivElement>(null);
   const expandImgRef = useRef<HTMLImageElement>(null);
-
   const isScrollingRef = useRef(false);
-  const activeHiddenCardRef = useRef<HTMLElement | null>(null);
-  const startPosRef = useRef<{ top: number; left: number; width: number; height: number } | null>(null);
 
-  // Smooth continuous infinite vertical marquee (cards moving from bottom to top)
+  // Smooth continuous infinite vertical marquee
   useEffect(() => {
     const track = centerTrackRef.current;
     if (!track) return;
@@ -453,7 +372,7 @@ function Hero() {
           }
           track.style.transform = `translate3d(0, -${yPos}px, 0)`;
 
-          // Continuous distance-based scaling: the card in the middle scales smoothly to 1.0
+          // Continuous distance-based scaling: ONLY the card in the middle scales smoothly!
           if (tileStep > 0) {
             const children = track.children;
             for (let i = 0; i < children.length; i++) {
@@ -461,10 +380,10 @@ function Hero() {
               const childCenter = child.offsetTop - yPos + tileHeight / 2;
               const diff = Math.abs(childCenter - slotCenter);
 
-              // Proximity curve: 1.0 when dead center, 0.86 when entering/leaving
+              // Proximity curve: 1 when dead center, 0 when approaching/leaving
               const proximity = Math.max(0, 1 - diff / (tileStep * 0.95));
               const smoothEase = proximity * proximity * (3 - 2 * proximity);
-              const scale = 0.86 + 0.14 * smoothEase;
+              const scale = 0.85 + 0.15 * smoothEase; // 0.85 unexpanded, 1.0 fully focused in slot
 
               child.style.transform = `scale(${scale})`;
             }
@@ -484,7 +403,7 @@ function Hero() {
     };
   }, []);
 
-  // GSAP ScrollTrigger: Locks onto the exact centered card and expands it seamlessly to full screen
+  // GSAP ScrollTrigger: Center tile slot expands to full screen on scroll down
   useEffect(() => {
     const section = sectionRef.current;
     const sticky = stickyRef.current;
@@ -498,9 +417,32 @@ function Hero() {
     }
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const syncBounds = () => {
+      const sRect = slot.getBoundingClientRect();
+      const stickyRect = sticky.getBoundingClientRect();
+      return {
+        top: sRect.top - stickyRect.top,
+        left: sRect.left - stickyRect.left,
+        width: sRect.width,
+        height: sRect.height,
+      };
+    };
+
+    const initial = syncBounds();
+    gsap.set(frame, {
+      top: initial.top,
+      left: initial.left,
+      width: initial.width,
+      height: initial.height,
+      borderRadius: "28px",
+      opacity: 0,
+      pointerEvents: "none",
+    });
+
     if (reduce) return;
 
-    // Helper to find the card in the reel that is physically closest to the vertical center of the slot
+    // Helper to find the card in the reel that is physically closest to the middle
     const getCenteredCard = () => {
       const slotRect = slot.getBoundingClientRect();
       const slotCenterY = slotRect.top + slotRect.height / 2;
@@ -520,121 +462,116 @@ function Hero() {
       return closestChild;
     };
 
-    const trigger = ScrollTrigger.create({
-      trigger: section,
-      start: "top top",
-      end: "bottom bottom",
-      scrub: 0.8,
-      onUpdate: (self) => {
-        if (self.progress > 0) {
-          // On first scroll down: Lock onto the EXACT center card
-          if (!isScrollingRef.current) {
+    const tl = gsap.timeline({
+      paused: true,
+      scrollTrigger: {
+        trigger: section,
+        start: "top top",
+        end: "bottom bottom",
+        scrub: 0.8,
+        onUpdate: (self) => {
+          const scrolling = self.progress > 0.005;
+
+          if (scrolling && !isScrollingRef.current) {
+            // Scroll just started: Freeze the continuous marquee and lock onto the EXACT middle card
             isScrollingRef.current = true;
             const centered = getCenteredCard();
             if (centered) {
-              const cardRect = centered.getBoundingClientRect();
-              const stickyRect = sticky.getBoundingClientRect();
-
-              startPosRef.current = {
-                top: cardRect.top - stickyRect.top,
-                left: cardRect.left - stickyRect.left,
-                width: cardRect.width,
-                height: cardRect.height,
-              };
-
               const img = centered.querySelector("img");
               if (img && expandImgRef.current) {
                 expandImgRef.current.src = img.src;
-                expandImgRef.current.alt = img.alt || "Precious Meets curated table";
+                expandImgRef.current.alt = img.alt || "Curated dinner table";
               }
-
-              // Hide the conveyor card so there is ZERO overlap, zero ghosting, zero cut
-              centered.style.opacity = "0";
-              activeHiddenCardRef.current = centered;
-
-              gsap.set(frame, {
-                top: startPosRef.current.top,
-                left: startPosRef.current.left,
-                width: startPosRef.current.width,
-                height: startPosRef.current.height,
-                borderRadius: "28px",
-                borderWidth: "1px",
-                opacity: 1,
-                display: "block",
-              });
             }
+          } else if (!scrolling && isScrollingRef.current) {
+            // Returned to top: Resume continuous scrolling
+            isScrollingRef.current = false;
           }
 
-          // Mathematical interpolation directly mapped to scroll scrub
-          if (startPosRef.current) {
-            const stickyRect = sticky.getBoundingClientRect();
-            const start = startPosRef.current;
-
-            // Expand progress from 0.0 to 0.80
-            const p = Math.min(1, Math.max(0, self.progress / 0.80));
-            // Power2 in-out ease curve
-            const easeP = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
-
-            const curTop = start.top * (1 - easeP);
-            const curLeft = start.left * (1 - easeP);
-            const curWidth = start.width + (stickyRect.width - start.width) * easeP;
-            const curHeight = start.height + (stickyRect.height - start.height) * easeP;
-            const curRadius = 28 * (1 - easeP);
-            const curBorder = easeP > 0.8 ? "0px" : "1px";
-
-            gsap.set(frame, {
-              top: curTop,
-              left: curLeft,
-              width: curWidth,
-              height: curHeight,
-              borderRadius: `${curRadius}px`,
-              borderWidth: curBorder,
-            });
-
-            // Cinematic subtle zoom on the expanding image
-            if (expandImgRef.current) {
-              const imgScale = 1 + 0.05 * easeP;
-              gsap.set(expandImgRef.current, { scale: imgScale });
-            }
-
-            // Other cards in the conveyor smoothly fade out during first 22% of scroll
-            const reelFade = Math.min(1, self.progress / 0.22);
-            gsap.set("[data-hero-reel-mask]", { opacity: 1 - reelFade });
-
-            // "every" and "matters" glide and fade out
-            const flankP = Math.min(1, self.progress / 0.25);
-            gsap.set("[data-hero-flank-left]", { x: -70 * flankP, opacity: 1 - flankP });
-            gsap.set("[data-hero-flank-right]", { x: 70 * flankP, opacity: 1 - flankP });
-            gsap.set("[data-hero-sketch]", { opacity: 0.3 * (1 - flankP) });
-
-            // Fullscreen luxury text overlay unveils (0.70 to 1.0)
-            const overlayP = Math.max(0, Math.min(1, (self.progress - 0.70) / 0.30));
-            gsap.set("[data-expand-overlay]", {
-              opacity: overlayP,
-              y: 40 * (1 - overlayP),
-              pointerEvents: overlayP > 0.8 ? "auto" : "none",
-            });
+          if (self.progress === 0) {
+            gsap.set(frame, { opacity: 0, pointerEvents: "none" });
+            gsap.set("[data-hero-reel-mask]", { opacity: 1 });
+            isScrollingRef.current = false;
           }
-        } else if (self.progress === 0 && isScrollingRef.current) {
-          // Returned back to top: Seamlessly restore conveyor motion
-          isScrollingRef.current = false;
-          if (activeHiddenCardRef.current) {
-            activeHiddenCardRef.current.style.opacity = "1";
-            activeHiddenCardRef.current = null;
-          }
-          gsap.set(frame, { opacity: 0, display: "none" });
-          gsap.set("[data-hero-reel-mask]", { opacity: 1 });
-          gsap.set("[data-hero-flank-left]", { x: 0, opacity: 1 });
-          gsap.set("[data-hero-flank-right]", { x: 0, opacity: 1 });
-          gsap.set("[data-hero-sketch]", { opacity: 0.3 });
-          gsap.set("[data-expand-overlay]", { opacity: 0, y: 40, pointerEvents: "none" });
-          startPosRef.current = null;
-        }
+        },
       },
     });
 
+    // Phase 1 (0.0 -> 0.20): Left & right words fade/glide out, background sketch fades out,
+    // and expand frame seamlessly takes over the middle card with identical position
+    tl.to("[data-hero-flank-left]", {
+      x: -60,
+      opacity: 0,
+      duration: 0.2,
+      ease: "power2.in",
+    }, 0.02)
+      .to("[data-hero-flank-right]", {
+        x: 60,
+        opacity: 0,
+        duration: 0.2,
+        ease: "power2.in",
+      }, 0.02)
+      .to("[data-hero-sketch]", {
+        opacity: 0,
+        scale: 1.04,
+        duration: 0.25,
+        ease: "power2.inOut",
+      }, 0)
+      .to("[data-hero-reel-mask]", {
+        opacity: 0,
+        duration: 0.08,
+        ease: "power1.out",
+      }, 0)
+      .fromTo(frame, { opacity: 0 }, { opacity: 1, duration: 0.08, ease: "power1.out" }, 0)
+      // Step 1: Ensure frame is positioned at slot bounds at 0.20 progress
+      .to(frame, {
+        top: initial.top,
+        left: initial.left,
+        width: initial.width,
+        height: initial.height,
+        duration: 0.2,
+        ease: "power2.out",
+      }, 0)
+      // Step 2: ONLY the middle image expands to full screen from 0.20 to 0.82
+      .to(frame, {
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        borderRadius: "0px",
+        ease: "power2.inOut",
+        duration: 0.62,
+      }, 0.2)
+      .fromTo("[data-expand-img]", { scale: 1.12 }, { scale: 1, ease: "power2.inOut", duration: 0.62 }, 0.2)
+      // Phase 3 (0.75 -> 1.0): Fullscreen luxury text overlay
+      .fromTo(
+        "[data-expand-overlay]",
+        { opacity: 0, y: 50 },
+        { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" },
+        0.75,
+      );
+
+    const onResize = () => {
+      ScrollTrigger.refresh();
+      if (ScrollTrigger.isInViewport(section)) {
+        const b = syncBounds();
+        if (tl.progress() === 0) {
+          gsap.set(frame, {
+            top: b.top,
+            left: b.left,
+            width: b.width,
+            height: b.height,
+          });
+        }
+      }
+    };
+
+    window.addEventListener("resize", onResize);
+    document.fonts?.ready?.then(onResize);
+
     return () => {
-      trigger.kill();
+      tl.kill();
+      window.removeEventListener("resize", onResize);
     };
   }, []);
 
@@ -679,7 +616,7 @@ function Hero() {
               className="absolute z-10 w-[84%] sm:w-[86%] md:w-[92%] aspect-[4/5] max-h-[460px] md:max-h-[520px] rounded-3xl pointer-events-none opacity-0"
             />
 
-            {/* Continuous Vertical Conveyor */}
+            {/* Continuous Vertical Conveyor - Clean, crisp, NO upper or below shadow */}
             <div
               data-hero-reel-mask
               className="relative h-full w-full flex items-center justify-center overflow-hidden"
@@ -720,19 +657,19 @@ function Hero() {
 
         </div>
 
-        {/* The Expanding Center Image Tile: Seamlessly takes over the center card and expands to fullscreen */}
+        {/* The Expanding Center Image Tile: Perfectly locked onto the active center image and expanding fullscreen on scroll */}
         <div
           ref={expandFrameRef}
           data-hero="center-tile"
-          className="absolute z-30 overflow-hidden border border-ink/15 shadow-2xl opacity-0 pointer-events-none"
-          style={{ borderRadius: "28px", display: "none" }}
+          className="absolute z-30 overflow-hidden border border-ink/15 shadow-none opacity-0 pointer-events-none"
+          style={{ borderRadius: "28px" }}
         >
           <img
             ref={expandImgRef}
             data-expand-img
             src={heroSlides[0].src}
             alt="Precious Meets curated table"
-            className="absolute inset-0 size-full object-cover select-none"
+            className="absolute inset-0 size-full object-cover"
           />
 
           {/* Fullscreen expanded overlay unveiled on scroll */}
@@ -855,11 +792,10 @@ function Statement() {
               return (
                 <span
                   key={lIdx}
-                  className={`block w-full ${
-                    line.isBurgundyItalic
+                  className={`block w-full ${line.isBurgundyItalic
                       ? "italic font-serif text-burgundy pt-1 sm:pt-2"
                       : "text-ink"
-                  }`}
+                    }`}
                 >
                   {words.map((word, wIdx) => (
                     <span
@@ -907,8 +843,10 @@ function Geometry() {
                 className="w-full h-full overflow-visible"
                 aria-hidden
               >
-                {/* Concentric Table Orbit Ring */}
+                {/* Outer Concentric Architectural Guide Rings */}
                 <g data-rings>
+                  <circle cx="300" cy="300" r="275" fill="none" stroke="#E6DBCC" strokeWidth="1" />
+                  <circle cx="300" cy="300" r="236" fill="none" stroke="#E1D4C3" strokeWidth="0.8" strokeDasharray="3 4" />
                   <circle cx="300" cy="300" r="182" fill="none" stroke="#D7C8B4" strokeWidth="1" />
                 </g>
 
@@ -1540,13 +1478,13 @@ function How() {
 
   return (
     <section id="how" data-how-section className="relative text-ivory">
-      {/* Pinned Viewport Container with safe navbar top clearance */}
+      {/* Pinned Viewport Container */}
       <div
         data-how-container
-        className="min-h-screen w-full flex items-center justify-center px-[4vw] pt-28 pb-16 overflow-hidden relative"
+        className="min-h-screen w-full flex items-center justify-center px-[4vw] py-20 lg:py-0 overflow-hidden relative"
       >
-        <div className="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-          {/* Left Column: Big typography, elegant subtitle */}
+        <div className="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+          {/* Left Column: Big typography, elegant subtitle & dynamic step progress indicator */}
           <div className="lg:col-span-5 flex flex-col justify-center select-none lg:pr-6">
             <div className="inline-flex items-center gap-2 mb-4">
               <span className="w-2.5 h-2.5 rounded-full bg-ochre animate-pulse" />
@@ -1572,65 +1510,109 @@ function How() {
               Making new connections <em className="text-ochre not-italic font-medium">should feel natural</em>. No
               endless swiping or awkward networking. Just thoughtful dinners where real stories unfold.
             </p>
+
+            {/* Dynamic Step Progress Tracker */}
+            <div className="mt-10 pt-8 border-t border-ivory/15 max-w-md hidden sm:block">
+              {/* Progress Bar Rail */}
+              <div className="relative w-full h-[3px] bg-ivory/15 rounded-full overflow-hidden mb-6">
+                <div
+                  data-how-progress-bar
+                  className="absolute left-0 top-0 h-full w-[33%] bg-ochre shadow-[0_0_12px_rgba(217,119,6,0.6)] rounded-full transition-all duration-300"
+                />
+              </div>
+
+              {/* Step Status Badges */}
+              <div className="grid grid-cols-3 gap-2">
+                {steps.map((s, idx) => (
+                  <div
+                    key={s.num}
+                    data-how-nav-step={idx}
+                    className={`transition-all duration-500 cursor-pointer ${idx === 0 ? "opacity-100" : "opacity-40"
+                      }`}
+                  >
+                    <span className="label-mono text-[11px] block text-ochre font-medium tracking-wider">
+                      {s.num}
+                    </span>
+                    <span className="text-xs text-ivory/90 truncate block font-sans font-medium tracking-tight mt-0.5">
+                      {s.tag}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
-          {/* Right Column: Stage for Stacked Cards (Moved slightly down, clear of navbar) */}
-          <div className="lg:col-span-7 relative w-full flex items-center justify-center pt-2 sm:pt-4">
+          {/* Right Column: Stage for Big Cards */}
+          <div className="lg:col-span-7 relative w-full lg:h-[580px] min-h-[500px] flex items-center justify-center">
             {/* Ambient Background Glow behind active card */}
             <div className="pointer-events-none absolute -inset-10 bg-radial from-ochre/15 via-transparent to-transparent blur-3xl opacity-60" />
 
-            {/* Cards Deck - Vertical Stack */}
-            <div className="relative w-full max-w-[620px] mx-auto flex flex-col gap-3.5 sm:gap-4">
+            {/* Cards Deck */}
+            <div className="relative w-full lg:h-full max-w-[620px] mx-auto flex flex-col lg:block items-center justify-center space-y-6 lg:space-y-0">
               {steps.map((s, i) => (
                 <div
-                  key={s.title}
+                  key={s.num}
                   data-how-card={i}
-                  className="group relative w-full rounded-2xl border border-ivory/25 bg-[#2F3D1F]/95 px-5 py-4 sm:px-6 sm:py-4.5 backdrop-blur-2xl shadow-[0_16px_40px_-10px_rgba(0,0,0,0.5)] flex flex-col justify-between overflow-hidden transition-all duration-300 hover:border-ochre/50 hover:shadow-[0_20px_50px_-10px_rgba(217,119,6,0.25)]"
+                  className={`group relative lg:absolute lg:inset-0 w-full rounded-[2.5rem] border border-ivory/20 bg-[#3E4D2B]/85 p-8 sm:p-12 backdrop-blur-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] flex flex-col justify-between overflow-hidden transition-shadow hover:shadow-[0_30px_70px_-15px_rgba(217,119,6,0.25)] ${i === 0 ? "z-10" : i === 1 ? "z-20" : "z-30"
+                    }`}
                   style={{
                     willChange: "transform, opacity",
                   }}
                 >
+                  {/* Subtle Corner Watermark Number */}
+                  <span className="pointer-events-none absolute -bottom-6 -right-4 font-display text-[150px] sm:text-[200px] leading-none text-ivory/[0.04] font-normal select-none">
+                    {s.num}
+                  </span>
+
                   {/* Soft Corner Glow */}
-                  <div className="pointer-events-none absolute -top-12 -right-12 w-36 h-36 rounded-full bg-ochre/15 blur-xl" />
+                  <div className="pointer-events-none absolute -top-20 -right-20 w-64 h-64 rounded-full bg-ochre/10 blur-3xl" />
 
-                  {/* Top: Tag + Badge */}
-                  <div className="flex items-center justify-between gap-4">
-                    <p
-                      data-how-card-tag
-                      className="label-mono text-ochre text-[11px] uppercase tracking-widest font-semibold"
-                    >
-                      {s.tag}
-                    </p>
-                    <span
-                      data-how-card-badge
-                      className="label-mono text-[10px] px-3 py-0.5 rounded-full bg-ivory/15 text-ivory border border-ivory/30 uppercase tracking-widest backdrop-blur-md font-medium"
-                    >
-                      {s.badge}
-                    </span>
+                  {/* Top: Large Numeral + Badge */}
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <div className="overflow-hidden">
+                        <span data-how-card-num className="font-display text-5xl sm:text-6xl text-ochre block font-normal">
+                          {s.num}
+                        </span>
+                      </div>
+                      <span
+                        data-how-card-badge
+                        className="label-mono text-xs px-4 py-1.5 rounded-full bg-ivory/10 text-ivory/90 border border-ivory/20 uppercase tracking-widest backdrop-blur-md font-medium"
+                      >
+                        {s.badge}
+                      </span>
+                    </div>
+
+                    {/* Middle: Tag, Title, Desc */}
+                    <div className="mt-8 space-y-3">
+                      <p
+                        data-how-card-tag
+                        className="label-mono text-ochre text-xs uppercase tracking-widest font-medium"
+                      >
+                        {s.tag}
+                      </p>
+                      <h3
+                        data-how-card-title
+                        className="font-display text-3xl sm:text-4xl lg:text-[2.75rem] leading-[1.05] text-ivory font-normal"
+                      >
+                        {s.title}
+                      </h3>
+                      <p
+                        data-how-card-desc
+                        className="mt-4 text-base sm:text-lg leading-relaxed text-ivory/80 font-normal"
+                      >
+                        {s.desc}
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Middle: Title & Desc */}
-                  <div className="mt-2.5 space-y-1">
-                    <h3
-                      data-how-card-title
-                      className="font-display text-xl sm:text-2xl text-ivory font-medium leading-snug"
-                    >
-                      {s.title}
-                    </h3>
-                    <p
-                      data-how-card-desc
-                      className="text-xs sm:text-[13px] leading-relaxed text-ivory/90 font-normal line-clamp-2"
-                    >
-                      {s.desc}
-                    </p>
-                  </div>
-
-                  {/* Bottom: Interactive arrow */}
+                  {/* Bottom: Step progress & interactive arrow */}
                   <div
                     data-how-card-footer
-                    className="pt-2 border-t border-ivory/20 mt-2.5 flex items-center justify-end"
+                    className="pt-6 border-t border-ivory/15 mt-8 flex items-center justify-between text-xs label-mono text-ochre"
                   >
-                    <div className="w-6 h-6 rounded-full border border-ochre/50 flex items-center justify-center text-ochre text-xs transition-all duration-300 group-hover:bg-ochre group-hover:text-[#2F3D1F] group-hover:translate-x-0.5 shadow-xs">
+                    <span className="tracking-wider font-medium">Step {i + 1} of 3</span>
+                    <div className="w-10 h-10 rounded-full border border-ochre/40 flex items-center justify-center text-ochre text-base transition-all duration-300 group-hover:bg-ochre group-hover:text-[#3E4D2B] group-hover:translate-x-1 group-hover:border-ochre shadow-sm">
                       →
                     </div>
                   </div>
@@ -1657,20 +1639,16 @@ function Meets() {
       </div>
 
       {/* Stacking Cards Container */}
-      <div className="relative mx-auto max-w-5xl flex flex-col gap-12 pb-24">
+      <div className="relative mx-auto max-w-5xl flex flex-col gap-12 pb-16">
         {meets.map((m, i) => (
           <div
             key={m.name}
             data-stack-card
-            className={`sticky rounded-[2.5rem] shadow-2xl p-6 sm:p-10 md:p-12 overflow-hidden transition-all duration-300 border ${m.borderClass}`}
-            style={{
-              backgroundColor: m.bgColor,
-              top: `calc(6.5rem + ${i * 20}px)`,
-              zIndex: i + 1,
-            }}
+            className="sticky top-28 md:top-36 rounded-[2.5rem] border border-ivory/25 bg-[#4B5935] shadow-2xl p-6 sm:p-10 md:p-12 overflow-hidden transition-all"
+            style={{ zIndex: i + 1 }}
           >
             <div className="grid items-center gap-8 md:grid-cols-2">
-              <div className="overflow-hidden rounded-2xl aspect-[4/3] bg-ink/10 relative shadow-inner">
+              <div className="overflow-hidden rounded-2xl aspect-[4/3] bg-ink/20">
                 <img
                   src={m.img}
                   alt={m.name}
@@ -1680,29 +1658,21 @@ function Meets() {
               </div>
               <div className="flex flex-col justify-between h-full">
                 <div>
-                  <div className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 label-mono text-xs ${m.badgeClass}`}>
+                  <div className="inline-flex items-center gap-2 rounded-full bg-ivory/15 px-4 py-1.5 label-mono text-xs text-ochre">
                     <span>{m.when}</span>
                     <span>•</span>
                     <span>{m.where}</span>
                   </div>
-                  <h3 className={`font-display text-4xl sm:text-5xl md:text-6xl mt-4 leading-tight ${m.titleClass}`}>
+                  <h3 className="font-display text-4xl sm:text-5xl md:text-6xl mt-4 text-ivory">
                     {m.name}
                   </h3>
-                  <p className={`mt-4 text-base leading-relaxed ${m.descClass}`}>
+                  <p className="mt-4 text-base leading-relaxed text-ivory/80">
                     {m.desc}
                   </p>
                 </div>
-                <div className={`mt-8 pt-6 border-t flex items-center justify-between ${m.dividerClass}`}>
-                  <a
-                    href="/quiz"
-                    className={`inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-xs font-mono uppercase tracking-widest transition-all duration-300 hover:scale-105 ${m.btnClass}`}
-                  >
-                    <span>Request your seat</span>
-                    <ArrowRight className="size-3.5" />
-                  </a>
-                  <span className={`label-mono text-xs font-semibold ${m.seatsClass}`}>
-                    6 seats only
-                  </span>
+                <div className="mt-8 pt-6 border-t border-ivory/15 flex items-center justify-between">
+                  <CtaButton tone="burgundy" href="/quiz">Request your seat</CtaButton>
+                  <span className="label-mono text-xs text-ochre font-semibold">6 seats only</span>
                 </div>
               </div>
             </div>
@@ -2078,61 +2048,136 @@ function Index() {
           },
         });
 
-        // Desktop (>= 1024px): Pinned scrub animation revealing cards vertically (Card 0 top, Card 1 below, Card 2 bottom)
+        // Desktop (>= 1024px): Pinned scrub animation with right-to-left card slide-in
         mm.add("(min-width: 1024px)", () => {
           const card0 = document.querySelector<HTMLElement>("[data-how-card='0']");
           const card1 = document.querySelector<HTMLElement>("[data-how-card='1']");
           const card2 = document.querySelector<HTMLElement>("[data-how-card='2']");
+          const progressBar = document.querySelector<HTMLElement>("[data-how-progress-bar]");
+          const navStep0 = document.querySelector<HTMLElement>("[data-how-nav-step='0']");
+          const navStep1 = document.querySelector<HTMLElement>("[data-how-nav-step='1']");
+          const navStep2 = document.querySelector<HTMLElement>("[data-how-nav-step='2']");
 
           if (!card0 || !card1 || !card2) return;
 
-          // Clear any leftover filters/brightness and ensure all cards stay 100% visible and bright
-          gsap.set([card0, card1, card2], {
-            clearProps: "filter,backdropFilter",
-            filter: "none",
-          });
+          // Initial positions
+          gsap.set(card0, { xPercent: 0, opacity: 1, scale: 1, rotate: 0, filter: "brightness(1) blur(0px)" });
+          gsap.set(card1, { xPercent: 125, opacity: 0, scale: 0.94, rotate: 3, filter: "brightness(0.7)" });
+          gsap.set(card2, { xPercent: 250, opacity: 0, scale: 0.88, rotate: 6, filter: "brightness(0.5)" });
 
-          // Card 0 starts visible at the top; Card 1 & Card 2 start hidden below
-          gsap.set(card0, { opacity: 1, y: 0, scale: 1 });
-          gsap.set(card1, { opacity: 0, y: 40, scale: 1 });
-          gsap.set(card2, { opacity: 0, y: 40, scale: 1 });
+          if (progressBar) gsap.set(progressBar, { width: "33%" });
 
           const howTl = gsap.timeline({
             scrollTrigger: {
               trigger: "[data-how-section]",
               start: "top top",
-              end: "+=1200",
+              end: "+=2600",
               pin: true,
-              scrub: 0.5,
+              scrub: 1.2,
+              anticipatePin: 1,
             },
           });
 
-          // 1st scroll step: Card 1 begins gliding in immediately with smooth scroll feedback
-          howTl.to(
-            card1,
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.85,
-              ease: "power2.out",
-            },
-            0.08,
-          );
+          // Card 1 text elements
+          const card1Num = card1.querySelector("[data-how-card-num]");
+          const card1Badge = card1.querySelector("[data-how-card-badge]");
+          const card1Tag = card1.querySelector("[data-how-card-tag]");
+          const card1Title = card1.querySelector("[data-how-card-title]");
+          const card1Desc = card1.querySelector("[data-how-card-desc]");
 
-          // 2nd scroll step: Card 2 glides in seamlessly directly below Card 1
-          howTl.to(
-            card2,
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.85,
-              ease: "power2.out",
-            },
-            0.95,
-          );
+          // Card 2 text elements
+          const card2Num = card2.querySelector("[data-how-card-num]");
+          const card2Badge = card2.querySelector("[data-how-card-badge]");
+          const card2Tag = card2.querySelector("[data-how-card-tag]");
+          const card2Title = card2.querySelector("[data-how-card-title]");
+          const card2Desc = card2.querySelector("[data-how-card-desc]");
 
-          // 3rd scroll step: Brief comfortable buffer with all 3 cards visible before smooth unpin
-          howTl.to({}, { duration: 0.45 }, 1.8);
+          // Transition 1: Card 0 recedes, Card 1 slides in from right
+          howTl
+            .to(
+              card0,
+              {
+                xPercent: -18,
+                scale: 0.92,
+                opacity: 0.25,
+                filter: "brightness(0.35) blur(3px)",
+                duration: 1.0,
+                ease: "power2.inOut",
+              },
+              0.2,
+            )
+            .to(
+              card1,
+              {
+                xPercent: 0,
+                opacity: 1,
+                scale: 1,
+                rotate: 0,
+                filter: "brightness(1) blur(0px)",
+                duration: 1.0,
+                ease: "power3.out",
+              },
+              0.2,
+            )
+            .from(card1Num, { y: 35, opacity: 0, duration: 0.6, ease: "power2.out" }, 0.5)
+            .from(card1Badge, { x: 25, opacity: 0, duration: 0.5, ease: "power2.out" }, 0.5)
+            .from(card1Tag, { y: 20, opacity: 0, duration: 0.5, ease: "power2.out" }, 0.6)
+            .from(card1Title, { y: 25, opacity: 0, duration: 0.6, ease: "power2.out" }, 0.65)
+            .from(card1Desc, { y: 20, opacity: 0, duration: 0.6, ease: "power2.out" }, 0.7);
+
+          if (progressBar) {
+            howTl.to(progressBar, { width: "66%", duration: 0.8, ease: "power1.inOut" }, 0.3);
+          }
+          if (navStep0 && navStep1) {
+            howTl
+              .to(navStep0, { opacity: 0.35, duration: 0.5 }, 0.3)
+              .to(navStep1, { opacity: 1, duration: 0.5 }, 0.4);
+          }
+
+          // Transition 2: Card 1 recedes, Card 2 slides in from right
+          howTl
+            .to(
+              card1,
+              {
+                xPercent: -18,
+                scale: 0.92,
+                opacity: 0.25,
+                filter: "brightness(0.35) blur(3px)",
+                duration: 1.0,
+                ease: "power2.inOut",
+              },
+              1.6,
+            )
+            .to(
+              card2,
+              {
+                xPercent: 0,
+                opacity: 1,
+                scale: 1,
+                rotate: 0,
+                filter: "brightness(1) blur(0px)",
+                duration: 1.0,
+                ease: "power3.out",
+              },
+              1.6,
+            )
+            .from(card2Num, { y: 35, opacity: 0, duration: 0.6, ease: "power2.out" }, 1.9)
+            .from(card2Badge, { x: 25, opacity: 0, duration: 0.5, ease: "power2.out" }, 1.9)
+            .from(card2Tag, { y: 20, opacity: 0, duration: 0.5, ease: "power2.out" }, 2.0)
+            .from(card2Title, { y: 25, opacity: 0, duration: 0.6, ease: "power2.out" }, 2.05)
+            .from(card2Desc, { y: 20, opacity: 0, duration: 0.6, ease: "power2.out" }, 2.1);
+
+          if (progressBar) {
+            howTl.to(progressBar, { width: "100%", duration: 0.8, ease: "power1.inOut" }, 1.7);
+          }
+          if (navStep1 && navStep2) {
+            howTl
+              .to(navStep1, { opacity: 0.35, duration: 0.5 }, 1.7)
+              .to(navStep2, { opacity: 1, duration: 0.5 }, 1.8);
+          }
+
+          // Buffer at end
+          howTl.to({}, { duration: 0.6 }, 2.6);
         });
 
         // Mobile / Tablet (< 1024px): Smooth entrance on scroll
@@ -2140,10 +2185,10 @@ function Index() {
           const cards = gsap.utils.toArray<HTMLElement>("[data-how-card]");
           cards.forEach((card) => {
             gsap.from(card, {
-              y: 35,
+              x: 60,
               opacity: 0,
-              duration: 0.8,
-              ease: "power2.out",
+              duration: 1.0,
+              ease: "power3.out",
               scrollTrigger: {
                 trigger: card,
                 start: "top 85%",
