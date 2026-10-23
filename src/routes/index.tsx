@@ -15,6 +15,7 @@ import dusk from "@/assets/dusk.jpg";
 import tableStill from "@/assets/table-still.jpg";
 import tableBurgundy from "@/assets/table-burgundy.jpg";
 import footerBg from "@/assets/footer-bg.jpg";
+import { ConcaveCarousel } from "@/components/ConcaveCarousel";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -48,6 +49,66 @@ const meets = [
   { name: "The Sunder Nursery Supper", when: "Thursdays · 8 PM", where: "Mehrauli, Delhi NCR", img: tableLaugh, desc: "Six strangers, four courses, one candlelit table in a secluded heritage enclave." },
   { name: "Slow Coffee Sundays", when: "Sundays · 10 AM", where: "Indiranagar, Bengaluru", img: conversation, desc: "Unhurried conversations over a single pour." },
   { name: "After-Dark Walk & Wine", when: "Saturdays · 7 PM", where: "Hauz Khas, Delhi NCR", img: dusk, desc: "A twilight heritage walk, a private wine room, a few new friends." },
+];
+
+// React Bits Pro Concave Carousel 3D Testimonials
+const testimonials = [
+  {
+    quote: "I went alone not knowing a soul, and left with three people I now meet every Sunday morning for coffee. Precious Meets is pure warmth.",
+    author: "Aarav Mehta",
+    role: "Architect",
+    city: "Bengaluru",
+    rating: 5,
+  },
+  {
+    quote: "No forced icebreakers or networking pitches. Just six thoughtful strangers, candlelit sourdough, and conversations that lingered past midnight.",
+    author: "Meera Sengupta",
+    role: "Author & Journalist",
+    city: "Delhi NCR",
+    rating: 5,
+  },
+  {
+    quote: "In a city of millions where everyone is busy and guarded, this was the first evening in years that felt slow, honest, and truly nourishing.",
+    author: "Rohan Varma",
+    role: "Product Designer",
+    city: "Mumbai",
+    rating: 5,
+  },
+  {
+    quote: "The chemistry at our table was surreal. It felt like an intimate dinner party hosted by old friends who somehow found each other across the city.",
+    author: "Ananya Joshi",
+    role: "Art Curator",
+    city: "Delhi NCR",
+    rating: 5,
+  },
+  {
+    quote: "Safe, Aadhaar-vetted, and exquisitely hosted. Every seat at that table was held with genuine intention and care. I cannot recommend it enough.",
+    author: "Tara D'Souza",
+    role: "Creative Director",
+    city: "Mumbai",
+    rating: 5,
+  },
+  {
+    quote: "It completely redefined weekends for me. You arrive as hesitant strangers and leave having laughed so hard your ribs ache. Unforgettable.",
+    author: "Kabir Nambiar",
+    role: "Filmmaker",
+    city: "Bengaluru",
+    rating: 5,
+  },
+  {
+    quote: "The screening and table curation is quietly genius. Everyone had distinct stories, yet our values and curiosities harmonized effortlessly.",
+    author: "Dr. Rhea Sen",
+    role: "Neuroscientist",
+    city: "Delhi NCR",
+    rating: 5,
+  },
+  {
+    quote: "One shared meal, six entirely different lives, zero digital distractions. I haven’t felt this present in a dinner conversation since college.",
+    author: "Devika Rao",
+    role: "Botanist",
+    city: "Bengaluru",
+    rating: 5,
+  },
 ];
 
 function Nav() {
@@ -523,7 +584,7 @@ const tableSeats = [
 
 function Geometry() {
   return (
-    <section data-geo className="relative h-[340vh] bg-ivory">
+    <section data-geo className="relative h-[340vh]">
       <div className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden px-[4vw]">
         <div className="grid h-full w-full max-w-6xl grid-cols-1 items-center gap-8 lg:grid-cols-2">
           {/* Left Column: Architectural Dinner Table Diagram based on reference image */}
@@ -967,7 +1028,7 @@ function How() {
 function Meets() {
   return (
     <section id="meets" className="relative px-[4vw] py-32 text-ivory">
-      <div className="max-w-5xl mx-auto mb-16 text-center md:text-left">
+      <div className="max-w-5xl mx-auto mb-12 text-center md:text-left">
         <p className="label-mono mb-4 text-ochre font-semibold uppercase tracking-widest">
           Upcoming Curated Gatherings
         </p>
@@ -1016,6 +1077,49 @@ function Meets() {
             </div>
           </div>
         ))}
+      </div>
+    </section>
+  );
+}
+
+function CuratedGallerySection() {
+  return (
+    <section className="relative w-full pt-14 pb-8 bg-black text-white overflow-hidden">
+      {/* Testimonial Section Header */}
+      <div className="max-w-4xl mx-auto text-center mb-6 px-4">
+        <p className="label-mono mb-2 text-ochre font-semibold uppercase tracking-widest text-xs">
+          Voices from the Table
+        </p>
+        <h2 className="font-display text-4xl sm:text-5xl md:text-6xl text-ivory leading-tight">
+          What happens when <em className="text-ochre">strangers break bread.</em>
+        </h2>
+      </div>
+
+      <div className="w-full">
+        <ConcaveCarousel
+          items={testimonials}
+          aspect={1.38}
+          size={0.50}
+          curvature={0.72}
+          distance={4}
+          tilt={0}
+          gap={20}
+          radius={16}
+          reflection={0}
+          dim={0.35}
+          autoplay="drift"
+          speed={0.15}
+          interval={4}
+          snap={false}
+          inertia={0.5}
+          pauseOnHover={false}
+          draggable={true}
+          wheel={false}
+          captions={false}
+          controls={false}
+          backgroundColor="transparent"
+          className="w-full"
+        />
       </div>
     </section>
   );
@@ -1266,19 +1370,25 @@ function Index() {
 
       // Day-to-Night Ambient Transition (Collage / "Different lives. One shared table")
       // Transitions into #5F7045 (Forest Green) at "Different lives. One shared table" (#stories)
-      gsap.timeline({
-        scrollTrigger: {
-          trigger: "#stories",
-          start: "top 80%",
-          end: "top 25%",
-          scrub: 1,
+      gsap.fromTo(
+        root.current,
+        {
+          backgroundColor: "#F8F2E7",
+          color: "#171514",
         },
-      })
-        .to(root.current, {
+        {
           backgroundColor: "#5F7045", // Pure Brand Forest Green
           color: "#F8F2E7", // Luminous Ivory
           ease: "none",
-        });
+          scrollTrigger: {
+            trigger: "#stories",
+            start: "top 85%",
+            end: "top 20%",
+            scrub: 0.6,
+            invalidateOnRefresh: true,
+          },
+        }
+      );
 
       // How It Works — Interactive Sliding Cards & Pinned Experience
       const howSection = document.querySelector<HTMLElement>("[data-how-section]");
@@ -1519,7 +1629,7 @@ function Index() {
   }, []);
 
   return (
-    <div ref={root} className="transition-colors duration-700">
+    <div ref={root} className="min-h-screen">
       <Preloader onComplete={handlePreloaderComplete} />
       <Nav />
       <main>
@@ -1529,6 +1639,7 @@ function Index() {
         <Collage />
         <How />
         <Meets />
+        <CuratedGallerySection />
       </main>
       <Footer />
 
