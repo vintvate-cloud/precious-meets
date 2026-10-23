@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AdminEvent, AdminAttendee, EventsService } from "@/lib/events-service";
 import { AttendeePickerModal } from "@/components/admin/AttendeePickerModal";
+import { EventQrScannerModal } from "@/components/admin/EventQrScannerModal";
 import {
   Users,
   ShieldCheck,
@@ -16,6 +17,8 @@ import {
   KeyRound,
   UserPlus,
   RefreshCw,
+  ScanLine,
+  QrCode,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -23,6 +26,7 @@ interface InteractiveTableProps {
   event: AdminEvent;
   attendees: AdminAttendee[];
   onEventUpdated: (updated: AdminEvent) => void;
+  onOpenScanner?: () => void;
 }
 
 // 6 Seat positions in the circular layout (angles around 200, 200 in a 400x400 SVG)
@@ -48,11 +52,15 @@ export function InteractiveTable({
   event,
   attendees,
   onEventUpdated,
+  onOpenScanner,
 }: InteractiveTableProps) {
   const [activeSeatIndex, setActiveSeatIndex] = useState<number | null>(null);
   const [sendingEmails, setSendingEmails] = useState(false);
+  const [scannerOpen, setScannerOpen] = useState(false);
 
   const metrics = EventsService.calculateTableMetrics(event, attendees);
+  const checkIns = event.checkIns || {};
+  const admittedCount = Object.keys(checkIns).length;
 
   const handleSeatSelect = (attendeeId: string) => {
     if (activeSeatIndex === null) return;
@@ -127,13 +135,31 @@ export function InteractiveTable({
           <p className="text-xs text-muted-foreground mt-0.5">{event.theme}</p>
         </div>
 
-        {/* Email Dispatch Control */}
-        <div className="flex items-center gap-3">
+        {/* Quick Action Buttons: Scan Entry QR & Email Dispatch */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => {
+              if (onOpenScanner) {
+                onOpenScanner();
+              } else {
+                setScannerOpen(true);
+              }
+            }}
+            className="group flex items-center gap-2 rounded-full bg-forest px-4 sm:px-5 py-2.5 text-xs font-semibold text-ivory shadow-md transition-all duration-300 hover:bg-forest/90 hover:scale-105 hover:shadow-lg active:scale-95 cursor-pointer"
+          >
+            <ScanLine className="size-4 text-ivory transition-transform duration-300 group-hover:scale-110" />
+            <span>Scan Entry QR</span>
+            <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-mono font-bold">
+              {admittedCount}/{metrics.seatedCount}
+            </span>
+          </button>
+
           <button
             type="button"
             disabled={sendingEmails || metrics.seatedCount === 0}
             onClick={handleSendEmails}
-            className="group flex items-center gap-2 rounded-full bg-burgundy px-5 py-2.5 text-xs font-semibold text-ivory shadow-md transition-all duration-300 hover:bg-burgundy/90 hover:scale-105 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+            className="group flex items-center gap-2 rounded-full bg-burgundy px-4 sm:px-5 py-2.5 text-xs font-semibold text-ivory shadow-md transition-all duration-300 hover:bg-burgundy/90 hover:scale-105 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
           >
             {sendingEmails ? (
               <RefreshCw className="size-4 animate-spin text-ivory" />
@@ -306,47 +332,69 @@ export function InteractiveTable({
               >
                 {attendee ? (
                   // OCCUPIED SEAT CARD
-                  <div
-                    onClick={() => setActiveSeatIndex(seat.id)}
-                    className="group relative flex flex-col items-center cursor-pointer transition-all duration-300 hover:-translate-y-1"
-                  >
-                    <div className="relative">
-                      <img
-                        src={attendee.avatar}
-                        alt={attendee.name}
-                        className={`size-12 sm:size-14 rounded-full object-cover border-2 shadow-md transition-all duration-300 group-hover:scale-110 group-hover:shadow-[0_0_18px_rgba(105,28,53,0.35)] ${
-                          attendee.gender === "female"
-                            ? "border-forest ring-2 ring-forest/30"
-                            : "border-burgundy ring-2 ring-burgundy/30"
-                        }`}
-                      />
-                      <span className="absolute -bottom-1 -right-1 flex size-5 items-center justify-center rounded-full bg-forest text-ivory text-[10px] font-bold shadow-xs transition-transform duration-200 group-hover:scale-110">
-                        {seat.id + 1}
-                      </span>
-                    </div>
+                  (() => {
+                    const isCheckedIn = Boolean(checkIns[attendee.id]);
+                    return (
+                      <div
+                        onClick={() => setActiveSeatIndex(seat.id)}
+                        className="group relative flex flex-col items-center cursor-pointer transition-all duration-300 hover:-translate-y-1"
+                      >
+                        <div className="relative">
+                          <img
+                            src={attendee.avatar}
+                            alt={attendee.name}
+                            className={`size-12 sm:size-14 rounded-full object-cover border-2 shadow-md transition-all duration-300 group-hover:scale-110 group-hover:shadow-[0_0_18px_rgba(105,28,53,0.35)] ${
+                              isCheckedIn
+                                ? "border-forest ring-2 ring-forest/60"
+                                : attendee.gender === "female"
+                                ? "border-forest ring-2 ring-forest/30"
+                                : "border-burgundy ring-2 ring-burgundy/30"
+                            }`}
+                          />
+                          <span className="absolute -bottom-1 -right-1 flex size-5 items-center justify-center rounded-full bg-forest text-ivory text-[10px] font-bold shadow-xs transition-transform duration-200 group-hover:scale-110">
+                            {seat.id + 1}
+                          </span>
 
-                    <div className="mt-1.5 flex flex-col items-center text-center">
-                      <span className="text-xs font-bold text-foreground max-w-[85px] sm:max-w-[100px] truncate group-hover:text-burgundy transition-colors">
-                        {attendee.name.split(" ")[0]}
-                      </span>
-                      <span className="text-[10px] text-forest font-medium bg-forest/10 px-1.5 py-0.2 rounded-full mt-0.5">
-                        {attendee.archetype.title.replace("The ", "")}
-                      </span>
-                    </div>
+                          {isCheckedIn && (
+                            <span
+                              title={`Admitted at ${new Date(checkIns[attendee.id]?.checkedInAt || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
+                              className="absolute -top-1 -left-1 flex size-5 items-center justify-center rounded-full bg-forest text-ivory shadow-sm ring-2 ring-background animate-in zoom-in"
+                            >
+                              <CheckCircle2 className="size-3.5" />
+                            </span>
+                          )}
+                        </div>
 
-                    {/* Quick Unseat button on hover with microinteraction */}
-                    <button
-                      type="button"
-                      title="Unseat attendee"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleUnseat(seat.id);
-                      }}
-                      className="absolute -top-2 -right-2 hidden size-5 items-center justify-center rounded-full bg-destructive text-white text-[10px] font-bold group-hover:flex shadow-md transition-all duration-200 hover:scale-125 hover:rotate-90 active:scale-90"
-                    >
-                      &times;
-                    </button>
-                  </div>
+                        <div className="mt-1.5 flex flex-col items-center text-center">
+                          <span className="text-xs font-bold text-foreground max-w-[85px] sm:max-w-[100px] truncate group-hover:text-burgundy transition-colors">
+                            {attendee.name.split(" ")[0]}
+                          </span>
+                          {isCheckedIn ? (
+                            <span className="text-[9px] text-forest font-bold bg-forest/20 px-1.5 py-0.2 rounded-full mt-0.5 flex items-center gap-0.5 shadow-xs">
+                              <CheckCircle2 className="size-2.5" /> Admitted
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-forest font-medium bg-forest/10 px-1.5 py-0.2 rounded-full mt-0.5">
+                              {attendee.archetype.title.replace("The ", "")}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Quick Unseat button on hover with microinteraction */}
+                        <button
+                          type="button"
+                          title="Unseat attendee"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleUnseat(seat.id);
+                          }}
+                          className="absolute -top-2 -right-2 hidden size-5 items-center justify-center rounded-full bg-destructive text-white text-[10px] font-bold group-hover:flex shadow-md transition-all duration-200 hover:scale-125 hover:rotate-90 active:scale-90"
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    );
+                  })()
                 ) : (
                   // EMPTY SEAT BUTTON
                   <button
@@ -406,11 +454,22 @@ export function InteractiveTable({
           open={activeSeatIndex !== null}
           onClose={() => setActiveSeatIndex(null)}
           seatIndex={activeSeatIndex}
-          currentAttendeeId={event.seats[activeSeatIndex]}
+          currentAttendeeId={event.seats[activeSeatIndex] ?? null}
           onSelectAttendee={handleSeatSelect}
           onUnseatAttendee={() => handleUnseat(activeSeatIndex)}
           alreadySeatedIds={event.seats}
           attendees={attendees}
+        />
+      )}
+
+      {/* Event Gate QR Scanner Modal */}
+      {scannerOpen && (
+        <EventQrScannerModal
+          open={scannerOpen}
+          onOpenChange={setScannerOpen}
+          event={event}
+          attendees={attendees}
+          onEventUpdated={onEventUpdated}
         />
       )}
     </div>

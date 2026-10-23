@@ -10,6 +10,7 @@ import {
 } from "@/lib/events-service";
 import { InteractiveTable } from "@/components/admin/InteractiveTable";
 import { EventFormModal } from "@/components/admin/EventFormModal";
+import { EventQrScannerModal } from "@/components/admin/EventQrScannerModal";
 import {
   ShieldAlert,
   ShieldCheck,
@@ -30,6 +31,8 @@ import {
   Archive,
   ArrowRight,
   Eye,
+  ScanLine,
+  QrCode,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -61,6 +64,16 @@ function AdminConsolePage() {
   const [eventModalOpen, setEventModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<AdminEvent | null>(null);
 
+  // Scanner Modal State
+  const [scannerModalOpen, setScannerModalOpen] = useState(false);
+  const [scanningEvent, setScanningEvent] = useState<AdminEvent | null>(null);
+
+  const handleOpenScanner = (evt: AdminEvent) => {
+    setScanningEvent(evt);
+    setSelectedEventId(evt.id);
+    setScannerModalOpen(true);
+  };
+
   // Load events and attendees from service
   useEffect(() => {
     const loadedEvents = EventsService.getEvents();
@@ -71,7 +84,9 @@ function AdminConsolePage() {
     if (loadedEvents.length > 0 && !selectedEventId) {
       // Default select the first upcoming event
       const firstUpcoming = loadedEvents.find((e) => e.status !== "completed") || loadedEvents[0];
-      setSelectedEventId(firstUpcoming.id);
+      if (firstUpcoming) {
+        setSelectedEventId(firstUpcoming.id);
+      }
     }
   }, []);
 
@@ -124,6 +139,9 @@ function AdminConsolePage() {
 
   const handleEventUpdated = (updated: AdminEvent) => {
     setEvents(EventsService.getEvents());
+    if (scanningEvent && scanningEvent.id === updated.id) {
+      setScanningEvent(updated);
+    }
   };
 
   // Sample operational SOS & verification data
@@ -362,6 +380,25 @@ function AdminConsolePage() {
                           </div>
 
                           <div className="flex items-center gap-1">
+                            {/* Scan Entry QR Button */}
+                            <button
+                              type="button"
+                              title="Scan Guest QR for Entry"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenScanner(evt);
+                              }}
+                              className="flex items-center gap-1 rounded-full bg-forest/15 px-2.5 py-1 text-[10px] font-semibold text-forest hover:bg-forest hover:text-ivory transition-all duration-200 hover:scale-105 active:scale-90 cursor-pointer shadow-2xs"
+                            >
+                              <ScanLine className="size-3" />
+                              <span>Scan</span>
+                              {evt.checkIns && Object.keys(evt.checkIns).length > 0 && (
+                                <span className="ml-0.5 rounded-full bg-forest text-ivory text-[9px] font-mono px-1">
+                                  {Object.keys(evt.checkIns).length}
+                                </span>
+                              )}
+                            </button>
+
                             <button
                               type="button"
                               title="Edit Details"
@@ -413,6 +450,7 @@ function AdminConsolePage() {
                     event={selectedEvent}
                     attendees={attendees}
                     onEventUpdated={handleEventUpdated}
+                    onOpenScanner={() => handleOpenScanner(selectedEvent)}
                   />
                 ) : (
                   <div className="rounded-3xl border border-dashed border-border p-16 text-center text-muted-foreground">
@@ -659,6 +697,20 @@ function AdminConsolePage() {
         initialEvent={editingEvent}
         onSave={handleSaveEvent}
       />
+
+      {/* Event QR Gate Scanner Modal */}
+      {scannerModalOpen && scanningEvent && (
+        <EventQrScannerModal
+          open={scannerModalOpen}
+          onOpenChange={(open) => {
+            setScannerModalOpen(open);
+            if (!open) setScanningEvent(null);
+          }}
+          event={scanningEvent}
+          attendees={attendees}
+          onEventUpdated={handleEventUpdated}
+        />
+      )}
 
       <Footer />
     </div>

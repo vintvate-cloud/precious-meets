@@ -50,6 +50,15 @@ export interface AdminEvent {
   seats: (string | null)[]; // 6 slots: index 0 to 5 containing Attendee IDs
   emailsSentAt?: string | null;
   notes?: string;
+  checkIns?: Record<string, EventCheckIn>; // Keyed by attendeeId
+}
+
+export interface EventCheckIn {
+  attendeeId: string;
+  attendeeName: string;
+  memberId: string;
+  seatNumber: number; // 1 to 6
+  checkedInAt: string; // ISO string
 }
 
 export interface UserSeatInvitation {
@@ -764,5 +773,238 @@ export class EventsService {
     const updated = [newInvitation, ...invitations];
     this.saveUserInvitations(updated);
     return newInvitation;
+  }
+
+  // 17. Check In an Attendee for an Event
+  static checkInAttendee(
+    eventId: string,
+    attendeeId: string,
+    seatNumber?: number
+  ): AdminEvent {
+    const event = this.getEventById(eventId);
+    if (!event) throw new Error("Event not found");
+
+    const attendees = this.getAttendees();
+    const attendee = attendees.find((a) => a.id === attendeeId);
+    if (!attendee) throw new Error("Attendee not found in roster");
+
+    // Determine seat number if not provided
+    const seatIdx = event.seats.findIndex((id) => id === attendeeId);
+    const resolvedSeatNumber = seatNumber ?? (seatIdx !== -1 ? seatIdx + 1 : 1);
+
+    const existingCheckIns = event.checkIns || {};
+    const newCheckIn: EventCheckIn = {
+      attendeeId,
+      attendeeName: attendee.name,
+      memberId: attendee.memberId,
+      seatNumber: resolvedSeatNumber,
+      checkedInAt: new Date().toISOString(),
+    };
+
+    const updated = this.updateEvent(eventId, {
+      checkIns: {
+        ...existingCheckIns,
+        [attendeeId]: newCheckIn,
+      },
+    });
+
+    return updated;
+  }
+
+  // 18. Undo/Reset Check In for an Attendee
+  static undoCheckIn(eventId: string, attendeeId: string): AdminEvent {
+    const event = this.getEventById(eventId);
+    if (!event) throw new Error("Event not found");
+
+    const existingCheckIns = { ...(event.checkIns || {}) };
+    delete existingCheckIns[attendeeId];
+
+    return this.updateEvent(eventId, {
+      checkIns: existingCheckIns,
+    });
+  }
+
+  // 19. Parse raw QR data payload
+  static parseQrPayload(raw: string): {
+    memberId?: string | undefined;
+    attendeeId?: string | undefined;
+    name?: string | undefined;
+    email?: string | undefined;
+    raw: string;
+  } {
+    const trimmed = raw.trim();
+    let memberId: string | undefined;
+    let attendeeId: string | undefined;
+    let name: string | undefined;
+    let email: string | undefined;
+
+    // Check if it's a URL
+    try {
+      if (trimmed.includes("://") || trimmed.startsWith("/")) {
+        const url = new URL(trimmed, "https://preciousmeets.com");
+        memberId = url.searchParams.get("memberId") || undefined;
+        name = url.searchParams.get("user") || undefined;
+        email = url.searchParams.get("email") || undefined;
+        attendeeId = url.searchParams.get("attendeeId") || undefined;
+      }
+    } catch {
+      // Not a valid URL
+    }
+
+    // Check if it's JSON
+    if (!memberId && trimmed.startsWith("{") && trimmed.endsWith("}")) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        memberId = parsed.memberId || parsed.member_id;
+        attendeeId = parsed.attendeeId || parsed.attendee_id;
+        name = parsed.name || parsed.displayName;
+        email = parsed.email;
+      } catch {
+        // Not valid JSON
+      }
+    }
+
+    // If still not extracted, check standard Precious Meets patterns
+    if (!memberId) {
+      // Look for PM-FOUNDER-xxxx, PM-ANNUAL-xxxx, PM-MEMBER-xxxx
+      const pmMatch = trimmed.match(/PM-[A-Z]+-\d+/i);
+      if (pmMatch) {
+        memberId = pmMatch[0].toUpperCase();
+      }
+    }
+
+    if (!attendeeId) {
+      // Look for att_xx
+      const attMatch = trimmed.match(/att_\w+/i);
+      if (attMatch) {
+        attendeeId = attMatch[0];
+      }
+    }
+
+    return { memberId, attendeeId, name, email, raw: trimmed };
+  }
+
+  // 20. Verify Scanned QR Payload against specific event's 6-seat table
+  static verifyScanPayload(
+    eventId: string,
+    qrPayload: string
+  ): {
+    success: boolean;
+    reason: "admitted" | "already_checked_in" | "not_in_table" | "unrecognized";
+    message: string;
+    attendee?: AdminAttendee | undefined;
+    seatNumber?: number | undefined;
+    alreadyCheckedIn?: boolean | undefined;
+    checkedInAt?: string | undefined;
+    assignedOtherEvent?: AdminEvent | undefined;
+  } {
+    const event = this.getEventById(eventId);
+    if (!event) {
+      return {
+        success: false,
+        reason: "unrecognized",
+        message: "Event not found in system.",
+      };
+    }
+
+    const attendees = this.getAttendees();
+    const parsed = this.parseQrPayload(qrPayload);
+
+    // Find matching attendee in the master roster
+    let matchedAttendee: AdminAttendee | undefined;
+
+    if (parsed.memberId) {
+      matchedAttendee = attendees.find(
+        (a) => a.memberId.toUpperCase() === parsed.memberId!.toUpperCase()
+      );
+    }
+
+    if (!matchedAttendee && parsed.attendeeId) {
+      matchedAttendee = attendees.find((a) => a.id === parsed.attendeeId);
+    }
+
+    if (!matchedAttendee && parsed.email) {
+      matchedAttendee = attendees.find(
+        (a) => a.email.toLowerCase() === parsed.email!.toLowerCase()
+      );
+    }
+
+    if (!matchedAttendee && parsed.name) {
+      matchedAttendee = attendees.find(
+        (a) => a.name.toLowerCase() === parsed.name!.toLowerCase()
+      );
+    }
+
+    // Direct string match against attendees list
+    if (!matchedAttendee) {
+      const lowerRaw = parsed.raw.toLowerCase();
+      matchedAttendee = attendees.find(
+        (a) =>
+          lowerRaw.includes(a.memberId.toLowerCase()) ||
+          lowerRaw.includes(a.id.toLowerCase()) ||
+          lowerRaw.includes(a.email.toLowerCase()) ||
+          lowerRaw.includes(a.name.toLowerCase())
+      );
+    }
+
+    // 1. If not a recognized Precious Meets member pass
+    if (!matchedAttendee) {
+      return {
+        success: false,
+        reason: "unrecognized",
+        message: "Unrecognized QR Pass. No matching registered Precious Meets member found in the database.",
+      };
+    }
+
+    // 2. CHECK IF THIS ATTENDEE IS IN THE 6-SEATER TABLE OF THIS EVENT
+    const seatIndex = event.seats.findIndex((id) => id === matchedAttendee!.id);
+
+    // CRITICAL: If they aren't in the table, the QR won't scan / entry refused!
+    if (seatIndex === -1) {
+      // Find if they are seated in any other event
+      const allEvents = this.getEvents();
+      const otherEvent = allEvents.find(
+        (e) => e.id !== eventId && e.seats.includes(matchedAttendee!.id)
+      );
+
+      return {
+        success: false,
+        reason: "not_in_table",
+        message: `Entry Refused: ${matchedAttendee.name} (${matchedAttendee.memberId}) is NOT assigned to this table.`,
+        attendee: matchedAttendee,
+        assignedOtherEvent: otherEvent,
+      };
+    }
+
+    // 3. Attendee IS in the table!
+    const seatNumber = seatIndex + 1;
+    const existingCheckIn = event.checkIns?.[matchedAttendee.id];
+
+    if (existingCheckIn) {
+      return {
+        success: true,
+        reason: "already_checked_in",
+        alreadyCheckedIn: true,
+        message: `${matchedAttendee.name} was already checked in for Seat #${seatNumber} at ${new Date(
+          existingCheckIn.checkedInAt
+        ).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}. Entry re-verified.`,
+        attendee: matchedAttendee,
+        seatNumber,
+        checkedInAt: existingCheckIn.checkedInAt,
+      };
+    }
+
+    // 4. Record new check-in!
+    this.checkInAttendee(eventId, matchedAttendee.id, seatNumber);
+
+    return {
+      success: true,
+      reason: "admitted",
+      alreadyCheckedIn: false,
+      message: `Entry Granted! Welcome ${matchedAttendee.name}. Guided to Seat #${seatNumber}.`,
+      attendee: matchedAttendee,
+      seatNumber,
+      checkedInAt: new Date().toISOString(),
+    };
   }
 }
