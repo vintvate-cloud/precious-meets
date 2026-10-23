@@ -11,6 +11,7 @@ import {
 import { InteractiveTable } from "@/components/admin/InteractiveTable";
 import { EventFormModal } from "@/components/admin/EventFormModal";
 import { EventQrScannerModal } from "@/components/admin/EventQrScannerModal";
+import { UsersArchiveSection } from "@/components/admin/UsersArchiveSection";
 import {
   ShieldAlert,
   ShieldCheck,
@@ -51,8 +52,8 @@ export const Route = createFileRoute("/admin/")({
 });
 
 function AdminConsolePage() {
-  const { user, profile, isAdmin } = useAuth();
-  const [activeTab, setActiveTab] = useState<"events" | "overview" | "incidents" | "verifications">("events");
+  const { user, profile, isAdmin, loading } = useAuth();
+  const [activeTab, setActiveTab] = useState<"users" | "events" | "overview" | "incidents" | "verifications">("users");
 
   // Events & Seating State
   const [events, setEvents] = useState<AdminEvent[]>([]);
@@ -203,6 +204,58 @@ function AdminConsolePage() {
     toast.success(`Verification status updated to ${status}.`);
   };
 
+  if (loading) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-ivory text-foreground">
+        <div className="size-8 animate-spin rounded-full border-2 border-burgundy border-t-transparent" />
+        <p className="font-display mt-4 text-xl">Verifying executive clearance...</p>
+      </div>
+    );
+  }
+
+  if (!user || !isAdmin) {
+    return (
+      <div className="flex min-h-screen flex-col bg-ivory text-foreground">
+        <Navbar />
+        <main className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center px-6 py-28 text-center">
+          <div className="rounded-3xl border border-burgundy/20 bg-card p-8 shadow-sm">
+            <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-burgundy/10 text-burgundy ring-8 ring-burgundy/5">
+              <ShieldAlert className="size-7" />
+            </div>
+            <span className="label-mono mt-4 block text-xs text-burgundy">Security Protocol</span>
+            <h1 className="font-display mt-2 text-2xl md:text-3xl">Executive Clearance Required</h1>
+            <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+              This operational console is strictly restricted to verified Precious Meets administrators.
+              Access is exclusively granted to <span className="font-mono text-foreground font-semibold">admin@preciousmeets.com</span>.
+            </p>
+            {user && (
+              <p className="mt-2 rounded-lg bg-burgundy/5 p-2 text-[11px] text-muted-foreground">
+                Currently authenticated as <strong className="text-foreground">{user.email}</strong> (Non-admin account).
+              </p>
+            )}
+            <div className="mt-6 flex flex-col gap-2">
+              <Link
+                to="/login"
+                search={{ redirect: "/admin" } as any}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-burgundy py-3 text-xs font-semibold uppercase tracking-wider text-ivory hover:bg-burgundy/90 transition-transform active:scale-98"
+              >
+                Sign in with Admin Credentials
+                <ArrowRight className="size-3.5" />
+              </Link>
+              <Link
+                to="/"
+                className="inline-flex w-full items-center justify-center rounded-full border border-border bg-card py-2.5 text-xs font-semibold text-muted-foreground hover:bg-sage/40 hover:text-foreground"
+              >
+                Return to Experiences
+              </Link>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-ivory text-foreground">
       <Navbar />
@@ -225,6 +278,7 @@ function AdminConsolePage() {
           {/* Master Tabs - Simplified */}
           <div className="flex flex-wrap items-center gap-2">
             {[
+              { id: "users", label: "Users & Dossiers" },
               { id: "events", label: "Meets & Seating" },
               { id: "overview", label: "Metrics" },
               { id: "incidents", label: "SOS Alerts" },
@@ -244,6 +298,13 @@ function AdminConsolePage() {
             ))}
           </div>
         </div>
+
+        {/* 0. USERS & CONFIDENTIAL DOSSIERS ARCHIVE TAB */}
+        {activeTab === "users" && (
+          <div className="mt-6">
+            <UsersArchiveSection />
+          </div>
+        )}
 
         {/* 1. EVENTS & INTERACTIVE TABLE SEATING TAB */}
         {activeTab === "events" && (

@@ -10,7 +10,9 @@ export interface EmailPayload {
     | "identity_verified"
     | "booking_confirmed"
     | "booking_cancelled"
-    | "sos_incident_alert";
+    | "sos_incident_alert"
+    | "application_approved"
+    | "application_rejected";
   data: Record<string, any>;
 }
 
@@ -146,6 +148,95 @@ export class EmailService {
             <li><strong>Booking:</strong> ${data.bookingReference || "Direct Alert"}</li>
             <li><strong>Location Shared:</strong> ${data.locationShared ? `Lat: ${data.latitude}, Lng: ${data.longitude}` : "No coordinates attached"}</li>
           </ul>
+        `;
+        break;
+
+      case "application_approved":
+        bodyContent = `
+          <div style="background: #fbf8f3; border: 1px solid #c6a568; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
+            <div style="display: inline-block; background: #5f7045; color: #f8f2e7; font-family: monospace; font-size: 10px; padding: 4px 10px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">
+              ✓ Application Officially Approved
+            </div>
+            <h2 style="font-family: Georgia, serif; color: #171514; font-size: 24px; margin: 0 0 8px 0;">Welcome to Precious Meets, ${data.name || "Member"}.</h2>
+            <p style="color: #4a453f; line-height: 1.6; margin: 0 0 16px 0;">
+              Your membership application, conversational vibe profile, and identity verification have been formally reviewed and approved by the curation committee.
+            </p>
+            
+            <div style="background: #ffffff; border: 1px solid #e0d7c7; border-radius: 6px; padding: 18px; margin: 18px 0;">
+              <table style="width: 100%; font-size: 13px; color: #4a453f; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 6px 0; color: #6b6357;">Dossier Pass ID:</td>
+                  <td style="padding: 6px 0; text-align: right; font-family: monospace; font-weight: bold; color: #691c35;">${data.memberId || data.reference || "PM-MEMBER-01"}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #6b6357;">Vibe Archetype:</td>
+                  <td style="padding: 6px 0; text-align: right; font-weight: bold; color: #5f7045;">${data.archetype || "Curious Flâneur"}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #6b6357;">Aadhaar Verification:</td>
+                  <td style="padding: 6px 0; text-align: right; font-weight: bold; color: #5f7045;">✓ 100% Verified Offline</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #6b6357;">Membership Tier:</td>
+                  <td style="padding: 6px 0; text-align: right; font-weight: bold; color: #171514;">${data.plan || "Annual Founding Member"}</td>
+                </tr>
+              </table>
+            </div>
+
+            ${
+              data.reviewNotes
+                ? `<div style="background: #e8ecd8; border-left: 3px solid #5f7045; padding: 12px 16px; margin: 16px 0; border-radius: 4px; font-size: 12px; color: #3b4528;">
+                    <strong>Note from Curation Committee:</strong><br />${data.reviewNotes}
+                  </div>`
+                : ""
+            }
+
+            <p style="color: #4a453f; font-size: 13px; line-height: 1.6;">
+              Your member status is active immediately. You may now book exclusive 6-seat tables, discover secret dinners, and view matched seating.
+            </p>
+
+            <div style="margin: 24px 0 8px 0; text-align: center;">
+              <a href="${data.dashboardUrl || "http://localhost:5173/dashboard"}" style="background-color: #691c35; color: #f8f2e7; padding: 14px 32px; border-radius: 9999px; text-decoration: none; font-size: 13px; font-weight: bold; display: inline-block;">
+                Explore Curated Tables &rarr;
+              </a>
+            </div>
+          </div>
+        `;
+        break;
+
+      case "application_rejected":
+        bodyContent = `
+          <div style="background: #fffaf1; border: 1px solid #e0d7c7; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
+            <div style="display: inline-block; background: #691c35; color: #f8f2e7; font-family: monospace; font-size: 10px; padding: 4px 10px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">
+              Membership Application Update
+            </div>
+            <h2 style="font-family: Georgia, serif; color: #171514; font-size: 22px; margin: 0 0 10px 0;">Dear ${data.name || "Applicant"},</h2>
+            <p style="color: #4a453f; line-height: 1.6; margin: 0 0 14px 0;">
+              Thank you for taking the time to share your conversational rhythm and applying to join Precious Meets.
+            </p>
+            <p style="color: #4a453f; line-height: 1.6; margin: 0 0 16px 0;">
+              To protect the intimacy and intentional chemistry of our 6-seat supper salons, every cohort is curated with stringent capacity constraints. At this time, our committee is unable to accept your membership application for the current season.
+            </p>
+
+            ${
+              data.rejectionReason
+                ? `<div style="background: #fbf2f4; border-left: 3px solid #691c35; padding: 12px 16px; margin: 16px 0; border-radius: 4px; font-size: 13px; color: #52182b;">
+                    <strong>Curator Feedback:</strong><br />${data.rejectionReason}
+                  </div>`
+                : ""
+            }
+
+            <p style="color: #4a453f; font-size: 13px; line-height: 1.6;">
+              ${
+                data.refundNote ||
+                "If your payment was processed, a full 100% refund has been initiated back to your original payment method via Razorpay within 3–5 business days."
+              }
+            </p>
+
+            <p style="color: #6b6357; font-size: 12px; line-height: 1.6; margin-top: 20px;">
+              You are welcome to re-apply for upcoming seasonal salons after 90 days. We wish you wonderful conversations ahead.
+            </p>
+          </div>
         `;
         break;
 

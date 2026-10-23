@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { EmailService } from "@/lib/email-service";
+import { ApplicationsService } from "@/lib/applications-service";
 import { openRazorpaySubscriptionCheckout } from "@/lib/razorpay-client";
 import {
   Sparkles,
@@ -149,7 +150,25 @@ export function QuizResultsPage() {
             memberId: result.memberId,
           });
 
-          // 2. Dispatch automated subscription confirmation email
+          // 2. Record full member application dossier for executive review
+          ApplicationsService.createOrUpdateFromCheckout({
+            userId: user?.id,
+            name: name.trim(),
+            email: email.trim(),
+            phone: phone.trim(),
+            archetypeTitle: profile?.archetype.title || "The Curious Flâneur",
+            archetypeDescription: profile?.archetype.description,
+            scores: profile?.dimensions,
+            dietary: profile?.dimensions?.dietary,
+            allergies: profile?.dimensions?.allergies,
+            boundaries: profile?.dimensions?.boundaries,
+            sharedInterests: profile?.dimensions?.sharedInterests,
+            paymentId: result.paymentId,
+            amountInr: 1999,
+            memberId: result.memberId,
+          });
+
+          // 3. Dispatch automated subscription confirmation email
           await EmailService.send({
             to: email.trim(),
             subject: "Welcome to Precious Meets — Your Membership is Active ✨",

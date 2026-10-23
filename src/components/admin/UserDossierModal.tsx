@@ -1,0 +1,787 @@
+import React, { useState } from "react";
+import {
+  MemberApplication,
+  ApplicationsService,
+} from "@/lib/applications-service";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  ShieldCheck,
+  CheckCircle2,
+  XCircle,
+  CreditCard,
+  FileText,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  Sparkles,
+  AlertTriangle,
+  Loader2,
+  Lock,
+  ArrowRight,
+  ExternalLink,
+  Send,
+  UserCheck,
+  UserX,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+
+interface UserDossierModalProps {
+  application: MemberApplication | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onApplicationUpdated: (updated: MemberApplication) => void;
+}
+
+export function UserDossierModal({
+  application,
+  open,
+  onOpenChange,
+  onApplicationUpdated,
+}: UserDossierModalProps) {
+  if (!application) return null;
+
+  const [activeSheet, setActiveSheet] = useState<
+    "quiz" | "payment" | "identity" | "decision"
+  >("quiz");
+  const [processing, setProcessing] = useState(false);
+  const [reviewerNotes, setReviewerNotes] = useState("");
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+
+  const handleApprove = async () => {
+    setProcessing(true);
+    try {
+      const res = await ApplicationsService.approveApplication(
+        application.id,
+        reviewerNotes || "Approved for curated tables by curation committee.",
+      );
+      toast.success(
+        `Application ${application.applicationReference} approved!`,
+        {
+          description: `Welcome pass email dispatched to ${application.applicantEmail}.`,
+        },
+      );
+      onApplicationUpdated(res.application);
+      onOpenChange(false);
+    } catch (e: any) {
+      toast.error(e.message || "Failed to approve application.");
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleReject = async () => {
+    setProcessing(true);
+    try {
+      const res = await ApplicationsService.rejectApplication(
+        application.id,
+        rejectionReason ||
+          "Due to cohort balance and seat capacity restrictions, we cannot accept this application for the current season.",
+      );
+      toast.info(
+        `Application ${application.applicationReference} declined.`,
+        {
+          description: `Notice email sent to ${application.applicantEmail}.`,
+        },
+      );
+      onApplicationUpdated(res.application);
+      setRejectModalOpen(false);
+      onOpenChange(false);
+    } catch (e: any) {
+      toast.error(e.message || "Failed to reject application.");
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const isPending = application.status === "pending_review";
+  const isApproved = application.status === "approved";
+  const isRejected = application.status === "rejected";
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl p-0 overflow-hidden bg-ivory text-foreground border border-border shadow-2xl rounded-3xl max-h-[92vh] flex flex-col">
+        {/* ========================================================================= */}
+        {/* DOSSIER FOLDER HEADER (Physical Archive Aesthetic)                        */}
+        {/* ========================================================================= */}
+        <div className="relative border-b border-border/80 bg-card p-6 pb-4">
+          {/* Top Folder Tab */}
+          <div className="flex items-center justify-between pb-3">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[10px] uppercase tracking-wider rounded-t-lg bg-burgundy/10 text-burgundy border border-b-0 border-burgundy/20 px-3 py-1 font-semibold">
+                CONFIDENTIAL DOSSIER · {application.applicationReference}
+              </span>
+              <span className="text-[11px] text-muted-foreground font-mono">
+                Received: {new Date(application.createdAt).toLocaleDateString()}
+              </span>
+            </div>
+
+            {/* Status Stamp */}
+            <div>
+              {isApproved && (
+                <span className="inline-flex items-center gap-1 rounded-full border border-forest/30 bg-forest/15 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-forest">
+                  <CheckCircle2 className="size-3.5" />
+                  VERIFIED MEMBER
+                </span>
+              )}
+              {isPending && (
+                <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/15 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-amber-700 animate-pulse">
+                  <AlertTriangle className="size-3.5" />
+                  AWAITING REVIEW
+                </span>
+              )}
+              {isRejected && (
+                <span className="inline-flex items-center gap-1 rounded-full border border-destructive/30 bg-destructive/15 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-destructive">
+                  <XCircle className="size-3.5" />
+                  DECLINED
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Member Card Summary */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+            <div className="flex items-center gap-4">
+              <img
+                src={
+                  application.avatarUrl ||
+                  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80"
+                }
+                alt={application.applicantName}
+                className="size-14 rounded-2xl border-2 border-border/80 object-cover shadow-xs"
+              />
+              <div>
+                <h2 className="font-display text-2xl font-normal leading-tight text-foreground">
+                  {application.applicantName}
+                </h2>
+                <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground mt-0.5">
+                  <span className="flex items-center gap-1">
+                    <Mail className="size-3" />
+                    {application.applicantEmail}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Phone className="size-3" />
+                    {application.applicantPhone}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <MapPin className="size-3" />
+                    {application.applicantCity}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick 3-Pillar Verification Badges */}
+            <div className="flex items-center gap-2 text-[10px] font-mono">
+              <div className="flex items-center gap-1 rounded-xl border border-forest/20 bg-forest/10 px-2.5 py-1.5 text-forest font-semibold">
+                <CheckCircle2 className="size-3 text-forest" />
+                <span>Quiz Complete</span>
+              </div>
+              <div
+                className={`flex items-center gap-1 rounded-xl border px-2.5 py-1.5 font-semibold ${
+                  application.paymentStatus === "paid"
+                    ? "border-forest/20 bg-forest/10 text-forest"
+                    : "border-border bg-card text-muted-foreground"
+                }`}
+              >
+                <CreditCard className="size-3" />
+                <span>
+                  {application.paymentStatus === "paid"
+                    ? `Paid ₹${application.paymentAmountInr}`
+                    : "Unpaid"}
+                </span>
+              </div>
+              <div
+                className={`flex items-center gap-1 rounded-xl border px-2.5 py-1.5 font-semibold ${
+                  application.identityStatus === "verified"
+                    ? "border-forest/20 bg-forest/10 text-forest"
+                    : "border-amber-500/20 bg-amber-500/10 text-amber-700"
+                }`}
+              >
+                <ShieldCheck className="size-3" />
+                <span>
+                  {application.identityStatus === "verified"
+                    ? "Aadhaar Verified"
+                    : "Aadhaar Pending"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Dossier Sheets Navigation Tabs */}
+          <div className="flex items-center gap-1.5 pt-5 -mb-4 overflow-x-auto">
+            {[
+              {
+                id: "quiz",
+                label: "1. Vibe & Quiz Dossier",
+                icon: Sparkles,
+              },
+              {
+                id: "payment",
+                label: "2. Financial Record",
+                icon: CreditCard,
+              },
+              {
+                id: "identity",
+                label: "3. Aadhaar Verification",
+                icon: ShieldCheck,
+              },
+              {
+                id: "decision",
+                label: "4. Review History & Emails",
+                icon: FileText,
+              },
+            ].map((sheet) => {
+              const Icon = sheet.icon;
+              const isActive = activeSheet === sheet.id;
+              return (
+                <button
+                  key={sheet.id}
+                  onClick={() => setActiveSheet(sheet.id as any)}
+                  className={`flex items-center gap-1.5 rounded-t-xl px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-all duration-200 cursor-pointer ${
+                    isActive
+                      ? "bg-ivory text-burgundy border-t-2 border-burgundy shadow-xs font-bold"
+                      : "text-muted-foreground hover:bg-sage/40 hover:text-foreground"
+                  }`}
+                >
+                  <Icon className="size-3.5" />
+                  <span>{sheet.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ========================================================================= */}
+        {/* DOSSIER BODY (Content of selected sheet)                                  */}
+        {/* ========================================================================= */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-ivory">
+          {/* SHEET 1: VIBE & QUIZ DOSSIER */}
+          {activeSheet === "quiz" && (
+            <div className="space-y-6">
+              {/* Archetype Highlight Banner */}
+              <div className="rounded-2xl border border-ochre/30 bg-card p-5 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <span className="label-mono text-xs text-forest">
+                    Social Compatibility Archetype
+                  </span>
+                  <span className="rounded-full bg-burgundy/10 px-3 py-0.5 font-mono text-[10px] font-bold text-burgundy">
+                    10-Question Scoring Engine
+                  </span>
+                </div>
+                <h3 className="font-display mt-2 text-2xl text-foreground">
+                  {application.archetypeTitle}
+                </h3>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground max-w-2xl">
+                  {application.archetypeDescription}
+                </p>
+
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {application.archetypeTraits?.map((trait, i) => (
+                    <span
+                      key={i}
+                      className="rounded-full border border-border bg-ivory px-3 py-0.5 text-[11px] font-medium text-foreground"
+                    >
+                      {trait}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Dimension Metrics */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="rounded-2xl border border-border/80 bg-card p-5 space-y-3">
+                  <h4 className="font-mono text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                    Conversational Dynamics (0–100)
+                  </h4>
+
+                  {[
+                    {
+                      label: "Social Energy",
+                      value: application.socialEnergyScore,
+                      desc: "Intimacy vs. Large room dynamic",
+                    },
+                    {
+                      label: "Conversation Depth",
+                      value: application.conversationDepthScore,
+                      desc: "Philosophical & deep discourse",
+                    },
+                    {
+                      label: "Playfulness / Wit",
+                      value: application.playfulnessScore,
+                      desc: "Humor, storytelling & banter",
+                    },
+                    {
+                      label: "Curiosity Factor",
+                      value: application.curiosityScore,
+                      desc: "Interest in unfamiliar perspectives",
+                    },
+                    {
+                      label: "Sensory & Adventure",
+                      value: application.adventureScore,
+                      desc: "Appetite for experimental venues",
+                    },
+                  ].map((dim, i) => (
+                    <div key={i} className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="font-medium text-foreground">
+                          {dim.label}
+                        </span>
+                        <span className="font-mono font-bold text-burgundy">
+                          {dim.value}%
+                        </span>
+                      </div>
+                      <div className="h-2 w-full rounded-full bg-border/60 overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-burgundy transition-all duration-500"
+                          style={{ width: `${dim.value}%` }}
+                        />
+                      </div>
+                      <div className="text-[10px] text-muted-foreground">
+                        {dim.desc}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Dietary & Boundaries */}
+                <div className="rounded-2xl border border-border/80 bg-card p-5 space-y-4">
+                  <h4 className="font-mono text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                    Table Safety & Boundaries
+                  </h4>
+
+                  <div className="space-y-1">
+                    <span className="text-[11px] font-mono uppercase text-muted-foreground">
+                      Dietary Preferences
+                    </span>
+                    <p className="text-xs font-semibold text-foreground bg-ivory rounded-xl p-2.5 border border-border">
+                      {application.dietaryPreference || "Flexible / Omnivore"}
+                    </p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <span className="text-[11px] font-mono uppercase text-muted-foreground">
+                      Known Allergies
+                    </span>
+                    <div className="flex flex-wrap gap-1">
+                      {application.allergies && application.allergies.length > 0 ? (
+                        application.allergies.map((alg, i) => (
+                          <span
+                            key={i}
+                            className="rounded-lg bg-destructive/10 text-destructive border border-destructive/20 px-2 py-0.5 text-[11px] font-mono"
+                          >
+                            ⚠️ {alg}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-xs text-muted-foreground">
+                          None declared
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <span className="text-[11px] font-mono uppercase text-muted-foreground">
+                      Conversational Boundaries
+                    </span>
+                    <ul className="text-xs space-y-1 text-muted-foreground">
+                      {application.personalBoundaries &&
+                      application.personalBoundaries.length > 0 ? (
+                        application.personalBoundaries.map((b, i) => (
+                          <li
+                            key={i}
+                            className="rounded-lg bg-ivory p-2 border border-border text-[11px]"
+                          >
+                            🛡️ {b}
+                          </li>
+                        ))
+                      ) : (
+                        <li>Standard community guidelines apply.</li>
+                      )}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Answers Breakdown */}
+              {application.quizAnswers && application.quizAnswers.length > 0 && (
+                <div className="rounded-2xl border border-border/80 bg-card p-5 space-y-3">
+                  <h4 className="font-mono text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                    Detailed Question-by-Question Responses
+                  </h4>
+                  <div className="space-y-2">
+                    {application.quizAnswers.map((ans, idx) => (
+                      <div
+                        key={idx}
+                        className="rounded-xl border border-border/60 bg-ivory/60 p-3 text-xs"
+                      >
+                        <div className="font-medium text-foreground">
+                          Q{ans.questionNumber || idx + 1}: {ans.questionTitle}
+                        </div>
+                        <div className="mt-1 text-burgundy font-serif italic text-sm">
+                          “{ans.answerLabel}”
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* SHEET 2: FINANCIAL RECORD */}
+          {activeSheet === "payment" && (
+            <div className="space-y-6">
+              <div className="rounded-2xl border border-border/80 bg-card p-6 space-y-4">
+                <div className="flex items-center justify-between border-b border-border/70 pb-4">
+                  <div>
+                    <span className="label-mono text-xs text-forest">
+                      Payment Verification
+                    </span>
+                    <h3 className="font-display text-2xl text-foreground mt-1">
+                      {application.paymentPlanTitle}
+                    </h3>
+                  </div>
+                  <span
+                    className={`rounded-full px-3 py-1 font-mono text-xs font-bold uppercase tracking-wider ${
+                      application.paymentStatus === "paid"
+                        ? "bg-forest/15 text-forest border border-forest/30"
+                        : "bg-destructive/15 text-destructive border border-destructive/30"
+                    }`}
+                  >
+                    {application.paymentStatus}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                  <div className="rounded-xl bg-ivory p-3 border border-border">
+                    <span className="font-mono text-[10px] uppercase text-muted-foreground">
+                      Amount Paid
+                    </span>
+                    <div className="font-display text-2xl text-foreground font-bold mt-0.5">
+                      ₹{application.paymentAmountInr}
+                    </div>
+                    <span className="text-[10px] text-muted-foreground">
+                      Full 365-day founding membership
+                    </span>
+                  </div>
+
+                  <div className="rounded-xl bg-ivory p-3 border border-border">
+                    <span className="font-mono text-[10px] uppercase text-muted-foreground">
+                      Gateway Reference
+                    </span>
+                    <div className="font-mono text-xs text-burgundy font-bold mt-1 break-all">
+                      {application.razorpayPaymentId || "pay_unassigned"}
+                    </div>
+                    <span className="text-[10px] text-muted-foreground">
+                      Razorpay Authorized Checkout
+                    </span>
+                  </div>
+
+                  <div className="rounded-xl bg-ivory p-3 border border-border">
+                    <span className="font-mono text-[10px] uppercase text-muted-foreground">
+                      Transaction Date
+                    </span>
+                    <div className="text-xs font-semibold text-foreground mt-1">
+                      {application.paidAt
+                        ? new Date(application.paidAt).toLocaleString()
+                        : "Pending"}
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl bg-ivory p-3 border border-border">
+                    <span className="font-mono text-[10px] uppercase text-muted-foreground">
+                      Member Pass Reference
+                    </span>
+                    <div className="font-mono text-xs font-bold text-foreground mt-1">
+                      {application.applicationReference}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-xl bg-sage/30 p-3.5 border border-forest/20 text-xs text-muted-foreground flex items-center gap-2">
+                  <ShieldCheck className="size-4 text-forest shrink-0" />
+                  <span>
+                    Payment captured via PCI-DSS Level 1 compliant Razorpay
+                    gateway. If rejected, automatic 100% refund is initiated.
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SHEET 3: AADHAAR VERIFICATION */}
+          {activeSheet === "identity" && (
+            <div className="space-y-6">
+              <div className="rounded-2xl border border-border/80 bg-card p-6 space-y-4">
+                <div className="flex items-center justify-between border-b border-border/70 pb-4">
+                  <div>
+                    <span className="label-mono text-xs text-forest">
+                      UIDAI Compliance Protocol
+                    </span>
+                    <h3 className="font-display text-2xl text-foreground mt-1">
+                      Offline Aadhaar & DigiLocker Audit
+                    </h3>
+                  </div>
+                  <span
+                    className={`rounded-full px-3 py-1 font-mono text-xs font-bold uppercase tracking-wider ${
+                      application.identityStatus === "verified"
+                        ? "bg-forest/15 text-forest border border-forest/30"
+                        : "bg-amber-500/15 text-amber-700 border border-amber-500/30"
+                    }`}
+                  >
+                    {application.identityStatus}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                  <div className="rounded-xl bg-ivory p-3 border border-border">
+                    <span className="font-mono text-[10px] uppercase text-muted-foreground">
+                      Verification Method
+                    </span>
+                    <div className="font-semibold text-foreground mt-0.5">
+                      {application.identityProvider}
+                    </div>
+                    <span className="text-[10px] text-muted-foreground">
+                      Zero raw Aadhaar numbers or biometrics stored
+                    </span>
+                  </div>
+
+                  <div className="rounded-xl bg-ivory p-3 border border-border">
+                    <span className="font-mono text-[10px] uppercase text-muted-foreground">
+                      Provider Verification Hash
+                    </span>
+                    <div className="font-mono text-xs text-forest font-bold mt-0.5">
+                      {application.identityReference || "DL-CONSENT-TOKEN-01"}
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl bg-ivory p-3 border border-border sm:col-span-2">
+                    <span className="font-mono text-[10px] uppercase text-muted-foreground">
+                      Verification Timestamp
+                    </span>
+                    <div className="text-xs font-semibold text-foreground mt-0.5">
+                      {application.identityVerifiedAt
+                        ? new Date(
+                            application.identityVerifiedAt,
+                          ).toLocaleString()
+                        : "Not yet completed"}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-xl bg-forest/5 p-4 border border-forest/20 text-xs text-muted-foreground space-y-1">
+                  <div className="flex items-center gap-1.5 font-semibold text-forest">
+                    <ShieldCheck className="size-4" />
+                    <span>UIDAI Compliance Audit Guarantee</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed">
+                    This applicant completed consent-driven XML/DigiLocker offline
+                    verification confirming age (18+), residency, and matching full
+                    legal name.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SHEET 4: REVIEW HISTORY & EMAILS */}
+          {activeSheet === "decision" && (
+            <div className="space-y-6">
+              <div className="rounded-2xl border border-border/80 bg-card p-6 space-y-4">
+                <h3 className="font-display text-xl text-foreground">
+                  Adjudication Trail & Email Notifications
+                </h3>
+
+                <div className="space-y-3 text-xs">
+                  <div className="rounded-xl bg-ivory p-3.5 border border-border">
+                    <div className="flex justify-between font-mono text-[11px] text-muted-foreground">
+                      <span>Reviewed By:</span>
+                      <span className="font-semibold text-foreground">
+                        {application.reviewedBy || "Pending Review"}
+                      </span>
+                    </div>
+                    {application.reviewedAt && (
+                      <div className="flex justify-between font-mono text-[11px] text-muted-foreground mt-1">
+                        <span>Reviewed At:</span>
+                        <span>
+                          {new Date(application.reviewedAt).toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {application.reviewDecisionNotes && (
+                    <div className="rounded-xl bg-forest/10 p-3.5 border border-forest/20 text-xs">
+                      <span className="font-mono text-[10px] uppercase font-bold text-forest">
+                        Curation Committee Notes:
+                      </span>
+                      <p className="mt-1 text-foreground leading-relaxed">
+                        {application.reviewDecisionNotes}
+                      </p>
+                    </div>
+                  )}
+
+                  {application.rejectionReason && (
+                    <div className="rounded-xl bg-destructive/10 p-3.5 border border-destructive/20 text-xs">
+                      <span className="font-mono text-[10px] uppercase font-bold text-destructive">
+                        Rejection Feedback Given:
+                      </span>
+                      <p className="mt-1 text-foreground leading-relaxed">
+                        {application.rejectionReason}
+                      </p>
+                    </div>
+                  )}
+
+                  {application.decisionEmailSentAt && (
+                    <div className="rounded-xl bg-ivory p-3.5 border border-border flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2">
+                        <Send className="size-4 text-forest" />
+                        <div>
+                          <div className="font-semibold text-foreground">
+                            Decision Email Sent
+                          </div>
+                          <div className="text-[10px] text-muted-foreground font-mono">
+                            Template: {application.decisionEmailTemplate}
+                          </div>
+                        </div>
+                      </div>
+                      <span className="font-mono text-[10px] text-muted-foreground">
+                        {new Date(
+                          application.decisionEmailSentAt,
+                        ).toLocaleTimeString()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ========================================================================= */}
+        {/* DOSSIER FOOTER (Executive Decision Actions)                                */}
+        {/* ========================================================================= */}
+        <div className="border-t border-border/80 bg-card p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="text-xs text-muted-foreground flex items-center gap-2">
+            <Lock className="size-3.5 text-burgundy" />
+            <span>Executive Action controls are permanently audit-logged.</span>
+          </div>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            {isPending ? (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => setRejectModalOpen(true)}
+                  disabled={processing}
+                  className="rounded-full border-destructive/40 text-destructive hover:bg-destructive/10 text-xs px-4 cursor-pointer"
+                >
+                  <UserX className="size-3.5 mr-1" />
+                  Decline Application
+                </Button>
+
+                <Button
+                  onClick={handleApprove}
+                  disabled={processing}
+                  className="rounded-full bg-forest text-ivory hover:bg-forest/90 text-xs font-semibold px-6 shadow-sm cursor-pointer"
+                >
+                  {processing ? (
+                    <Loader2 className="size-3.5 animate-spin mr-1" />
+                  ) : (
+                    <UserCheck className="size-3.5 mr-1" />
+                  )}
+                  Approve & Issue Member Pass
+                </Button>
+              </>
+            ) : isApproved ? (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-forest font-semibold flex items-center gap-1">
+                  <CheckCircle2 className="size-4" /> Member Officially Inducted
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setRejectModalOpen(true)}
+                  className="rounded-full border-border text-xs text-muted-foreground hover:text-destructive cursor-pointer"
+                >
+                  Revoke & Decline
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-destructive font-semibold flex items-center gap-1">
+                  <XCircle className="size-4" /> Application Declined
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleApprove}
+                  className="rounded-full border-forest/40 text-forest hover:bg-forest/10 text-xs cursor-pointer"
+                >
+                  Re-evaluate & Approve
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </DialogContent>
+
+      {/* Reject Modal */}
+      <Dialog open={rejectModalOpen} onOpenChange={setRejectModalOpen}>
+        <DialogContent className="max-w-md bg-ivory rounded-3xl p-6 border border-border">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl text-foreground">
+              Decline Application for {application.applicantName}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 pt-2">
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Please enter the curator rationale. This explanation will be
+              courteously formatted and dispatched via email to{" "}
+              <strong>{application.applicantEmail}</strong> along with refund
+              confirmation.
+            </p>
+
+            <textarea
+              rows={3}
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              placeholder="e.g. Table harmony capacity restrictions, or commercial small talk conflict."
+              className="w-full rounded-2xl border border-border bg-card p-3 text-xs outline-none focus:border-burgundy focus:ring-1 focus:ring-burgundy"
+            />
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setRejectModalOpen(false)}
+                className="rounded-full text-xs"
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleReject}
+                disabled={processing}
+                className="rounded-full bg-destructive text-ivory hover:bg-destructive/90 text-xs font-semibold"
+              >
+                {processing && <Loader2 className="size-3 animate-spin mr-1" />}
+                Confirm Rejection & Dispatch Email
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </Dialog>
+  );
+}
