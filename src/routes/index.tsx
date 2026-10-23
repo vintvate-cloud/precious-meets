@@ -1285,49 +1285,75 @@ function Collage() {
         trigger: section,
         start: "top top",
         end: "bottom bottom",
-        scrub: 0.9,
+        scrub: 1.1,
       },
     });
 
-    // Step 0: Blank canvas transition from warm ivory into brand forest green (#5F7045) in the stories section
+    // Phase 0: Slow, premium atmospheric transition into brand forest green (#5F7045)
+    // Runs across an unhurried 1.6s timeline interval so the user experiences a velvety, cinematic color wash
     tl.to(
       stage,
       {
         backgroundColor: "#5F7045",
-        duration: 0.65,
-        ease: "power2.inOut",
+        duration: 1.6,
+        ease: "sine.inOut",
       },
       0,
     )
       .to(
-        "[data-stories-watermark-sub]",
+        "[data-stories-glow]",
         {
-          color: "rgba(248, 242, 231, 0.6)",
-          duration: 0.65,
+          opacity: 1,
+          scale: 1.15,
+          duration: 1.6,
+          ease: "sine.inOut",
         },
         0,
+      )
+      .to(
+        "[data-stories-vignette]",
+        {
+          opacity: 0.9,
+          duration: 1.6,
+          ease: "sine.inOut",
+        },
+        0,
+      )
+      .to(
+        "[data-stories-watermark-sub]",
+        {
+          color: "rgba(248, 242, 231, 0.65)",
+          duration: 1.4,
+          ease: "power2.inOut",
+        },
+        0.1,
       )
       .to(
         "[data-stories-watermark-title]",
         {
-          color: "rgba(248, 242, 231, 0.28)",
-          duration: 0.65,
+          color: "rgba(248, 242, 231, 0.32)",
+          duration: 1.4,
+          ease: "power2.inOut",
         },
-        0,
+        0.1,
       )
       .to(
         "[data-stories-watermark-em]",
         {
-          color: "rgba(198, 165, 104, 0.6)",
-          duration: 0.65,
+          color: "rgba(198, 165, 104, 0.7)",
+          duration: 1.4,
+          ease: "power2.inOut",
         },
-        0,
+        0.1,
       );
+
+    // Phase 0.5: Serene breath on the fully transformed forest green canvas
+    tl.to({}, { duration: 0.5 });
 
     // Step 1 to 6: Sequential two-beat choreography:
     // Beat A: Picture slides down from the top into its postcard place on the board
     // Beat B: Doodle pin strikes down into the card with paper impact rebound
-    cards.forEach((card, i) => {
+    cards.forEach((card) => {
       const targetRotate = parseFloat(card.getAttribute("data-target-rotate") || "0");
       const pin = card.querySelector<HTMLElement>("[data-pin]");
 
@@ -1339,10 +1365,10 @@ function Collage() {
           opacity: 1,
           scale: 1,
           rotation: targetRotate,
-          duration: 0.8,
+          duration: 0.85,
           ease: "power2.out",
         },
-        i === 0 ? "+=0.1" : "+=0.3",
+        "+=0.25",
       );
 
       // Beat B: Pin punctures into the card
@@ -1376,7 +1402,7 @@ function Collage() {
     });
 
     // Step 7: Final hold with all 6 pinned postcards resting proudly on the board before unpinning
-    tl.to({}, { duration: 0.55 });
+    tl.to({}, { duration: 0.6 });
 
     const onResize = () => ScrollTrigger.refresh();
     window.addEventListener("resize", onResize);
@@ -1391,17 +1417,26 @@ function Collage() {
     <section
       id="stories"
       ref={sectionRef}
-      className="relative h-[520vh] bg-[#5F7045] select-none"
+      className="relative h-[560vh] bg-[#5F7045] select-none"
     >
       {/* Sticky Fullscreen Pinboard Stage */}
       <div
         ref={stageRef}
         className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-[#FAF7F2] px-3 sm:px-6"
       >
-        {/* Subtle Warm Atmospheric Candlelight Glow in Center */}
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="w-[70vw] h-[70vw] max-w-[850px] max-h-[850px] rounded-full bg-[#C6A568]/18 blur-[160px] pointer-events-none" />
-          <div className="w-[45vw] h-[45vw] max-w-[550px] max-h-[550px] rounded-full bg-[#691C35]/14 blur-[140px] pointer-events-none" />
+        {/* Soft Vignette Overlay for rich photographic moodboard depth */}
+        <div
+          data-stories-vignette
+          className="pointer-events-none absolute inset-0 opacity-0 bg-[radial-gradient(circle_at_center,transparent_40%,rgba(15,22,12,0.45)_100%)]"
+        />
+
+        {/* Atmospheric Candlelight Glow in Center */}
+        <div
+          data-stories-glow
+          className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-60"
+        >
+          <div className="w-[70vw] h-[70vw] max-w-[850px] max-h-[850px] rounded-full bg-[#C6A568]/20 blur-[160px] pointer-events-none" />
+          <div className="w-[45vw] h-[45vw] max-w-[550px] max-h-[550px] rounded-full bg-[#691C35]/16 blur-[140px] pointer-events-none" />
         </div>
 
         {/* Ambient Pinboard Watermark Title (Visible on blank canvas before cards land) */}
@@ -2041,22 +2076,22 @@ function Index() {
         .to("[data-table-center]", { opacity: 1, duration: 0.6 }, 2.2)
         .to("[data-table-caption]", { opacity: 1, duration: 0.6 }, 2.3);
 
-      // Ambient Green Transition into #5F7045 (Forest Green) happens strictly when entering the stories section
+      // Ambient Green Transition into #5F7045 (Forest Green) happens slowly and luxuriously as user scrolls into the stories section
       gsap.fromTo(
         root.current,
         {
-          backgroundColor: "#F8F2E7",
+          backgroundColor: "#FAF7F2",
           color: "#171514",
         },
         {
           backgroundColor: "#5F7045", // Pure Brand Forest Green
           color: "#F8F2E7", // Luminous Ivory
-          ease: "none",
+          ease: "sine.inOut",
           scrollTrigger: {
             trigger: "#stories",
             start: "top top",
-            end: "+=600",
-            scrub: 0.8,
+            end: "+=1400",
+            scrub: 1.2,
             invalidateOnRefresh: true,
           },
         }
