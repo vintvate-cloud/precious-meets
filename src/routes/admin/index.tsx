@@ -166,7 +166,7 @@ function AdminConsolePage() {
       status: "acknowledged",
       createdAt: "2 hours ago",
       bookingRef: "PM-B33G19",
-      location: "Indiranagar, Bengaluru",
+      location: "Hauz Khas, Delhi NCR",
     },
   ]);
 

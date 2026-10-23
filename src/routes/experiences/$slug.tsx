@@ -64,15 +64,15 @@ const DELHI_SUPPER = {
 const EXPERIENCES_MAP: Record<string, any> = {
   "the-long-table-supper-delhi": DELHI_SUPPER,
   "the-long-table-supper-mumbai": DELHI_SUPPER, // backwards compatibility alias
-  "slow-coffee-vinyl-bengaluru": {
+  "slow-coffee-sunder-nursery-delhi": {
     id: "exp_2",
-    slug: "slow-coffee-vinyl-bengaluru",
-    title: "Slow Coffee & Vinyl Sunday",
-    tagline: "Unhurried conversations over single-origin pours.",
-    city: "Bengaluru",
-    neighborhood: "Indiranagar",
-    venueName: "Cask & Bean Roastery",
-    venueAddress: "12th Main Road, HAL 2nd Stage, Indiranagar, Bengaluru 560038",
+    slug: "slow-coffee-sunder-nursery-delhi",
+    title: "Slow Pour & Vinyl Sunday",
+    tagline: "Unhurried conversations over single-origin pours under garden arches.",
+    city: "Delhi NCR",
+    neighborhood: "Sunder Nursery",
+    venueName: "The Heritage Pavilion at Sunder Nursery",
+    venueAddress: "Bharat Scouts and Guides Marg, Nizamuddin, New Delhi 110013",
     coverImage: "https://images.unsplash.com/photo-1442512595331-e89e73853f31?auto=format&fit=crop&w=1200&q=80",
     priceInr: 119900,
     maxCapacity: 6,
@@ -81,19 +81,13 @@ const EXPERIENCES_MAP: Record<string, any> = {
       name: "Arjun Varma",
       role: "Q-Grader & Vinyl Collector",
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
-      bio: "Arjun curates rare jazz vinyls alongside micro-lot coffees sourced directly from smallholder farms in Chikmagalur.",
+      bio: "Arjun curates rare jazz vinyls alongside micro-lot coffees sourced directly from smallholder farms.",
     },
     menu: [
       "Welcome: Cold brew tonic with orange blossom extract",
       "Cupping Flight: 3 distinct anaerobic fermentation Arabicas",
       "Artisanal Pairing: Sourdough tartines with whipped almond butter & preserves",
     ],
-    dietary: ["Vegetarian", "Vegan"],
-    session: {
-      id: "sess_002",
-      startsAt: new Date(Date.now() + 5 * 24 * 3600 * 1000).toISOString(),
-      endsAt: new Date(Date.now() + 5 * 24 * 3600 * 1000 + 2.5 * 3600 * 1000).toISOString(),
-    },
   },
   "after-dark-walk-and-wine-delhi": {
     id: "exp_3",

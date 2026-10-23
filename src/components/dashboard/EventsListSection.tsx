@@ -58,9 +58,8 @@ export function EventsListSection({
         {/* City Filter Pills */}
         <div className="flex flex-wrap items-center gap-1.5 self-start sm:self-auto">
           {[
-            { id: "all", label: "All Cities" },
+            { id: "all", label: "All Venues" },
             { id: "Delhi NCR", label: "Delhi NCR" },
-            { id: "Bengaluru", label: "Bengaluru" },
           ].map((c) => (
             <button
               key={c.id}

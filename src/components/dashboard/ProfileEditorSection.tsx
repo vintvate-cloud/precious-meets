@@ -189,7 +189,6 @@ export function ProfileEditorSection() {
                   className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-burgundy/30"
                 >
                   <option value="Delhi NCR">Delhi NCR</option>
-                  <option value="Bengaluru">Bengaluru</option>
                 </select>
               </div>
             </div>

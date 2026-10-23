@@ -14,6 +14,7 @@ import conversation from "@/assets/conversation.jpg";
 import dusk from "@/assets/dusk.jpg";
 import tableStill from "@/assets/table-still.jpg";
 import tableBurgundy from "@/assets/table-burgundy.jpg";
+import heroSketchBg from "@/assets/hero-sketch-bg.jpg";
 import footerBg from "@/assets/footer-bg.jpg";
 import { ConcaveCarousel } from "@/components/ConcaveCarousel";
 
@@ -44,10 +45,10 @@ const menuItems = [
   { label: "Member Sign In", href: "/login", icon: <User className="size-4 text-foreground/70" /> },
 ];
 
-// Curated gatherings across cities (Delhi NCR & Bengaluru focus; Mumbai removed)
+// Curated gatherings across Delhi NCR heritage enclaves
 const meets = [
   { name: "The Sunder Nursery Supper", when: "Thursdays · 8 PM", where: "Mehrauli, Delhi NCR", img: tableLaugh, desc: "Six strangers, four courses, one candlelit table in a secluded heritage enclave." },
-  { name: "Slow Coffee Sundays", when: "Sundays · 10 AM", where: "Indiranagar, Bengaluru", img: conversation, desc: "Unhurried conversations over a single pour." },
+  { name: "Slow Pour Sundays", when: "Sundays · 10 AM", where: "Sunder Nursery Pavilion, Delhi NCR", img: conversation, desc: "Unhurried conversations over single-origin pour-overs beneath the garden trees." },
   { name: "After-Dark Walk & Wine", when: "Saturdays · 7 PM", where: "Hauz Khas, Delhi NCR", img: dusk, desc: "A twilight heritage walk, a private wine room, a few new friends." },
 ];
 
@@ -136,16 +137,16 @@ function Nav() {
         <nav
           data-nav-bar
           style={{
-            background: "linear-gradient(135deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.48) 100%)",
+            background: "linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.55) 100%)",
             backdropFilter: "blur(28px) saturate(190%) contrast(95%)",
             WebkitBackdropFilter: "blur(28px) saturate(190%) contrast(95%)",
           }}
-          className="pointer-events-auto flex w-full items-center justify-between rounded-full border border-white/70 py-2 pl-3.5 sm:pl-5 pr-2 text-[#171514] shadow-[0_16px_40px_-10px_rgba(23,21,20,0.12),_0_4px_12px_-2px_rgba(23,21,20,0.04),_inset_0_1px_2px_0_rgba(255,255,255,0.95),_inset_0_-1px_1px_0_rgba(255,255,255,0.3)] transition-all duration-300"
+          className="pointer-events-auto flex w-full items-center justify-between rounded-full border border-black/5 py-2 pl-3.5 sm:pl-5 pr-2 text-[#171514] shadow-[0_12px_32px_-10px_rgba(23,21,20,0.08),_0_2px_8px_-2px_rgba(23,21,20,0.03)] transition-all duration-300"
         >
           {/* Left: Brand Monogram + Logo */}
           <div className="flex items-center gap-3">
             <a href="#top" className="flex items-center gap-2.5 group">
-              <span className="grid size-8 place-items-center rounded-full bg-white/75 border border-white/80 shadow-[inset_0_1px_1px_rgba(255,255,255,1)] text-[#691C35] transition-transform duration-300 group-hover:scale-105">
+              <span className="grid size-8 place-items-center rounded-full bg-white border border-black/5 text-[#691C35] transition-transform duration-300 group-hover:scale-105">
                 <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="8" stroke="#691C35" strokeWidth="2" />
                   <circle cx="12" cy="12" r="3" fill="#C6A568" />
@@ -161,7 +162,7 @@ function Nav() {
           {/* Right Controls: Ambient City Pill + CTA Button + Dropdown Toggle */}
           <div className="flex items-center gap-2">
             {/* Ambient City Pill */}
-            <div className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-white/60 px-3 py-1.5 text-[11px] font-mono tracking-wider text-[#171514]/75 border border-white/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9)]">
+            <div className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-white/70 px-3 py-1.5 text-[11px] font-mono tracking-wider text-[#171514]/75 border border-black/5">
               <span className="size-1.5 rounded-full bg-[#5F7045] animate-pulse" />
               <span>Delhi NCR</span>
             </div>
@@ -169,7 +170,7 @@ function Nav() {
             {/* Solid Pill CTA Button -> routes to /quiz */}
             <a
               href="/quiz"
-              className="rounded-full bg-white text-[#171514] border border-white/80 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold tracking-tight shadow-[0_2px_8px_rgba(0,0,0,0.06),_inset_0_1px_1px_rgba(255,255,255,1)] transition-all duration-300 hover:bg-[#691C35] hover:text-white hover:scale-105 active:scale-95"
+              className="rounded-full bg-white text-[#171514] border border-black/10 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold tracking-tight shadow-xs transition-all duration-300 hover:bg-[#691C35] hover:text-white hover:scale-105 active:scale-95"
             >
               Save a seat
             </a>
@@ -236,38 +237,181 @@ function Nav() {
   );
 }
 
-const heroPillImages = [
-  { src: tableBurgundy, alt: "Curated long dinner table set with wine and burgundy floral arrangements" },
-  { src: tableLaugh, alt: "Friends laughing together around a dinner table" },
-  { src: hands, alt: "Hands passing a shared plate across a candlelit table" },
-  { src: tableStill, alt: "Curated dinner table set with wine and calla lily" },
-  { src: conversation, alt: "Two people smiling over a conversation" },
-  { src: dusk, alt: "New friends sharing drinks at dusk" },
+const heroSlides = [
+  {
+    id: "gathering",
+    src: tableBurgundy,
+    alt: "Curated long dinner table set with wine and burgundy floral arrangements",
+    kicker: "The Geometry of Six",
+    leftLine1: "Six strangers.",
+    leftLine2: "One table.",
+    leftDesc: "No resumes. No social performance. Handcrafted seating balancing energy and intellect in private heritage courtyards.",
+    rightTitle: "Every meet matters.",
+    rightSubtitle: "Delhi NCR · 6 Guests Only",
+    rightStat: "100% Aadhaar Verified",
+    rightLocation: "Mehrauli & Sunder Nursery",
+  },
+  {
+    id: "laughter",
+    src: tableLaugh,
+    alt: "Friends laughing together around a dinner table",
+    kicker: "The Unscripted Salon",
+    leftLine1: "Real laughter.",
+    leftLine2: "Unhurried tempo.",
+    leftDesc: "Leave the city's frantic pace at the heavy wooden doors. Four seasonal courses, warm candlelight, and stories that linger.",
+    rightTitle: "Chemistry by design.",
+    rightSubtitle: "Curated Psychometrics",
+    rightStat: "Zero Anonymous Predators",
+    rightLocation: "Hauz Khas Lofts & Secret Terraces",
+  },
+  {
+    id: "connection",
+    src: hands,
+    alt: "Hands passing a shared plate across a candlelit table",
+    kicker: "Deliberate Gathering",
+    leftLine1: "Breaking bread.",
+    leftLine2: "True presence.",
+    leftDesc: "Every friend in your life was once a complete stranger. We simply make the introduction effortless and safe.",
+    rightTitle: "A seat held for you.",
+    rightSubtitle: "Weekly Curated Evenings",
+    rightStat: "24/7 Safety SOS Architecture",
+    rightLocation: "Civil Lines & Chanakyapuri",
+  },
+  {
+    id: "stillness",
+    src: tableStill,
+    alt: "Curated dinner table set with wine and calla lily",
+    kicker: "Sanctuary from the Rush",
+    leftLine1: "Quiet spaces.",
+    leftLine2: "Deep listening.",
+    leftDesc: "Intimate dining rooms secluded from Delhi's noise, designed for voices to be heard without shouting.",
+    rightTitle: "Space to breathe.",
+    rightSubtitle: "Sound-Vetted Enclaves",
+    rightStat: "50:50 Balanced Ratios",
+    rightLocation: "Lutyens' Verandas & Lodhi Enclaves",
+  },
+  {
+    id: "dialogue",
+    src: conversation,
+    alt: "Two people smiling over a conversation",
+    kicker: "Beyond Small Talk",
+    leftLine1: "Curious minds.",
+    leftLine2: "Unexpected spark.",
+    leftDesc: "Where poets converse with engineers, and entrepreneurs swap travel memoirs with artists over a shared dessert.",
+    rightTitle: "Perspectives aligned.",
+    rightSubtitle: "Archetype Chemistry",
+    rightStat: "UIDAI DigiLocker Pre-Checked",
+    rightLocation: "Connaught Place Heritage Vaults",
+  },
+  {
+    id: "twilight",
+    src: dusk,
+    alt: "New friends sharing drinks at dusk",
+    kicker: "The Golden Hour",
+    leftLine1: "Sundown walks.",
+    leftLine2: "New beginnings.",
+    leftDesc: "Twilight walks through ancient stone ruins, opening smoothly into an intimate supper table with five new friends.",
+    rightTitle: "Evenings that linger.",
+    rightSubtitle: "After-Dark Salons",
+    rightStat: "Dedicated Guardian Hosts",
+    rightLocation: "Qutub Arches & Jahanpanah Woods",
+  },
 ];
 
 function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
-  const anchorRef = useRef<HTMLSpanElement>(null);
+  const centerTrackRef = useRef<HTMLDivElement>(null);
+  const centerTileSlotRef = useRef<HTMLDivElement>(null);
   const expandFrameRef = useRef<HTMLDivElement>(null);
-  const [activeIdx, setActiveIdx] = useState(0);
+  const expandImgRef = useRef<HTMLImageElement>(null);
   const isScrollingRef = useRef(false);
 
+  // Smooth continuous infinite vertical marquee
   useEffect(() => {
-    const timer = setInterval(() => {
-      if (!isScrollingRef.current) {
-        setActiveIdx((prev) => (prev + 1) % heroPillImages.length);
+    const track = centerTrackRef.current;
+    if (!track) return;
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return;
+
+    const slot = centerTileSlotRef.current;
+    let yPos = 0;
+    const speed = 1.15;
+    let animationFrameId: number;
+    let singleLoopHeight = 0;
+    let tileStep = 0;
+    let tileHeight = 0;
+    let slotCenter = 0;
+
+    const measure = () => {
+      if (!track || track.children.length < 2) return;
+      const first = track.children[0] as HTMLElement;
+      const second = track.children[1] as HTMLElement;
+      if (first && second) {
+        tileStep = second.offsetTop - first.offsetTop;
+        tileHeight = first.offsetHeight;
+        if (tileStep > 0) {
+          singleLoopHeight = tileStep * heroSlides.length;
+        }
       }
-    }, 2800);
-    return () => clearInterval(timer);
+      if (slot) {
+        slotCenter = slot.offsetTop + slot.offsetHeight / 2;
+      }
+    };
+
+    measure();
+    window.addEventListener("resize", measure);
+    document.fonts?.ready?.then(measure);
+
+    const step = () => {
+      if (!isScrollingRef.current) {
+        if (singleLoopHeight > 0) {
+          yPos += speed;
+          if (yPos >= singleLoopHeight) {
+            yPos -= singleLoopHeight;
+          }
+          track.style.transform = `translate3d(0, -${yPos}px, 0)`;
+
+          // Continuous distance-based scaling: ONLY the card in the middle scales smoothly!
+          if (tileStep > 0) {
+            const children = track.children;
+            for (let i = 0; i < children.length; i++) {
+              const child = children[i] as HTMLElement;
+              const childCenter = child.offsetTop - yPos + tileHeight / 2;
+              const diff = Math.abs(childCenter - slotCenter);
+
+              // Proximity curve: 1 when dead center, 0 when approaching/leaving
+              const proximity = Math.max(0, 1 - diff / (tileStep * 0.95));
+              const smoothEase = proximity * proximity * (3 - 2 * proximity);
+              const scale = 0.85 + 0.15 * smoothEase; // 0.85 unexpanded, 1.0 fully focused in slot
+
+              child.style.transform = `scale(${scale})`;
+            }
+          }
+        } else {
+          measure();
+        }
+      }
+      animationFrameId = requestAnimationFrame(step);
+    };
+
+    animationFrameId = requestAnimationFrame(step);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener("resize", measure);
+    };
   }, []);
 
+  // GSAP ScrollTrigger: Center tile slot expands to full screen on scroll down
   useEffect(() => {
     const section = sectionRef.current;
     const sticky = stickyRef.current;
-    const anchor = anchorRef.current;
+    const slot = centerTileSlotRef.current;
     const frame = expandFrameRef.current;
-    if (!section || !sticky || !anchor || !frame) return;
+    const track = centerTrackRef.current;
+    if (!section || !sticky || !slot || !frame || !track) return;
 
     if (typeof window !== "undefined") {
       gsap.registerPlugin(ScrollTrigger);
@@ -276,20 +420,13 @@ function Hero() {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const syncBounds = () => {
-      const line = anchor.closest<HTMLElement>("[data-hero=line]");
-      let transformY = 0;
-      if (line) {
-        const curY = (gsap.getProperty(line, "y") as number) || 0;
-        const curYPercent = (gsap.getProperty(line, "yPercent") as number) || 0;
-        transformY = curY + (line.offsetHeight * curYPercent) / 100;
-      }
-      const a = anchor.getBoundingClientRect();
-      const s = sticky.getBoundingClientRect();
+      const sRect = slot.getBoundingClientRect();
+      const stickyRect = sticky.getBoundingClientRect();
       return {
-        top: a.top - transformY - s.top,
-        left: a.left - s.left,
-        width: a.width > 0 ? a.width : 140,
-        height: a.height > 0 ? a.height : 60,
+        top: sRect.top - stickyRect.top,
+        left: sRect.left - stickyRect.left,
+        width: sRect.width,
+        height: sRect.height,
       };
     };
 
@@ -299,10 +436,32 @@ function Hero() {
       left: initial.left,
       width: initial.width,
       height: initial.height,
-      borderRadius: "999px",
+      borderRadius: "28px",
+      opacity: 0,
+      pointerEvents: "none",
     });
 
     if (reduce) return;
+
+    // Helper to find the card in the reel that is physically closest to the middle
+    const getCenteredCard = () => {
+      const slotRect = slot.getBoundingClientRect();
+      const slotCenterY = slotRect.top + slotRect.height / 2;
+      let closestChild: HTMLElement | null = null;
+      let minDiff = Infinity;
+      const children = track.children;
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i] as HTMLElement;
+        const rect = child.getBoundingClientRect();
+        const centerY = rect.top + rect.height / 2;
+        const diff = Math.abs(centerY - slotCenterY);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closestChild = child;
+        }
+      }
+      return closestChild;
+    };
 
     const tl = gsap.timeline({
       paused: true,
@@ -312,18 +471,69 @@ function Hero() {
         end: "bottom bottom",
         scrub: 0.8,
         onUpdate: (self) => {
-          isScrollingRef.current = self.progress > 0.05;
+          const scrolling = self.progress > 0.005;
+
+          if (scrolling && !isScrollingRef.current) {
+            // Scroll just started: Freeze the continuous marquee and lock onto the EXACT middle card
+            isScrollingRef.current = true;
+            const centered = getCenteredCard();
+            if (centered) {
+              const img = centered.querySelector("img");
+              if (img && expandImgRef.current) {
+                expandImgRef.current.src = img.src;
+                expandImgRef.current.alt = img.alt || "Curated dinner table";
+              }
+            }
+          } else if (!scrolling && isScrollingRef.current) {
+            // Returned to top: Resume continuous scrolling
+            isScrollingRef.current = false;
+          }
+
+          if (self.progress === 0) {
+            gsap.set(frame, { opacity: 0, pointerEvents: "none" });
+            gsap.set("[data-hero-reel-mask]", { opacity: 1 });
+            isScrollingRef.current = false;
+          }
         },
       },
     });
 
-    tl.to("[data-hero-content]", {
+    // Phase 1 (0.0 -> 0.20): Left & right words fade/glide out, background sketch fades out,
+    // and expand frame seamlessly takes over the middle card with identical position
+    tl.to("[data-hero-flank-left]", {
+      x: -60,
       opacity: 0,
-      y: -40,
-      scale: 0.96,
+      duration: 0.2,
       ease: "power2.in",
-      duration: 0.35,
-    }, 0)
+    }, 0.02)
+      .to("[data-hero-flank-right]", {
+        x: 60,
+        opacity: 0,
+        duration: 0.2,
+        ease: "power2.in",
+      }, 0.02)
+      .to("[data-hero-sketch]", {
+        opacity: 0,
+        scale: 1.04,
+        duration: 0.25,
+        ease: "power2.inOut",
+      }, 0)
+      .to("[data-hero-reel-mask]", {
+        opacity: 0,
+        duration: 0.08,
+        ease: "power1.out",
+      }, 0)
+      .fromTo(frame, { opacity: 0 }, { opacity: 1, duration: 0.08, ease: "power1.out" }, 0)
+      // Step 1: Ensure frame is positioned at slot bounds at 0.20 progress
+      .to(frame, {
+        top: initial.top,
+        left: initial.left,
+        width: initial.width,
+        height: initial.height,
+        duration: 0.2,
+        ease: "power2.out",
+      }, 0)
+      // Step 2: ONLY the middle image expands to full screen from 0.20 to 0.82
       .to(frame, {
         top: 0,
         left: 0,
@@ -331,14 +541,15 @@ function Hero() {
         height: "100%",
         borderRadius: "0px",
         ease: "power2.inOut",
-        duration: 1,
-      }, 0)
-      .fromTo("[data-expand-img]", { scale: 1.2 }, { scale: 1, ease: "power2.inOut", duration: 1 }, 0)
+        duration: 0.62,
+      }, 0.2)
+      .fromTo("[data-expand-img]", { scale: 1.12 }, { scale: 1, ease: "power2.inOut", duration: 0.62 }, 0.2)
+      // Phase 3 (0.75 -> 1.0): Fullscreen luxury text overlay
       .fromTo(
         "[data-expand-overlay]",
-        { opacity: 0, y: 40 },
-        { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" },
-        0.55,
+        { opacity: 0, y: 50 },
+        { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" },
+        0.75,
       );
 
     const onResize = () => {
@@ -365,31 +576,107 @@ function Hero() {
     };
   }, []);
 
+  // Infinite array tripled (18 items) to ensure 100% seamless looping with zero wrap jumps
+  const infiniteTiles = [...heroSlides, ...heroSlides, ...heroSlides];
+
   return (
-    <section ref={sectionRef} id="top" className="relative h-[260vh] bg-ivory">
-      <div ref={stickyRef} className="sticky top-0 flex h-screen w-full flex-col justify-end overflow-hidden px-[4vw] pb-16 pt-32">
-        {/* The expanding capsule frame: starts at anchor in headline, expands to full screen on scroll */}
+    <section ref={sectionRef} id="top" className="relative h-[280vh] bg-ivory">
+      <div ref={stickyRef} className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden px-[2vw] lg:px-[3vw]">
+        
+        {/* Hand-drawn artisanal dinner table sketch in the background */}
+        <div
+          data-hero-sketch
+          className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center overflow-hidden"
+        >
+          <img
+            src={heroSketchBg}
+            alt="Hand-drawn dinner table illustration"
+            className="size-full object-cover object-center opacity-30 mix-blend-multiply contrast-105"
+          />
+        </div>
+
+        {/* Full-width 3-Column Hero Stage filling the viewport height */}
+        <div className="relative z-10 flex h-full w-full max-w-[1520px] flex-col md:flex-row items-center justify-between gap-4 md:gap-6 lg:gap-8 px-3 sm:px-6 lg:px-8">
+
+          {/* LEFT FLANK: Monumental Brand Statement "every" in Forest Green */}
+          <div
+            data-hero-flank-left
+            className="order-1 flex-1 flex items-center justify-center md:justify-end select-none pr-0 md:pr-4 lg:pr-8 xl:pr-10"
+          >
+            <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[7.5rem] 2xl:text-[8.5rem] leading-none tracking-tight text-forest select-none text-center md:text-right">
+              every
+            </h1>
+          </div>
+
+          {/* CENTER COLUMN: Continuous Infinite Reel spanning FULL HEIGHT of the Hero */}
+          <div className="order-2 shrink-0 relative flex items-center justify-center h-screen w-full md:w-[380px] lg:w-[420px] xl:w-[450px] 2xl:w-[480px] overflow-hidden">
+            
+            {/* The Invisible Anchor Slot defining the exact center viewport position */}
+            <div
+              ref={centerTileSlotRef}
+              className="absolute z-10 w-[84%] sm:w-[86%] md:w-[92%] aspect-[4/5] max-h-[460px] md:max-h-[520px] rounded-3xl pointer-events-none opacity-0"
+            />
+
+            {/* Continuous Vertical Conveyor - Clean, crisp, NO upper or below shadow */}
+            <div
+              data-hero-reel-mask
+              className="relative h-full w-full flex items-center justify-center overflow-hidden"
+            >
+              <div
+                ref={centerTrackRef}
+                className="w-full flex flex-col items-center gap-6 py-6"
+                style={{ willChange: "transform" }}
+              >
+                {infiniteTiles.map((tile, idx) => (
+                  <div
+                    key={tile.id + "-" + idx}
+                    style={{ transformOrigin: "center center" }}
+                    className="relative w-[84%] sm:w-[86%] md:w-[92%] aspect-[4/5] max-h-[460px] md:max-h-[520px] rounded-3xl overflow-hidden border border-ink/15 shadow-none select-none shrink-0 opacity-100"
+                  >
+                    <img
+                      src={tile.src}
+                      alt={tile.alt}
+                      className="size-full object-cover"
+                      loading={idx < 4 ? "eager" : "lazy"}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+
+          {/* RIGHT FLANK: Monumental Brand Statement "matters" in Burgundy */}
+          <div
+            data-hero-flank-right
+            className="order-3 flex-1 flex items-center justify-center md:justify-start select-none pl-0 md:pl-4 lg:pl-8 xl:pl-10"
+          >
+            <h2 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[7.5rem] 2xl:text-[8.5rem] leading-none tracking-tight text-burgundy select-none text-center md:text-left">
+              matters
+            </h2>
+          </div>
+
+        </div>
+
+        {/* The Expanding Center Image Tile: Perfectly locked onto the active center image and expanding fullscreen on scroll */}
         <div
           ref={expandFrameRef}
-          data-hero="pill"
-          className="absolute z-20 overflow-hidden border border-ink/10 shadow-sm"
-          style={{ borderRadius: 999 }}
+          data-hero="center-tile"
+          className="absolute z-30 overflow-hidden border border-ink/15 shadow-none opacity-0 pointer-events-none"
+          style={{ borderRadius: "28px" }}
         >
-          {heroPillImages.map((img, i) => (
-            <img
-              key={img.src}
-              data-expand-img
-              src={img.src}
-              alt={img.alt}
-              className={`absolute inset-0 size-full object-cover transition-opacity duration-1000 ease-in-out ${i === activeIdx ? "opacity-100" : "opacity-0 pointer-events-none"
-                }`}
-            />
-          ))}
+          <img
+            ref={expandImgRef}
+            data-expand-img
+            src={heroSlides[0].src}
+            alt="Precious Meets curated table"
+            className="absolute inset-0 size-full object-cover"
+          />
 
-          {/* Fullscreen expanded overlay */}
+          {/* Fullscreen expanded overlay unveiled on scroll */}
           <div
             data-expand-overlay
-            className="absolute inset-0 flex flex-col justify-end p-[6vw] text-ivory opacity-0 pointer-events-none bg-gradient-to-t from-ink/90 via-ink/35 to-transparent"
+            className="absolute inset-0 flex flex-col justify-end p-[6vw] text-ivory opacity-0 pointer-events-none bg-gradient-to-t from-ink/90 via-ink/40 to-transparent"
           >
             <div className="max-w-3xl">
               <p className="label-mono mb-4 text-ochre">The Precious Meets promise</p>
@@ -403,94 +690,10 @@ function Hero() {
           </div>
         </div>
 
-        {/* Hero headline & copy layer */}
-        <div data-hero-content className="relative z-10 flex w-full flex-col justify-end">
-          <h1 className="font-display text-[13vw] sm:text-[10.5vw] md:text-[8vw] lg:text-[7.5vw] leading-[0.92] tracking-tight">
-            {/* Line 1: Six [pill] strangers. */}
-            <div className="line-mask overflow-visible pt-10 -mt-10">
-              <div data-hero="line" className="flex items-center flex-wrap gap-x-[1.2vw]">
-                <span>Six</span>
-                <div className="relative inline-flex items-center">
-                  {/* Handwritten style doodle arrow + annotation above pill */}
-                  <div
-                    data-hero="annotation"
-                    className="absolute -top-9 sm:-top-11 left-1/2 -translate-x-1/2 flex items-center gap-1.5 whitespace-nowrap pointer-events-none select-none z-30"
-                  >
-                    <span className="label-mono text-[10px] md:text-xs tracking-wider uppercase font-semibold text-ochre">
-                      You + five others
-                    </span>
-                    <svg
-                      className="w-5 h-5 text-ochre -rotate-12 translate-y-1"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="#C6A568"
-                      strokeWidth="2.4"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M 4 5 C 9 5, 14 9, 16 16" />
-                      <path d="M 11 14 l 5 3 3 -4" />
-                    </svg>
-                  </div>
-
-                  {/* Anchor that reserves the exact space for the capsule in the text flow */}
-                  <span
-                    ref={anchorRef}
-                    className="inline-block h-[0.72em] w-[2.2em] md:h-[0.78em] md:w-[2.4em] mx-[0.18em] -translate-y-[0.06em] align-middle opacity-0 pointer-events-none"
-                  />
-                </div>
-                <span>strangers.</span>
-              </div>
-            </div>
-
-            {/* Line 2: One table. */}
-            <div className="line-mask">
-              <div data-hero="line" className="block">
-                One table.
-              </div>
-            </div>
-
-            {/* Line 3: Every meet matters. with animated doodle underline */}
-            <div className="relative inline-block w-fit">
-              <div className="line-mask">
-                <div data-hero="line" className="block">
-                  <span>Every meet </span>
-                  <span className="italic text-burgundy">matters.</span>
-                </div>
-              </div>
-              {/* Animated Brand Deep Burgundy Underline */}
-              <svg
-                className="absolute -bottom-2 md:-bottom-4 left-0 w-[104%] -left-[2%] h-4 md:h-7 overflow-visible pointer-events-none"
-                viewBox="0 0 640 32"
-                fill="none"
-              >
-                <path
-                  data-hero="underline-path"
-                  d="M 6 22 C 140 10, 280 26, 440 14 C 520 8, 590 18, 634 12"
-                  stroke="#691C35"
-                  strokeWidth="5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-          </h1>
-
-          <div className="mt-12 grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
-            <div data-hero="copy" className="max-w-md">
-              <p className="text-base sm:text-lg leading-relaxed text-muted-foreground">
-                Take a short quiz. Every week, we curate a table of five people worth meeting in your city.
-              </p>
-            </div>
-            <div data-hero="cta"><CtaButton href="/quiz" tone="burgundy">Discover your next meet</CtaButton></div>
-          </div>
-        </div>
       </div>
     </section>
   );
 }
-
-
 
 const statementStaticLines = [
   "Life gets busy.",
@@ -518,56 +721,63 @@ function Statement() {
   }, []);
 
   return (
-    <section className="relative flex min-h-screen flex-col items-center justify-center px-[4vw] py-32 text-center overflow-hidden">
-      <h2 className="font-display text-[9vw] leading-[0.98] md:text-[6vw]">
-        {/* Line 1: Life gets busy. (Pure typography, zero doodles) */}
-        <span className="line-mask overflow-visible">
-          <span data-reveal className="relative inline-block">
-            <span>Life gets busy.</span>
-          </span>
-        </span>
+    <section className="relative flex min-h-[90vh] flex-col items-center justify-center px-[4vw] pt-40 pb-32 text-center overflow-hidden bg-ivory">
+      {/* Subtle Warm Atmospheric Glow */}
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+        <div className="w-[60vw] h-[60vw] max-w-[700px] max-h-[700px] rounded-full bg-[#C6A568]/12 blur-[140px] pointer-events-none select-none" />
+      </div>
 
-        {/* Line 2: Circles get smaller. (Pure typography, zero doodles) */}
-        <span className="line-mask overflow-visible">
-          <span data-reveal className="relative inline-block">
-            <span>Circles get smaller.</span>
-          </span>
-        </span>
-
-        {/* Line 3: There is always room at the table. (Pure typography, zero doodles) */}
-        <span className="line-mask overflow-visible">
-          <span data-reveal className="relative inline-block">
-            <span>There is always room at the table.</span>
-          </span>
-        </span>
-
-        {/* Line 4: Automatically rotating line with smooth typography transition */}
-        <span className="line-mask overflow-visible pt-1">
-          <span data-reveal className="relative inline-block">
-            <span className="relative inline-flex items-center justify-center overflow-hidden h-[1.15em] align-baseline px-2">
-              <AnimatePresence mode="popLayout">
-                <motion.span
-                  key={activeIdx}
-                  initial={{ y: "115%", opacity: 0 }}
-                  animate={{ y: "0%", opacity: 1 }}
-                  exit={{ y: "-115%", opacity: 0 }}
-                  transition={{
-                    duration: 0.65,
-                    ease: [0.19, 1, 0.22, 1],
-                  }}
-                  className="inline-block italic text-burgundy font-serif whitespace-nowrap"
-                >
-                  {statementRotatingLines[activeIdx]}
-                </motion.span>
-              </AnimatePresence>
+      <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center">
+        <h2 className="font-display text-[9vw] leading-[1.02] md:text-[5.5vw] text-ink select-none">
+          {/* Line 1: Life gets busy. */}
+          <span className="line-mask overflow-visible block">
+            <span data-reveal className="relative inline-block">
+              <span>Life gets busy.</span>
             </span>
           </span>
-        </span>
-      </h2>
 
-      {/* Clean CTA Button */}
-      <div className="relative mt-16 flex flex-col items-center">
-        <CtaButton tone="burgundy" href="/quiz">Find your table</CtaButton>
+          {/* Line 2: Circles get smaller. */}
+          <span className="line-mask overflow-visible block">
+            <span data-reveal className="relative inline-block">
+              <span>Circles get smaller.</span>
+            </span>
+          </span>
+
+          {/* Line 3: There is always room at the table. */}
+          <span className="line-mask overflow-visible block">
+            <span data-reveal className="relative inline-block">
+              <span>There is always room at the table.</span>
+            </span>
+          </span>
+
+          {/* Line 4: Automatically rotating line with smooth typography transition */}
+          <span className="line-mask overflow-visible pt-2 block">
+            <span data-reveal className="relative inline-block">
+              <span className="relative inline-flex items-center justify-center overflow-hidden h-[1.25em] align-baseline px-2">
+                <AnimatePresence mode="popLayout">
+                  <motion.span
+                    key={activeIdx}
+                    initial={{ y: "115%", opacity: 0 }}
+                    animate={{ y: "0%", opacity: 1 }}
+                    exit={{ y: "-115%", opacity: 0 }}
+                    transition={{
+                      duration: 0.65,
+                      ease: [0.19, 1, 0.22, 1],
+                    }}
+                    className="inline-block italic text-burgundy font-serif whitespace-nowrap"
+                  >
+                    {statementRotatingLines[activeIdx]}
+                  </motion.span>
+                </AnimatePresence>
+              </span>
+            </span>
+          </span>
+        </h2>
+
+        {/* Clean Luxury CTA */}
+        <div className="relative mt-16 sm:mt-20 flex flex-col items-center">
+          <CtaButton tone="burgundy" href="/quiz">Find your table</CtaButton>
+        </div>
       </div>
     </section>
   );
@@ -1289,23 +1499,58 @@ function Index() {
         gsap.set(underline, { strokeDasharray: len, strokeDashoffset: len });
       }
 
+      const heroEase = "power3.out";
+      const heroItemDuration = 1.1;
+      const heroItemDelayGap = 0.32;
+      const firstItemStart = 0.35;
+
       // Hero entrance sequence (paused until preloader curtain reveals)
       heroEntranceRef.current = gsap.timeline({
         paused: true,
-        defaults: { ease },
         onComplete: () => {
           if (typeof window !== "undefined") {
             window.dispatchEvent(new Event("resize"));
+            ScrollTrigger.refresh();
           }
         },
       })
-        .from("[data-nav]", { y: -30, opacity: 0, duration: 1 })
-        .from("[data-hero=line]", { yPercent: 110, duration: 1.2, stagger: 0.1 }, "-=0.5")
-        .from("[data-hero=pill]", { yPercent: 110, scale: 0.8, opacity: 0, duration: 1.1 }, "-=1.1")
-        .from("[data-hero=annotation]", { y: -12, opacity: 0, duration: 0.8, ease: "back.out(1.7)" }, "-=0.7")
-        .to("[data-hero=underline-path]", { strokeDashoffset: 0, duration: 1.3, ease: "power2.inOut" }, "-=0.4")
-        .from("[data-hero=copy]", { y: 20, opacity: 0, duration: 0.9 }, "-=0.7")
-        .from("[data-hero=cta]", { y: 20, opacity: 0, duration: 0.9 }, "-=0.7");
+        // Top navigation bar glides down first
+        .from("[data-nav]", { y: -25, opacity: 0, duration: 0.85, ease: "power2.out" }, 0)
+        // Background artisanal dinner sketch fades in softly
+        .from("[data-hero-sketch]", { opacity: 0, duration: 1.2, ease: "power2.out" }, 0.1)
+        // 1. Firstly: 'every' text comes in sliding from top
+        .from(
+          "[data-hero-flank-left]",
+          {
+            y: -90,
+            opacity: 0,
+            duration: heroItemDuration,
+            ease: heroEase,
+          },
+          firstItemStart,
+        )
+        // 2. Then: the images reel comes in sliding from top with consistent speed & delay
+        .from(
+          "[data-hero-reel-mask]",
+          {
+            y: -90,
+            opacity: 0,
+            duration: heroItemDuration,
+            ease: heroEase,
+          },
+          firstItemStart + heroItemDelayGap,
+        )
+        // 3. And then: 'matters' text comes in sliding from top with the exact same speed & delay
+        .from(
+          "[data-hero-flank-right]",
+          {
+            y: -90,
+            opacity: 0,
+            duration: heroItemDuration,
+            ease: heroEase,
+          },
+          firstItemStart + heroItemDelayGap * 2,
+        );
 
       if (preloaderDoneRef.current) {
         heroEntranceRef.current.play();
