@@ -325,6 +325,8 @@ function Hero() {
   const expandFrameRef = useRef<HTMLDivElement>(null);
   const expandImgRef = useRef<HTMLImageElement>(null);
   const isScrollingRef = useRef(false);
+  const activeHiddenCardRef = useRef<HTMLElement | null>(null);
+  const startPosRef = useRef<{ top: number; left: number; width: number; height: number } | null>(null);
 
   // Smooth continuous infinite vertical marquee
   useEffect(() => {
@@ -403,7 +405,7 @@ function Hero() {
     };
   }, []);
 
-  // GSAP ScrollTrigger: Center tile slot expands to full screen on scroll down
+  // GSAP ScrollTrigger: Locks onto the exact centered card and expands it seamlessly to full screen
   useEffect(() => {
     const section = sectionRef.current;
     const sticky = stickyRef.current;
@@ -417,32 +419,9 @@ function Hero() {
     }
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    const syncBounds = () => {
-      const sRect = slot.getBoundingClientRect();
-      const stickyRect = sticky.getBoundingClientRect();
-      return {
-        top: sRect.top - stickyRect.top,
-        left: sRect.left - stickyRect.left,
-        width: sRect.width,
-        height: sRect.height,
-      };
-    };
-
-    const initial = syncBounds();
-    gsap.set(frame, {
-      top: initial.top,
-      left: initial.left,
-      width: initial.width,
-      height: initial.height,
-      borderRadius: "28px",
-      opacity: 0,
-      pointerEvents: "none",
-    });
-
     if (reduce) return;
 
-    // Helper to find the card in the reel that is physically closest to the middle
+    // Helper to find the card in the reel that is physically closest to the vertical center of the slot
     const getCenteredCard = () => {
       const slotRect = slot.getBoundingClientRect();
       const slotCenterY = slotRect.top + slotRect.height / 2;
@@ -462,116 +441,121 @@ function Hero() {
       return closestChild;
     };
 
-    const tl = gsap.timeline({
-      paused: true,
-      scrollTrigger: {
-        trigger: section,
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 0.8,
-        onUpdate: (self) => {
-          const scrolling = self.progress > 0.005;
-
-          if (scrolling && !isScrollingRef.current) {
-            // Scroll just started: Freeze the continuous marquee and lock onto the EXACT middle card
+    const trigger = ScrollTrigger.create({
+      trigger: section,
+      start: "top top",
+      end: "bottom bottom",
+      scrub: 0.8,
+      onUpdate: (self) => {
+        if (self.progress > 0) {
+          // On first scroll down: Lock onto the EXACT center card
+          if (!isScrollingRef.current) {
             isScrollingRef.current = true;
             const centered = getCenteredCard();
             if (centered) {
+              const cardRect = centered.getBoundingClientRect();
+              const stickyRect = sticky.getBoundingClientRect();
+
+              startPosRef.current = {
+                top: cardRect.top - stickyRect.top,
+                left: cardRect.left - stickyRect.left,
+                width: cardRect.width,
+                height: cardRect.height,
+              };
+
               const img = centered.querySelector("img");
               if (img && expandImgRef.current) {
                 expandImgRef.current.src = img.src;
-                expandImgRef.current.alt = img.alt || "Curated dinner table";
+                expandImgRef.current.alt = img.alt || "Precious Meets curated table";
               }
+
+              // Hide the conveyor card so there is ZERO overlap, zero ghosting, zero cut
+              centered.style.opacity = "0";
+              activeHiddenCardRef.current = centered;
+
+              gsap.set(frame, {
+                top: startPosRef.current.top,
+                left: startPosRef.current.left,
+                width: startPosRef.current.width,
+                height: startPosRef.current.height,
+                borderRadius: "28px",
+                borderWidth: "1px",
+                opacity: 1,
+                display: "block",
+              });
             }
-          } else if (!scrolling && isScrollingRef.current) {
-            // Returned to top: Resume continuous scrolling
-            isScrollingRef.current = false;
           }
 
-          if (self.progress === 0) {
-            gsap.set(frame, { opacity: 0, pointerEvents: "none" });
-            gsap.set("[data-hero-reel-mask]", { opacity: 1 });
-            isScrollingRef.current = false;
+          // Mathematical interpolation directly mapped to scroll scrub
+          if (startPosRef.current) {
+            const stickyRect = sticky.getBoundingClientRect();
+            const start = startPosRef.current;
+
+            // Expand progress from 0.0 to 0.80
+            const p = Math.min(1, Math.max(0, self.progress / 0.80));
+            // Power2 in-out ease curve
+            const easeP = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+
+            const curTop = start.top * (1 - easeP);
+            const curLeft = start.left * (1 - easeP);
+            const curWidth = start.width + (stickyRect.width - start.width) * easeP;
+            const curHeight = start.height + (stickyRect.height - start.height) * easeP;
+            const curRadius = 28 * (1 - easeP);
+            const curBorder = easeP > 0.8 ? "0px" : "1px";
+
+            gsap.set(frame, {
+              top: curTop,
+              left: curLeft,
+              width: curWidth,
+              height: curHeight,
+              borderRadius: `${curRadius}px`,
+              borderWidth: curBorder,
+            });
+
+            // Cinematic subtle zoom on the expanding image
+            if (expandImgRef.current) {
+              const imgScale = 1 + 0.05 * easeP;
+              gsap.set(expandImgRef.current, { scale: imgScale });
+            }
+
+            // Other cards in the conveyor smoothly fade out during first 22% of scroll
+            const reelFade = Math.min(1, self.progress / 0.22);
+            gsap.set("[data-hero-reel-mask]", { opacity: 1 - reelFade });
+
+            // "every" and "matters" glide and fade out
+            const flankP = Math.min(1, self.progress / 0.25);
+            gsap.set("[data-hero-flank-left]", { x: -70 * flankP, opacity: 1 - flankP });
+            gsap.set("[data-hero-flank-right]", { x: 70 * flankP, opacity: 1 - flankP });
+            gsap.set("[data-hero-sketch]", { opacity: 0.3 * (1 - flankP) });
+
+            // Fullscreen luxury text overlay unveils (0.70 to 1.0)
+            const overlayP = Math.max(0, Math.min(1, (self.progress - 0.70) / 0.30));
+            gsap.set("[data-expand-overlay]", {
+              opacity: overlayP,
+              y: 40 * (1 - overlayP),
+              pointerEvents: overlayP > 0.8 ? "auto" : "none",
+            });
           }
-        },
+        } else if (self.progress === 0 && isScrollingRef.current) {
+          // Returned back to top: Seamlessly restore conveyor motion
+          isScrollingRef.current = false;
+          if (activeHiddenCardRef.current) {
+            activeHiddenCardRef.current.style.opacity = "1";
+            activeHiddenCardRef.current = null;
+          }
+          gsap.set(frame, { opacity: 0, display: "none" });
+          gsap.set("[data-hero-reel-mask]", { opacity: 1 });
+          gsap.set("[data-hero-flank-left]", { x: 0, opacity: 1 });
+          gsap.set("[data-hero-flank-right]", { x: 0, opacity: 1 });
+          gsap.set("[data-hero-sketch]", { opacity: 0.3 });
+          gsap.set("[data-expand-overlay]", { opacity: 0, y: 40, pointerEvents: "none" });
+          startPosRef.current = null;
+        }
       },
     });
 
-    // Phase 1 (0.0 -> 0.20): Left & right words fade/glide out, background sketch fades out,
-    // and expand frame seamlessly takes over the middle card with identical position
-    tl.to("[data-hero-flank-left]", {
-      x: -60,
-      opacity: 0,
-      duration: 0.2,
-      ease: "power2.in",
-    }, 0.02)
-      .to("[data-hero-flank-right]", {
-        x: 60,
-        opacity: 0,
-        duration: 0.2,
-        ease: "power2.in",
-      }, 0.02)
-      .to("[data-hero-sketch]", {
-        opacity: 0,
-        scale: 1.04,
-        duration: 0.25,
-        ease: "power2.inOut",
-      }, 0)
-      .to("[data-hero-reel-mask]", {
-        opacity: 0,
-        duration: 0.08,
-        ease: "power1.out",
-      }, 0)
-      .fromTo(frame, { opacity: 0 }, { opacity: 1, duration: 0.08, ease: "power1.out" }, 0)
-      // Step 1: Ensure frame is positioned at slot bounds at 0.20 progress
-      .to(frame, {
-        top: initial.top,
-        left: initial.left,
-        width: initial.width,
-        height: initial.height,
-        duration: 0.2,
-        ease: "power2.out",
-      }, 0)
-      // Step 2: ONLY the middle image expands to full screen from 0.20 to 0.82
-      .to(frame, {
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        borderRadius: "0px",
-        ease: "power2.inOut",
-        duration: 0.62,
-      }, 0.2)
-      .fromTo("[data-expand-img]", { scale: 1.12 }, { scale: 1, ease: "power2.inOut", duration: 0.62 }, 0.2)
-      // Phase 3 (0.75 -> 1.0): Fullscreen luxury text overlay
-      .fromTo(
-        "[data-expand-overlay]",
-        { opacity: 0, y: 50 },
-        { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" },
-        0.75,
-      );
-
-    const onResize = () => {
-      ScrollTrigger.refresh();
-      if (ScrollTrigger.isInViewport(section)) {
-        const b = syncBounds();
-        if (tl.progress() === 0) {
-          gsap.set(frame, {
-            top: b.top,
-            left: b.left,
-            width: b.width,
-            height: b.height,
-          });
-        }
-      }
-    };
-
-    window.addEventListener("resize", onResize);
-    document.fonts?.ready?.then(onResize);
-
     return () => {
-      tl.kill();
-      window.removeEventListener("resize", onResize);
+      trigger.kill();
     };
   }, []);
 
@@ -657,19 +641,19 @@ function Hero() {
 
         </div>
 
-        {/* The Expanding Center Image Tile: Perfectly locked onto the active center image and expanding fullscreen on scroll */}
+        {/* The Expanding Center Image Tile: Seamlessly takes over the center card and expands to fullscreen */}
         <div
           ref={expandFrameRef}
           data-hero="center-tile"
-          className="absolute z-30 overflow-hidden border border-ink/15 shadow-none opacity-0 pointer-events-none"
-          style={{ borderRadius: "28px" }}
+          className="absolute z-30 overflow-hidden border border-ink/15 shadow-2xl opacity-0 pointer-events-none"
+          style={{ borderRadius: "28px", display: "none" }}
         >
           <img
             ref={expandImgRef}
             data-expand-img
             src={heroSlides[0].src}
             alt="Precious Meets curated table"
-            className="absolute inset-0 size-full object-cover"
+            className="absolute inset-0 size-full object-cover select-none"
           />
 
           {/* Fullscreen expanded overlay unveiled on scroll */}
@@ -843,10 +827,8 @@ function Geometry() {
                 className="w-full h-full overflow-visible"
                 aria-hidden
               >
-                {/* Outer Concentric Architectural Guide Rings */}
+                {/* Concentric Table Orbit Ring */}
                 <g data-rings>
-                  <circle cx="300" cy="300" r="275" fill="none" stroke="#E6DBCC" strokeWidth="1" />
-                  <circle cx="300" cy="300" r="236" fill="none" stroke="#E1D4C3" strokeWidth="0.8" strokeDasharray="3 4" />
                   <circle cx="300" cy="300" r="182" fill="none" stroke="#D7C8B4" strokeWidth="1" />
                 </g>
 
