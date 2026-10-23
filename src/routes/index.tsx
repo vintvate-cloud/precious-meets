@@ -832,7 +832,7 @@ const tableSeats = [
 
 function Geometry() {
   return (
-    <section data-geo className="relative h-[340vh]">
+    <section data-geo className="relative h-[340vh] bg-[#FAF7F2] text-ink select-none">
       <div className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden px-[4vw]">
         <div className="grid h-full w-full max-w-6xl grid-cols-1 items-center gap-8 lg:grid-cols-2">
           {/* Left Column: Architectural Dinner Table Diagram based on reference image */}
@@ -843,13 +843,6 @@ function Geometry() {
                 className="w-full h-full overflow-visible"
                 aria-hidden
               >
-                {/* Outer Concentric Architectural Guide Rings */}
-                <g data-rings>
-                  <circle cx="300" cy="300" r="275" fill="none" stroke="#E6DBCC" strokeWidth="1" />
-                  <circle cx="300" cy="300" r="236" fill="none" stroke="#E1D4C3" strokeWidth="0.8" strokeDasharray="3 4" />
-                  <circle cx="300" cy="300" r="182" fill="none" stroke="#D7C8B4" strokeWidth="1" />
-                </g>
-
                 {/* Central Table Disc */}
                 <circle
                   data-table-disc
@@ -1296,8 +1289,40 @@ function Collage() {
       },
     });
 
-    // Step 0: Blank canvas hold (user enters, sees an unblemished stage with quiet ambient watermark)
-    tl.to({}, { duration: 0.2 });
+    // Step 0: Blank canvas transition from warm ivory into brand forest green (#5F7045) in the stories section
+    tl.to(
+      stage,
+      {
+        backgroundColor: "#5F7045",
+        duration: 0.65,
+        ease: "power2.inOut",
+      },
+      0,
+    )
+      .to(
+        "[data-stories-watermark-sub]",
+        {
+          color: "rgba(248, 242, 231, 0.6)",
+          duration: 0.65,
+        },
+        0,
+      )
+      .to(
+        "[data-stories-watermark-title]",
+        {
+          color: "rgba(248, 242, 231, 0.28)",
+          duration: 0.65,
+        },
+        0,
+      )
+      .to(
+        "[data-stories-watermark-em]",
+        {
+          color: "rgba(198, 165, 104, 0.6)",
+          duration: 0.65,
+        },
+        0,
+      );
 
     // Step 1 to 6: Sequential two-beat choreography:
     // Beat A: Picture slides down from the top into its postcard place on the board
@@ -1366,7 +1391,7 @@ function Collage() {
     <section
       id="stories"
       ref={sectionRef}
-      className="relative h-[520vh] bg-ivory select-none"
+      className="relative h-[520vh] bg-[#5F7045] select-none"
     >
       {/* Sticky Fullscreen Pinboard Stage */}
       <div
@@ -1375,18 +1400,29 @@ function Collage() {
       >
         {/* Subtle Warm Atmospheric Candlelight Glow in Center */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="w-[70vw] h-[70vw] max-w-[850px] max-h-[850px] rounded-full bg-[#C6A568]/12 blur-[160px] pointer-events-none" />
-          <div className="w-[45vw] h-[45vw] max-w-[550px] max-h-[550px] rounded-full bg-[#691C35]/10 blur-[140px] pointer-events-none" />
+          <div className="w-[70vw] h-[70vw] max-w-[850px] max-h-[850px] rounded-full bg-[#C6A568]/18 blur-[160px] pointer-events-none" />
+          <div className="w-[45vw] h-[45vw] max-w-[550px] max-h-[550px] rounded-full bg-[#691C35]/14 blur-[140px] pointer-events-none" />
         </div>
 
         {/* Ambient Pinboard Watermark Title (Visible on blank canvas before cards land) */}
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center px-4 select-none">
-          <span className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.28em] text-[#171514]/40 mb-3">
+          <span
+            data-stories-watermark-sub
+            className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.28em] text-[#171514]/40 mb-3"
+          >
             Moments From The Table · Delhi NCR
           </span>
-          <h2 className="font-display text-4xl sm:text-6xl md:text-7xl lg:text-8xl text-[#171514]/20 tracking-tight leading-none">
+          <h2
+            data-stories-watermark-title
+            className="font-display text-4xl sm:text-6xl md:text-7xl lg:text-8xl text-[#171514]/20 tracking-tight leading-none"
+          >
             Six strangers.<br />
-            <em className="font-serif italic text-burgundy/25">Stories that linger.</em>
+            <em
+              data-stories-watermark-em
+              className="font-serif italic text-burgundy/25"
+            >
+              Stories that linger.
+            </em>
           </h2>
         </div>
 
@@ -1980,9 +2016,6 @@ function Index() {
         }, 1.34 + idx * 0.08);
       });
 
-      // Outer guide rings rotate slightly with precision
-      g.to("[data-rings]", { rotation: 15, transformOrigin: "300px 300px", duration: 1.6, ease: "power1.inOut" }, 1.0);
-
       // Phase 3 (2 -> 3): "One table. One empty chair. Sunday, 7 PM."
       // Frame 1 -> Frame 2. Seat 3 (the empty chair) slides into place.
       g.to("[data-geo-text='1']", { opacity: 0, y: -26, duration: 0.3 }, 2.05)
@@ -2008,8 +2041,7 @@ function Index() {
         .to("[data-table-center]", { opacity: 1, duration: 0.6 }, 2.2)
         .to("[data-table-caption]", { opacity: 1, duration: 0.6 }, 2.3);
 
-      // Day-to-Night Ambient Transition (Collage / "Different lives. One shared table")
-      // Transitions into #5F7045 (Forest Green) at "Different lives. One shared table" (#stories)
+      // Ambient Green Transition into #5F7045 (Forest Green) happens strictly when entering the stories section
       gsap.fromTo(
         root.current,
         {
@@ -2022,9 +2054,9 @@ function Index() {
           ease: "none",
           scrollTrigger: {
             trigger: "#stories",
-            start: "top 85%",
-            end: "top 20%",
-            scrub: 0.6,
+            start: "top top",
+            end: "+=600",
+            scrub: 0.8,
             invalidateOnRefresh: true,
           },
         }
