@@ -1,15 +1,6 @@
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { SosModal } from "@/components/SosModal";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   ShieldCheck,
@@ -25,6 +16,9 @@ import {
 
 export function Navbar() {
   const { user, profile, isAdmin, signOut } = useAuth();
+  const location = useLocation();
+  const isDashboard = location.pathname.startsWith("/dashboard");
+  const isMemberAuthenticated = Boolean(user || isDashboard);
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -44,133 +38,85 @@ export function Navbar() {
   }, []);
 
   return (
-    <header className="fixed inset-x-0 top-4 z-50 flex justify-center px-4 pointer-events-none">
+    <header data-nav className="fixed inset-x-0 top-4 z-50 flex justify-center px-4 pointer-events-none">
       <div ref={menuRef} className="relative w-full max-w-4xl">
-        <nav className="pointer-events-auto flex w-full items-center justify-between rounded-full border border-border/80 bg-ivory/95 py-2 pl-5 pr-2 shadow-sm backdrop-blur-md">
-          <div className="flex items-center gap-5 sm:gap-6">
-            <Link to="/" className="font-display text-2xl tracking-tight text-foreground">
-              Precious<em className="text-burgundy not-italic font-normal">meets</em>
+        <nav
+          data-nav-bar
+          style={{
+            background: "linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.65) 100%)",
+            backdropFilter: "blur(28px) saturate(190%) contrast(95%)",
+            WebkitBackdropFilter: "blur(28px) saturate(190%) contrast(95%)",
+          }}
+          className="pointer-events-auto flex w-full items-center justify-between rounded-full border border-black/5 py-2 pl-3.5 sm:pl-5 pr-2 text-[#171514] shadow-[0_12px_32px_-10px_rgba(23,21,20,0.08),_0_2px_8px_-2px_rgba(23,21,20,0.03)] transition-all duration-300"
+        >
+          {/* Left: Brand Monogram + Logo */}
+          <div className="flex items-center gap-3">
+            <Link to="/" className="flex items-center gap-2.5 group">
+              <span className="grid size-8 place-items-center rounded-full bg-white border border-black/5 text-[#691C35] transition-transform duration-300 group-hover:scale-105 shadow-xs">
+                <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="8" stroke="#691C35" strokeWidth="2" />
+                  <circle cx="12" cy="12" r="3" fill="#C6A568" />
+                </svg>
+              </span>
+              <span className="font-display text-xl sm:text-2xl text-[#171514] tracking-tight">
+                Precious<em className="text-[#691C35] not-italic font-serif"> meets</em>
+              </span>
             </Link>
-            <div className="hidden items-center gap-4 md:flex">
-              <Link
-                to="/philosophy"
-                className="text-xs font-semibold text-foreground/85 transition-colors hover:text-burgundy flex items-center gap-1"
-              >
-                Philosophy
-                <span className="text-[9px] bg-forest/15 text-forest px-1.5 py-0.2 rounded-full font-mono">Safety USP</span>
-              </Link>
-              <Link
-                to="/experiences"
-                className="text-xs font-medium text-foreground/80 transition-colors hover:text-burgundy"
-              >
-                Meets
-              </Link>
-              <Link
-                to="/how-it-works"
-                className="text-xs font-medium text-foreground/80 transition-colors hover:text-burgundy"
-              >
-                How It Works
-              </Link>
-              <Link
-                to="/safety"
-                className="text-xs font-medium text-foreground/80 transition-colors hover:text-burgundy"
-              >
-                Safety Code
-              </Link>
-            </div>
           </div>
 
+          {/* Right Controls: Ambient City Pill + CTA Button + User Avatar + Menu Toggle Button */}
           <div className="flex items-center gap-2">
+            {/* Ambient City Pill */}
+            <div className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-white/70 px-3 py-1.5 text-[11px] font-mono tracking-wider text-[#171514]/75 border border-black/5">
+              <span className="size-1.5 rounded-full bg-[#5F7045] animate-pulse" />
+              <span>Delhi NCR</span>
+            </div>
+
+            {/* Solid Pill CTA Button -> routes to /quiz */}
             <Link
               to="/quiz"
-              className="hidden items-center gap-1.5 rounded-full bg-burgundy px-4 py-2 text-xs font-semibold uppercase tracking-wider text-ivory transition-transform hover:scale-105 sm:inline-flex"
+              className="rounded-full bg-white text-[#171514] border border-black/10 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold tracking-tight shadow-xs transition-all duration-300 hover:bg-[#691C35] hover:text-white hover:scale-105 active:scale-95"
             >
-              <Sparkles className="size-3.5 text-ochre" />
-              Take the Quiz
+              Save a seat
             </Link>
 
-            {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger className="rounded-full ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer">
-                  <Avatar className="size-9 border border-border">
-                    <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.display_name || "User"} />
-                    <AvatarFallback className="bg-sage text-xs font-semibold text-forest">
-                      {profile?.display_name?.slice(0, 2).toUpperCase() || "ME"}
-                    </AvatarFallback>
-                  </Avatar>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-card text-card-foreground shadow-lg">
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{profile?.display_name || "Attendee"}</p>
-                      <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
-                      {profile?.identity_verified && (
-                        <span className="mt-1 inline-flex items-center gap-1 text-[10px] font-medium text-forest">
-                          <ShieldCheck className="size-3 text-forest" /> Aadhaar Verified
-                        </span>
-                      )}
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/dashboard" className="flex items-center gap-2 cursor-pointer">
-                      <User className="size-4" /> Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/dashboard/bookings" className="flex items-center gap-2 cursor-pointer">
-                      <Calendar className="size-4" /> My Meets
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/dashboard/safety" className="flex items-center gap-2 cursor-pointer">
-                      <ShieldAlert className="size-4" /> Safety & SOS
-                    </Link>
-                  </DropdownMenuItem>
-                  {isAdmin && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild>
-                        <Link to="/admin" className="flex items-center gap-2 text-burgundy cursor-pointer font-medium">
-                          <ShieldCheck className="size-4" /> Admin Console
-                        </Link>
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => signOut()} className="flex items-center gap-2 text-destructive cursor-pointer">
-                    <LogOut className="size-4" /> Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
+            {/* User Profile Avatar if authenticated or in dashboard */}
+            {(user || isDashboard) && (
               <Link
-                to="/login"
-                className="rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-foreground transition-colors hover:bg-sage/40"
+                to="/dashboard"
+                title="Go to Dashboard"
+                className="hidden sm:inline-flex rounded-full ring-offset-background transition-transform hover:scale-105 cursor-pointer"
               >
-                Sign In
+                <Avatar className="size-8 sm:size-9 border border-black/10 shadow-xs">
+                  <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.display_name || "User"} />
+                  <AvatarFallback className="bg-sage text-xs font-semibold text-forest">
+                    {profile?.display_name?.slice(0, 2).toUpperCase() || "ME"}
+                  </AvatarFallback>
+                </Avatar>
               </Link>
             )}
 
-            {/* Compact Dropdown Menu Toggle Button */}
+            {/* Compact Dropdown Menu Toggle Button - ALWAYS visible on all screen sizes */}
             <button
               aria-label={open ? "Close menu" : "Open menu"}
               aria-expanded={open}
               onClick={() => setOpen((o) => !o)}
-              className="grid size-9 place-items-center rounded-full bg-ink text-ivory hover:bg-burgundy transition-all duration-300 md:hidden cursor-pointer"
+              className="relative grid size-9 sm:size-10 place-items-center rounded-full bg-[#171514] text-white shadow-sm transition-all duration-300 hover:bg-[#691C35] hover:scale-105 active:scale-95 cursor-pointer"
             >
-              <span className={`block h-0.5 w-4 bg-ivory transition-transform duration-300 ${open ? "rotate-45 translate-y-1" : "-translate-y-0.5"}`} />
-              <span className={`block h-0.5 w-4 bg-ivory transition-transform duration-300 ${open ? "-rotate-45 -translate-y-0.5" : "translate-y-0.5"}`} />
+              <span className={`absolute h-px w-3.5 sm:w-4 bg-white transition-transform duration-500 ${open ? "rotate-45" : "-translate-y-1"}`} />
+              <span className={`absolute h-px w-3.5 sm:w-4 bg-white transition-transform duration-500 ${open ? "-rotate-45" : "translate-y-1"}`} />
             </button>
           </div>
         </nav>
 
-        {/* COMPACT DROPDOWN POPUP FOR NAVBAR */}
+        {/* COMPACT DROPDOWN POPUP */}
         {open && (
-          <div className="pointer-events-auto absolute top-full right-0 mt-2 w-72 overflow-hidden rounded-2xl border border-border/80 bg-card/95 p-2.5 text-card-foreground shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-200 md:hidden">
-            <div className="px-3 py-2 border-b border-border/60 mb-1 flex items-center justify-between text-[10px] font-mono uppercase text-muted-foreground">
-              <span>Navigation</span>
-              <span className="text-forest font-semibold flex items-center gap-1">
+          <div className="pointer-events-auto absolute top-full right-0 mt-2.5 w-72 sm:w-80 overflow-hidden rounded-2xl border border-white/80 bg-white/95 p-2.5 text-[#171514] shadow-[0_20px_50px_rgba(0,0,0,0.18)] backdrop-blur-2xl animate-in fade-in slide-in-from-top-3 duration-200">
+            <div className="px-3 py-2 border-b border-[#171514]/10 mb-1 flex items-center justify-between">
+              <span className="label-mono text-[10px] uppercase font-bold text-muted-foreground">
+                Navigation
+              </span>
+              <span className="text-[10px] text-forest font-semibold flex items-center gap-1">
                 <ShieldCheck className="size-3" /> 100% Aadhaar Verified
               </span>
             </div>
@@ -179,9 +125,9 @@ export function Navbar() {
               <Link
                 to="/quiz"
                 onClick={() => setOpen(false)}
-                className="flex items-center justify-between rounded-xl bg-burgundy px-3 py-2.5 text-xs font-semibold text-ivory hover:bg-burgundy/90 shadow-xs"
+                className="flex items-center justify-between rounded-xl bg-burgundy px-3 py-2.5 text-xs font-semibold text-ivory hover:bg-burgundy/90 shadow-xs transition-colors"
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   <Sparkles className="size-4 text-ochre" />
                   <span>Take the Discovery Quiz</span>
                 </div>
@@ -193,17 +139,19 @@ export function Navbar() {
                 onClick={() => setOpen(false)}
                 className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold text-foreground hover:bg-sage/40 transition-colors"
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   <ShieldCheck className="size-4 text-forest" />
-                  <span>The Safety Philosophy</span>
+                  <span>The Philosophy & Safety</span>
                 </div>
-                <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-forest/15 text-forest">USP</span>
+                <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-forest/15 text-forest">
+                  Women-First
+                </span>
               </Link>
 
               <Link
                 to="/how-it-works"
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-sage/40 transition-colors"
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-sage/40 transition-colors"
               >
                 <BookOpen className="size-4 text-foreground/70" />
                 <span>How It Works</span>
@@ -212,29 +160,82 @@ export function Navbar() {
               <Link
                 to="/experiences"
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-sage/40 transition-colors"
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-sage/40 transition-colors"
               >
                 <Utensils className="size-4 text-foreground/70" />
-                <span>Curated Meets</span>
+                <span>Upcoming Meets</span>
               </Link>
 
               <Link
                 to="/safety"
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
               >
                 <ShieldAlert className="size-4 text-red-600" />
-                <span>Safety & SOS Beacon</span>
+                <span>24/7 Safety & SOS</span>
               </Link>
 
-              <Link
-                to={user ? "/dashboard" : "/login"}
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-sage/40 transition-colors border-t border-border/50 pt-2"
-              >
-                <User className="size-4 text-foreground/70" />
-                <span>{user ? "My Dashboard" : "Member Sign In"}</span>
-              </Link>
+              {isMemberAuthenticated ? (
+                <div className="border-t border-[#171514]/10 my-1 pt-1 space-y-1">
+                  <div className="px-3 py-1.5 flex items-center justify-between">
+                    <span className="text-[10px] uppercase font-mono text-muted-foreground">Member Session</span>
+                    <span className="text-xs font-medium text-foreground truncate max-w-[150px]">{profile?.display_name || user?.email || "Founding Member"}</span>
+                  </div>
+                  {!isDashboard && (
+                    <Link
+                      to="/dashboard"
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-sage/40 transition-colors"
+                    >
+                      <User className="size-4 text-foreground/70" />
+                      <span>My Dashboard</span>
+                    </Link>
+                  )}
+                  <Link
+                    to="/dashboard/bookings"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-sage/40 transition-colors"
+                  >
+                    <Calendar className="size-4 text-foreground/70" />
+                    <span>My Meets & Passes</span>
+                  </Link>
+                  {isAdmin && (
+                    <Link
+                      to="/admin"
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-burgundy hover:bg-burgundy/10 transition-colors"
+                    >
+                      <ShieldCheck className="size-4 text-burgundy" />
+                      <span>Admin Operations</span>
+                    </Link>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpen(false);
+                      signOut();
+                    }}
+                    className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer text-left"
+                  >
+                    <LogOut className="size-4" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-sage/40 transition-colors border-t border-[#171514]/10 pt-2"
+                >
+                  <User className="size-4 text-foreground/70" />
+                  <span>Member Sign In</span>
+                </Link>
+              )}
+            </div>
+
+            <div className="mt-2 border-t border-[#171514]/10 pt-2 px-3 text-[11px] text-muted-foreground flex items-center justify-between">
+              <span>Delhi NCR · Active Circles</span>
+              <span className="font-mono text-[10px] text-forest">Verified Tables</span>
             </div>
           </div>
         )}

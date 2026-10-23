@@ -13,6 +13,10 @@ import { EventFormModal } from "@/components/admin/EventFormModal";
 import { EventQrScannerModal } from "@/components/admin/EventQrScannerModal";
 import { UsersArchiveSection } from "@/components/admin/UsersArchiveSection";
 import {
+  VerificationsSection,
+  VerificationQueueItem,
+} from "@/components/admin/VerificationsSection";
+import {
   ShieldAlert,
   ShieldCheck,
   Users,
@@ -171,7 +175,7 @@ function AdminConsolePage() {
     },
   ]);
 
-  const [verifications, setVerifications] = useState([
+  const [verifications, setVerifications] = useState<VerificationQueueItem[]>([
     {
       id: "ver_01",
       userName: "Ananya Deshmukh",
@@ -678,73 +682,10 @@ function AdminConsolePage() {
 
         {/* 4. VERIFICATIONS TAB */}
         {activeTab === "verifications" && (
-          <div className="mt-8 space-y-4">
-            <div>
-              <h2 className="font-display text-2xl">Aadhaar Offline Verification Queue</h2>
-              <p className="text-xs text-muted-foreground">
-                Consent-based verification records from DigiLocker partner API.
-              </p>
-            </div>
-
-            <div className="rounded-3xl border border-border/80 bg-card p-6 shadow-sm">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="border-b border-border/60 text-muted-foreground">
-                    <tr>
-                      <th className="pb-3">User</th>
-                      <th className="pb-3">Method</th>
-                      <th className="pb-3">Requested At</th>
-                      <th className="pb-3">Status</th>
-                      <th className="pb-3 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border/60">
-                    {verifications.map((v) => (
-                      <tr key={v.id}>
-                        <td className="py-4">
-                          <p className="font-medium text-foreground">{v.userName}</p>
-                          <p className="text-[11px] text-muted-foreground">{v.email}</p>
-                        </td>
-                        <td className="py-4 font-mono text-[11px] text-muted-foreground">
-                          {v.method}
-                        </td>
-                        <td className="py-4 text-muted-foreground">{v.requestedAt}</td>
-                        <td className="py-4">
-                          <span
-                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
-                              v.status === "verified"
-                                ? "bg-forest/20 text-forest"
-                                : v.status === "pending"
-                                ? "bg-ochre/20 text-ochre"
-                                : "bg-destructive/15 text-destructive"
-                            }`}
-                          >
-                            {v.status}
-                          </span>
-                        </td>
-                        <td className="py-4 text-right space-x-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => handleUpdateVerification(v.id, "verified")}
-                            className="text-[11px] h-7 px-3 text-forest border-forest/30"
-                          >
-                            Approve
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            onClick={() => handleUpdateVerification(v.id, "failed")}
-                            className="text-[11px] h-7 px-3"
-                          >
-                            Reject
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+          <VerificationsSection
+            queue={verifications}
+            onUpdateQueueStatus={handleUpdateVerification}
+          />
         )}
       </main>
 
