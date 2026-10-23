@@ -16,6 +16,7 @@ import tableStill from "@/assets/table-still.jpg";
 import tableBurgundy from "@/assets/table-burgundy.jpg";
 import heroSketchBg from "@/assets/hero-sketch-bg.jpg";
 import footerBg from "@/assets/footer-bg.jpg";
+import { ConcaveCarousel } from "@/components/ConcaveCarousel";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -49,6 +50,66 @@ const meets = [
   { name: "The Sunder Nursery Supper", when: "Thursdays · 8 PM", where: "Mehrauli, Delhi NCR", img: tableLaugh, desc: "Six strangers, four courses, one candlelit table in a secluded heritage enclave." },
   { name: "Slow Pour Sundays", when: "Sundays · 10 AM", where: "Sunder Nursery Pavilion, Delhi NCR", img: conversation, desc: "Unhurried conversations over single-origin pour-overs beneath the garden trees." },
   { name: "After-Dark Walk & Wine", when: "Saturdays · 7 PM", where: "Hauz Khas, Delhi NCR", img: dusk, desc: "A twilight heritage walk, a private wine room, a few new friends." },
+];
+
+// React Bits Pro Concave Carousel 3D Testimonials
+const testimonials = [
+  {
+    quote: "I went alone not knowing a soul, and left with three people I now meet every Sunday morning for coffee. Precious Meets is pure warmth.",
+    author: "Aarav Mehta",
+    role: "Architect",
+    city: "Bengaluru",
+    rating: 5,
+  },
+  {
+    quote: "No forced icebreakers or networking pitches. Just six thoughtful strangers, candlelit sourdough, and conversations that lingered past midnight.",
+    author: "Meera Sengupta",
+    role: "Author & Journalist",
+    city: "Delhi NCR",
+    rating: 5,
+  },
+  {
+    quote: "In a city of millions where everyone is busy and guarded, this was the first evening in years that felt slow, honest, and truly nourishing.",
+    author: "Rohan Varma",
+    role: "Product Designer",
+    city: "Mumbai",
+    rating: 5,
+  },
+  {
+    quote: "The chemistry at our table was surreal. It felt like an intimate dinner party hosted by old friends who somehow found each other across the city.",
+    author: "Ananya Joshi",
+    role: "Art Curator",
+    city: "Delhi NCR",
+    rating: 5,
+  },
+  {
+    quote: "Safe, Aadhaar-vetted, and exquisitely hosted. Every seat at that table was held with genuine intention and care. I cannot recommend it enough.",
+    author: "Tara D'Souza",
+    role: "Creative Director",
+    city: "Mumbai",
+    rating: 5,
+  },
+  {
+    quote: "It completely redefined weekends for me. You arrive as hesitant strangers and leave having laughed so hard your ribs ache. Unforgettable.",
+    author: "Kabir Nambiar",
+    role: "Filmmaker",
+    city: "Bengaluru",
+    rating: 5,
+  },
+  {
+    quote: "The screening and table curation is quietly genius. Everyone had distinct stories, yet our values and curiosities harmonized effortlessly.",
+    author: "Dr. Rhea Sen",
+    role: "Neuroscientist",
+    city: "Delhi NCR",
+    rating: 5,
+  },
+  {
+    quote: "One shared meal, six entirely different lives, zero digital distractions. I haven’t felt this present in a dinner conversation since college.",
+    author: "Devika Rao",
+    role: "Botanist",
+    city: "Bengaluru",
+    rating: 5,
+  },
 ];
 
 function Nav() {
@@ -733,7 +794,7 @@ const tableSeats = [
 
 function Geometry() {
   return (
-    <section data-geo className="relative h-[340vh] bg-ivory">
+    <section data-geo className="relative h-[340vh]">
       <div className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden px-[4vw]">
         <div className="grid h-full w-full max-w-6xl grid-cols-1 items-center gap-8 lg:grid-cols-2">
           {/* Left Column: Architectural Dinner Table Diagram based on reference image */}
@@ -973,27 +1034,117 @@ function Geometry() {
 
 
 function Collage() {
-  const photos = [
-    { src: conversation, alt: "Two people smiling over coffee", cls: "left-[2%] top-10 -rotate-6 w-[42%] md:w-[30%]" },
-    { src: tableLaugh, alt: "A group laughing around a dinner table", cls: "left-[28%] top-24 rotate-2 w-[50%] md:w-[38%] z-10" },
-    { src: dusk, alt: "Friends walking and laughing at dusk", cls: "right-[2%] top-4 rotate-6 w-[40%] md:w-[26%]" },
-  ];
   return (
-    <section id="stories" className="relative px-[4vw] pt-32 pb-36 overflow-visible text-ivory">
-      <div className="grid gap-10 md:grid-cols-[1fr_1.4fr] md:items-end">
-        <h2 className="font-display text-6xl leading-[0.95] md:text-8xl text-ivory">
-          Different lives.<br /><em className="text-ochre">One shared table.</em>
-        </h2>
-        <p className="max-w-sm text-sm leading-relaxed text-ivory/80 md:justify-self-end">
-          Meet people with different stories, unexpected interests, and something new to bring to the conversation.
-        </p>
-      </div>
-      <div className="relative mt-16 h-[68vw] md:h-[46vw]">
-        {photos.map((p) => (
-          <figure key={p.alt} data-photo className={`photo-frame absolute transition-transform duration-700 hover:-translate-y-2 hover:rotate-0 ${p.cls}`}>
-            <img src={p.src} alt={p.alt} loading="lazy" className="aspect-[4/5] w-full object-cover" />
-          </figure>
-        ))}
+    <section id="stories" className="relative px-[4vw] pt-24 md:pt-32 pb-32 md:pb-40 overflow-hidden text-ivory">
+      <div className="max-w-7xl mx-auto">
+        {/* Header Grid */}
+        <div className="grid gap-8 md:grid-cols-[1fr_1.4fr] md:items-end mb-12 md:mb-16">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-ivory/20 bg-ivory/10 px-3.5 py-1 text-xs font-mono uppercase tracking-widest text-ochre backdrop-blur-md mb-4">
+              Our Stories
+            </div>
+            <h2 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl leading-[0.95] text-ivory">
+              Different lives.<br /><em className="text-ochre">One shared table.</em>
+            </h2>
+          </div>
+          <p className="max-w-md text-sm sm:text-base leading-relaxed text-ivory/80 md:justify-self-end">
+            Meet people with different stories, unexpected interests, and something new to bring to the conversation.
+          </p>
+        </div>
+
+        {/* Bento Grid layout matching reference 2nd image */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 sm:gap-4 md:gap-5">
+          {/* Row 1 - Left: Wide Landscape (7 cols) */}
+          <div
+            data-photo
+            className="md:col-span-7 h-[260px] sm:h-[340px] md:h-[400px] lg:h-[450px] rounded-2xl md:rounded-3xl overflow-hidden bg-black/20 group relative shadow-md"
+          >
+            <img
+              src={tableBurgundy}
+              alt="Curated dinner table set with wine and burgundy floral arrangements"
+              loading="lazy"
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            />
+          </div>
+
+          {/* Row 1 - Right: Taller / Square-ish (5 cols) */}
+          <div
+            data-photo
+            className="md:col-span-5 h-[260px] sm:h-[340px] md:h-[400px] lg:h-[450px] rounded-2xl md:rounded-3xl overflow-hidden bg-black/20 group relative shadow-md"
+          >
+            <img
+              src={conversation}
+              alt="Two people smiling over conversation"
+              loading="lazy"
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            />
+          </div>
+
+          {/* Row 2 - Left: 1/3 (4 cols) */}
+          <div
+            data-photo
+            className="md:col-span-4 h-[250px] sm:h-[320px] md:h-[370px] lg:h-[410px] rounded-2xl md:rounded-3xl overflow-hidden bg-black/20 group relative shadow-md"
+          >
+            <img
+              src={tableLaugh}
+              alt="Friends laughing around a dinner table"
+              loading="lazy"
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            />
+          </div>
+
+          {/* Row 2 - Center: 1/3 (4 cols) */}
+          <div
+            data-photo
+            className="md:col-span-4 h-[250px] sm:h-[320px] md:h-[370px] lg:h-[410px] rounded-2xl md:rounded-3xl overflow-hidden bg-black/20 group relative shadow-md"
+          >
+            <img
+              src={hands}
+              alt="Hands sharing a plate across a candlelit table"
+              loading="lazy"
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            />
+          </div>
+
+          {/* Row 2 - Right: 1/3 (4 cols) */}
+          <div
+            data-photo
+            className="md:col-span-4 h-[250px] sm:h-[320px] md:h-[370px] lg:h-[410px] rounded-2xl md:rounded-3xl overflow-hidden bg-black/20 group relative shadow-md"
+          >
+            <img
+              src={dusk}
+              alt="Friends sharing drinks and laughter at dusk"
+              loading="lazy"
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            />
+          </div>
+
+          {/* Row 3 - Left: 1/3 (4 cols) */}
+          <div
+            data-photo
+            className="md:col-span-4 h-[180px] sm:h-[220px] md:h-[260px] lg:h-[290px] rounded-2xl md:rounded-3xl overflow-hidden bg-black/20 group relative shadow-md"
+          >
+            <img
+              src={tableStill}
+              alt="Curated dinner table set with wine and calla lily"
+              loading="lazy"
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            />
+          </div>
+
+          {/* Row 3 - Right: 2/3 Wide Landscape (8 cols) */}
+          <div
+            data-photo
+            className="md:col-span-8 h-[180px] sm:h-[220px] md:h-[260px] lg:h-[290px] rounded-2xl md:rounded-3xl overflow-hidden bg-black/20 group relative shadow-md"
+          >
+            <img
+              src={footerBg}
+              alt="Atmospheric dinner gathering table ambiance"
+              loading="lazy"
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            />
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -1177,7 +1328,7 @@ function How() {
 function Meets() {
   return (
     <section id="meets" className="relative px-[4vw] py-32 text-ivory">
-      <div className="max-w-5xl mx-auto mb-16 text-center md:text-left">
+      <div className="max-w-5xl mx-auto mb-12 text-center md:text-left">
         <p className="label-mono mb-4 text-ochre font-semibold uppercase tracking-widest">
           Upcoming Curated Gatherings
         </p>
@@ -1226,6 +1377,49 @@ function Meets() {
             </div>
           </div>
         ))}
+      </div>
+    </section>
+  );
+}
+
+function CuratedGallerySection() {
+  return (
+    <section className="relative w-full pt-14 pb-8 bg-black text-white overflow-hidden">
+      {/* Testimonial Section Header */}
+      <div className="max-w-4xl mx-auto text-center mb-6 px-4">
+        <p className="label-mono mb-2 text-ochre font-semibold uppercase tracking-widest text-xs">
+          Voices from the Table
+        </p>
+        <h2 className="font-display text-4xl sm:text-5xl md:text-6xl text-ivory leading-tight">
+          What happens when <em className="text-ochre">strangers break bread.</em>
+        </h2>
+      </div>
+
+      <div className="w-full">
+        <ConcaveCarousel
+          items={testimonials}
+          aspect={1.38}
+          size={0.50}
+          curvature={0.72}
+          distance={4}
+          tilt={0}
+          gap={20}
+          radius={16}
+          reflection={0}
+          dim={0.35}
+          autoplay="drift"
+          speed={0.15}
+          interval={4}
+          snap={false}
+          inertia={0.5}
+          pauseOnHover={false}
+          draggable={true}
+          wheel={false}
+          captions={false}
+          controls={false}
+          backgroundColor="transparent"
+          className="w-full"
+        />
       </div>
     </section>
   );
@@ -1413,8 +1607,12 @@ function Index() {
         gsap.from(el, { y: 60, opacity: 0, duration: 1.2, ease, scrollTrigger: { trigger: el, start: "top 85%" } }),
       );
       gsap.from("[data-photo]", {
-        y: 120, rotate: 0, opacity: 0, duration: 1.4, ease, stagger: 0.15,
-        scrollTrigger: { trigger: "#stories", start: "top 60%" },
+        y: 50,
+        opacity: 0,
+        duration: 1.0,
+        ease: "power3.out",
+        stagger: 0.08,
+        scrollTrigger: { trigger: "#stories", start: "top 75%" },
       });
 
       // Geometry storytelling (Architectural dinner table based on reference image)
@@ -1511,19 +1709,25 @@ function Index() {
 
       // Day-to-Night Ambient Transition (Collage / "Different lives. One shared table")
       // Transitions into #5F7045 (Forest Green) at "Different lives. One shared table" (#stories)
-      gsap.timeline({
-        scrollTrigger: {
-          trigger: "#stories",
-          start: "top 80%",
-          end: "top 25%",
-          scrub: 1,
+      gsap.fromTo(
+        root.current,
+        {
+          backgroundColor: "#F8F2E7",
+          color: "#171514",
         },
-      })
-        .to(root.current, {
+        {
           backgroundColor: "#5F7045", // Pure Brand Forest Green
           color: "#F8F2E7", // Luminous Ivory
           ease: "none",
-        });
+          scrollTrigger: {
+            trigger: "#stories",
+            start: "top 85%",
+            end: "top 20%",
+            scrub: 0.6,
+            invalidateOnRefresh: true,
+          },
+        }
+      );
 
       // How It Works — Interactive Sliding Cards & Pinned Experience
       const howSection = document.querySelector<HTMLElement>("[data-how-section]");
@@ -1764,7 +1968,7 @@ function Index() {
   }, []);
 
   return (
-    <div ref={root} className="transition-colors duration-700">
+    <div ref={root} className="min-h-screen">
       <Preloader onComplete={handlePreloaderComplete} />
       <Nav />
       <main>
@@ -1774,6 +1978,7 @@ function Index() {
         <Collage />
         <How />
         <Meets />
+        <CuratedGallerySection />
       </main>
       <Footer />
 
