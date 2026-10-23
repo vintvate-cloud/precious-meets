@@ -43,7 +43,7 @@ export function EventFormModal({
   onSave,
 }: EventFormModalProps) {
   const [title, setTitle] = useState("");
-  const [city, setCity] = useState<"Delhi NCR" | "Bengaluru">("Delhi NCR");
+  const [city, setCity] = useState<"Delhi NCR">("Delhi NCR");
   const [neighborhood, setNeighborhood] = useState("Mehrauli");
   const [venueName, setVenueName] = useState("");
   const [venueAddress, setVenueAddress] = useState("");
@@ -192,7 +192,6 @@ export function EventFormModal({
                 className="mt-1 w-full rounded-xl border border-input bg-background p-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-burgundy"
               >
                 <option value="Delhi NCR">Delhi NCR</option>
-                <option value="Bengaluru">Bengaluru</option>
               </select>
             </div>
 

@@ -44,7 +44,7 @@ export class EmailService {
     const brandFooter = `
       <div style="background-color: #f8f2e7; padding: 24px; text-align: center; border-top: 1px solid #e0d7c7; border-radius: 0 0 8px 8px; font-family: sans-serif; font-size: 12px; color: #6b6357;">
         <p style="margin: 0 0 8px 0;">Precious Meets · Curated Real-World Tables & Social Discovery</p>
-        <p style="margin: 0;">Delhi NCR · Bengaluru</p>
+        <p style="margin: 0;">Delhi NCR · 100% Aadhaar Verified</p>
       </div>
     `;
 

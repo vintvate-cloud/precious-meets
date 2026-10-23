@@ -52,8 +52,7 @@ function OnboardingPage() {
                 onChange={(e) => setCity(e.target.value)}
                 className="mt-1 w-full rounded-md border border-input bg-background p-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
               >
-                <option value="Delhi NCR">Delhi NCR (Mehrauli, Hauz Khas, Sunder Nursery, CP)</option>
-                <option value="Bengaluru">Bengaluru (Indiranagar, Koramangala, Lavelle Rd)</option>
+                <option value="Delhi NCR">Delhi NCR (Mehrauli, Hauz Khas, Sunder Nursery, CP, Gurgaon)</option>
               </select>
             </div>
 

@@ -13,11 +13,8 @@ export function Footer() {
               Intimate dinner salons, unhurried coffee tastings, and sunset walks for thoughtful people beyond your usual circle.
             </p>
             <div className="mt-6 flex items-center gap-3">
-              <span className="label-mono rounded-full bg-sage/60 px-3 py-1 text-xs text-forest">
+              <span className="label-mono rounded-full bg-sage/60 px-3.5 py-1 text-xs text-forest border border-forest/20">
                 Delhi NCR
-              </span>
-              <span className="label-mono rounded-full bg-sage/60 px-3 py-1 text-xs text-forest">
-                Bengaluru
               </span>
             </div>
           </div>

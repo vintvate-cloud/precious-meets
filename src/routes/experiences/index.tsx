@@ -8,7 +8,7 @@ export const Route = createFileRoute("/experiences/")({
   head: () => ({
     meta: [
       { title: "Curated Meets & Shared Tables — Precious Meets" },
-      { name: "description", content: "Discover upcoming supper clubs, slow coffee tastings, and evening salons in Delhi NCR and Bengaluru." },
+      { name: "description", content: "Discover upcoming supper clubs, slow coffee tastings, and evening salons across Delhi NCR." },
     ],
   }),
   component: ExperiencesPage,
@@ -32,14 +32,14 @@ const CURATED_MEETS = [
   },
   {
     id: "exp_2",
-    slug: "slow-coffee-vinyl-bengaluru",
-    title: "Slow Coffee & Vinyl Sunday",
-    city: "Bengaluru",
-    neighborhood: "Indiranagar",
+    slug: "slow-coffee-sunder-nursery-delhi",
+    title: "Slow Pour & Vinyl Sunday",
+    city: "Delhi NCR",
+    neighborhood: "Sunder Nursery",
     category: "coffee_tasting",
     date: "Sunday · 10:00 AM",
     coverImage: "https://images.unsplash.com/photo-1442512595331-e89e73853f31?auto=format&fit=crop&w=800&q=80",
-    desc: "Unhurried conversations, single-origin pour-overs, and rare jazz records.",
+    desc: "Unhurried conversations, single-origin pour-overs, and rare jazz records under the garden canopy.",
     priceInr: 1199,
     seatsLeft: 2,
     dietary: "Artisanal Bakes & Vegan Milk",
@@ -90,9 +90,9 @@ function ExperiencesPage() {
 
         {/* Filter Controls */}
         <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-b border-border/70 pb-6">
-          {/* City Tabs */}
+          {/* City / Enclave Tabs */}
           <div className="flex items-center gap-2">
-            {["All", "Delhi NCR", "Bengaluru"].map((city) => (
+            {["All", "Delhi NCR"].map((city) => (
               <button
                 key={city}
                 onClick={() => setSelectedCity(city)}

@@ -396,7 +396,7 @@ export function QuizResultsPage() {
                       <Check className="size-3 stroke-[3]" />
                     </div>
                     <span className="text-xs leading-relaxed text-ivory/90">
-                      <strong>Guaranteed Priority Table Access:</strong> Weekly curated suppers across Delhi NCR & Bengaluru.
+                      <strong>Guaranteed Priority Table Access:</strong> Weekly curated suppers across Delhi NCR's most secluded enclaves.
                     </span>
                   </div>
 

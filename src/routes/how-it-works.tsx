@@ -36,7 +36,7 @@ function HowItWorksPage() {
     {
       num: "04",
       title: "The Long Table Gathering",
-      desc: "Arrive at an intimate private venue in Mehrauli, Hauz Khas, Sunder Nursery, or Indiranagar. Share an unhurried 4-course meal guided by a vetted, trained host.",
+      desc: "Arrive at an intimate private venue in Mehrauli, Hauz Khas, Sunder Nursery, or Chanakyapuri. Share an unhurried 4-course meal guided by a vetted, trained host.",
       icon: <Utensils className="size-6 text-burgundy" />,
     },
   ];

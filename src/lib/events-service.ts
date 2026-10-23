@@ -6,7 +6,7 @@ export interface AdminAttendee {
   email: string;
   phone: string;
   avatar: string;
-  city: "Delhi NCR" | "Bengaluru";
+  city: "Delhi NCR";
   gender: "female" | "male" | "non-binary";
   archetype: {
     title: string;
@@ -29,7 +29,7 @@ export interface AdminEvent {
   id: string;
   slug: string;
   title: string;
-  city: "Delhi NCR" | "Bengaluru";
+  city: "Delhi NCR";
   neighborhood: string;
   venueName: string;
   venueAddress: string;
@@ -129,13 +129,13 @@ export const INITIAL_USER_INVITATIONS: UserSeatInvitation[] = [
     invitedAt: new Date(Date.now() - 4 * 3600 * 1000).toISOString(),
   },
   {
-    id: "inv_vinyl_indiranagar",
-    eventId: "evt_bengaluru_vinyl",
-    eventTitle: "Slow Coffee & Vinyl Sunday",
-    city: "Bengaluru",
-    neighborhood: "Indiranagar",
-    venueName: "Cask & Bean Roastery",
-    venueAddress: "12th Main Road, HAL 2nd Stage, Indiranagar, Bengaluru 560038",
+    id: "inv_vinyl_delhi",
+    eventId: "evt_delhi_vinyl",
+    eventTitle: "Slow Pour & Vinyl Sunday",
+    city: "Delhi NCR",
+    neighborhood: "Sunder Nursery",
+    venueName: "The Heritage Pavilion at Sunder Nursery",
+    venueAddress: "Bharat Scouts and Guides Marg, Nizamuddin, New Delhi 110013",
     dateDisplay: "This Sunday · 10:00 AM",
     coverImage: "https://images.unsplash.com/photo-1442512595331-e89e73853f31?auto=format&fit=crop&w=1200&q=80",
     hostName: "Nikhil & Sound Curator Dev",
@@ -341,13 +341,13 @@ export const INITIAL_EVENTS: AdminEvent[] = [
     notes: "Private courtyard reserved. 2 guardian table hosts stationed at entry.",
   },
   {
-    id: "evt_bengaluru_vinyl",
-    slug: "slow-coffee-vinyl-bengaluru",
-    title: "Slow Coffee & Vinyl Sunday",
-    city: "Bengaluru",
-    neighborhood: "Indiranagar",
-    venueName: "Cask & Bean Roastery",
-    venueAddress: "12th Main Road, HAL 2nd Stage, Indiranagar, Bengaluru 560038",
+    id: "evt_delhi_vinyl",
+    slug: "slow-coffee-sunder-nursery-delhi",
+    title: "Slow Pour & Vinyl Sunday",
+    city: "Delhi NCR",
+    neighborhood: "Sunder Nursery",
+    venueName: "The Heritage Pavilion at Sunder Nursery",
+    venueAddress: "Bharat Scouts and Guides Marg, Nizamuddin, New Delhi 110013",
     secretAccessCode: "VINYL-411",
     startsAt: new Date(Date.now() + 6 * 24 * 3600 * 1000).toISOString(),
     endsAt: new Date(Date.now() + 6 * 24 * 3600 * 1000 + 3 * 3600 * 1000).toISOString(),

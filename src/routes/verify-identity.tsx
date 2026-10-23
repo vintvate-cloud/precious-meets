@@ -114,7 +114,7 @@ function VerifyIdentityPage() {
                 Verified Member Status
               </h3>
               <p className="mt-1 text-xs text-muted-foreground">
-                Your profile holds a verified status. You can join any curated table in Delhi NCR and Bengaluru.
+                Your profile holds a verified status. You can join any curated table in Delhi NCR.
               </p>
               <Button
                 onClick={() => navigate({ to: "/dashboard" })}
