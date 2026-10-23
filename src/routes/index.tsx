@@ -824,27 +824,117 @@ function Geometry() {
 
 
 function Collage() {
-  const photos = [
-    { src: conversation, alt: "Two people smiling over coffee", cls: "left-[2%] top-10 -rotate-6 w-[42%] md:w-[30%]" },
-    { src: tableLaugh, alt: "A group laughing around a dinner table", cls: "left-[28%] top-24 rotate-2 w-[50%] md:w-[38%] z-10" },
-    { src: dusk, alt: "Friends walking and laughing at dusk", cls: "right-[2%] top-4 rotate-6 w-[40%] md:w-[26%]" },
-  ];
   return (
-    <section id="stories" className="relative px-[4vw] pt-32 pb-36 overflow-visible text-ivory">
-      <div className="grid gap-10 md:grid-cols-[1fr_1.4fr] md:items-end">
-        <h2 className="font-display text-6xl leading-[0.95] md:text-8xl text-ivory">
-          Different lives.<br /><em className="text-ochre">One shared table.</em>
-        </h2>
-        <p className="max-w-sm text-sm leading-relaxed text-ivory/80 md:justify-self-end">
-          Meet people with different stories, unexpected interests, and something new to bring to the conversation.
-        </p>
-      </div>
-      <div className="relative mt-16 h-[68vw] md:h-[46vw]">
-        {photos.map((p) => (
-          <figure key={p.alt} data-photo className={`photo-frame absolute transition-transform duration-700 hover:-translate-y-2 hover:rotate-0 ${p.cls}`}>
-            <img src={p.src} alt={p.alt} loading="lazy" className="aspect-[4/5] w-full object-cover" />
-          </figure>
-        ))}
+    <section id="stories" className="relative px-[4vw] pt-24 md:pt-32 pb-32 md:pb-40 overflow-hidden text-ivory">
+      <div className="max-w-7xl mx-auto">
+        {/* Header Grid */}
+        <div className="grid gap-8 md:grid-cols-[1fr_1.4fr] md:items-end mb-12 md:mb-16">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-ivory/20 bg-ivory/10 px-3.5 py-1 text-xs font-mono uppercase tracking-widest text-ochre backdrop-blur-md mb-4">
+              Our Stories
+            </div>
+            <h2 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl leading-[0.95] text-ivory">
+              Different lives.<br /><em className="text-ochre">One shared table.</em>
+            </h2>
+          </div>
+          <p className="max-w-md text-sm sm:text-base leading-relaxed text-ivory/80 md:justify-self-end">
+            Meet people with different stories, unexpected interests, and something new to bring to the conversation.
+          </p>
+        </div>
+
+        {/* Bento Grid layout matching reference 2nd image */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 sm:gap-4 md:gap-5">
+          {/* Row 1 - Left: Wide Landscape (7 cols) */}
+          <div
+            data-photo
+            className="md:col-span-7 h-[260px] sm:h-[340px] md:h-[400px] lg:h-[450px] rounded-2xl md:rounded-3xl overflow-hidden bg-black/20 group relative shadow-md"
+          >
+            <img
+              src={tableBurgundy}
+              alt="Curated dinner table set with wine and burgundy floral arrangements"
+              loading="lazy"
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            />
+          </div>
+
+          {/* Row 1 - Right: Taller / Square-ish (5 cols) */}
+          <div
+            data-photo
+            className="md:col-span-5 h-[260px] sm:h-[340px] md:h-[400px] lg:h-[450px] rounded-2xl md:rounded-3xl overflow-hidden bg-black/20 group relative shadow-md"
+          >
+            <img
+              src={conversation}
+              alt="Two people smiling over conversation"
+              loading="lazy"
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            />
+          </div>
+
+          {/* Row 2 - Left: 1/3 (4 cols) */}
+          <div
+            data-photo
+            className="md:col-span-4 h-[250px] sm:h-[320px] md:h-[370px] lg:h-[410px] rounded-2xl md:rounded-3xl overflow-hidden bg-black/20 group relative shadow-md"
+          >
+            <img
+              src={tableLaugh}
+              alt="Friends laughing around a dinner table"
+              loading="lazy"
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            />
+          </div>
+
+          {/* Row 2 - Center: 1/3 (4 cols) */}
+          <div
+            data-photo
+            className="md:col-span-4 h-[250px] sm:h-[320px] md:h-[370px] lg:h-[410px] rounded-2xl md:rounded-3xl overflow-hidden bg-black/20 group relative shadow-md"
+          >
+            <img
+              src={hands}
+              alt="Hands sharing a plate across a candlelit table"
+              loading="lazy"
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            />
+          </div>
+
+          {/* Row 2 - Right: 1/3 (4 cols) */}
+          <div
+            data-photo
+            className="md:col-span-4 h-[250px] sm:h-[320px] md:h-[370px] lg:h-[410px] rounded-2xl md:rounded-3xl overflow-hidden bg-black/20 group relative shadow-md"
+          >
+            <img
+              src={dusk}
+              alt="Friends sharing drinks and laughter at dusk"
+              loading="lazy"
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            />
+          </div>
+
+          {/* Row 3 - Left: 1/3 (4 cols) */}
+          <div
+            data-photo
+            className="md:col-span-4 h-[180px] sm:h-[220px] md:h-[260px] lg:h-[290px] rounded-2xl md:rounded-3xl overflow-hidden bg-black/20 group relative shadow-md"
+          >
+            <img
+              src={tableStill}
+              alt="Curated dinner table set with wine and calla lily"
+              loading="lazy"
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            />
+          </div>
+
+          {/* Row 3 - Right: 2/3 Wide Landscape (8 cols) */}
+          <div
+            data-photo
+            className="md:col-span-8 h-[180px] sm:h-[220px] md:h-[260px] lg:h-[290px] rounded-2xl md:rounded-3xl overflow-hidden bg-black/20 group relative shadow-md"
+          >
+            <img
+              src={footerBg}
+              alt="Atmospheric dinner gathering table ambiance"
+              loading="lazy"
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            />
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -1272,8 +1362,12 @@ function Index() {
         gsap.from(el, { y: 60, opacity: 0, duration: 1.2, ease, scrollTrigger: { trigger: el, start: "top 85%" } }),
       );
       gsap.from("[data-photo]", {
-        y: 120, rotate: 0, opacity: 0, duration: 1.4, ease, stagger: 0.15,
-        scrollTrigger: { trigger: "#stories", start: "top 60%" },
+        y: 50,
+        opacity: 0,
+        duration: 1.0,
+        ease: "power3.out",
+        stagger: 0.08,
+        scrollTrigger: { trigger: "#stories", start: "top 75%" },
       });
 
       // Geometry storytelling (Architectural dinner table based on reference image)
