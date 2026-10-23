@@ -790,10 +790,8 @@ function Geometry() {
                 className="w-full h-full overflow-visible"
                 aria-hidden
               >
-                {/* Outer Concentric Architectural Guide Rings */}
+                {/* Concentric Table Orbit Ring */}
                 <g data-rings>
-                  <circle cx="300" cy="300" r="275" fill="none" stroke="#E6DBCC" strokeWidth="1" />
-                  <circle cx="300" cy="300" r="236" fill="none" stroke="#E1D4C3" strokeWidth="0.8" strokeDasharray="3 4" />
                   <circle cx="300" cy="300" r="182" fill="none" stroke="#D7C8B4" strokeWidth="1" />
                 </g>
 
