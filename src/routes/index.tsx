@@ -967,13 +967,13 @@ function How() {
 
   return (
     <section id="how" data-how-section className="relative text-ivory">
-      {/* Pinned Viewport Container */}
+      {/* Pinned Viewport Container with safe navbar top clearance */}
       <div
         data-how-container
-        className="min-h-screen w-full flex items-center justify-center px-[4vw] py-20 lg:py-0 overflow-hidden relative"
+        className="min-h-screen w-full flex items-center justify-center px-[4vw] pt-28 pb-16 overflow-hidden relative"
       >
-        <div className="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-          {/* Left Column: Big typography, elegant subtitle & dynamic step progress indicator */}
+        <div className="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+          {/* Left Column: Big typography, elegant subtitle */}
           <div className="lg:col-span-5 flex flex-col justify-center select-none lg:pr-6">
             <div className="inline-flex items-center gap-2 mb-4">
               <span className="w-2.5 h-2.5 rounded-full bg-ochre animate-pulse" />
@@ -999,109 +999,65 @@ function How() {
               Making new connections <em className="text-ochre not-italic font-medium">should feel natural</em>. No
               endless swiping or awkward networking. Just thoughtful dinners where real stories unfold.
             </p>
-
-            {/* Dynamic Step Progress Tracker */}
-            <div className="mt-10 pt-8 border-t border-ivory/15 max-w-md hidden sm:block">
-              {/* Progress Bar Rail */}
-              <div className="relative w-full h-[3px] bg-ivory/15 rounded-full overflow-hidden mb-6">
-                <div
-                  data-how-progress-bar
-                  className="absolute left-0 top-0 h-full w-[33%] bg-ochre shadow-[0_0_12px_rgba(217,119,6,0.6)] rounded-full transition-all duration-300"
-                />
-              </div>
-
-              {/* Step Status Badges */}
-              <div className="grid grid-cols-3 gap-2">
-                {steps.map((s, idx) => (
-                  <div
-                    key={s.num}
-                    data-how-nav-step={idx}
-                    className={`transition-all duration-500 cursor-pointer ${idx === 0 ? "opacity-100" : "opacity-40"
-                      }`}
-                  >
-                    <span className="label-mono text-[11px] block text-ochre font-medium tracking-wider">
-                      {s.num}
-                    </span>
-                    <span className="text-xs text-ivory/90 truncate block font-sans font-medium tracking-tight mt-0.5">
-                      {s.tag}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
 
-          {/* Right Column: Stage for Big Cards */}
-          <div className="lg:col-span-7 relative w-full lg:h-[580px] min-h-[500px] flex items-center justify-center">
+          {/* Right Column: Stage for Stacked Cards (Moved slightly down, clear of navbar) */}
+          <div className="lg:col-span-7 relative w-full flex items-center justify-center pt-2 sm:pt-4">
             {/* Ambient Background Glow behind active card */}
             <div className="pointer-events-none absolute -inset-10 bg-radial from-ochre/15 via-transparent to-transparent blur-3xl opacity-60" />
 
-            {/* Cards Deck */}
-            <div className="relative w-full lg:h-full max-w-[620px] mx-auto flex flex-col lg:block items-center justify-center space-y-6 lg:space-y-0">
+            {/* Cards Deck - Vertical Stack */}
+            <div className="relative w-full max-w-[620px] mx-auto flex flex-col gap-3.5 sm:gap-4">
               {steps.map((s, i) => (
                 <div
-                  key={s.num}
+                  key={s.title}
                   data-how-card={i}
-                  className={`group relative lg:absolute lg:inset-0 w-full rounded-[2.5rem] border border-ivory/20 bg-[#3E4D2B]/85 p-8 sm:p-12 backdrop-blur-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] flex flex-col justify-between overflow-hidden transition-shadow hover:shadow-[0_30px_70px_-15px_rgba(217,119,6,0.25)] ${i === 0 ? "z-10" : i === 1 ? "z-20" : "z-30"
-                    }`}
+                  className="group relative w-full rounded-2xl border border-ivory/25 bg-[#2F3D1F]/95 px-5 py-4 sm:px-6 sm:py-4.5 backdrop-blur-2xl shadow-[0_16px_40px_-10px_rgba(0,0,0,0.5)] flex flex-col justify-between overflow-hidden transition-all duration-300 hover:border-ochre/50 hover:shadow-[0_20px_50px_-10px_rgba(217,119,6,0.25)]"
                   style={{
                     willChange: "transform, opacity",
                   }}
                 >
-                  {/* Subtle Corner Watermark Number */}
-                  <span className="pointer-events-none absolute -bottom-6 -right-4 font-display text-[150px] sm:text-[200px] leading-none text-ivory/[0.04] font-normal select-none">
-                    {s.num}
-                  </span>
-
                   {/* Soft Corner Glow */}
-                  <div className="pointer-events-none absolute -top-20 -right-20 w-64 h-64 rounded-full bg-ochre/10 blur-3xl" />
+                  <div className="pointer-events-none absolute -top-12 -right-12 w-36 h-36 rounded-full bg-ochre/15 blur-xl" />
 
-                  {/* Top: Large Numeral + Badge */}
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <div className="overflow-hidden">
-                        <span data-how-card-num className="font-display text-5xl sm:text-6xl text-ochre block font-normal">
-                          {s.num}
-                        </span>
-                      </div>
-                      <span
-                        data-how-card-badge
-                        className="label-mono text-xs px-4 py-1.5 rounded-full bg-ivory/10 text-ivory/90 border border-ivory/20 uppercase tracking-widest backdrop-blur-md font-medium"
-                      >
-                        {s.badge}
-                      </span>
-                    </div>
-
-                    {/* Middle: Tag, Title, Desc */}
-                    <div className="mt-8 space-y-3">
-                      <p
-                        data-how-card-tag
-                        className="label-mono text-ochre text-xs uppercase tracking-widest font-medium"
-                      >
-                        {s.tag}
-                      </p>
-                      <h3
-                        data-how-card-title
-                        className="font-display text-3xl sm:text-4xl lg:text-[2.75rem] leading-[1.05] text-ivory font-normal"
-                      >
-                        {s.title}
-                      </h3>
-                      <p
-                        data-how-card-desc
-                        className="mt-4 text-base sm:text-lg leading-relaxed text-ivory/80 font-normal"
-                      >
-                        {s.desc}
-                      </p>
-                    </div>
+                  {/* Top: Tag + Badge */}
+                  <div className="flex items-center justify-between gap-4">
+                    <p
+                      data-how-card-tag
+                      className="label-mono text-ochre text-[11px] uppercase tracking-widest font-semibold"
+                    >
+                      {s.tag}
+                    </p>
+                    <span
+                      data-how-card-badge
+                      className="label-mono text-[10px] px-3 py-0.5 rounded-full bg-ivory/15 text-ivory border border-ivory/30 uppercase tracking-widest backdrop-blur-md font-medium"
+                    >
+                      {s.badge}
+                    </span>
                   </div>
 
-                  {/* Bottom: Step progress & interactive arrow */}
+                  {/* Middle: Title & Desc */}
+                  <div className="mt-2.5 space-y-1">
+                    <h3
+                      data-how-card-title
+                      className="font-display text-xl sm:text-2xl text-ivory font-medium leading-snug"
+                    >
+                      {s.title}
+                    </h3>
+                    <p
+                      data-how-card-desc
+                      className="text-xs sm:text-[13px] leading-relaxed text-ivory/90 font-normal line-clamp-2"
+                    >
+                      {s.desc}
+                    </p>
+                  </div>
+
+                  {/* Bottom: Interactive arrow */}
                   <div
                     data-how-card-footer
-                    className="pt-6 border-t border-ivory/15 mt-8 flex items-center justify-between text-xs label-mono text-ochre"
+                    className="pt-2 border-t border-ivory/20 mt-2.5 flex items-center justify-end"
                   >
-                    <span className="tracking-wider font-medium">Step {i + 1} of 3</span>
-                    <div className="w-10 h-10 rounded-full border border-ochre/40 flex items-center justify-center text-ochre text-base transition-all duration-300 group-hover:bg-ochre group-hover:text-[#3E4D2B] group-hover:translate-x-1 group-hover:border-ochre shadow-sm">
+                    <div className="w-6 h-6 rounded-full border border-ochre/50 flex items-center justify-center text-ochre text-xs transition-all duration-300 group-hover:bg-ochre group-hover:text-[#2F3D1F] group-hover:translate-x-0.5 shadow-xs">
                       →
                     </div>
                   </div>
@@ -1502,136 +1458,61 @@ function Index() {
           },
         });
 
-        // Desktop (>= 1024px): Pinned scrub animation with right-to-left card slide-in
+        // Desktop (>= 1024px): Pinned scrub animation revealing cards vertically (Card 0 top, Card 1 below, Card 2 bottom)
         mm.add("(min-width: 1024px)", () => {
           const card0 = document.querySelector<HTMLElement>("[data-how-card='0']");
           const card1 = document.querySelector<HTMLElement>("[data-how-card='1']");
           const card2 = document.querySelector<HTMLElement>("[data-how-card='2']");
-          const progressBar = document.querySelector<HTMLElement>("[data-how-progress-bar]");
-          const navStep0 = document.querySelector<HTMLElement>("[data-how-nav-step='0']");
-          const navStep1 = document.querySelector<HTMLElement>("[data-how-nav-step='1']");
-          const navStep2 = document.querySelector<HTMLElement>("[data-how-nav-step='2']");
 
           if (!card0 || !card1 || !card2) return;
 
-          // Initial positions
-          gsap.set(card0, { xPercent: 0, opacity: 1, scale: 1, rotate: 0, filter: "brightness(1) blur(0px)" });
-          gsap.set(card1, { xPercent: 125, opacity: 0, scale: 0.94, rotate: 3, filter: "brightness(0.7)" });
-          gsap.set(card2, { xPercent: 250, opacity: 0, scale: 0.88, rotate: 6, filter: "brightness(0.5)" });
+          // Clear any leftover filters/brightness and ensure all cards stay 100% visible and bright
+          gsap.set([card0, card1, card2], {
+            clearProps: "filter,backdropFilter",
+            filter: "none",
+          });
 
-          if (progressBar) gsap.set(progressBar, { width: "33%" });
+          // Card 0 starts visible at the top; Card 1 & Card 2 start hidden below
+          gsap.set(card0, { opacity: 1, y: 0, scale: 1 });
+          gsap.set(card1, { opacity: 0, y: 40, scale: 1 });
+          gsap.set(card2, { opacity: 0, y: 40, scale: 1 });
 
           const howTl = gsap.timeline({
             scrollTrigger: {
               trigger: "[data-how-section]",
               start: "top top",
-              end: "+=2600",
+              end: "+=1200",
               pin: true,
-              scrub: 1.2,
-              anticipatePin: 1,
+              scrub: 0.5,
             },
           });
 
-          // Card 1 text elements
-          const card1Num = card1.querySelector("[data-how-card-num]");
-          const card1Badge = card1.querySelector("[data-how-card-badge]");
-          const card1Tag = card1.querySelector("[data-how-card-tag]");
-          const card1Title = card1.querySelector("[data-how-card-title]");
-          const card1Desc = card1.querySelector("[data-how-card-desc]");
+          // 1st scroll step: Card 1 begins gliding in immediately with smooth scroll feedback
+          howTl.to(
+            card1,
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.85,
+              ease: "power2.out",
+            },
+            0.08,
+          );
 
-          // Card 2 text elements
-          const card2Num = card2.querySelector("[data-how-card-num]");
-          const card2Badge = card2.querySelector("[data-how-card-badge]");
-          const card2Tag = card2.querySelector("[data-how-card-tag]");
-          const card2Title = card2.querySelector("[data-how-card-title]");
-          const card2Desc = card2.querySelector("[data-how-card-desc]");
+          // 2nd scroll step: Card 2 glides in seamlessly directly below Card 1
+          howTl.to(
+            card2,
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.85,
+              ease: "power2.out",
+            },
+            0.95,
+          );
 
-          // Transition 1: Card 0 recedes, Card 1 slides in from right
-          howTl
-            .to(
-              card0,
-              {
-                xPercent: -18,
-                scale: 0.92,
-                opacity: 0.25,
-                filter: "brightness(0.35) blur(3px)",
-                duration: 1.0,
-                ease: "power2.inOut",
-              },
-              0.2,
-            )
-            .to(
-              card1,
-              {
-                xPercent: 0,
-                opacity: 1,
-                scale: 1,
-                rotate: 0,
-                filter: "brightness(1) blur(0px)",
-                duration: 1.0,
-                ease: "power3.out",
-              },
-              0.2,
-            )
-            .from(card1Num, { y: 35, opacity: 0, duration: 0.6, ease: "power2.out" }, 0.5)
-            .from(card1Badge, { x: 25, opacity: 0, duration: 0.5, ease: "power2.out" }, 0.5)
-            .from(card1Tag, { y: 20, opacity: 0, duration: 0.5, ease: "power2.out" }, 0.6)
-            .from(card1Title, { y: 25, opacity: 0, duration: 0.6, ease: "power2.out" }, 0.65)
-            .from(card1Desc, { y: 20, opacity: 0, duration: 0.6, ease: "power2.out" }, 0.7);
-
-          if (progressBar) {
-            howTl.to(progressBar, { width: "66%", duration: 0.8, ease: "power1.inOut" }, 0.3);
-          }
-          if (navStep0 && navStep1) {
-            howTl
-              .to(navStep0, { opacity: 0.35, duration: 0.5 }, 0.3)
-              .to(navStep1, { opacity: 1, duration: 0.5 }, 0.4);
-          }
-
-          // Transition 2: Card 1 recedes, Card 2 slides in from right
-          howTl
-            .to(
-              card1,
-              {
-                xPercent: -18,
-                scale: 0.92,
-                opacity: 0.25,
-                filter: "brightness(0.35) blur(3px)",
-                duration: 1.0,
-                ease: "power2.inOut",
-              },
-              1.6,
-            )
-            .to(
-              card2,
-              {
-                xPercent: 0,
-                opacity: 1,
-                scale: 1,
-                rotate: 0,
-                filter: "brightness(1) blur(0px)",
-                duration: 1.0,
-                ease: "power3.out",
-              },
-              1.6,
-            )
-            .from(card2Num, { y: 35, opacity: 0, duration: 0.6, ease: "power2.out" }, 1.9)
-            .from(card2Badge, { x: 25, opacity: 0, duration: 0.5, ease: "power2.out" }, 1.9)
-            .from(card2Tag, { y: 20, opacity: 0, duration: 0.5, ease: "power2.out" }, 2.0)
-            .from(card2Title, { y: 25, opacity: 0, duration: 0.6, ease: "power2.out" }, 2.05)
-            .from(card2Desc, { y: 20, opacity: 0, duration: 0.6, ease: "power2.out" }, 2.1);
-
-          if (progressBar) {
-            howTl.to(progressBar, { width: "100%", duration: 0.8, ease: "power1.inOut" }, 1.7);
-          }
-          if (navStep1 && navStep2) {
-            howTl
-              .to(navStep1, { opacity: 0.35, duration: 0.5 }, 1.7)
-              .to(navStep2, { opacity: 1, duration: 0.5 }, 1.8);
-          }
-
-          // Buffer at end
-          howTl.to({}, { duration: 0.6 }, 2.6);
+          // 3rd scroll step: Brief comfortable buffer with all 3 cards visible before smooth unpin
+          howTl.to({}, { duration: 0.45 }, 1.8);
         });
 
         // Mobile / Tablet (< 1024px): Smooth entrance on scroll
@@ -1639,10 +1520,10 @@ function Index() {
           const cards = gsap.utils.toArray<HTMLElement>("[data-how-card]");
           cards.forEach((card) => {
             gsap.from(card, {
-              x: 60,
+              y: 35,
               opacity: 0,
-              duration: 1.0,
-              ease: "power3.out",
+              duration: 0.8,
+              ease: "power2.out",
               scrollTrigger: {
                 trigger: card,
                 start: "top 85%",
