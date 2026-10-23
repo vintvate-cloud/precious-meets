@@ -45,11 +45,89 @@ const menuItems = [
   { label: "Member Sign In", href: "/login", icon: <User className="size-4 text-foreground/70" /> },
 ];
 
-// Curated gatherings across Delhi NCR heritage enclaves
+// Curated gatherings across Delhi NCR heritage enclaves mapped to brand color palette
+// Palette: #5F7045 (Forest Sage), #691C35 (Burgundy), #C6A568 (Warm Ochre), #E8ECD8 (Light Sage), #F8F2E7 (Ivory Cream)
 const meets = [
-  { name: "The Sunder Nursery Supper", when: "Thursdays · 8 PM", where: "Mehrauli, Delhi NCR", img: tableLaugh, desc: "Six strangers, four courses, one candlelit table in a secluded heritage enclave." },
-  { name: "Slow Pour Sundays", when: "Sundays · 10 AM", where: "Sunder Nursery Pavilion, Delhi NCR", img: conversation, desc: "Unhurried conversations over single-origin pour-overs beneath the garden trees." },
-  { name: "After-Dark Walk & Wine", when: "Saturdays · 7 PM", where: "Hauz Khas, Delhi NCR", img: dusk, desc: "A twilight heritage walk, a private wine room, a few new friends." },
+  {
+    name: "The Sunder Nursery Supper",
+    when: "Thursdays · 8 PM",
+    where: "Mehrauli, Delhi NCR",
+    img: tableLaugh,
+    desc: "Six strangers, four courses, one candlelit table in a secluded heritage enclave.",
+    bgColor: "#5F7045",
+    colorName: "Forest Sage",
+    titleClass: "text-[#F8F2E7]",
+    descClass: "text-[#F8F2E7]/85",
+    badgeClass: "bg-[#F8F2E7]/15 text-[#E8ECD8] border border-[#F8F2E7]/20",
+    seatsClass: "text-[#C6A568]",
+    borderClass: "border-[#E8ECD8]/25",
+    dividerClass: "border-[#F8F2E7]/15",
+    btnClass: "bg-[#691C35] text-[#F8F2E7] hover:bg-[#171514] shadow-lg",
+  },
+  {
+    name: "After-Dark Walk & Wine",
+    when: "Saturdays · 7 PM",
+    where: "Hauz Khas Terraces, Delhi NCR",
+    img: tableBurgundy,
+    desc: "A twilight heritage walk, a private sommelier room, and unhurried conversations that linger long past dessert.",
+    bgColor: "#691C35",
+    colorName: "Deep Burgundy",
+    titleClass: "text-[#F8F2E7]",
+    descClass: "text-[#F8F2E7]/85",
+    badgeClass: "bg-[#F8F2E7]/15 text-[#C6A568] border border-[#F8F2E7]/20",
+    seatsClass: "text-[#C6A568]",
+    borderClass: "border-[#C6A568]/30",
+    dividerClass: "border-[#F8F2E7]/15",
+    btnClass: "bg-[#C6A568] text-[#171514] hover:bg-[#F8F2E7] shadow-lg font-semibold",
+  },
+  {
+    name: "Slow Pour Sundays",
+    when: "Sundays · 10 AM",
+    where: "Sunder Nursery Pavilion, Delhi NCR",
+    img: conversation,
+    desc: "Unhurried conversations over single-origin pour-overs and fresh artisanal bakes beneath ancient garden trees.",
+    bgColor: "#C6A568",
+    colorName: "Warm Ochre",
+    titleClass: "text-[#171514]",
+    descClass: "text-[#171514]/85",
+    badgeClass: "bg-[#171514]/10 text-[#171514] border border-[#171514]/15",
+    seatsClass: "text-[#691C35] font-bold",
+    borderClass: "border-[#171514]/15",
+    dividerClass: "border-[#171514]/15",
+    btnClass: "bg-[#691C35] text-[#F8F2E7] hover:bg-[#171514] shadow-lg",
+  },
+  {
+    name: "The Poets & Engineers Salon",
+    when: "Fridays · 7:30 PM",
+    where: "Civil Lines Courtyard, Delhi NCR",
+    img: hands,
+    desc: "A gathering of contrasting curiosities—breaking bread, sharing ideas, and bridging different worlds over artisanal pasta.",
+    bgColor: "#E8ECD8",
+    colorName: "Light Sage",
+    titleClass: "text-[#171514]",
+    descClass: "text-[#171514]/85",
+    badgeClass: "bg-[#5F7045]/15 text-[#5F7045] border border-[#5F7045]/20",
+    seatsClass: "text-[#5F7045] font-bold",
+    borderClass: "border-[#5F7045]/20",
+    dividerClass: "border-[#5F7045]/20",
+    btnClass: "bg-[#5F7045] text-[#F8F2E7] hover:bg-[#171514] shadow-lg",
+  },
+  {
+    name: "Twilight Supper & Vinyl",
+    when: "Wednesdays · 8 PM",
+    where: "Lodhi Verandas, Delhi NCR",
+    img: dusk,
+    desc: "Gentle jazz on analog vinyl, seasonal tasting plates, and six open-hearted guests welcoming the evening.",
+    bgColor: "#F8F2E7",
+    colorName: "Ivory Cream",
+    titleClass: "text-[#171514]",
+    descClass: "text-[#171514]/85",
+    badgeClass: "bg-[#691C35]/10 text-[#691C35] border border-[#691C35]/15",
+    seatsClass: "text-[#691C35] font-bold",
+    borderClass: "border-[#691C35]/20",
+    dividerClass: "border-[#171514]/15",
+    btnClass: "bg-[#691C35] text-[#F8F2E7] hover:bg-[#5F7045] shadow-lg",
+  },
 ];
 
 // React Bits Pro Concave Carousel 3D Testimonials
@@ -206,11 +284,10 @@ function Nav() {
                   key={item.href}
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-semibold transition-all ${
-                    item.highlight
+                  className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-semibold transition-all ${item.highlight
                       ? "bg-burgundy text-ivory hover:bg-burgundy/90 shadow-xs"
                       : "text-foreground hover:bg-sage/40"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2.5">
                     {item.icon}
@@ -582,7 +659,7 @@ function Hero() {
   return (
     <section ref={sectionRef} id="top" className="relative h-[280vh] bg-ivory">
       <div ref={stickyRef} className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden px-[2vw] lg:px-[3vw]">
-        
+
         {/* Hand-drawn artisanal dinner table sketch in the background */}
         <div
           data-hero-sketch
@@ -610,7 +687,7 @@ function Hero() {
 
           {/* CENTER COLUMN: Continuous Infinite Reel spanning FULL HEIGHT of the Hero */}
           <div className="order-2 shrink-0 relative flex items-center justify-center h-screen w-full md:w-[380px] lg:w-[420px] xl:w-[450px] 2xl:w-[480px] overflow-hidden">
-            
+
             {/* The Invisible Anchor Slot defining the exact center viewport position */}
             <div
               ref={centerTileSlotRef}
@@ -695,88 +772,128 @@ function Hero() {
   );
 }
 
-const statementStaticLines = [
-  "Life gets busy.",
-  "Circles get smaller.",
-  "There is always room at the table.",
-];
-
-const statementRotatingLines = [
-  "Every meet counts.",
-  "Every meet matters.",
-  "Every stranger is a story.",
-  "Every seat has a story.",
-  "Every dinner leaves a mark.",
-  "Every connection is precious.",
+const manifestoLines = [
+  { text: "In a city that moves too fast,", isBurgundyItalic: false },
+  { text: "We make room for unhurried conversations.", isBurgundyItalic: false },
+  { text: "No resumes. No social performance.", isBurgundyItalic: false },
+  { text: "Just six strangers, one candlelit table.", isBurgundyItalic: false },
+  { text: "Because every meet matters.", isBurgundyItalic: true },
 ];
 
 function Statement() {
-  const [activeIdx, setActiveIdx] = useState(0);
+  const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveIdx((prev) => (prev + 1) % statementRotatingLines.length);
-    }, 2800);
-    return () => clearInterval(timer);
+    const section = sectionRef.current;
+    if (!section) return;
+
+    if (typeof window !== "undefined") {
+      gsap.registerPlugin(ScrollTrigger);
+    }
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const words = section.querySelectorAll<HTMLElement>("[data-reveal-word]");
+    const cta = section.querySelector<HTMLElement>("[data-statement-cta]");
+
+    if (reduce) {
+      gsap.set(words, { opacity: 1 });
+      if (cta) gsap.set(cta, { opacity: 1, y: 0 });
+      return;
+    }
+
+    // Initial dimmed state: subtle low-contrast silhouettes
+    gsap.set(words, { opacity: 0.16 });
+    if (cta) gsap.set(cta, { opacity: 0, y: 30, scale: 0.96 });
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: section,
+        start: "top top",
+        end: "bottom bottom",
+        scrub: 0.5,
+      },
+    });
+
+    // Reveal words sequentially as the user scrolls
+    tl.to(words, {
+      opacity: 1,
+      stagger: {
+        each: 0.04,
+        from: "start",
+      },
+      duration: 0.85,
+      ease: "power1.inOut",
+    });
+
+    if (cta) {
+      tl.to(
+        cta,
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.2,
+          ease: "power2.out",
+        },
+        "-=0.1",
+      );
+    }
+
+    const onResize = () => {
+      ScrollTrigger.refresh();
+    };
+
+    window.addEventListener("resize", onResize);
+
+    return () => {
+      tl.kill();
+      window.removeEventListener("resize", onResize);
+    };
   }, []);
 
   return (
-    <section className="relative flex min-h-[90vh] flex-col items-center justify-center px-[4vw] pt-40 pb-32 text-center overflow-hidden bg-ivory">
-      {/* Subtle Warm Atmospheric Glow */}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <div className="w-[60vw] h-[60vw] max-w-[700px] max-h-[700px] rounded-full bg-[#C6A568]/12 blur-[140px] pointer-events-none select-none" />
-      </div>
+    <section
+      ref={sectionRef}
+      className="relative h-[220vh] bg-ivory select-none"
+    >
+      <div className="sticky top-0 flex h-screen w-full flex-col items-center justify-center px-2 sm:px-4 md:px-6 lg:px-8 overflow-hidden">
+        {/* Subtle Warm Atmospheric Glow */}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="w-[70vw] h-[70vw] max-w-[850px] max-h-[850px] rounded-full bg-[#C6A568]/12 blur-[150px] pointer-events-none select-none" />
+        </div>
 
-      <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center">
-        <h2 className="font-display text-[9vw] leading-[1.02] md:text-[5.5vw] text-ink select-none">
-          {/* Line 1: Life gets busy. */}
-          <span className="line-mask overflow-visible block">
-            <span data-reveal className="relative inline-block">
-              <span>Life gets busy.</span>
-            </span>
-          </span>
+        <div className="relative z-10 w-full max-w-[98vw] lg:max-w-[96vw] xl:max-w-[94vw] 2xl:max-w-[92vw] mx-auto flex flex-col items-center text-center px-1 sm:px-2 pt-12 sm:pt-8">
 
-          {/* Line 2: Circles get smaller. */}
-          <span className="line-mask overflow-visible block">
-            <span data-reveal className="relative inline-block">
-              <span>Circles get smaller.</span>
-            </span>
-          </span>
+          <h2 className="w-full font-display text-[9vw] sm:text-[7vw] md:text-[5.6vw] lg:text-[5vw] xl:text-[5.4vw] 2xl:text-[5.8vw] leading-[1.08] sm:leading-[1.1] tracking-tight select-none">
+            {manifestoLines.map((line, lIdx) => {
+              const words = line.text.split(" ");
+              return (
+                <span
+                  key={lIdx}
+                  className={`block w-full ${
+                    line.isBurgundyItalic
+                      ? "italic font-serif text-burgundy pt-1 sm:pt-2"
+                      : "text-ink"
+                  }`}
+                >
+                  {words.map((word, wIdx) => (
+                    <span
+                      key={wIdx}
+                      data-reveal-word
+                      className="inline-block mr-[0.2em] will-change-[opacity]"
+                    >
+                      {word}
+                    </span>
+                  ))}
+                </span>
+              );
+            })}
+          </h2>
 
-          {/* Line 3: There is always room at the table. */}
-          <span className="line-mask overflow-visible block">
-            <span data-reveal className="relative inline-block">
-              <span>There is always room at the table.</span>
-            </span>
-          </span>
-
-          {/* Line 4: Automatically rotating line with smooth typography transition */}
-          <span className="line-mask overflow-visible pt-2 block">
-            <span data-reveal className="relative inline-block">
-              <span className="relative inline-flex items-center justify-center overflow-hidden h-[1.25em] align-baseline px-2">
-                <AnimatePresence mode="popLayout">
-                  <motion.span
-                    key={activeIdx}
-                    initial={{ y: "115%", opacity: 0 }}
-                    animate={{ y: "0%", opacity: 1 }}
-                    exit={{ y: "-115%", opacity: 0 }}
-                    transition={{
-                      duration: 0.65,
-                      ease: [0.19, 1, 0.22, 1],
-                    }}
-                    className="inline-block italic text-burgundy font-serif whitespace-nowrap"
-                  >
-                    {statementRotatingLines[activeIdx]}
-                  </motion.span>
-                </AnimatePresence>
-              </span>
-            </span>
-          </span>
-        </h2>
-
-        {/* Clean Luxury CTA */}
-        <div className="relative mt-16 sm:mt-20 flex flex-col items-center">
-          <CtaButton tone="burgundy" href="/quiz">Find your table</CtaButton>
+          {/* Clean Luxury CTA Button */}
+          <div data-statement-cta className="relative mt-8 sm:mt-12 flex flex-col items-center">
+            <CtaButton tone="burgundy" href="/quiz">Find your table</CtaButton>
+          </div>
         </div>
       </div>
     </section>
@@ -1033,117 +1150,380 @@ function Geometry() {
 }
 
 
-function Collage() {
+function DoodlePin({
+  color = "#691C35",
+  tilt = 0,
+}: {
+  color?: string;
+  tilt?: number;
+}) {
   return (
-    <section id="stories" className="relative px-[4vw] pt-24 md:pt-32 pb-32 md:pb-40 overflow-hidden text-ivory">
-      <div className="max-w-7xl mx-auto">
-        {/* Header Grid */}
-        <div className="grid gap-8 md:grid-cols-[1fr_1.4fr] md:items-end mb-12 md:mb-16">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-ivory/20 bg-ivory/10 px-3.5 py-1 text-xs font-mono uppercase tracking-widest text-ochre backdrop-blur-md mb-4">
-              Our Stories
-            </div>
-            <h2 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl leading-[0.95] text-ivory">
-              Different lives.<br /><em className="text-ochre">One shared table.</em>
-            </h2>
-          </div>
-          <p className="max-w-md text-sm sm:text-base leading-relaxed text-ivory/80 md:justify-self-end">
-            Meet people with different stories, unexpected interests, and something new to bring to the conversation.
-          </p>
+    <div
+      className="relative flex items-center justify-center filter drop-shadow-[0_4px_7px_rgba(23,21,20,0.35)]"
+      style={{ transform: `rotate(${tilt}deg)` }}
+      aria-hidden="true"
+    >
+      <svg
+        width="36"
+        height="40"
+        viewBox="0 0 36 40"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="overflow-visible"
+      >
+        {/* Soft puncture shadow hole on the card paper */}
+        <ellipse cx="18" cy="36" rx="3.5" ry="1.8" fill="#171514" opacity="0.4" />
+
+        {/* Pin metallic stem */}
+        <path
+          d="M18 20 L18 35.5"
+          stroke="#3B3836"
+          strokeWidth="2.4"
+          strokeLinecap="round"
+        />
+        <path
+          d="M17.4 22 L17.4 34"
+          stroke="#EDE8DF"
+          strokeWidth="0.9"
+          strokeLinecap="round"
+          opacity="0.85"
+        />
+
+        {/* Pin base collar ring */}
+        <ellipse
+          cx="18"
+          cy="20"
+          rx="6.5"
+          ry="2.6"
+          fill={color}
+          stroke="#171514"
+          strokeWidth="1.5"
+        />
+
+        {/* Pin body (doodle tapered waist) */}
+        <path
+          d="M13.5 20 C13.5 15.5, 14.5 13, 14 10.5 C13.6 8.5, 12.5 8, 11.5 7.5 C11.5 5.5, 24.5 5.5, 24.5 7.5 C23.5 8, 22.4 8.5, 22 10.5 C21.5 13, 22.5 15.5, 22.5 20 Z"
+          fill={color}
+          stroke="#171514"
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+        />
+
+        {/* Pin top rounded dome */}
+        <path
+          d="M11.5 7.5 C11.5 3.8, 14.2 2, 18 2 C21.8 2, 24.5 3.8, 24.5 7.5 Z"
+          fill={color}
+          stroke="#171514"
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+        />
+
+        {/* Hand-sketched doodle gloss & reflections */}
+        <path
+          d="M14.5 5 C16 3.8, 19 3.8, 21 4.6"
+          stroke="#FFFFFF"
+          strokeWidth="1.3"
+          strokeLinecap="round"
+          opacity="0.8"
+        />
+        <path
+          d="M15 11.5 C15.2 13.5, 15.6 17, 15.8 18.5"
+          stroke="#FFFFFF"
+          strokeWidth="1.1"
+          strokeLinecap="round"
+          opacity="0.65"
+        />
+      </svg>
+    </div>
+  );
+}
+
+const galleryPostcards = [
+  {
+    id: "laugh",
+    src: tableLaugh,
+    alt: "Friends laughing around a dinner table",
+    title: "Unscripted Laughter",
+    location: "Mehrauli Enclave",
+    time: "8:42 PM",
+    pinColor: "#691C35", // Deep Burgundy
+    pinTilt: -7,
+    desktop: { top: "7%", left: "4%", rotate: -4 },
+    mobile: { top: "12%", left: "6%", rotate: -4, width: "260px" },
+  },
+  {
+    id: "conversation",
+    src: conversation,
+    alt: "Two people smiling over conversation",
+    title: "Poets & Engineers",
+    location: "Civil Lines Courtyard",
+    time: "9:15 PM",
+    pinColor: "#C6A568", // Antique Brass Ochre
+    pinTilt: 6,
+    desktop: { top: "5%", left: "36%", rotate: 3 },
+    mobile: { top: "24%", left: "20%", rotate: 4, width: "260px" },
+  },
+  {
+    id: "burgundy",
+    src: tableBurgundy,
+    alt: "Curated long dinner table set with wine and burgundy floral arrangements",
+    title: "The Geometry of Six",
+    location: "Sunder Nursery Pavilion",
+    time: "7:30 PM",
+    pinColor: "#2D3E28", // Forest Green
+    pinTilt: -5,
+    desktop: { top: "8%", left: "68%", rotate: -3 },
+    mobile: { top: "36%", left: "8%", rotate: -3, width: "260px" },
+  },
+  {
+    id: "hands",
+    src: hands,
+    alt: "Hands sharing a plate across a candlelit table",
+    title: "Breaking Bread",
+    location: "Hauz Khas Terraces",
+    time: "8:58 PM",
+    pinColor: "#B85A3B", // Warm Terracotta
+    pinTilt: 8,
+    desktop: { top: "51%", left: "5%", rotate: 4 },
+    mobile: { top: "48%", left: "22%", rotate: 5, width: "260px" },
+  },
+  {
+    id: "still",
+    src: tableStill,
+    alt: "Curated dinner table set with wine and calla lily",
+    title: "Sanctuary from the Rush",
+    location: "Lodhi Verandas",
+    time: "10:10 PM",
+    pinColor: "#1E2A38", // Deep Ink Navy
+    pinTilt: -6,
+    desktop: { top: "49%", left: "37%", rotate: -2 },
+    mobile: { top: "60%", left: "6%", rotate: -2, width: "260px" },
+  },
+  {
+    id: "dusk",
+    src: dusk,
+    alt: "Friends sharing drinks and laughter at dusk",
+    title: "Twilight Supper",
+    location: "Jahanpanah Vaults",
+    time: "7:05 PM",
+    pinColor: "#691C35", // Deep Burgundy
+    pinTilt: 7,
+    desktop: { top: "53%", left: "69%", rotate: 5 },
+    mobile: { top: "72%", left: "18%", rotate: 4, width: "260px" },
+  },
+];
+
+function Collage() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    const stage = stageRef.current;
+    if (!section || !stage) return;
+
+    if (typeof window !== "undefined") {
+      gsap.registerPlugin(ScrollTrigger);
+    }
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const cards = stage.querySelectorAll<HTMLElement>("[data-postcard]");
+
+    if (reduce) {
+      cards.forEach((card) => {
+        gsap.set(card, { y: 0, opacity: 1 });
+        const pin = card.querySelector<HTMLElement>("[data-pin]");
+        if (pin) gsap.set(pin, { y: 0, opacity: 1, scale: 1 });
+      });
+      return;
+    }
+
+    // Set initial state: cards positioned far above the screen (blank stage initially)
+    // and doodle pins suspended above ready to strike
+    cards.forEach((card) => {
+      gsap.set(card, {
+        y: -window.innerHeight * 1.4,
+        opacity: 0,
+        scale: 1.08,
+      });
+
+      const pin = card.querySelector<HTMLElement>("[data-pin]");
+      if (pin) {
+        gsap.set(pin, {
+          y: -55,
+          opacity: 0,
+          scale: 2.2,
+          rotation: -15,
+        });
+      }
+    });
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: section,
+        start: "top top",
+        end: "bottom bottom",
+        scrub: 0.9,
+      },
+    });
+
+    // Step 0: Blank canvas hold (user enters, sees an unblemished stage with quiet ambient watermark)
+    tl.to({}, { duration: 0.2 });
+
+    // Step 1 to 6: Sequential two-beat choreography:
+    // Beat A: Picture slides down from the top into its postcard place on the board
+    // Beat B: Doodle pin strikes down into the card with paper impact rebound
+    cards.forEach((card, i) => {
+      const targetRotate = parseFloat(card.getAttribute("data-target-rotate") || "0");
+      const pin = card.querySelector<HTMLElement>("[data-pin]");
+
+      // Beat A: Picture slides in smoothly from the top
+      tl.to(
+        card,
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          rotation: targetRotate,
+          duration: 0.8,
+          ease: "power2.out",
+        },
+        i === 0 ? "+=0.1" : "+=0.3",
+      );
+
+      // Beat B: Pin punctures into the card
+      if (pin) {
+        tl.to(
+          pin,
+          {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            rotation: 0,
+            duration: 0.38,
+            ease: "back.out(2.4)",
+          },
+          "-=0.1",
+        );
+
+        // Tactile micro-impact shake of the card as the pin punches in
+        tl.to(
+          card,
+          {
+            y: "+=4",
+            duration: 0.08,
+            yoyo: true,
+            repeat: 1,
+            ease: "power1.inOut",
+          },
+          "<0.12",
+        );
+      }
+    });
+
+    // Step 7: Final hold with all 6 pinned postcards resting proudly on the board before unpinning
+    tl.to({}, { duration: 0.55 });
+
+    const onResize = () => ScrollTrigger.refresh();
+    window.addEventListener("resize", onResize);
+
+    return () => {
+      tl.kill();
+      window.removeEventListener("resize", onResize);
+    };
+  }, [isMobile]);
+
+  return (
+    <section
+      id="stories"
+      ref={sectionRef}
+      className="relative h-[520vh] bg-ivory select-none"
+    >
+      {/* Sticky Fullscreen Pinboard Stage */}
+      <div
+        ref={stageRef}
+        className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-[#FAF7F2] px-3 sm:px-6"
+      >
+        {/* Subtle Warm Atmospheric Candlelight Glow in Center */}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="w-[70vw] h-[70vw] max-w-[850px] max-h-[850px] rounded-full bg-[#C6A568]/12 blur-[160px] pointer-events-none" />
+          <div className="w-[45vw] h-[45vw] max-w-[550px] max-h-[550px] rounded-full bg-[#691C35]/10 blur-[140px] pointer-events-none" />
         </div>
 
-        {/* Bento Grid layout matching reference 2nd image */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 sm:gap-4 md:gap-5">
-          {/* Row 1 - Left: Wide Landscape (7 cols) */}
-          <div
-            data-photo
-            className="md:col-span-7 h-[260px] sm:h-[340px] md:h-[400px] lg:h-[450px] rounded-2xl md:rounded-3xl overflow-hidden bg-black/20 group relative shadow-md"
-          >
-            <img
-              src={tableBurgundy}
-              alt="Curated dinner table set with wine and burgundy floral arrangements"
-              loading="lazy"
-              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-            />
-          </div>
+        {/* Ambient Pinboard Watermark Title (Visible on blank canvas before cards land) */}
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center px-4 select-none">
+          <span className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.28em] text-[#171514]/40 mb-3">
+            Moments From The Table · Delhi NCR
+          </span>
+          <h2 className="font-display text-4xl sm:text-6xl md:text-7xl lg:text-8xl text-[#171514]/20 tracking-tight leading-none">
+            Six strangers.<br />
+            <em className="font-serif italic text-burgundy/25">Stories that linger.</em>
+          </h2>
+        </div>
 
-          {/* Row 1 - Right: Taller / Square-ish (5 cols) */}
-          <div
-            data-photo
-            className="md:col-span-5 h-[260px] sm:h-[340px] md:h-[400px] lg:h-[450px] rounded-2xl md:rounded-3xl overflow-hidden bg-black/20 group relative shadow-md"
-          >
-            <img
-              src={conversation}
-              alt="Two people smiling over conversation"
-              loading="lazy"
-              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-            />
-          </div>
+        {/* 6 Postcards positioned across the stage */}
+        <div className="relative size-full max-w-[1620px] mx-auto pointer-events-none">
+          {galleryPostcards.map((card) => {
+            const pos = isMobile ? card.mobile : card.desktop;
+            return (
+              <div
+                key={card.id}
+                data-postcard
+                data-target-rotate={pos.rotate}
+                style={{
+                  top: pos.top,
+                  left: pos.left,
+                  width: isMobile ? card.mobile.width : undefined,
+                  willChange: "transform, opacity",
+                }}
+                className="absolute pointer-events-auto rounded-2xl bg-[#FCFAF7] p-3 sm:p-3.5 pb-6 sm:pb-7 shadow-[0_22px_50px_-12px_rgba(23,21,20,0.24),_0_4px_16px_rgba(0,0,0,0.06)] border border-[#171514]/8 w-[250px] sm:w-[280px] md:w-[310px] lg:w-[340px] xl:w-[370px] transition-shadow duration-300 hover:shadow-[0_30px_70px_-14px_rgba(105,28,53,0.32)] hover:scale-[1.025] cursor-pointer"
+              >
+                {/* Handcrafted Doodle Pin on Top of Card */}
+                <div
+                  data-pin
+                  className="absolute -top-4 left-1/2 -translate-x-1/2 z-20 pointer-events-none"
+                  style={{ willChange: "transform, opacity" }}
+                >
+                  <DoodlePin color={card.pinColor} tilt={card.pinTilt} />
+                </div>
 
-          {/* Row 2 - Left: 1/3 (4 cols) */}
-          <div
-            data-photo
-            className="md:col-span-4 h-[250px] sm:h-[320px] md:h-[370px] lg:h-[410px] rounded-2xl md:rounded-3xl overflow-hidden bg-black/20 group relative shadow-md"
-          >
-            <img
-              src={tableLaugh}
-              alt="Friends laughing around a dinner table"
-              loading="lazy"
-              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-            />
-          </div>
+                {/* Postcard Image Frame */}
+                <div className="aspect-[4/3] w-full overflow-hidden rounded-xl bg-ink/5 relative">
+                  <img
+                    src={card.src}
+                    alt={card.alt}
+                    className="size-full object-cover transition-transform duration-500 hover:scale-105"
+                    loading="lazy"
+                  />
+                  {/* Subtle inner shadow for tactile photograph print feel */}
+                  <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-black/10" />
+                </div>
 
-          {/* Row 2 - Center: 1/3 (4 cols) */}
-          <div
-            data-photo
-            className="md:col-span-4 h-[250px] sm:h-[320px] md:h-[370px] lg:h-[410px] rounded-2xl md:rounded-3xl overflow-hidden bg-black/20 group relative shadow-md"
-          >
-            <img
-              src={hands}
-              alt="Hands sharing a plate across a candlelit table"
-              loading="lazy"
-              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-            />
-          </div>
-
-          {/* Row 2 - Right: 1/3 (4 cols) */}
-          <div
-            data-photo
-            className="md:col-span-4 h-[250px] sm:h-[320px] md:h-[370px] lg:h-[410px] rounded-2xl md:rounded-3xl overflow-hidden bg-black/20 group relative shadow-md"
-          >
-            <img
-              src={dusk}
-              alt="Friends sharing drinks and laughter at dusk"
-              loading="lazy"
-              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-            />
-          </div>
-
-          {/* Row 3 - Left: 1/3 (4 cols) */}
-          <div
-            data-photo
-            className="md:col-span-4 h-[180px] sm:h-[220px] md:h-[260px] lg:h-[290px] rounded-2xl md:rounded-3xl overflow-hidden bg-black/20 group relative shadow-md"
-          >
-            <img
-              src={tableStill}
-              alt="Curated dinner table set with wine and calla lily"
-              loading="lazy"
-              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-            />
-          </div>
-
-          {/* Row 3 - Right: 2/3 Wide Landscape (8 cols) */}
-          <div
-            data-photo
-            className="md:col-span-8 h-[180px] sm:h-[220px] md:h-[260px] lg:h-[290px] rounded-2xl md:rounded-3xl overflow-hidden bg-black/20 group relative shadow-md"
-          >
-            <img
-              src={footerBg}
-              alt="Atmospheric dinner gathering table ambiance"
-              loading="lazy"
-              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-            />
-          </div>
+                {/* Postcard Handwritten / Editorial Caption */}
+                <div className="mt-3 px-1.5 flex items-baseline justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="font-display text-base sm:text-lg text-ink leading-tight truncate">
+                      {card.title}
+                    </p>
+                    <p className="font-mono text-[9px] sm:text-[10px] text-ink/60 uppercase tracking-wider truncate mt-0.5">
+                      {card.location}
+                    </p>
+                  </div>
+                  <span className="shrink-0 font-mono text-[10px] sm:text-xs text-burgundy font-semibold">
+                    {card.time}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -1338,16 +1718,20 @@ function Meets() {
       </div>
 
       {/* Stacking Cards Container */}
-      <div className="relative mx-auto max-w-5xl flex flex-col gap-12 pb-16">
+      <div className="relative mx-auto max-w-5xl flex flex-col gap-12 pb-24">
         {meets.map((m, i) => (
           <div
             key={m.name}
             data-stack-card
-            className="sticky top-28 md:top-36 rounded-[2.5rem] border border-ivory/25 bg-[#4B5935] shadow-2xl p-6 sm:p-10 md:p-12 overflow-hidden transition-all"
-            style={{ zIndex: i + 1 }}
+            className={`sticky rounded-[2.5rem] shadow-2xl p-6 sm:p-10 md:p-12 overflow-hidden transition-all duration-300 border ${m.borderClass}`}
+            style={{
+              backgroundColor: m.bgColor,
+              top: `calc(6.5rem + ${i * 20}px)`,
+              zIndex: i + 1,
+            }}
           >
             <div className="grid items-center gap-8 md:grid-cols-2">
-              <div className="overflow-hidden rounded-2xl aspect-[4/3] bg-ink/20">
+              <div className="overflow-hidden rounded-2xl aspect-[4/3] bg-ink/10 relative shadow-inner">
                 <img
                   src={m.img}
                   alt={m.name}
@@ -1357,21 +1741,29 @@ function Meets() {
               </div>
               <div className="flex flex-col justify-between h-full">
                 <div>
-                  <div className="inline-flex items-center gap-2 rounded-full bg-ivory/15 px-4 py-1.5 label-mono text-xs text-ochre">
+                  <div className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 label-mono text-xs ${m.badgeClass}`}>
                     <span>{m.when}</span>
                     <span>•</span>
                     <span>{m.where}</span>
                   </div>
-                  <h3 className="font-display text-4xl sm:text-5xl md:text-6xl mt-4 text-ivory">
+                  <h3 className={`font-display text-4xl sm:text-5xl md:text-6xl mt-4 leading-tight ${m.titleClass}`}>
                     {m.name}
                   </h3>
-                  <p className="mt-4 text-base leading-relaxed text-ivory/80">
+                  <p className={`mt-4 text-base leading-relaxed ${m.descClass}`}>
                     {m.desc}
                   </p>
                 </div>
-                <div className="mt-8 pt-6 border-t border-ivory/15 flex items-center justify-between">
-                  <CtaButton tone="burgundy" href="/quiz">Request your seat</CtaButton>
-                  <span className="label-mono text-xs text-ochre font-semibold">6 seats only</span>
+                <div className={`mt-8 pt-6 border-t flex items-center justify-between ${m.dividerClass}`}>
+                  <a
+                    href="/quiz"
+                    className={`inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-xs font-mono uppercase tracking-widest transition-all duration-300 hover:scale-105 ${m.btnClass}`}
+                  >
+                    <span>Request your seat</span>
+                    <ArrowRight className="size-3.5" />
+                  </a>
+                  <span className={`label-mono text-xs font-semibold ${m.seatsClass}`}>
+                    6 seats only
+                  </span>
                 </div>
               </div>
             </div>
