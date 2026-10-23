@@ -45,13 +45,6 @@ const menuItems = [
   { label: "Member Sign In", href: "/login", icon: <User className="size-4 text-foreground/70" /> },
 ];
 
-// Curated gatherings across Delhi NCR heritage enclaves
-const meets = [
-  { name: "The Sunder Nursery Supper", when: "Thursdays · 8 PM", where: "Mehrauli, Delhi NCR", img: tableLaugh, desc: "Six strangers, four courses, one candlelit table in a secluded heritage enclave." },
-  { name: "Slow Pour Sundays", when: "Sundays · 10 AM", where: "Sunder Nursery Pavilion, Delhi NCR", img: conversation, desc: "Unhurried conversations over single-origin pour-overs beneath the garden trees." },
-  { name: "After-Dark Walk & Wine", when: "Saturdays · 7 PM", where: "Hauz Khas, Delhi NCR", img: dusk, desc: "A twilight heritage walk, a private wine room, a few new friends." },
-];
-
 // React Bits Pro Concave Carousel 3D Testimonials
 const testimonials = [
   {
@@ -1030,7 +1023,7 @@ function Geometry() {
         {/* Bottom Pinned Quiz Button in Burgundy */}
         <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 z-20 pointer-events-auto">
           <a
-            href="#meets"
+            href="/quiz"
             className="group flex items-center gap-3 rounded-full bg-burgundy py-2.5 pl-6 pr-2 text-xs font-mono uppercase tracking-widest text-ivory shadow-lg transition-all hover:bg-ink hover:scale-105"
           >
             <span>Take the quiz</span>
@@ -1681,63 +1674,6 @@ function How() {
   );
 }
 
-function Meets() {
-  return (
-    <section id="meets" className="relative px-[4vw] py-32 text-ivory">
-      <div className="max-w-5xl mx-auto mb-12 text-center md:text-left">
-        <p className="label-mono mb-4 text-ochre font-semibold uppercase tracking-widest">
-          Upcoming Curated Gatherings
-        </p>
-        <h2 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl leading-[0.95]">
-          Your next favourite<br /><em className="text-ochre">conversation starts here.</em>
-        </h2>
-      </div>
-
-      {/* Stacking Cards Container */}
-      <div className="relative mx-auto max-w-5xl flex flex-col gap-12 pb-16">
-        {meets.map((m, i) => (
-          <div
-            key={m.name}
-            data-stack-card
-            className="sticky top-28 md:top-36 rounded-[2.5rem] border border-ivory/25 bg-[#4B5935] shadow-2xl p-6 sm:p-10 md:p-12 overflow-hidden transition-all"
-            style={{ zIndex: i + 1 }}
-          >
-            <div className="grid items-center gap-8 md:grid-cols-2">
-              <div className="overflow-hidden rounded-2xl aspect-[4/3] bg-ink/20">
-                <img
-                  src={m.img}
-                  alt={m.name}
-                  loading="lazy"
-                  className="size-full object-cover transition-transform duration-700 hover:scale-105"
-                />
-              </div>
-              <div className="flex flex-col justify-between h-full">
-                <div>
-                  <div className="inline-flex items-center gap-2 rounded-full bg-ivory/15 px-4 py-1.5 label-mono text-xs text-ochre">
-                    <span>{m.when}</span>
-                    <span>•</span>
-                    <span>{m.where}</span>
-                  </div>
-                  <h3 className="font-display text-4xl sm:text-5xl md:text-6xl mt-4 text-ivory">
-                    {m.name}
-                  </h3>
-                  <p className="mt-4 text-base leading-relaxed text-ivory/80">
-                    {m.desc}
-                  </p>
-                </div>
-                <div className="mt-8 pt-6 border-t border-ivory/15 flex items-center justify-between">
-                  <CtaButton tone="burgundy" href="/quiz">Request your seat</CtaButton>
-                  <span className="label-mono text-xs text-ochre font-semibold">6 seats only</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 function CuratedGallerySection() {
   return (
     <section className="relative w-full pt-14 pb-8 bg-black text-white overflow-hidden">
@@ -2249,25 +2185,6 @@ function Index() {
         });
       }
 
-      // Stacking Cards animation for Meets
-      const stackCards = gsap.utils.toArray<HTMLElement>("[data-stack-card]");
-      stackCards.forEach((card, index) => {
-        const nextCard = stackCards[index + 1];
-        if (nextCard) {
-          gsap.to(card, {
-            scale: 0.94 - index * 0.02,
-            opacity: 0.8,
-            ease: "none",
-            scrollTrigger: {
-              trigger: nextCard,
-              start: "top 80%",
-              end: "top 20%",
-              scrub: true,
-            },
-          });
-        }
-      });
-
       // Footer Parallax Background
       gsap.to("[data-footer-bg]", {
         yPercent: -12,
@@ -2329,7 +2246,6 @@ function Index() {
         <Geometry />
         <Collage />
         <How />
-        <Meets />
         <CuratedGallerySection />
       </main>
       <Footer />
