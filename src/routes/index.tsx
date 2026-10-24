@@ -10,6 +10,7 @@ import { Navbar } from "@/components/Navbar";
 import { HeroMarquee } from "@/components/HeroMarquee";
 import { ConversationStarters } from "@/components/ConversationStarters";
 import { FaqSection } from "@/components/FaqSection";
+import { DoorGreetings } from "@/components/DoorGreetings";
 import { SosModal } from "@/components/SosModal";
 import { ShieldAlert, ShieldCheck, Sparkles, BookOpen, Utensils, User, ArrowRight, X } from "lucide-react";
 import tableLaugh from "@/assets/table-laugh.jpg";
@@ -548,11 +549,11 @@ function Hero() {
 }
 
 const manifestoLines = [
-  { text: "In a city that moves too fast,", isBurgundyItalic: false },
-  { text: "We make room for unhurried conversations.", isBurgundyItalic: false },
-  { text: "No resumes. No social performance.", isBurgundyItalic: false },
-  { text: "Just six strangers, one candlelit table.", isBurgundyItalic: false },
-  { text: "Because every meet matters.", isBurgundyItalic: true },
+  { text: "Somewhere, an AI is trying to work out who you should meet.", isBurgundyItalic: false },
+  { text: "We'd rather ask you.", isBurgundyItalic: false },
+  { text: "A person reads your answers,", isBurgundyItalic: false },
+  { text: "a person checks your ID,", isBurgundyItalic: false },
+  { text: "and a person meets you at the door.", isBurgundyItalic: true },
 ];
 
 function Statement() {
@@ -1781,6 +1782,7 @@ function Index() {
         <Hero />
         <HeroMarquee />
         <Statement />
+        <DoorGreetings />
         <Geometry />
         <ConversationStarters />
         <Collage />

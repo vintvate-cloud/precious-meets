@@ -16,6 +16,7 @@ import {
   VerificationsSection,
   VerificationQueueItem,
 } from "@/components/admin/VerificationsSection";
+import { VerificationsService } from "@/lib/verifications-service";
 import {
   ShieldAlert,
   ShieldCheck,
@@ -175,24 +176,22 @@ function AdminConsolePage() {
     },
   ]);
 
-  const [verifications, setVerifications] = useState<VerificationQueueItem[]>([
-    {
-      id: "ver_01",
-      userName: "Ananya Deshmukh",
-      email: "ananya.d@example.com",
-      method: "digilocker_consent_offline",
-      status: "pending",
-      requestedAt: "Today, 2:15 PM",
-    },
-    {
-      id: "ver_02",
-      userName: "Vikram Sengupta",
-      email: "vikram.s@example.com",
-      method: "digilocker_consent_offline",
-      status: "manual_review",
-      requestedAt: "Yesterday, 6:40 PM",
-    },
-  ]);
+  const [verifications, setVerifications] = useState<VerificationQueueItem[]>([]);
+
+  useEffect(() => {
+    setVerifications(VerificationsService.getQueue());
+
+    const handleUpdate = () => {
+      setVerifications(VerificationsService.getQueue());
+    };
+
+    window.addEventListener("storage", handleUpdate);
+    window.addEventListener("precious_meets_verification_updated", handleUpdate);
+    return () => {
+      window.removeEventListener("storage", handleUpdate);
+      window.removeEventListener("precious_meets_verification_updated", handleUpdate);
+    };
+  }, []);
 
   const handleResolveIncident = (id: string) => {
     setIncidents((prev) =>
@@ -202,9 +201,8 @@ function AdminConsolePage() {
   };
 
   const handleUpdateVerification = (id: string, status: "verified" | "failed") => {
-    setVerifications((prev) =>
-      prev.map((v) => (v.id === id ? { ...v, status } : v)),
-    );
+    const updated = VerificationsService.updateStatus(id, status);
+    setVerifications(updated);
     toast.success(`Verification status updated to ${status}.`);
   };
 
