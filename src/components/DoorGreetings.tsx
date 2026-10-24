@@ -226,9 +226,6 @@ export function DoorGreetings() {
             className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none px-6 z-0"
           >
             <div className="max-w-md mx-auto flex flex-col items-center">
-              <span className="inline-block px-3.5 py-1 rounded-full bg-burgundy/[0.06] border border-burgundy/15 text-burgundy text-[11px] sm:text-xs font-mono tracking-[0.24em] uppercase mb-3">
-                At The Door
-              </span>
               <h3 className="font-display text-3xl sm:text-4xl md:text-5xl text-ink tracking-tight leading-[1.1]">
                 Welcomed in <em className="italic font-serif text-burgundy">every tongue.</em>
               </h3>
