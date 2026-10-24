@@ -6,6 +6,10 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
 import { CtaButton } from "@/components/CtaButton";
 import { Preloader } from "@/components/Preloader";
+import { Navbar } from "@/components/Navbar";
+import { HeroMarquee } from "@/components/HeroMarquee";
+import { ConversationStarters } from "@/components/ConversationStarters";
+import { FaqSection } from "@/components/FaqSection";
 import { SosModal } from "@/components/SosModal";
 import { ShieldAlert, ShieldCheck, Sparkles, BookOpen, Utensils, User, ArrowRight, X } from "lucide-react";
 import tableLaugh from "@/assets/table-laugh.jpg";
@@ -37,14 +41,7 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const menuItems = [
-  { label: "Take the Quiz", href: "/quiz", highlight: true, icon: <Sparkles className="size-4 text-ochre" /> },
-  { label: "The Philosophy & Safety", href: "/philosophy", badge: "Women-First", icon: <ShieldCheck className="size-4 text-forest" /> },
-  { label: "How It Works", href: "/how-it-works", icon: <BookOpen className="size-4 text-foreground/70" /> },
-  { label: "Upcoming Meets", href: "/experiences", icon: <Utensils className="size-4 text-foreground/70" /> },
-  { label: "24/7 Safety & SOS", href: "/safety", icon: <ShieldAlert className="size-4 text-red-600" /> },
-  { label: "Member Sign In", href: "/login", icon: <User className="size-4 text-foreground/70" /> },
-];
+
 
 // React Bits Pro Concave Carousel 3D Testimonials
 const testimonials = [
@@ -106,129 +103,7 @@ const testimonials = [
   },
 ];
 
-function Nav() {
-  const [open, setOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
-    const onClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    document.addEventListener("mousedown", onClickOutside);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.removeEventListener("mousedown", onClickOutside);
-    };
-  }, []);
-
-  return (
-    <header data-nav className="fixed inset-x-0 top-4 z-50 flex justify-center px-4 pointer-events-none">
-      <div ref={menuRef} className="relative w-full max-w-4xl">
-        <nav
-          data-nav-bar
-          style={{
-            background: "linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.55) 100%)",
-            backdropFilter: "blur(28px) saturate(190%) contrast(95%)",
-            WebkitBackdropFilter: "blur(28px) saturate(190%) contrast(95%)",
-          }}
-          className="pointer-events-auto flex w-full items-center justify-between rounded-full border border-black/5 py-2 pl-3.5 sm:pl-5 pr-2 text-[#171514] shadow-[0_12px_32px_-10px_rgba(23,21,20,0.08),_0_2px_8px_-2px_rgba(23,21,20,0.03)] transition-all duration-300"
-        >
-          {/* Left: Brand Monogram + Logo */}
-          <div className="flex items-center gap-3">
-            <a href="#top" className="flex items-center gap-2.5 group">
-              <span className="grid size-8 place-items-center rounded-full bg-white border border-black/5 text-[#691C35] transition-transform duration-300 group-hover:scale-105">
-                <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="8" stroke="#691C35" strokeWidth="2" />
-                  <circle cx="12" cy="12" r="3" fill="#C6A568" />
-                </svg>
-              </span>
-              <span className="font-display text-xl sm:text-2xl text-[#171514] tracking-tight">
-                Precious<em className="text-[#691C35] not-italic font-serif"> meets</em>
-              </span>
-            </a>
-
-          </div>
-
-          {/* Right Controls: Ambient City Pill + CTA Button + Dropdown Toggle */}
-          <div className="flex items-center gap-2">
-            {/* Ambient City Pill */}
-            <div className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-white/70 px-3 py-1.5 text-[11px] font-mono tracking-wider text-[#171514]/75 border border-black/5">
-              <span className="size-1.5 rounded-full bg-[#5F7045] animate-pulse" />
-              <span>Delhi NCR</span>
-            </div>
-
-            {/* Solid Pill CTA Button -> routes to /quiz */}
-            <a
-              href="/quiz"
-              className="rounded-full bg-white text-[#171514] border border-black/10 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold tracking-tight shadow-xs transition-all duration-300 hover:bg-[#691C35] hover:text-white hover:scale-105 active:scale-95"
-            >
-              Save a seat
-            </a>
-
-            {/* Compact Dropdown Menu Toggle Button */}
-            <button
-              aria-label={open ? "Close menu" : "Open menu"}
-              aria-expanded={open}
-              onClick={() => setOpen((o) => !o)}
-              className="relative grid size-9 sm:size-10 place-items-center rounded-full bg-[#171514] text-white shadow-sm transition-all duration-300 hover:bg-[#691C35] hover:scale-105 active:scale-95 cursor-pointer"
-            >
-              <span className={`absolute h-px w-3.5 sm:w-4 bg-white transition-transform duration-500 ${open ? "rotate-45" : "-translate-y-1"}`} />
-              <span className={`absolute h-px w-3.5 sm:w-4 bg-white transition-transform duration-500 ${open ? "-rotate-45" : "translate-y-1"}`} />
-            </button>
-          </div>
-        </nav>
-
-        {/* COMPACT DROPDOWN POPUP (Replaces full-page takeover) */}
-        {open && (
-          <div className="pointer-events-auto absolute top-full right-0 mt-2.5 w-72 sm:w-80 overflow-hidden rounded-2xl border border-white/80 bg-white/95 p-2.5 text-[#171514] shadow-[0_20px_50px_rgba(0,0,0,0.18)] backdrop-blur-2xl animate-in fade-in slide-in-from-top-3 duration-200">
-            <div className="px-3 py-2 border-b border-[#171514]/10 mb-1 flex items-center justify-between">
-              <span className="label-mono text-[10px] uppercase font-bold text-muted-foreground">
-                Navigation
-              </span>
-              <span className="text-[10px] text-forest font-semibold flex items-center gap-1">
-                <ShieldCheck className="size-3" /> 100% Aadhaar Verified
-              </span>
-            </div>
-
-            <div className="space-y-1">
-              {menuItems.map((item) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setOpen(false)}
-                  className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-semibold transition-all ${item.highlight
-                    ? "bg-burgundy text-ivory hover:bg-burgundy/90 shadow-xs"
-                    : "text-foreground hover:bg-sage/40"
-                    }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    {item.icon}
-                    <span>{item.label}</span>
-                  </div>
-                  {item.badge && (
-                    <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-forest/15 text-forest">
-                      {item.badge}
-                    </span>
-                  )}
-                  {item.highlight && <ArrowRight className="size-3.5" />}
-                </a>
-              ))}
-            </div>
-
-            <div className="mt-2 border-t border-[#171514]/10 pt-2 px-3 text-[11px] text-muted-foreground flex items-center justify-between">
-              <span>Delhi NCR · Active Circles</span>
-              <span className="font-mono text-[10px] text-forest">Verified Tables</span>
-            </div>
-          </div>
-        )}
-      </div>
-    </header>
-  );
-}
 
 const heroSlides = [
   {
@@ -771,8 +646,8 @@ function Statement() {
                 <span
                   key={lIdx}
                   className={`block w-full ${line.isBurgundyItalic
-                      ? "italic font-serif text-burgundy pt-1 sm:pt-2"
-                      : "text-ink"
+                    ? "italic font-serif text-burgundy pt-1 sm:pt-2"
+                    : "text-ink"
                     }`}
                 >
                   {words.map((word, wIdx) => (
@@ -1901,14 +1776,17 @@ function Index() {
   return (
     <div ref={root} className="min-h-screen">
       <Preloader onComplete={handlePreloaderComplete} />
-      <Nav />
+      <Navbar />
       <main>
         <Hero />
+        <HeroMarquee />
         <Statement />
         <Geometry />
+        <ConversationStarters />
         <Collage />
         <How />
         <CuratedGallerySection />
+        <FaqSection />
       </main>
       <Footer />
 
