@@ -227,7 +227,7 @@ export function DoorGreetings() {
           >
             <div className="max-w-md mx-auto flex flex-col items-center">
               <h3 className="font-display text-3xl sm:text-4xl md:text-5xl text-ink tracking-tight leading-[1.1]">
-                Welcomed in <em className="italic font-serif text-burgundy">every tongue.</em>
+                Welcomed in <em className="italic font-serif text-burgundy">every language.</em>
               </h3>
             </div>
           </div>
