@@ -34,7 +34,7 @@ export interface HeroSectionProps {
 
   /**
    * Minimal single-line poetic subtitle.
-   * @default "Six strangers. One candlelit table. An unhurried evening."
+   * @default "Curated dinners designed for meaningful human connections across Delhi NCR."
    */
   subtitle?: string;
 
@@ -46,13 +46,13 @@ export interface HeroSectionProps {
 
   /**
    * CTA button label.
-   * @default "Reserve a Seat"
+   * @default "Take the Quiz"
    */
   ctaText?: string;
 
   /**
    * CTA button target href.
-   * @default "/experiences"
+   * @default "/quiz"
    */
   ctaHref?: string;
 

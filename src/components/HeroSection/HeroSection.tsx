@@ -68,10 +68,10 @@ export function HeroSection({
   leftFlankText = "every",
   rightFlankText = "matters.",
   kicker = "DELHI NCR · 6 GUESTS ONLY",
-  subtitle = "Six strangers. One candlelit table. An unhurried evening.",
+  subtitle = "Curated dinners designed for meaningful human connections across Delhi NCR.",
   autoPlayInterval = 6500,
-  ctaText = "Reserve a Seat",
-  ctaHref = "/experiences",
+  ctaText = "Take the Quiz",
+  ctaHref = "/quiz",
   className = "",
 }: HeroSectionProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
