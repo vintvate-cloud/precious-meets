@@ -189,6 +189,11 @@ export function QuizResultsPage() {
     try {
       const memberId = `PM-FOUNDER-${Math.floor(1000 + Math.random() * 9000)}`;
       const invoiceNumber = CryptoService.generateInvoiceNumber();
+      const formattedDate = new Date().toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
 
       // Retrieve Aadhaar document proof from state or fallback to saved contact in localStorage
       let effectiveAadhaarUrl = aadhaarFileUrl;
@@ -204,8 +209,28 @@ export function QuizResultsPage() {
         } catch (e) {}
       }
 
-      // 1. Record member application dossier for curation review directly in Supabase
-      // Note: User is NOT active yet. Status is 'paid_pending_credentials'
+      // 1. Dispatch automated subscription & payment confirmed email IMMEDIATELY
+      // This sends the Razorpay tax invoice & subscription confirmation email to user's inbox right away
+      const sendEmailPromise = EmailService.send({
+        to: email.trim(),
+        subject: "Thanks for Subscribing to Precious Meets — Invoice & Member Access ✨",
+        template: "subscription_activated",
+        data: {
+          name: name.trim(),
+          email: email.trim(),
+          amount: "₹1,999",
+          plan: "Annual Founding Member Pass",
+          memberId,
+          archetype: profile?.archetype?.title || "Curious Flâneur",
+          dashboardUrl: `${window.location.origin}/login`,
+          invoiceNumber,
+          paymentId: result.paymentId,
+          date: formattedDate,
+        },
+      });
+
+      // 2. Record member application dossier for curation review directly in Supabase
+      // Note: User is pending admin credential issuance
       await ApplicationsService.createOrUpdateFromCheckout({
         userId: user?.id,
         name: name.trim(),
@@ -227,7 +252,7 @@ export function QuizResultsPage() {
         aadhaarFileName: effectiveAadhaarName,
       });
 
-      // 2. Dispatch a verification request to the Admin Panel's verification queue
+      // 3. Dispatch a verification request to the Admin Panel's verification queue
       VerificationsService.addRequest({
         userName: name.trim(),
         email: email.trim(),
@@ -241,28 +266,16 @@ export function QuizResultsPage() {
         aadhaarFileName: effectiveAadhaarName,
       });
 
-      // 3. Dispatch automated receipt & invoice email via Resend
+      // Await email delivery confirmation
       try {
-        await EmailService.send({
-          to: email.trim(),
-          subject: "Thanks for Subscribing to Precious Meets — Invoice & Member Access ✨",
-          template: "subscription_activated",
-          data: {
-            name: name.trim(),
-            email: email.trim(),
-            amount: "₹1,999",
-            plan: "Annual Founding Member Pass",
-            memberId,
-            archetype: profile?.archetype?.title || "Curious Flâneur",
-            dashboardUrl: `${window.location.origin}/login`,
-            invoiceNumber,
-            paymentId: result.paymentId,
-            credentialsEtaNotice:
-              "We will email your member sign in credentials in a while. Once your credentials have been sent by the admin, you will be able to log in.",
-          },
-        });
+        const emailRes = await sendEmailPromise;
+        if (emailRes && emailRes.success) {
+          console.log("[results.tsx] Payment invoice email sent successfully to", email.trim(), "ID:", emailRes.id);
+        } else {
+          console.warn("[results.tsx] Email dispatch warning:", emailRes?.error);
+        }
       } catch (emailErr) {
-        console.warn("Email service notice:", emailErr);
+        console.warn("[results.tsx] Email service notice:", emailErr);
       }
 
       const dossierData = {
@@ -281,7 +294,7 @@ export function QuizResultsPage() {
         invoiceNumber,
         paymentId: result.paymentId,
       });
-      toast.success("Payment Received! Razorpay invoice generated. Awaiting admin credential dispatch.");
+      toast.success("Payment Received! Invoice & payment confirmation email sent to your inbox.");
     } catch (e: any) {
       setPaying(false);
       toast.error(e.message || "An unexpected error occurred during confirmation.");

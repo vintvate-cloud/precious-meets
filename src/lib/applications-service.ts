@@ -301,6 +301,8 @@ export class ApplicationsService {
       razorpayOrderId: payload.orderId,
       invoiceNumber: payload.invoiceNumber || CryptoService.generateInvoiceNumber(),
       paidAt: now,
+      decisionEmailSentAt: now,
+      decisionEmailTemplate: "subscription_activated",
       credentialsSent: false,
       identityStatus: "pending",
       identityProvider: payload.aadhaarFileUrl ? "aadhaar_card_upload" : "digilocker_consent_offline",

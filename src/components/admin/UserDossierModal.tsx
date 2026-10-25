@@ -92,7 +92,7 @@ export function UserDossierModal({
       toast.success(
         `Application ${application.applicationReference} approved!`,
         {
-          description: `Welcome pass email dispatched to ${application.applicantEmail}.`,
+          description: `Member inducted successfully. Send login credentials when ready.`,
         },
       );
       onApplicationUpdated(res.application);
