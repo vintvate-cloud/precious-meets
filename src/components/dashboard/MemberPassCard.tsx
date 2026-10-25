@@ -6,18 +6,9 @@ import {
   Ticket,
   QrCode,
   Calendar,
-  Clock,
-  Users,
   Compass,
-  ArrowUpRight,
-  ExternalLink,
-  ChevronRight,
-  Lightbulb,
-  CheckCircle2,
-  Lock,
   Mail,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   UniversalMemberPassModal,
   SeatedEvent,
@@ -223,11 +214,10 @@ export function MemberPassCard({
       </div>
 
       {/* ------------------------------------------------------------- */}
-      {/* 2. UPCOMING DINNER COUNTDOWN & MYSTERY COMPANIONS */}
+      {/* 2. NEXT CONFIRMED MEET (Clean, minimal)                       */}
       {/* ------------------------------------------------------------- */}
-      <div className="grid gap-6 md:grid-cols-12">
-        {/* Next Meet Countdown Card */}
-        <div className="md:col-span-7 rounded-3xl border border-border/80 bg-card p-6 shadow-sm">
+      {nextEvent && (
+        <div className="rounded-3xl border border-border/80 bg-card p-6 shadow-sm">
           <div className="flex items-center justify-between border-b border-border/60 pb-3">
             <div className="flex items-center gap-2">
               <span className="size-2 rounded-full bg-forest animate-pulse" />
@@ -240,8 +230,8 @@ export function MemberPassCard({
             </span>
           </div>
 
-          {nextEvent ? (
-            <div className="mt-4">
+          <div className="mt-4 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
               <h3 className="font-display text-2xl text-foreground">
                 {nextEvent.title}
               </h3>
@@ -252,127 +242,46 @@ export function MemberPassCard({
                 <span>•</span>
                 <span>{nextEvent.neighborhood}</span>
               </div>
-
-              {/* Countdown Ticker Pills */}
-              <div className="mt-5 grid grid-cols-4 gap-2 text-center">
-                {[
-                  { label: "Days", val: timeLeft.days },
-                  { label: "Hours", val: timeLeft.hours },
-                  { label: "Mins", val: timeLeft.minutes },
-                  { label: "Secs", val: timeLeft.seconds },
-                ].map((item, i) => (
-                  <div key={i} className="rounded-2xl bg-sage/30 border border-border/60 p-2.5">
-                    <span className="font-mono text-2xl font-bold text-burgundy">
-                      {String(item.val).padStart(2, "0")}
-                    </span>
-                    <span className="block text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
-                      {item.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-5 flex items-center justify-between rounded-xl bg-card border border-border/80 p-3 text-xs">
-                <div>
-                  <span className="text-[10px] uppercase text-muted-foreground block font-mono">
-                    Universal QR Gate Key
-                  </span>
-                  <button
-                    onClick={() => setShowQrModal(true)}
-                    className="font-mono text-sm font-bold text-burgundy hover:underline flex items-center gap-1 cursor-pointer"
-                  >
-                    <QrCode className="size-3.5" /> Tap to Open Pass
-                  </button>
-                </div>
-                <span className="text-[11px] text-muted-foreground text-right">
-                  Host scans your QR at the door
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div className="mt-6 text-center py-6">
-              <Ticket className="size-10 text-muted-foreground/40 mx-auto" />
-              <p className="mt-2 text-sm font-medium">No upcoming table confirmed yet</p>
-              <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
-                Tables are strictly invite-only. Check your Requests to accept curator seat invitations.
-              </p>
-              <Button
-                onClick={onViewInvitations}
-                className="mt-4 rounded-full bg-burgundy text-ivory text-xs px-5 cursor-pointer shadow-sm hover:bg-burgundy/90"
-              >
-                <Mail className="size-3.5 mr-1.5" />
-                <span>View Seat Invitations</span>
-              </Button>
-            </div>
-          )}
-        </div>
-
-        {/* Mystery Table Companions & Conversational Harmony */}
-        <div className="md:col-span-5 rounded-3xl border border-border/80 bg-card p-6 shadow-sm flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between border-b border-border/60 pb-3">
-              <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-                Table Chemistry
-              </span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-forest/15 px-2.5 py-0.5 text-[11px] font-bold text-forest">
-                <Sparkles className="size-3 text-forest" /> 97% Harmony
-              </span>
             </div>
 
-            <h4 className="font-display text-lg mt-3">Who is at the Table?</h4>
-            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-              Anonymized conversational archetypes calibrated by our algorithm for dynamic chemistry:
-            </p>
-
-            <div className="mt-4 space-y-2 text-xs">
+            {/* Countdown Ticker Pills */}
+            <div className="grid grid-cols-4 gap-2 text-center shrink-0">
               {[
-                { tag: "🎨 2 Creatives & Designers", desc: "The Passionate Debater & The Serene Minimalist" },
-                { tag: "🚀 2 Tech & Venture Founders", desc: "The Curious Flâneur & The Active Contributor" },
-                { tag: "🏛️ 1 Architectural Anthropologist", desc: "The Quiet Observer" },
-                { tag: "🍷 Sommelier & Culinary Host", desc: "Table Facilitator & Storyteller" },
-              ].map((comp, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-start justify-between gap-2 rounded-xl bg-sage/20 p-2 text-[11px]"
-                >
-                  <span className="font-medium text-foreground">{comp.tag}</span>
-                  <span className="text-[10px] text-muted-foreground text-right">{comp.desc}</span>
+                { label: "Days", val: timeLeft.days },
+                { label: "Hours", val: timeLeft.hours },
+                { label: "Mins", val: timeLeft.minutes },
+                { label: "Secs", val: timeLeft.seconds },
+              ].map((item, i) => (
+                <div key={i} className="rounded-2xl bg-sage/30 border border-border/60 px-3 py-2">
+                  <span className="font-mono text-xl font-bold text-burgundy">
+                    {String(item.val).padStart(2, "0")}
+                  </span>
+                  <span className="block text-[9px] uppercase tracking-wider text-muted-foreground font-mono">
+                    {item.label}
+                  </span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-border/60 text-[11px] text-muted-foreground flex items-center justify-between">
-            <span>Sized strictly to 6 guests</span>
-            <span className="text-burgundy font-semibold">Zero Pitching Rule</span>
-          </div>
-        </div>
-      </div>
-
-      {/* ------------------------------------------------------------- */}
-      {/* 3. WEEKLY SALON ICEBREAKER CUE */}
-      {/* ------------------------------------------------------------- */}
-      <div className="rounded-3xl border border-ochre/30 bg-gradient-to-r from-ochre/10 via-card to-sage/20 p-5 sm:p-6 shadow-sm">
-        <div className="flex items-start gap-4">
-          <div className="grid size-9 shrink-0 place-items-center rounded-2xl bg-ochre/20 text-ochre border border-ochre/30">
-            <Lightbulb className="size-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] uppercase tracking-wider text-ochre font-bold">
-                Table Cue of the Week
+          <div className="mt-5 flex items-center justify-between rounded-2xl bg-sage/20 border border-border/60 p-3 text-xs">
+            <div>
+              <span className="text-[10px] uppercase text-muted-foreground block font-mono">
+                Universal QR Gate Key
               </span>
-              <span className="text-[10px] text-muted-foreground">• Skip the LinkedIn talk</span>
+              <button
+                onClick={() => setShowQrModal(true)}
+                className="font-mono text-sm font-bold text-burgundy hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <QrCode className="size-3.5" /> Tap to Open Pass
+              </button>
             </div>
-            <p className="font-serif italic text-base sm:text-lg text-foreground mt-1">
-              “What is a small, unexpected rabbit hole you fell down this month that gave you pure, unadulterated joy?”
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Curated conversation starter for your next Precious Meet gathering.
-            </p>
+            <span className="text-[11px] text-muted-foreground text-right font-mono">
+              Gate: {nextEvent.gateCode}
+            </span>
           </div>
         </div>
-      </div>
+      )}
 
       {/* ------------------------------------------------------------- */}
       {/* UNIVERSAL MASTER QR PASS MODAL */}

@@ -31,7 +31,7 @@ const PRESET_COVERS = [
     url: "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=1200&q=80",
   },
   {
-    label: "Heritage Garden Salon",
+    label: "Heritage Garden Table",
     url: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1200&q=80",
   },
 ];
@@ -177,7 +177,7 @@ export function EventFormModal({
                 <option value="supper_club">Supper Club</option>
                 <option value="coffee_tasting">Slow Coffee Tasting</option>
                 <option value="after_dark">After-Dark Walk</option>
-                <option value="salon">Cultural Salon</option>
+                <option value="salon">Cultural Gathering</option>
               </select>
             </div>
           </div>
@@ -307,7 +307,7 @@ export function EventFormModal({
                 required
                 value={hostRole}
                 onChange={(e) => setHostRole(e.target.value)}
-                placeholder="e.g. Culinary Anthropologist & Salon Host"
+                placeholder="e.g. Culinary Anthropologist & Table Host"
                 className="mt-1 w-full rounded-xl border border-input bg-background p-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-burgundy"
               />
             </div>

@@ -8,7 +8,7 @@ export const Route = createFileRoute("/experiences/")({
   head: () => ({
     meta: [
       { title: "Curated Meets & Shared Tables — Precious Meets" },
-      { name: "description", content: "Discover upcoming supper clubs, slow coffee tastings, and evening salons across Delhi NCR." },
+      { name: "description", content: "Discover upcoming dinners, slow coffee meets, and evening gatherings across Delhi NCR." },
     ],
   }),
   component: ExperiencesPage,

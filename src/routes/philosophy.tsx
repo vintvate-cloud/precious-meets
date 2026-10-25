@@ -106,7 +106,7 @@ export function PhilosophyPage() {
       feature: "Security for Women",
       nightlife: "Crowded clubs, unwanted advances",
       apps: "Unpredictable 1-on-1 private risk",
-      precious: "Safe 6-person curated salon with verified host",
+      precious: "Safe 6-person dinner table with verified host",
     },
     {
       feature: "Attendee Accountability",

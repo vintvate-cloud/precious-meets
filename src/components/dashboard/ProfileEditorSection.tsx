@@ -56,11 +56,36 @@ export function ProfileEditorSection() {
       }
     }
 
+    const savedPrefs = localStorage.getItem("precious_meets_user_preferences");
+    if (savedPrefs) {
+      try {
+        const pr = JSON.parse(savedPrefs);
+        if (pr.displayName) setDisplayName(pr.displayName);
+        if (pr.bio) setBio(pr.bio);
+        if (pr.city) setCity(pr.city);
+        if (pr.dietary) setDietary(pr.dietary);
+        if (Array.isArray(pr.allergies)) setAllergies(pr.allergies);
+        if (pr.emergencyName) setEmergencyName(pr.emergencyName);
+        if (pr.emergencyPhone) setEmergencyPhone(pr.emergencyPhone);
+      } catch (e) {
+        // ignore
+      }
+    }
+
     const savedProfile = localStorage.getItem("precious_meets_latest_profile");
     if (savedProfile) {
       try {
         const p = JSON.parse(savedProfile);
-        if (p.archetype) setArchetypeData(p.archetype);
+        setArchetypeData((prev) => ({
+          title: p?.archetype?.title || prev.title,
+          description: p?.archetype?.description || prev.description,
+          dimensions: {
+            socialEnergy: p?.dimensions?.socialEnergy ?? p?.archetype?.dimensions?.socialEnergy ?? prev.dimensions.socialEnergy,
+            conversationDepth: p?.dimensions?.conversationDepth ?? p?.archetype?.dimensions?.conversationDepth ?? prev.dimensions.conversationDepth,
+            curiosity: p?.dimensions?.curiosity ?? p?.archetype?.dimensions?.curiosity ?? prev.dimensions.curiosity,
+            adventure: p?.dimensions?.adventure ?? p?.archetype?.dimensions?.adventure ?? prev.dimensions.adventure,
+          },
+        }));
       } catch (e) {
         // ignore
       }
@@ -117,15 +142,9 @@ export function ProfileEditorSection() {
     <div className="space-y-8">
       {/* Header */}
       <div className="border-b border-border/60 pb-5">
-        <span className="font-mono text-xs uppercase tracking-wider text-forest font-bold">
-          Member Identity & Preferences
-        </span>
         <h2 className="font-display mt-1 text-2xl sm:text-3xl text-foreground">
-          Manage Your Profile
+          Manage Profile
         </h2>
-        <p className="text-xs text-muted-foreground mt-1">
-          Hosts use your preferences to prepare customized seasonal courses and seat compatible conversation partners.
-        </p>
       </div>
 
       <div className="grid gap-8 md:grid-cols-12">
@@ -355,20 +374,20 @@ export function ProfileEditorSection() {
 
             <div>
               <h4 className="font-display text-xl text-foreground">
-                {archetypeData.title}
+                {archetypeData?.title || "The Curious Flâneur"}
               </h4>
               <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                {archetypeData.description}
+                {archetypeData?.description || "Curious, thoughtful, and observant conversation partner."}
               </p>
             </div>
 
             {/* Dimension Sliders */}
             <div className="space-y-3 pt-2 text-xs">
               {[
-                { label: "Social Energy", val: archetypeData.dimensions.socialEnergy },
-                { label: "Conversation Depth", val: archetypeData.dimensions.conversationDepth },
-                { label: "Curiosity Factor", val: archetypeData.dimensions.curiosity },
-                { label: "Adventure Appetite", val: archetypeData.dimensions.adventure },
+                { label: "Social Energy", val: archetypeData?.dimensions?.socialEnergy ?? 74 },
+                { label: "Conversation Depth", val: archetypeData?.dimensions?.conversationDepth ?? 88 },
+                { label: "Curiosity Factor", val: archetypeData?.dimensions?.curiosity ?? 92 },
+                { label: "Adventure Appetite", val: archetypeData?.dimensions?.adventure ?? 78 },
               ].map((dim, i) => (
                 <div key={i} className="space-y-1">
                   <div className="flex justify-between text-[11px]">

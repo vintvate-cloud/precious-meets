@@ -134,7 +134,7 @@ export function VerificationsSection({
           city: app.applicantCity || "Delhi NCR",
           memberTier: app.status === "approved" ? "Founding Member" : "Annual Pass",
           memberId: app.applicationReference.replace("PM-FILE-", "PM-MEMBER-"),
-          archetypeTitle: app.archetypeTitle || "Salon Contributor",
+          archetypeTitle: app.archetypeTitle || "Circle Member",
           verificationMethod: "DigiLocker Consent Offline",
           verificationReference: app.identityReference || "DL-AADHAAR-OK-7721",
           verifiedAt: app.identityVerifiedAt

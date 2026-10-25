@@ -1,24 +1,17 @@
-import { Link, useLocation } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
-import { useAuth } from "@/lib/auth-context";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   ShieldCheck,
-  User,
-  Calendar,
-  LogOut,
   ShieldAlert,
   Sparkles,
   BookOpen,
   ArrowRight,
   HelpCircle,
+  Compass,
+  FileText,
 } from "lucide-react";
 
 export function Navbar() {
-  const { user, profile, isAdmin, signOut } = useAuth();
-  const location = useLocation();
-  const isDashboard = location.pathname.startsWith("/dashboard");
-  const isMemberAuthenticated = Boolean(user || isDashboard);
   const [open, setOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -105,22 +98,6 @@ export function Navbar() {
               Save a seat
             </Link>
 
-            {/* User Profile Avatar if authenticated or in dashboard */}
-            {(user || isDashboard) && (
-              <Link
-                to="/dashboard"
-                title="Go to Dashboard"
-                className="hidden sm:inline-flex rounded-full ring-offset-background transition-transform hover:scale-105 cursor-pointer"
-              >
-                <Avatar className="size-8 sm:size-9 border border-black/10 shadow-xs">
-                  <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.display_name || "User"} />
-                  <AvatarFallback className="bg-sage text-xs font-semibold text-forest">
-                    {profile?.display_name?.slice(0, 2).toUpperCase() || "ME"}
-                  </AvatarFallback>
-                </Avatar>
-              </Link>
-            )}
-
             {/* Compact Dropdown Menu Toggle Button - ALWAYS visible on all screen sizes */}
             <button
               aria-label={open ? "Close menu" : "Open menu"}
@@ -137,20 +114,12 @@ export function Navbar() {
         {/* COMPACT DROPDOWN POPUP */}
         {open && (
           <div className="pointer-events-auto absolute top-full right-0 mt-2.5 w-72 sm:w-80 overflow-hidden rounded-2xl border border-white/80 bg-white/95 p-2.5 text-[#171514] shadow-[0_20px_50px_rgba(0,0,0,0.18)] backdrop-blur-2xl animate-in fade-in slide-in-from-top-3 duration-200">
-            <div className="px-3 py-2 border-b border-[#171514]/10 mb-1 flex items-center justify-between">
-              <span className="label-mono text-[10px] uppercase font-bold text-muted-foreground">
-                Navigation
-              </span>
-              <span className="text-[10px] text-forest font-semibold flex items-center gap-1">
-                <ShieldCheck className="size-3" /> 100% Aadhaar Verified
-              </span>
-            </div>
 
             <div className="space-y-1">
               <Link
                 to="/quiz"
                 onClick={() => setOpen(false)}
-                className="flex items-center justify-between rounded-xl bg-burgundy px-3 py-2.5 text-xs font-semibold text-ivory hover:bg-burgundy/90 shadow-xs transition-colors"
+                className="flex items-center justify-between rounded-xl bg-burgundy px-3.5 py-2.5 text-xs font-semibold text-ivory hover:bg-burgundy/90 shadow-xs transition-colors mb-2"
               >
                 <div className="flex items-center gap-2.5">
                   <Sparkles className="size-4 text-ochre" />
@@ -159,38 +128,47 @@ export function Navbar() {
                 <ArrowRight className="size-3.5" />
               </Link>
 
+              {/* 1. The Philosophy */}
               <Link
                 to="/philosophy"
                 onClick={() => setOpen(false)}
                 className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold text-foreground hover:bg-sage/40 transition-colors"
               >
                 <div className="flex items-center gap-2.5">
-                  <ShieldCheck className="size-4 text-forest" />
-                  <span>The Philosophy & Safety</span>
+                  <Compass className="size-4 text-forest" />
+                  <span>The Philosophy</span>
                 </div>
-                <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-forest/15 text-forest">
+                <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-forest/15 text-forest font-semibold">
                   Women-First
                 </span>
               </Link>
 
-              <a
-                href="/#how"
-                onClick={handleHowItWorksClick}
-                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-sage/40 transition-colors cursor-pointer"
+              {/* 2. How It Works */}
+              <Link
+                to="/how-it-works"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-sage/40 transition-colors"
               >
-                <BookOpen className="size-4 text-foreground/70" />
+                <BookOpen className="size-4 text-burgundy" />
                 <span>How It Works</span>
-              </a>
+              </Link>
 
+              {/* 3. Safety & SOS */}
               <Link
                 to="/safety"
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
+                className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
               >
-                <ShieldAlert className="size-4 text-red-600" />
-                <span>24/7 Safety & SOS</span>
+                <div className="flex items-center gap-2.5">
+                  <ShieldAlert className="size-4 text-red-600" />
+                  <span>24/7 Safety & SOS</span>
+                </div>
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-red-100 text-red-700 font-semibold">
+                  Emergency
+                </span>
               </Link>
 
+              {/* 4. FAQs */}
               <Link
                 to="/faq"
                 onClick={() => setOpen(false)}
@@ -201,71 +179,30 @@ export function Navbar() {
                   <span>Frequently Asked Questions</span>
                 </div>
                 <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-black/5 text-muted-foreground font-semibold">
-                  FAQ
+                  FAQs
                 </span>
               </Link>
 
-              {isMemberAuthenticated ? (
-                <div className="border-t border-[#171514]/10 my-1 pt-1 space-y-1">
-                  <div className="px-3 py-1.5 flex items-center justify-between">
-                    <span className="text-[10px] uppercase font-mono text-muted-foreground">Member Session</span>
-                    <span className="text-xs font-medium text-foreground truncate max-w-[150px]">{profile?.display_name || user?.email || "Founding Member"}</span>
-                  </div>
-                  {!isDashboard && (
-                    <Link
-                      to="/dashboard"
-                      onClick={() => setOpen(false)}
-                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-sage/40 transition-colors"
-                    >
-                      <User className="size-4 text-foreground/70" />
-                      <span>My Dashboard</span>
-                    </Link>
-                  )}
-                  <Link
-                    to="/dashboard/bookings"
-                    onClick={() => setOpen(false)}
-                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-sage/40 transition-colors"
-                  >
-                    <Calendar className="size-4 text-foreground/70" />
-                    <span>My Meets & Passes</span>
-                  </Link>
-                  {isAdmin && (
-                    <Link
-                      to="/admin"
-                      onClick={() => setOpen(false)}
-                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-burgundy hover:bg-burgundy/10 transition-colors"
-                    >
-                      <ShieldCheck className="size-4 text-burgundy" />
-                      <span>Admin Operations</span>
-                    </Link>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setOpen(false);
-                      signOut();
-                    }}
-                    className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer text-left"
-                  >
-                    <LogOut className="size-4" />
-                    <span>Sign Out</span>
-                  </button>
-                </div>
-              ) : (
+              {/* 5 & 6. Terms of Service & Privacy Policy */}
+              <div className="border-t border-[#171514]/10 my-1 pt-1.5 space-y-1">
                 <Link
-                  to="/login"
+                  to="/terms"
                   onClick={() => setOpen(false)}
-                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-sage/40 transition-colors border-t border-[#171514]/10 pt-2"
+                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-sage/40 transition-colors"
                 >
-                  <User className="size-4 text-foreground/70" />
-                  <span>Member Sign In</span>
+                  <FileText className="size-4 text-muted-foreground" />
+                  <span>Terms of Service</span>
                 </Link>
-              )}
-            </div>
 
-            <div className="mt-2 border-t border-[#171514]/10 pt-2 px-3 text-[11px] text-muted-foreground flex items-center justify-between">
-              <span>Delhi NCR · Active Circles</span>
-              <span className="font-mono text-[10px] text-forest">Verified Tables</span>
+                <Link
+                  to="/privacy"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-sage/40 transition-colors"
+                >
+                  <ShieldCheck className="size-4 text-muted-foreground" />
+                  <span>Privacy Policy</span>
+                </Link>
+              </div>
             </div>
           </div>
         )}

@@ -50,15 +50,9 @@ export function InvoiceReceiptSection() {
       {/* Header */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end border-b border-border/60 pb-5">
         <div>
-          <span className="font-mono text-xs uppercase tracking-wider text-forest font-bold">
-            Tax Invoice & Membership Documentation
-          </span>
           <h2 className="font-display mt-1 text-2xl sm:text-3xl text-foreground">
-            Payment Invoice & Receipts
+            Tax Receipts & Invoices
           </h2>
-          <p className="text-xs text-muted-foreground mt-1">
-            Official receipt documenting your application date, pass tier, and tax payment details.
-          </p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -154,7 +148,7 @@ export function InvoiceReceiptSection() {
                       Annual Founding Member Circle Pass
                     </p>
                     <p className="text-[11px] text-muted-foreground mt-0.5 max-w-md">
-                      Exclusive admission to 6-person curated dinner salons, 100% offline Aadhaar identity vetting, table host coordination, seasonal tasting pairings, and safe departure concierge.
+                      Exclusive admission to 6-person curated dinners, 100% offline Aadhaar identity vetting, table host coordination, seasonal tasting pairings, and safe departure concierge.
                     </p>
                   </td>
                   <td className="py-4 text-center font-mono text-muted-foreground">

@@ -616,7 +616,7 @@ export function EventQrScannerModal({
                         </div>
                       ) : (
                         <p className="text-[11px] text-muted-foreground italic">
-                          This member has not been assigned a chair at this 6-person salon.
+                          This member has not been assigned a chair at this 6-person table.
                         </p>
                       )}
                     </div>

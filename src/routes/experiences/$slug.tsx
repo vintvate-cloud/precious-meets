@@ -45,7 +45,7 @@ const DELHI_SUPPER = {
     name: "Chef Tara Sen",
     role: "Culinary Anthropologist & Supper Host",
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
-    bio: "Tara spent seven years documenting heritage recipes across North India and Old Delhi before founding this intimate salon table.",
+    bio: "Tara spent seven years documenting heritage recipes across North India and Old Delhi before founding this intimate dinner table.",
   },
   menu: [
     "Amuse-bouche: Smoked jackfruit tartlets with kokum glaze",
@@ -110,7 +110,7 @@ const EXPERIENCES_MAP: Record<string, any> = {
     },
     menu: [
       "Monuments: 45-minute twilight architectural walk around Hauz Khas reservoir",
-      "Rooftop Salon: Reserved communal terrace with artisan wine pairings and regional tapas",
+      "Rooftop Table: Reserved communal terrace with artisan wine pairings and regional tapas",
     ],
     dietary: ["Vegetarian", "Non-Vegetarian"],
     session: {

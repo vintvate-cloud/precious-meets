@@ -290,7 +290,7 @@ function AdminConsolePage() {
               </span>
             </div>
             <h1 className="font-display mt-2 text-3xl sm:text-4xl">
-              Salons, <em className="italic text-burgundy">Seating & Safety Operations</em>
+              Meets, <em className="italic text-burgundy">Seating & Safety Operations</em>
             </h1>
           </div>
 

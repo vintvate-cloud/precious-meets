@@ -1,7 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
 import { useAuth } from "@/lib/auth-context";
 import {
   EventsService,
@@ -16,28 +14,26 @@ import { QuizResponsesSection } from "@/components/dashboard/QuizResponsesSectio
 import { InvoiceReceiptSection } from "@/components/dashboard/InvoiceReceiptSection";
 import {
   Sparkles,
-  Ticket,
-  Wine,
+  Calendar,
   Mail,
   User,
   FileQuestion,
   Receipt,
   ShieldAlert,
-  ArrowRight,
+  LogOut,
   ShieldCheck,
-  CheckCircle2,
+  Menu,
+  X,
+  Compass,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard/")({
   head: () => ({
     meta: [
-      { title: "Member Experience Hub — Precious Meets" },
+      { title: "Member Dashboard — Precious Meets" },
       {
         name: "description",
-        content:
-          "Exclusive mobile-friendly member portal for 6-person curated meets, table invitations, profile customization, and payment receipts.",
+        content: "Curated member dashboard for verified meets and table passes.",
       },
     ],
   }),
@@ -63,9 +59,10 @@ export function DashboardPage() {
   }, [user, loading, navigate]);
 
   const [activeTab, setActiveTab] = useState<DashboardTab>("overview");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [events, setEvents] = useState<AdminEvent[]>([]);
   const [invitations, setInvitations] = useState<UserSeatInvitation[]>([]);
-  const [reservedEventIds, setReservedEventIds] = useState<string[]>([]);
+  const [, setReservedEventIds] = useState<string[]>([]);
 
   // Load initial data from EventsService & LocalStorage
   const loadDashboardData = () => {
@@ -97,10 +94,8 @@ export function DashboardPage() {
     };
   }, [user?.email]);
 
-  // Only accepted invitations represent confirmed meets the user can attend
   const acceptedInvitations = invitations.filter((i) => i.status === "accepted");
 
-  // Next confirmed event for the countdown card
   const nextEvent = acceptedInvitations.length > 0 ? {
     title: acceptedInvitations[0].eventTitle,
     dateDisplay: acceptedInvitations[0].dateDisplay,
@@ -109,7 +104,6 @@ export function DashboardPage() {
     gateCode: acceptedInvitations[0].secretAccessCode || "GATE-402",
   } : null;
 
-  // Formatted seated events for the universal QR pass
   const seatedEvents = acceptedInvitations.map((inv) => ({
     id: inv.eventId,
     title: inv.eventTitle,
@@ -124,7 +118,6 @@ export function DashboardPage() {
   const memberId = subscription?.memberId || "PM-FOUNDER-8841";
   const city = profile?.city || "Delhi NCR";
 
-  // Read archetype
   let userArchetype = "The Curious Flâneur";
   try {
     const raw = localStorage.getItem("precious_meets_latest_profile");
@@ -142,31 +135,31 @@ export function DashboardPage() {
     { id: "overview", label: "Overview", icon: Sparkles, badge: null },
     {
       id: "meets",
-      label: "Meets",
-      icon: Wine,
+      label: "Confirmed Meets",
+      icon: Calendar,
       badge: acceptedInvitations.length > 0 ? `${acceptedInvitations.length}` : null,
     },
     {
       id: "requests",
-      label: "Requests",
+      label: "Seat Invitations",
       icon: Mail,
-      badge: pendingInvitationsCount > 0 ? `${pendingInvitationsCount} New` : null,
+      badge: pendingInvitationsCount > 0 ? `${pendingInvitationsCount}` : null,
     },
     { id: "profile", label: "Profile", icon: User, badge: null },
-    { id: "questions", label: "Quiz Record", icon: FileQuestion, badge: null },
-    { id: "invoice", label: "Invoices", icon: Receipt, badge: null },
+    { id: "questions", label: "Quiz Dossier", icon: FileQuestion, badge: null },
+    { id: "invoice", label: "Receipts", icon: Receipt, badge: null },
   ];
 
   if (loading || !user) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-ivory text-foreground px-4 text-center">
-        <div className="flex flex-col items-center space-y-4 max-w-sm p-8 rounded-3xl border border-border/70 bg-card/90 shadow-lg backdrop-blur">
-          <div className="h-10 w-10 animate-spin rounded-full border-3 border-burgundy border-t-transparent" />
-          <h2 className="font-serif text-xl font-medium tracking-tight text-foreground">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[#FAF7F2] text-[#171514] px-4 text-center">
+        <div className="flex flex-col items-center space-y-4 max-w-sm p-8 rounded-3xl border border-black/5 bg-white shadow-xl">
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#691C35] border-t-transparent" />
+          <h2 className="font-serif text-lg font-medium text-[#171514]">
             Verifying Member Credentials...
           </h2>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            Direct access to the salon dashboard requires an authenticated member account. Redirecting you to sign in...
+          <p className="text-xs text-muted-foreground">
+            Direct access requires an authenticated member account.
           </p>
         </div>
       </div>
@@ -174,13 +167,48 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-ivory text-foreground selection:bg-burgundy/20">
-      <Navbar />
+    <div className="min-h-screen bg-[#FAF7F2] text-[#171514]">
+      {/* ========================================================================= */}
+      {/* 1. LEFT SIDE PANEL (DESKTOP)                                               */}
+      {/* ========================================================================= */}
+      <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 xl:w-72 flex-col justify-between bg-[#151212] text-white border-r border-white/10 z-30 p-5 selection:bg-[#691C35]/40">
+        <div className="space-y-6">
+          {/* Top Brand Monogram */}
+          <div className="flex items-center justify-between border-b border-white/10 pb-4">
+            <Link to="/" className="flex items-center gap-2.5 group">
+              <span className="grid size-8 place-items-center rounded-full bg-white/10 border border-white/15 text-[#C6A568] transition-transform duration-300 group-hover:scale-105">
+                <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="8" stroke="#FAF7F2" strokeWidth="2" />
+                  <circle cx="12" cy="12" r="3" fill="#C6A568" />
+                </svg>
+              </span>
+              <span className="font-display text-xl text-white tracking-tight">
+                Precious<em className="text-[#C6A568] not-italic font-serif"> meets</em>
+              </span>
+            </Link>
+          </div>
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 sm:px-6 pb-28 pt-24 sm:pt-28">
-        {/* Mobile Sticky / Floating Segmented Tab Control */}
-        <div className="sticky top-18 z-40 mb-8 -mx-4 px-4 sm:mx-0 sm:px-0 py-2 backdrop-blur-md bg-ivory/80">
-          <div className="flex items-center gap-1.5 overflow-x-auto rounded-full border border-border/80 bg-card p-1.5 shadow-sm scrollbar-none">
+          {/* Member Card Summary */}
+          <div className="rounded-2xl bg-white/[0.04] border border-white/[0.08] p-3.5">
+            <div className="flex items-center gap-3">
+              <div className="size-9 rounded-full bg-gradient-to-tr from-[#691C35] to-[#C6A568] flex items-center justify-center text-xs font-serif font-bold text-white shadow-xs">
+                {displayName.slice(0, 2).toUpperCase()}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="font-medium text-xs text-white truncate">{displayName}</div>
+                <div className="font-mono text-[10px] text-white/50 truncate">{memberId}</div>
+              </div>
+            </div>
+            <div className="mt-2.5 pt-2 border-t border-white/[0.06] flex items-center justify-between text-[10px]">
+              <span className="text-emerald-400 font-mono flex items-center gap-1 font-semibold">
+                <ShieldCheck className="size-3" /> Verified
+              </span>
+              <span className="text-white/40 font-mono">{city}</span>
+            </div>
+          </div>
+
+          {/* Navigation Links (Minimal, sleek) */}
+          <nav className="space-y-1">
             {NAV_TABS.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -189,153 +217,214 @@ export function DashboardPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as DashboardTab)}
-                  className={`relative flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                  className={`w-full flex items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-medium transition-all duration-200 cursor-pointer ${
                     isActive
-                      ? "bg-burgundy text-ivory shadow-sm scale-100 font-bold"
-                      : "text-muted-foreground hover:bg-sage/40 hover:text-foreground"
+                      ? "bg-[#691C35] text-white font-semibold shadow-sm"
+                      : "text-white/70 hover:bg-white/[0.06] hover:text-white"
                   }`}
                 >
-                  <Icon className="size-3.5" />
-                  <span>{tab.label}</span>
+                  <div className="flex items-center gap-3">
+                    <Icon className={`size-4 ${isActive ? "text-[#C6A568]" : "text-white/60"}`} />
+                    <span>{tab.label}</span>
+                  </div>
 
                   {tab.badge && (
-                    <span className="grid size-4.5 place-items-center rounded-full bg-ochre text-[10px] font-bold text-ink shadow-xs">
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                      isActive ? "bg-white text-[#691C35]" : "bg-[#C6A568] text-[#151212]"
+                    }`}>
                       {tab.badge}
                     </span>
                   )}
                 </button>
               );
             })}
-          </div>
+          </nav>
         </div>
 
-        {/* Tab 1: OVERVIEW & VIP PASSCARD */}
-        {activeTab === "overview" && (
-          <div className="animate-in fade-in duration-300">
-            <MemberPassCard
-              displayName={displayName}
-              memberId={memberId}
-              userArchetype={userArchetype}
-              city={city}
-              nextEvent={nextEvent}
-              onExploreMeets={() => setActiveTab("meets")}
-              onViewInvitations={() => setActiveTab("requests")}
-              pendingInvitationsCount={pendingInvitationsCount}
-              seatedEvents={seatedEvents}
-            />
+        {/* Bottom Panel Utilities */}
+        <div className="space-y-1 pt-4 border-t border-white/10 text-xs">
+          <Link
+            to="/safety"
+            className="flex items-center gap-2.5 rounded-xl px-3.5 py-2 text-white/60 hover:text-red-400 hover:bg-white/[0.04] transition-colors"
+          >
+            <ShieldAlert className="size-4 text-red-400" />
+            <span>24/7 Safety & SOS</span>
+          </Link>
 
-            {/* Quick Link Cards to other sections */}
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
+          <Link
+            to="/"
+            className="flex items-center gap-2.5 rounded-xl px-3.5 py-2 text-white/60 hover:text-white hover:bg-white/[0.04] transition-colors"
+          >
+            <Compass className="size-4" />
+            <span>Precious Meets Home</span>
+          </Link>
+
+          <button
+            onClick={() => signOut()}
+            className="w-full flex items-center gap-2.5 rounded-xl px-3.5 py-2 text-white/60 hover:text-red-400 hover:bg-white/[0.04] transition-colors cursor-pointer text-left"
+          >
+            <LogOut className="size-4" />
+            <span>Sign Out</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* ========================================================================= */}
+      {/* 2. MOBILE TOP BAR & NAVIGATION                                            */}
+      {/* ========================================================================= */}
+      <div className="lg:hidden sticky top-0 z-30 bg-[#151212] text-white px-4 py-3 border-b border-white/10 flex items-center justify-between">
+        <Link to="/" className="font-display text-lg text-white tracking-tight">
+          Precious<em className="text-[#C6A568] not-italic font-serif"> meets</em>
+        </Link>
+
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-[11px] text-[#C6A568] bg-white/10 px-2.5 py-1 rounded-full">
+            {memberId}
+          </span>
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="grid size-8 place-items-center rounded-lg bg-white/10 text-white"
+          >
+            {mobileMenuOpen ? <X className="size-4" /> : <Menu className="size-4" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Drawer Menu */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden bg-[#151212] border-b border-white/10 px-4 py-3 space-y-1 animate-in fade-in slide-in-from-top-2">
+          {NAV_TABS.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
               <button
-                onClick={() => setActiveTab("meets")}
-                className="rounded-3xl border border-border/80 bg-card p-5 text-left transition-all hover:border-burgundy/40 hover:shadow-sm cursor-pointer"
+                key={tab.id}
+                onClick={() => {
+                  setActiveTab(tab.id as DashboardTab);
+                  setMobileMenuOpen(false);
+                }}
+                className={`w-full flex items-center justify-between rounded-xl px-3.5 py-2.5 text-xs ${
+                  isActive ? "bg-[#691C35] text-white font-semibold" : "text-white/70 hover:bg-white/[0.06]"
+                }`}
               >
-                <div className="flex items-center justify-between text-burgundy">
-                  <Wine className="size-5" />
-                  {acceptedInvitations.length > 0 && (
-                    <span className="rounded-full bg-forest/20 text-forest font-mono text-[10px] font-bold px-2 py-0.5">
-                      {acceptedInvitations.length} Booked
-                    </span>
-                  )}
-                  {acceptedInvitations.length === 0 && <ArrowRight className="size-4 text-muted-foreground" />}
+                <div className="flex items-center gap-3">
+                  <Icon className="size-4" />
+                  <span>{tab.label}</span>
                 </div>
-                <h4 className="font-display mt-3 text-base text-foreground">
-                  My Confirmed Meets
-                </h4>
-                <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                  View accepted 6-person tables, your allocated seat, and secret gate PIN.
-                </p>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("requests")}
-                className="relative rounded-3xl border border-border/80 bg-card p-5 text-left transition-all hover:border-ochre/50 hover:shadow-sm cursor-pointer"
-              >
-                {pendingInvitationsCount > 0 && (
-                  <span className="absolute top-4 right-4 rounded-full bg-ochre px-2 py-0.5 font-mono text-[10px] font-bold text-ink">
-                    {pendingInvitationsCount} New
+                {tab.badge && (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#C6A568] text-[#151212]">
+                    {tab.badge}
                   </span>
                 )}
-                <div className="flex items-center justify-between text-ochre">
-                  <Mail className="size-5" />
-                  {pendingInvitationsCount === 0 && <ArrowRight className="size-4 text-muted-foreground" />}
-                </div>
-                <h4 className="font-display mt-3 text-base text-foreground">
-                  Seat Invitations
-                </h4>
-                <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                  Review personal invitations dispatched by our table curators.
-                </p>
               </button>
+            );
+          })}
+          <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs text-white/60">
+            <Link to="/safety" className="text-red-400">Emergency SOS</Link>
+            <button onClick={() => signOut()}>Sign Out</button>
+          </div>
+        </div>
+      )}
 
-              <button
-                onClick={() => setActiveTab("invoice")}
-                className="rounded-3xl border border-border/80 bg-card p-5 text-left transition-all hover:border-forest/40 hover:shadow-sm cursor-pointer"
-              >
-                <div className="flex items-center justify-between text-forest">
-                  <Receipt className="size-5" />
-                  <ArrowRight className="size-4 text-muted-foreground" />
-                </div>
-                <h4 className="font-display mt-3 text-base text-foreground">
-                  Official Invoices & Tax Receipts
-                </h4>
-                <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                  Download or print verified payment receipts and application records.
-                </p>
-              </button>
+      {/* ========================================================================= */}
+      {/* 3. MAIN RIGHT CONTENT AREA                                                */}
+      {/* ========================================================================= */}
+      <main className="lg:pl-64 xl:pl-72 min-h-screen flex flex-col justify-between">
+        <div className="max-w-5xl mx-auto w-full p-5 sm:p-8 lg:p-10 space-y-6">
+          {/* Header Bar: Minimal, crisp */}
+          <div className="flex items-center justify-between border-b border-black/5 pb-4">
+            <div>
+              <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Precious Meets · Private Circle
+              </span>
+              <h1 className="font-display text-2xl sm:text-3xl text-[#171514]">
+                {NAV_TABS.find((t) => t.id === activeTab)?.label}
+              </h1>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-xs text-[#5F7045] bg-[#5F7045]/10 border border-[#5F7045]/20 px-3 py-1 rounded-full hidden sm:inline-flex items-center gap-1.5 font-semibold">
+                <span className="size-1.5 rounded-full bg-[#5F7045] animate-pulse" />
+                Delhi NCR
+              </span>
             </div>
           </div>
-        )}
 
-        {/* Tab 2: MEETS & TABLE PASSES (ONLY ACCEPTED MEETS) */}
-        {activeTab === "meets" && (
-          <div className="animate-in fade-in duration-300">
-            <EventsListSection
-              events={events}
-              acceptedInvitations={acceptedInvitations}
-              pendingInvitationsCount={pendingInvitationsCount}
-              onViewRequests={() => setActiveTab("requests")}
-              userCity={city}
-              displayName={displayName}
-              memberId={memberId}
-            />
-          </div>
-        )}
+          {/* TAB 1: OVERVIEW */}
+          {activeTab === "overview" && (
+            <div className="animate-in fade-in duration-300 space-y-6">
+              <MemberPassCard
+                displayName={displayName}
+                memberId={memberId}
+                userArchetype={userArchetype}
+                city={city}
+                nextEvent={nextEvent}
+                onExploreMeets={() => setActiveTab("meets")}
+                onViewInvitations={() => setActiveTab("requests")}
+                pendingInvitationsCount={pendingInvitationsCount}
+                seatedEvents={seatedEvents}
+              />
+            </div>
+          )}
 
-        {/* Tab 3: SEAT REQUESTS & INVITATIONS */}
-        {activeTab === "requests" && (
-          <div className="animate-in fade-in duration-300">
-            <SeatInvitationsSection
-              invitations={invitations}
-              onInvitationUpdated={loadDashboardData}
-              onViewAcceptedMeets={() => setActiveTab("meets")}
-            />
-          </div>
-        )}
+          {/* TAB 2: CONFIRMED MEETS */}
+          {activeTab === "meets" && (
+            <div className="animate-in fade-in duration-300">
+              <EventsListSection
+                events={events}
+                acceptedInvitations={acceptedInvitations}
+                pendingInvitationsCount={pendingInvitationsCount}
+                onViewRequests={() => setActiveTab("requests")}
+                userCity={city}
+                displayName={displayName}
+                memberId={memberId}
+              />
+            </div>
+          )}
 
-        {/* Tab 4: MANAGE PROFILE & PREFERENCES */}
-        {activeTab === "profile" && (
-          <div className="animate-in fade-in duration-300">
-            <ProfileEditorSection />
-          </div>
-        )}
+          {/* TAB 3: SEAT INVITATIONS */}
+          {activeTab === "requests" && (
+            <div className="animate-in fade-in duration-300">
+              <SeatInvitationsSection
+                invitations={invitations}
+                onInvitationUpdated={loadDashboardData}
+                onViewAcceptedMeets={() => setActiveTab("meets")}
+              />
+            </div>
+          )}
 
-        {/* Tab 5: FILLED QUESTIONS & DISCOVERY QUIZ RECORD */}
-        {activeTab === "questions" && (
-          <div className="animate-in fade-in duration-300">
-            <QuizResponsesSection />
-          </div>
-        )}
+          {/* TAB 4: PROFILE */}
+          {activeTab === "profile" && (
+            <div className="animate-in fade-in duration-300">
+              <ProfileEditorSection />
+            </div>
+          )}
 
-        {/* Tab 6: PAYMENT INVOICE & TAX RECEIPT */}
-        {activeTab === "invoice" && (
-          <div className="animate-in fade-in duration-300">
-            <InvoiceReceiptSection />
+          {/* TAB 5: QUIZ DOSSIER */}
+          {activeTab === "questions" && (
+            <div className="animate-in fade-in duration-300">
+              <QuizResponsesSection />
+            </div>
+          )}
+
+          {/* TAB 6: INVOICES & RECEIPTS */}
+          {activeTab === "invoice" && (
+            <div className="animate-in fade-in duration-300">
+              <InvoiceReceiptSection />
+            </div>
+          )}
+        </div>
+
+        {/* Minimal Subtle Footer */}
+        <footer className="px-5 sm:px-8 lg:px-10 py-6 border-t border-black/5 text-center sm:text-left text-[11px] font-mono text-muted-foreground flex flex-col sm:flex-row items-center justify-between gap-2">
+          <span>© {new Date().getFullYear()} Precious Meets Technologies Pvt. Ltd.</span>
+          <div className="flex items-center gap-4">
+            <Link to="/terms" className="hover:text-foreground">Terms</Link>
+            <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
+            <Link to="/safety" className="hover:text-red-600 font-semibold">24/7 Safety</Link>
           </div>
-        )}
+        </footer>
       </main>
-
-      <Footer />
     </div>
   );
 }

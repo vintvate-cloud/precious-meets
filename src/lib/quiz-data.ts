@@ -194,7 +194,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     options: [
       { id: "q9_1", label: "Micro Table: 4 people", sublabel: "Ultra-deep, single focused dialogue where everyone bonds", value: "4_people", scoreModifier: -5 },
       { id: "q9_2", label: "Classic Supper: 6 people", sublabel: "The sweet spot: rich diversity without splintering into side chats", value: "6_people", scoreModifier: 2 },
-      { id: "q9_3", label: "Salon Gathering: 8 people", sublabel: "Vibrant energy with multiple viewpoints and sparks", value: "8_people", scoreModifier: 7 },
+      { id: "q9_3", label: "Large Table: 8 people", sublabel: "Vibrant energy with multiple viewpoints and sparks", value: "8_people", scoreModifier: 7 },
     ],
   },
 ];

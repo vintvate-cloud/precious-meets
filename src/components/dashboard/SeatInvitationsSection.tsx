@@ -90,11 +90,8 @@ export function SeatInvitationsSection({
             )}
           </div>
           <h2 className="font-display mt-1 text-2xl sm:text-3xl text-foreground">
-            Curator Seat Invitations & Requests
+            Seat Invitations
           </h2>
-          <p className="text-xs text-muted-foreground mt-1">
-            Our curators handpick table guests based on your conversational archetype. Accept or decline below.
-          </p>
         </div>
 
         {/* Filter Pills */}

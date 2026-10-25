@@ -125,13 +125,13 @@ function LoginPage() {
         <div className="relative z-10 max-w-lg space-y-4 xl:space-y-5">
 
           <h2 className="font-display text-3xl xl:text-4xl leading-[1.18] text-ivory">
-            Where thoughtful minds sit down as strangers and leave as{" "}
-            <em className="italic text-ochre font-normal">intimate company</em>.
+            Six strangers. One shared table.{" "}
+            <em className="italic text-ochre font-normal">Real conversations.</em>
           </h2>
 
           <p className="text-xs xl:text-sm leading-relaxed text-ivory/80">
-            Intimate 6-seat supper clubs, single-origin tastings, and cultural salons across Delhi NCR.
-            Every guest identity-verified. Every table thoughtfully matched.
+            Curated dinners, quiet coffee meets, and sunset walks across Delhi NCR.
+            Every guest identity-verified. No awkward networking.
           </p>
         </div>
       </div>
@@ -159,11 +159,11 @@ function LoginPage() {
           <div className="space-y-2">
 
             <h1 className="font-display text-3xl sm:text-4xl leading-tight">
-              Welcome to <em className="italic text-burgundy">the Circle</em>
+              Welcome <em className="italic text-burgundy">back</em>
             </h1>
 
             <p className="text-sm sm:text-[15px] leading-relaxed text-muted-foreground">
-              Sign in with your email and password to access your bookings, table assignments, and compatibility archetype.
+              Sign in with your email and password to view your passes, upcoming meets, and table details.
             </p>
           </div>
 
@@ -247,27 +247,6 @@ function LoginPage() {
             </Button>
           </form>
 
-          {/* New Member Registration / Discovery Quiz Gate */}
-          <div className="mt-6 rounded-2xl border border-ochre/30 bg-ochre/5 p-4 text-center sm:text-left sm:flex sm:items-center sm:justify-between sm:gap-4">
-            <div className="space-y-1">
-              <span className="inline-block rounded-full bg-ochre/20 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-ochre">
-                New to Precious Meets?
-              </span>
-              <h4 className="font-display text-base font-medium text-foreground">
-                Apply for Curated Membership
-              </h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Direct registration is closed. New members join by completing our 3-minute conversational quiz to find matched salons.
-              </p>
-            </div>
-            <Link
-              to="/quiz"
-              className="mt-3 inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-burgundy px-4 py-2.5 text-xs font-semibold text-ivory transition-all hover:bg-burgundy/90 sm:mt-0"
-            >
-              <span>Take Quiz</span>
-              <ArrowRight className="size-3.5" />
-            </Link>
-          </div>
         </div>
 
         {/* Footer info */}

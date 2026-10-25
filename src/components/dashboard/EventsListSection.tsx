@@ -113,18 +113,15 @@ export function EventsListSection({
             )}
           </div>
           <h2 className="font-display mt-1 text-2xl sm:text-3xl text-foreground">
-            My Confirmed Meets
+            Confirmed Meets
           </h2>
-          <p className="text-xs text-muted-foreground mt-1 max-w-2xl leading-relaxed">
-            Private, invite-only dining salons and cultural gatherings you have accepted. Your seat is officially reserved and secret door PIN is unlocked below.
-          </p>
         </div>
 
         {/* Quick status pill */}
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-sage/30 px-3.5 py-1.5 text-xs font-semibold text-foreground border border-border/60">
             <ShieldCheck className="size-3.5 text-forest" />
-            Strictly Invite-Only Circle
+            Verified Tables
           </span>
         </div>
       </div>
@@ -132,19 +129,15 @@ export function EventsListSection({
       {/* Accepted Meets List or Invite-Only Explanatory State */}
       {acceptedInvitations.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-border/80 p-8 sm:p-12 text-center bg-card/60 relative overflow-hidden">
-          <div className="relative mx-auto size-16 rounded-full bg-burgundy/10 flex items-center justify-center text-burgundy mb-4 shadow-sm">
-            <Wine className="size-8 text-burgundy" />
+          <div className="relative mx-auto size-14 rounded-full bg-burgundy/10 flex items-center justify-center text-burgundy mb-3 shadow-sm">
+            <Wine className="size-6 text-burgundy" />
           </div>
 
-          <span className="rounded-full bg-ochre/20 px-3 py-1 font-mono text-[10px] uppercase font-bold text-ochre tracking-wider">
-            Curated Matchmaking Model
-          </span>
-
-          <h3 className="font-display text-xl sm:text-2xl mt-3 text-foreground">
-            No Confirmed Meets Yet
+          <h3 className="font-display text-xl sm:text-2xl text-foreground">
+            No Confirmed Meets
           </h3>
-          <p className="text-xs text-muted-foreground mt-2 max-w-lg mx-auto leading-relaxed">
-            Precious Meets tables are strictly invite-only to protect conversational privacy and 50:50 parity. You cannot browse or self-book public tables. Our curators match your psychometric archetype with compatible guests and send you an invitation email.
+          <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
+            Your accepted tables will appear here with gate PINs and seat allocations.
           </p>
 
           {/* Pending Invitations Prompt or Explanatory Flow */}
@@ -221,12 +214,12 @@ export function EventsListSection({
             const liveEvent = events.find((e) => e.id === inv.eventId);
             const gateCode = inv.secretAccessCode || liveEvent?.secretAccessCode || "GATE-402";
             const coverImage = inv.coverImage || liveEvent?.coverImage || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80";
-            const venueName = inv.venueName || liveEvent?.venueName || "Secret Private Salon";
+            const venueName = inv.venueName || liveEvent?.venueName || "Secret Dinner Venue";
             const venueAddress = inv.venueAddress || liveEvent?.venueAddress || "Disclosed upon confirmation";
             const hostName = inv.hostName || liveEvent?.hostName || "Table Facilitator";
             const hostRole = inv.hostRole || liveEvent?.hostRole || "Sommelier & Curator";
             const dateDisplay = inv.dateDisplay || liveEvent?.dateDisplay || "Upcoming Saturday · 7:30 PM";
-            const theme = inv.theme || liveEvent?.theme || "Intimate Salon Dinner";
+            const theme = inv.theme || liveEvent?.theme || "Curated Dinner Table";
             const neighborhood = inv.neighborhood || liveEvent?.neighborhood || "South Delhi";
             const city = inv.city || liveEvent?.city || userCity;
 

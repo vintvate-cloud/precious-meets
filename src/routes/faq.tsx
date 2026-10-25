@@ -93,7 +93,7 @@ const FAQ_DATA: FaqItem[] = [
     category: "curation",
     question: "Is Precious Meets a dating event or a networking meetup?",
     answer:
-      "Neither. Precious Meets is an intentional social salon. There are no LinkedIn elevator pitches, no resumes, and no awkward dating dynamics. We create room for rich, genuine human conversations about life, passions, childhood curiosities, and personal stories.",
+      "Neither. Precious Meets is about genuine human connection over good food. There are no LinkedIn elevator pitches, no business cards, and no awkward dating dynamics. We create room for honest, warm conversations about life, passions, childhood memories, and personal stories.",
     tags: ["dating", "networking", "linkedin", "social", "purpose"],
   },
   {

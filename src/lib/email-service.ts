@@ -305,7 +305,7 @@ export class EmailService {
               Thank you for taking the time to share your conversational rhythm and applying to join Precious Meets.
             </p>
             <p style="color: #4a453f; line-height: 1.6; margin: 0 0 16px 0;">
-              To protect the intimacy and intentional chemistry of our 6-seat supper salons, every cohort is curated with stringent capacity constraints. At this time, our committee is unable to accept your membership application for the current season.
+              To protect the warmth and chemistry of our 6-person dinner tables, every group is curated with limited seats. At this time, our team is unable to accept your membership application for the current season.
             </p>
 
             ${
@@ -324,7 +324,7 @@ export class EmailService {
             </p>
 
             <p style="color: #6b6357; font-size: 12px; line-height: 1.6; margin-top: 20px;">
-              You are welcome to re-apply for upcoming seasonal salons after 90 days. We wish you wonderful conversations ahead.
+              You are welcome to re-apply for upcoming meets after 90 days. We wish you wonderful conversations ahead.
             </p>
           </div>
         `;
