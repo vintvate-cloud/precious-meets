@@ -1,8 +1,9 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
+import { useAuth } from "@/lib/auth-context";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   ShieldCheck,
-
   ShieldAlert,
   Sparkles,
   BookOpen,
@@ -10,9 +11,15 @@ import {
   HelpCircle,
   Compass,
   FileText,
+  User,
+  LogOut,
 } from "lucide-react";
 
 export function Navbar() {
+  const { user, profile, isAdmin, signOut } = useAuth();
+  const location = useLocation();
+  const isDashboard = location.pathname.startsWith("/dashboard");
+  const isMemberAuthenticated = Boolean(user || isDashboard);
   const [open, setOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -101,6 +108,21 @@ export function Navbar() {
               </Link>
             )}
 
+            {/* User Profile Avatar if authenticated or in dashboard */}
+            {isMemberAuthenticated && (
+              <Link
+                to="/dashboard"
+                title="Go to Dashboard"
+                className="inline-flex rounded-full ring-offset-background transition-transform hover:scale-105 cursor-pointer"
+              >
+                <Avatar className="size-8 sm:size-9 border border-black/10 shadow-xs">
+                  <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.display_name || "User"} />
+                  <AvatarFallback className="bg-sage text-xs font-semibold text-forest">
+                    {profile?.display_name?.slice(0, 2).toUpperCase() || "ME"}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
+            )}
 
             {/* Compact Dropdown Menu Toggle Button - ALWAYS visible on all screen sizes */}
             <button
@@ -118,7 +140,6 @@ export function Navbar() {
         {/* COMPACT DROPDOWN POPUP */}
         {open && (
           <div className="pointer-events-auto absolute top-full right-0 mt-2.5 w-72 sm:w-80 overflow-hidden rounded-2xl border border-white/80 bg-white/95 p-2.5 text-[#171514] shadow-[0_20px_50px_rgba(0,0,0,0.18)] backdrop-blur-2xl animate-in fade-in slide-in-from-top-3 duration-200">
-
             <div className="space-y-1">
               <Link
                 to="/quiz"
@@ -207,6 +228,56 @@ export function Navbar() {
                   <span>Privacy Policy</span>
                 </Link>
               </div>
+
+              {/* Member Session */}
+              {isMemberAuthenticated ? (
+                <div className="border-t border-[#171514]/10 my-1 pt-1.5 space-y-1">
+                  <div className="px-3 py-1 flex items-center justify-between">
+                    <span className="text-[10px] uppercase font-mono text-muted-foreground">Member Session</span>
+                    <span className="text-xs font-medium text-foreground truncate max-w-[140px]">{profile?.display_name || user?.email || "Founding Member"}</span>
+                  </div>
+                  {!isDashboard && (
+                    <Link
+                      to="/dashboard"
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-sage/40 transition-colors"
+                    >
+                      <User className="size-4 text-foreground/70" />
+                      <span>My Dashboard</span>
+                    </Link>
+                  )}
+                  {isAdmin && (
+                    <Link
+                      to="/admin"
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-burgundy hover:bg-burgundy/10 transition-colors"
+                    >
+                      <ShieldCheck className="size-4 text-burgundy" />
+                      <span>Admin Operations</span>
+                    </Link>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpen(false);
+                      signOut();
+                    }}
+                    className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer text-left"
+                  >
+                    <LogOut className="size-4" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-sage/40 transition-colors border-t border-[#171514]/10 pt-2"
+                >
+                  <User className="size-4 text-foreground/70" />
+                  <span>Member Sign In</span>
+                </Link>
+              )}
             </div>
           </div>
         )}
