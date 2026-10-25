@@ -159,7 +159,7 @@ export class ApplicationsService {
         const mapped: MemberApplication[] = data.map((d: any) => ({
           id: d.id,
           userId: d.auth_user_id || undefined,
-          applicationReference: d.application_reference || `PM-FOUNDER-${d.id.slice(0, 4)}`,
+          applicationReference: d.application_reference || `PM-${d.id.slice(0, 4)}`,
           status: d.status || "pending_review",
           membershipStatus: d.membership_status || (d.credentials_sent ? "active" : "paid_pending_credentials"),
           applicantName: d.applicant_name || "Applicant",
@@ -184,7 +184,7 @@ export class ApplicationsService {
           quizCompletedAt: d.quiz_completed_at || d.created_at,
           paymentStatus: d.payment_status || "pending",
           paymentAmountInr: d.payment_amount_inr || 1999,
-          paymentPlanTitle: d.payment_plan_title || "Annual Founding Member Pass",
+          paymentPlanTitle: d.payment_plan_title || "Precious Meets Membership",
           razorpayPaymentId: d.razorpay_payment_id || undefined,
           invoiceNumber: d.invoice_number || undefined,
           razorpayOrderId: d.razorpay_order_id || undefined,
@@ -296,7 +296,7 @@ export class ApplicationsService {
       quizCompletedAt: now,
       paymentStatus: "paid",
       paymentAmountInr: payload.amountInr || 1999,
-      paymentPlanTitle: "Annual Founding Member Pass",
+      paymentPlanTitle: "Precious Meets Membership",
       razorpayPaymentId: payload.paymentId,
       razorpayOrderId: payload.orderId,
       invoiceNumber: payload.invoiceNumber || CryptoService.generateInvoiceNumber(),
@@ -340,7 +340,7 @@ export class ApplicationsService {
 
   /**
    * Generates a strong password, provisions/activates user in Supabase,
-   * sends credentials email via Resend, and marks member as ACTIVE in Supabase.
+   * sends credentials email, and marks member as ACTIVE in Supabase.
    */
   static async sendMemberCredentials(
     id: string
@@ -358,7 +358,7 @@ export class ApplicationsService {
     // 1. Generate strong password
     const strongPassword = CryptoService.generateStrongPassword(16);
 
-    // 2. Dispatch credentials email via Resend
+    // 2. Dispatch credentials email
     try {
       const signInUrl = typeof window !== "undefined"
         ? `${window.location.origin}/login?email=${encodeURIComponent(app.applicantEmail)}`
@@ -377,7 +377,7 @@ export class ApplicationsService {
       });
 
       if (!emailRes.success) {
-        throw new Error(emailRes.error || `Resend failed to deliver credentials to ${app.applicantEmail}`);
+        throw new Error(emailRes.error || `Failed to deliver credentials to ${app.applicantEmail}`);
       }
 
       // 3. Mark credentials as sent & promote status to APPROVED and ACTIVE
@@ -391,7 +391,7 @@ export class ApplicationsService {
       app.updatedAt = now;
     } catch (err: any) {
       console.error("[ApplicationsService] Failed to send credentials email:", err);
-      throw new Error("Failed to dispatch credentials email via Resend: " + (err.message || String(err)));
+      throw new Error("Failed to dispatch credentials email: " + (err.message || String(err)));
     }
 
     // 4. Update directly in Supabase member_applications table with generated password

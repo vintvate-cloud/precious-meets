@@ -137,6 +137,9 @@ export class EventsService {
       const stored = localStorage.getItem(STORAGE_EVENTS_KEY);
       if (stored) {
         const parsed: AdminEvent[] = JSON.parse(stored);
+        if (!Array.isArray(parsed)) {
+          return INITIAL_EVENTS;
+        }
         // Prune legacy mock event seeds
         const legacyMockIds = new Set([
           "evt_mehrauli_supper",
@@ -153,15 +156,19 @@ export class EventsService {
         const cleaned = parsed
           .filter(
             (evt) =>
+              evt &&
+              typeof evt === "object" &&
               !legacyMockIds.has(evt.id) &&
               !legacyMockCodes.has(evt.secretAccessCode)
           )
           .map((evt) => ({
             ...evt,
             // Clean any mock attendee IDs (att_01..08) from seat slots
-            seats: evt.seats.map((seatId) =>
-              seatId && seatId.startsWith("att_0") ? null : seatId
-            ),
+            seats: Array.isArray(evt.seats)
+              ? evt.seats.map((seatId) =>
+                  seatId && typeof seatId === "string" && seatId.startsWith("att_0") ? null : seatId
+                )
+              : [null, null, null, null, null, null],
           }));
 
         if (cleaned.length !== parsed.length) {
@@ -268,7 +275,7 @@ export class EventsService {
         identityVerified: app.identityStatus === "verified",
         memberTier:
           app.membershipStatus === "active"
-            ? "Founding Table Member"
+            ? "Private Circle Member"
             : "Applicant",
         memberId: app.applicationReference,
       }));
@@ -611,9 +618,15 @@ export class EventsService {
       const stored = localStorage.getItem(STORAGE_USER_INVITATIONS_KEY);
       if (stored) {
         const parsed: UserSeatInvitation[] = JSON.parse(stored);
+        if (!Array.isArray(parsed)) {
+          return INITIAL_USER_INVITATIONS;
+        }
         // Purge legacy mock invitations
         const cleaned = parsed.filter(
           (inv) =>
+            inv &&
+            typeof inv === "object" &&
+            typeof inv.id === "string" &&
             !inv.id.startsWith("inv_supper_") &&
             !inv.id.startsWith("inv_vinyl_") &&
             inv.eventId !== "evt_mehrauli_supper" &&
@@ -627,7 +640,7 @@ export class EventsService {
         if (userEmail && userEmail.trim()) {
           const lower = userEmail.trim().toLowerCase();
           const userSpecific = cleaned.filter(
-            (inv) => !inv.attendeeEmail || inv.attendeeEmail.toLowerCase() === lower
+            (inv) => inv && (!inv.attendeeEmail || inv.attendeeEmail.toLowerCase() === lower)
           );
           if (userSpecific.length > 0) return userSpecific;
         }
@@ -888,8 +901,8 @@ export class EventsService {
 
     // If still not extracted, check standard Precious Meets patterns
     if (!memberId) {
-      // Look for PM-FOUNDER-xxxx, PM-ANNUAL-xxxx, PM-MEMBER-xxxx
-      const pmMatch = trimmed.match(/PM-[A-Z]+-\d+/i);
+      // Look for PM-xxxx, PM-MEMBER-xxxx
+      const pmMatch = trimmed.match(/PM-(?:[A-Z]+-)?\d+/i);
       if (pmMatch) {
         memberId = pmMatch[0].toUpperCase();
       }

@@ -118,7 +118,7 @@ export function Navbar() {
                 <Avatar className="size-8 sm:size-9 border border-black/10 shadow-xs">
                   <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.display_name || "User"} />
                   <AvatarFallback className="bg-sage text-xs font-semibold text-forest">
-                    {profile?.display_name?.slice(0, 2).toUpperCase() || "ME"}
+                    {String(profile?.display_name || "ME").slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               </Link>
@@ -234,7 +234,7 @@ export function Navbar() {
                 <div className="border-t border-[#171514]/10 my-1 pt-1.5 space-y-1">
                   <div className="px-3 py-1 flex items-center justify-between">
                     <span className="text-[10px] uppercase font-mono text-muted-foreground">Member Session</span>
-                    <span className="text-xs font-medium text-foreground truncate max-w-[140px]">{profile?.display_name || user?.email || "Founding Member"}</span>
+                    <span className="text-xs font-medium text-foreground truncate max-w-[140px]">{profile?.display_name || user?.email || "Member"}</span>
                   </div>
                   {!isDashboard && (
                     <Link

@@ -50,7 +50,7 @@ export function RazorpaySubscriptionModal({
   userEmail,
   userPhone = "",
   amountInr = 1999,
-  planTitle = "Annual Founding Member Pass",
+  planTitle = "Precious Meets Membership",
   onSuccess,
   onError,
 }: RazorpaySubscriptionModalProps) {
@@ -81,7 +81,7 @@ export function RazorpaySubscriptionModal({
     setContactName(userName);
     setContactEmail(userEmail);
     setContactPhone(userPhone);
-    setCardHolder(userName || "FOUNDING MEMBER");
+    setCardHolder(userName || "MEMBER");
   }, [userName, userEmail, userPhone]);
 
   useEffect(() => {
@@ -189,7 +189,7 @@ export function RazorpaySubscriptionModal({
           {/* Member Contact Strip */}
           <div className="mt-4 pt-3 border-t border-white/15 flex items-center justify-between text-xs text-white/90">
             <div className="flex items-center gap-1.5 truncate max-w-[340px]">
-              <span className="font-medium text-white">{contactName || "Founding Member"}</span>
+              <span className="font-medium text-white">{contactName || "Member"}</span>
               <span className="text-[#C6A568]">·</span>
               <span className="text-white/80 truncate text-[11px] font-mono">{contactEmail}</span>
             </div>

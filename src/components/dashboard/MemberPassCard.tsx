@@ -93,7 +93,7 @@ export function MemberPassCard({
   return (
     <div className="space-y-6">
       {/* ------------------------------------------------------------- */}
-      {/* 1. LUXURY FOUNDING MEMBER PASSCARD (The Showstopper) */}
+      {/* 1. LUXURY DIGITAL MEMBER PASSCARD (The Showstopper) */}
       {/* ------------------------------------------------------------- */}
       <div className="relative overflow-hidden rounded-3xl border border-ochre/40 bg-gradient-to-br from-[#1c0d12] via-[#2a131a] to-[#12080c] p-6 sm:p-8 text-ivory shadow-2xl ring-1 ring-white/10">
         {/* Subtle decorative shimmer ambient background */}
@@ -121,7 +121,7 @@ export function MemberPassCard({
               <ShieldCheck className="size-3.5 text-emerald-400" /> Aadhaar Verified
             </span>
             <span className="rounded-full bg-white/10 px-3 py-1 font-mono text-[11px] text-white/80 border border-white/10">
-              Founding Circle
+              Private Circle
             </span>
           </div>
         </div>
@@ -177,7 +177,7 @@ export function MemberPassCard({
                   {memberId}
                 </span>
                 <span className="text-[10px] text-emerald-300 font-medium block mt-0.5">
-                  1 QR for all {seatedEvents.length} seated meet{seatedEvents.length !== 1 ? "s" : ""}
+                  1 QR for all {(seatedEvents || []).length} seated meet{(seatedEvents || []).length !== 1 ? "s" : ""}
                 </span>
               </div>
             </button>

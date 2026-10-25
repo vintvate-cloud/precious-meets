@@ -70,7 +70,7 @@ export function UserDossierModal({
       toast.success(
         `Login credentials dispatched to ${application.applicantEmail}!`,
         {
-          description: `Strong 16-character auto-generated password generated and sent via Resend.`,
+          description: `Strong 16-character auto-generated password generated and sent via secure email.`,
         },
       );
       onApplicationUpdated(res.application);
@@ -532,7 +532,7 @@ export function UserDossierModal({
                       ₹{application.paymentAmountInr}
                     </div>
                     <span className="text-[10px] text-muted-foreground">
-                      Full 365-day founding membership
+                      Full 365-day private circle membership
                     </span>
                   </div>
 
@@ -972,7 +972,7 @@ export function UserDossierModal({
 
           <div className="space-y-4 pt-2">
             <p className="text-xs text-muted-foreground leading-relaxed">
-              This will automatically generate a cryptographically strong 16-character password and dispatch a secure access notification to the member's registered email via Resend.
+              This will automatically generate a cryptographically strong 16-character password and dispatch a secure access notification to the member's registered email.
             </p>
 
             <div className="rounded-2xl bg-card border border-border p-4 space-y-2.5 text-xs">

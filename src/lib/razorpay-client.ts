@@ -38,7 +38,7 @@ export async function openRazorpaySubscriptionCheckout(options: RazorpaySubscrip
   const keyId =
     (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || "rzp_test_Ts3sw4uyv2qQqu";
   
-  const memberId = `PM-FOUNDER-${Math.floor(1000 + Math.random() * 9000)}`;
+  const memberId = `PM-${Math.floor(1000 + Math.random() * 9000)}`;
   const orderId = `order_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
 
   // If Razorpay script loaded and key is valid
@@ -49,7 +49,7 @@ export async function openRazorpaySubscriptionCheckout(options: RazorpaySubscrip
         amount: options.amountInr * 100, // in paise: 199900 = INR 1,999
         currency: "INR",
         name: "Precious Meets",
-        description: "Annual Founding Membership Subscription",
+        description: "Precious Meets Membership Subscription",
         image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=128&q=80",
         prefill: {
           name: options.name,
@@ -57,7 +57,7 @@ export async function openRazorpaySubscriptionCheckout(options: RazorpaySubscrip
           contact: options.phone || "",
         },
         notes: {
-          membership_tier: "Annual Founding Member",
+          membership_tier: "Member",
           archetype: options.archetypeTitle || "Curious Flâneur",
           member_id: memberId,
         },

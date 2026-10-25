@@ -38,6 +38,41 @@ export const Route = createFileRoute("/dashboard/")({
     ],
   }),
   component: DashboardPage,
+  errorComponent: ({ error, reset }: { error: any; reset: () => void }) => (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#FAF7F2] text-[#171514] px-4 text-center">
+      <div className="max-w-md w-full p-8 rounded-3xl border border-black/5 bg-white shadow-xl space-y-4">
+        <h2 className="font-display text-2xl text-[#171514]">Member Portal Notice</h2>
+        <p className="text-xs text-muted-foreground">
+          There was an issue loading your member account data.
+        </p>
+        {error && (
+          <div className="text-left p-3 rounded-xl bg-red-50 border border-red-200 text-xs font-mono text-red-700 max-h-36 overflow-auto">
+            {error instanceof Error ? error.message : String(error)}
+          </div>
+        )}
+        <div className="flex flex-wrap gap-2 justify-center pt-2">
+          <button
+            onClick={() => reset()}
+            className="rounded-full bg-[#691C35] text-white text-xs font-semibold px-5 py-2 cursor-pointer hover:bg-[#691C35]/90"
+          >
+            Retry Loading
+          </button>
+          <button
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                localStorage.removeItem("precious_meets_mock_user");
+                localStorage.removeItem("precious_meets_session_timestamp");
+                window.location.href = "/login";
+              }
+            }}
+            className="rounded-full border border-black/15 bg-white text-xs font-semibold px-5 py-2 cursor-pointer hover:bg-neutral-50"
+          >
+            Re-authenticate
+          </button>
+        </div>
+      </div>
+    </div>
+  ),
 });
 
 const LOCAL_STORAGE_RESERVATIONS_KEY = "precious_meets_member_rsvps";
@@ -94,33 +129,33 @@ export function DashboardPage() {
     };
   }, [user?.email]);
 
-  const acceptedInvitations = invitations.filter((i) => i.status === "accepted");
+  const acceptedInvitations = (invitations || []).filter((i) => i && i.status === "accepted");
 
-  const nextEvent = acceptedInvitations.length > 0 ? {
-    title: acceptedInvitations[0].eventTitle,
-    dateDisplay: acceptedInvitations[0].dateDisplay,
-    neighborhood: `${acceptedInvitations[0].neighborhood}, ${acceptedInvitations[0].city}`,
-    venueName: acceptedInvitations[0].venueName,
+  const nextEvent = acceptedInvitations.length > 0 && acceptedInvitations[0] ? {
+    title: acceptedInvitations[0].eventTitle || "Curated Gathering",
+    dateDisplay: acceptedInvitations[0].dateDisplay || "Upcoming Date",
+    neighborhood: `${acceptedInvitations[0].neighborhood || "Delhi"}, ${acceptedInvitations[0].city || "NCR"}`,
+    venueName: acceptedInvitations[0].venueName || "Heritage Venue",
     gateCode: acceptedInvitations[0].secretAccessCode || "GATE-402",
   } : null;
 
   const seatedEvents = acceptedInvitations.map((inv) => ({
-    id: inv.eventId,
-    title: inv.eventTitle,
-    dateDisplay: inv.dateDisplay,
-    neighborhood: `${inv.neighborhood}, ${inv.city}`,
-    venueName: inv.venueName,
-    gateCode: inv.secretAccessCode || "GATE-402",
-    seatNumber: inv.seatNumber,
+    id: inv?.eventId || "",
+    title: inv?.eventTitle || "Curated Gathering",
+    dateDisplay: inv?.dateDisplay || "Upcoming Date",
+    neighborhood: `${inv?.neighborhood || "Delhi"}, ${inv?.city || "NCR"}`,
+    venueName: inv?.venueName || "Heritage Venue",
+    gateCode: inv?.secretAccessCode || "GATE-402",
+    seatNumber: inv?.seatNumber || 1,
   }));
 
-  const displayName = profile?.display_name || user?.user_metadata?.full_name || "Founding Member";
-  const memberId = subscription?.memberId || "PM-FOUNDER-8841";
-  const city = profile?.city || "Delhi NCR";
+  const displayName = String(profile?.display_name || user?.user_metadata?.full_name || (user?.email ? user.email.split("@")[0] : "Member"));
+  const memberId = String(subscription?.memberId || "PM-8841");
+  const city = String(profile?.city || "Delhi NCR");
 
   let userArchetype = "The Curious Flâneur";
   try {
-    const raw = localStorage.getItem("precious_meets_latest_profile");
+    const raw = typeof window !== "undefined" ? localStorage.getItem("precious_meets_latest_profile") : null;
     if (raw) {
       const p = JSON.parse(raw);
       if (p?.archetype?.title) userArchetype = p.archetype.title;
@@ -129,7 +164,7 @@ export function DashboardPage() {
     // ignore
   }
 
-  const pendingInvitationsCount = invitations.filter((i) => i.status === "pending").length;
+  const pendingInvitationsCount = (invitations || []).filter((i) => i && i.status === "pending").length;
 
   const NAV_TABS = [
     { id: "overview", label: "Overview", icon: Sparkles, badge: null },
@@ -192,7 +227,7 @@ export function DashboardPage() {
           <div className="rounded-2xl bg-white/[0.04] border border-white/[0.08] p-3.5">
             <div className="flex items-center gap-3">
               <div className="size-9 rounded-full bg-gradient-to-tr from-[#691C35] to-[#C6A568] flex items-center justify-center text-xs font-serif font-bold text-white shadow-xs">
-                {displayName.slice(0, 2).toUpperCase()}
+                {String(displayName || "PM").slice(0, 2).toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="font-medium text-xs text-white truncate">{displayName}</div>

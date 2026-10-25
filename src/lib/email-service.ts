@@ -136,7 +136,7 @@ export class EmailService {
             </div>
             <h2 style="font-family: Georgia, serif; color: #171514; font-size: 24px; margin: 0 0 8px 0;">Thanks for subscribing to our platform, ${data.name || "Friend"}.</h2>
             <p style="color: #4a453f; line-height: 1.6; margin: 0 0 16px 0;">
-              Your annual subscription of <strong>${data.amount || "₹1,999"}</strong> has been processed successfully via Razorpay. Your table pass is reserved and your official payment invoice has been generated below.
+              Your subscription of <strong>${data.amount || "₹1,999"}</strong> has been processed successfully via Razorpay. Your table pass is reserved and your official payment invoice has been generated below.
             </p>
             
             <div style="background: #ffffff; border: 1px solid #e0d7c7; border-radius: 6px; padding: 18px; margin: 16px 0;">
@@ -155,7 +155,7 @@ export class EmailService {
                 </tr>
                 <tr>
                   <td style="padding: 6px 0; color: #6b6357;">Plan Tier:</td>
-                  <td style="padding: 6px 0; text-align: right; font-weight: bold; color: #171514;">${data.plan || "Annual Founding Member Pass"}</td>
+                  <td style="padding: 6px 0; text-align: right; font-weight: bold; color: #171514;">${data.plan || "Precious Meets Membership"}</td>
                 </tr>
                 <tr>
                   <td style="padding: 6px 0; color: #6b6357;">Amount Paid:</td>
@@ -268,7 +268,7 @@ export class EmailService {
                 </tr>
                 <tr>
                   <td style="padding: 6px 0; color: #6b6357;">Membership Tier:</td>
-                  <td style="padding: 6px 0; text-align: right; font-weight: bold; color: #171514;">${data.plan || "Annual Founding Member"}</td>
+                  <td style="padding: 6px 0; text-align: right; font-weight: bold; color: #171514;">${data.plan || "Precious Meets Member"}</td>
                 </tr>
               </table>
             </div>

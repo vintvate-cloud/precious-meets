@@ -39,10 +39,10 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/quiz/results")({
   head: () => ({
     meta: [
-      { title: "Your Vibe Profile & Founding Membership — Precious Meets" },
+      { title: "Your Vibe Profile & Membership — Precious Meets" },
       {
         name: "description",
-        content: "Discover your conversational archetype, social insights, and unlock founding member table access.",
+        content: "Discover your conversational archetype, social insights, and unlock curated table access.",
       },
     ],
   }),
@@ -73,13 +73,50 @@ export function QuizResultsPage() {
   } | null>(null);
 
   useEffect(() => {
-    const rawPaid = localStorage.getItem("precious_meets_paid_dossier");
-    if (rawPaid) {
+    const syncStatusWithDatabase = async () => {
+      const emailToCheck = (email || user?.email || "").trim().toLowerCase();
+      const rawPaid = typeof window !== "undefined" ? localStorage.getItem("precious_meets_paid_dossier") : null;
+
+      if (!emailToCheck) {
+        if (!user && typeof window !== "undefined") {
+          localStorage.removeItem("precious_meets_paid_dossier");
+          setPaidDossier(null);
+        }
+        return;
+      }
+
+      // Query Supabase directly to check if there is an active application in the database
       try {
-        setPaidDossier(JSON.parse(rawPaid));
-      } catch (e) {}
-    }
-  }, []);
+        const { data: dbApp } = await supabase
+          .from("member_applications")
+          .select("id, status, membership_status, invoice_number, razorpay_payment_id")
+          .eq("applicant_email", emailToCheck)
+          .maybeSingle();
+
+        if (!dbApp) {
+          // If no application exists in the database, clear any lingering local paid dossier
+          if (typeof window !== "undefined") {
+            localStorage.removeItem("precious_meets_paid_dossier");
+          }
+          setPaidDossier(null);
+        } else if (rawPaid) {
+          try {
+            setPaidDossier(JSON.parse(rawPaid));
+          } catch (e) {
+            setPaidDossier(null);
+          }
+        }
+      } catch (err) {
+        if (rawPaid) {
+          try {
+            setPaidDossier(JSON.parse(rawPaid));
+          } catch (e) {}
+        }
+      }
+    };
+
+    syncStatusWithDatabase();
+  }, [email, user?.email]);
 
   useEffect(() => {
     const raw = localStorage.getItem("precious_meets_latest_profile");
@@ -187,7 +224,7 @@ export function QuizResultsPage() {
     setPaying(true);
 
     try {
-      const memberId = `PM-FOUNDER-${Math.floor(1000 + Math.random() * 9000)}`;
+      const memberId = `PM-${Math.floor(1000 + Math.random() * 9000)}`;
       const invoiceNumber = CryptoService.generateInvoiceNumber();
       const formattedDate = new Date().toLocaleDateString("en-IN", {
         day: "numeric",
@@ -219,13 +256,15 @@ export function QuizResultsPage() {
           name: name.trim(),
           email: email.trim(),
           amount: "₹1,999",
-          plan: "Annual Founding Member Pass",
+          plan: "Precious Meets Membership",
           memberId,
           archetype: profile?.archetype?.title || "Curious Flâneur",
           dashboardUrl: `${window.location.origin}/login`,
           invoiceNumber,
           paymentId: result.paymentId,
           date: formattedDate,
+          credentialsEtaNotice:
+            "We will email your member sign in credentials in a while. Once your credentials have been sent by the admin, you will be able to log in.",
         },
       });
 
@@ -259,7 +298,7 @@ export function QuizResultsPage() {
         phone: phone.trim() || "+91 98765 43210",
         city: "Delhi NCR",
         method: effectiveAadhaarUrl ? "aadhaar_card_upload" : "digilocker_consent_offline",
-        notes: `Annual Founding Member Pass (₹1,999 Razorpay Payment: ${result.paymentId}). Archetype: ${profile?.archetype?.title || "The Curious Flâneur"}${effectiveAadhaarName ? ` | Aadhaar Document: ${effectiveAadhaarName}` : ""}`,
+        notes: `Precious Meets Membership (₹1,999 Razorpay Payment: ${result.paymentId}). Archetype: ${profile?.archetype?.title || "The Curious Flâneur"}${effectiveAadhaarName ? ` | Aadhaar Document: ${effectiveAadhaarName}` : ""}`,
         amountInr: 1999,
         memberId,
         aadhaarFileUrl: effectiveAadhaarUrl,
@@ -495,7 +534,7 @@ export function QuizResultsPage() {
               {/* Left Column: Perks & Value Proposition */}
               <div className="lg:col-span-7">
                 <div className="inline-flex items-center gap-2 rounded-full border border-[#C6A568]/40 bg-[#C6A568]/10 px-3.5 py-1 text-[11px] font-mono tracking-widest uppercase text-[#C6A568]">
-                  <Sparkles className="size-3" /> Exclusive Founding Membership · 2026 Pass
+                  <Sparkles className="size-3" /> Exclusive Circle Membership · 2026
                 </div>
 
                 <h2 className="font-display mt-4 text-3xl sm:text-4xl md:text-5xl leading-tight text-ivory">
@@ -503,7 +542,7 @@ export function QuizResultsPage() {
                 </h2>
 
                 <p className="mt-3 text-sm leading-relaxed text-ivory/80">
-                  Join our curated private circle across Delhi NCR. One annual pass unlocks unlimited invites to weekly 6-person suppers with compatible conversationalists and uncompromising women-first security.
+                  Join our curated private circle across Delhi NCR. Unlocks invitations to weekly 6-person suppers with compatible conversationalists and uncompromising women-first security.
                 </p>
 
                 {/* Benefits Bullet Grid */}
@@ -574,7 +613,7 @@ export function QuizResultsPage() {
                       </div>
                       <h3 className="font-display mt-4 text-2xl text-ivory">Active Member</h3>
                       <p className="mt-1 text-xs text-ivory/80">
-                        You hold an active Founding Member Pass. Your credentials are fully activated.
+                        You hold an active Member Pass. Your credentials are fully activated.
                       </p>
                       <Button
                         onClick={() => navigate({ to: "/dashboard" })}
@@ -608,12 +647,6 @@ export function QuizResultsPage() {
                           3. Once credentials arrive, sign in to unlock your matched secret tables.
                         </p>
                       </div>
-                      <Button
-                        onClick={() => navigate({ to: "/login" })}
-                        className="mt-6 w-full rounded-full bg-[#C6A568] font-bold text-[#171514] hover:bg-[#C6A568]/90 cursor-pointer"
-                      >
-                        Go to Member Sign In &rarr;
-                      </Button>
                     </div>
                   ) : (
                     <div>
@@ -621,19 +654,15 @@ export function QuizResultsPage() {
                       <div className="flex items-baseline justify-between border-b border-ivory/15 pb-4">
                         <div>
                           <span className="label-mono text-[10px] uppercase text-[#C6A568]">
-                            Annual Founding Pass
+                            Private Circle Access
                           </span>
                           <div className="flex items-baseline gap-2 mt-1">
                             <span className="font-display text-4xl sm:text-5xl font-bold text-ivory">
                               ₹1,999
                             </span>
-                            <span className="text-xs line-through text-ivory/50">₹4,999</span>
-                            <span className="text-[11px] text-ivory/70">/ year</span>
+                            <span className="text-[11px] text-ivory/70">membership</span>
                           </div>
                         </div>
-                        <span className="rounded-full bg-[#C6A568]/20 px-2.5 py-1 text-[10px] font-bold text-[#C6A568]">
-                          60% OFF
-                        </span>
                       </div>
 
                       {/* Inputs */}
@@ -717,7 +746,6 @@ export function QuizResultsPage() {
           open={true}
           onOpenChange={() => {
             setSuccessData(null);
-            navigate({ to: "/login" });
           }}
         >
           <DialogContent className="max-w-md bg-card text-foreground">
@@ -729,21 +757,21 @@ export function QuizResultsPage() {
                 Payment Authorized!
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                Your ₹1,999 Founding Membership payment has been confirmed by Razorpay.
+                Your ₹1,999 membership payment has been confirmed by Razorpay.
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 py-3 text-center">
               <div className="rounded-2xl border border-forest/30 bg-forest/5 p-4">
                 <span className="text-[10px] uppercase font-mono text-muted-foreground">
-                  Your Founding Member ID
+                  Your Member ID
                 </span>
                 <p className="font-mono text-2xl font-bold text-burgundy mt-0.5">
                   {successData.memberId}
                 </p>
                 <div className="flex items-center justify-center gap-1.5 mt-1 text-xs text-forest font-semibold">
                   <CheckCircle2 className="size-3.5" />
-                  <span>Payment Confirmed: {successData.amount} (Annual Pass)</span>
+                  <span>Payment Confirmed: {successData.amount}</span>
                 </div>
               </div>
 
@@ -770,25 +798,23 @@ export function QuizResultsPage() {
                 </div>
               </div>
 
-              {/* Status Box: Resend Email Dispatched */}
+              {/* Status Box: Email Dispatched */}
               <div className="flex items-start gap-3 rounded-xl border border-border/80 bg-background p-3 text-left">
                 <Mail className="size-5 text-forest shrink-0 mt-0.5" />
                 <div className="text-xs">
                   <p className="font-semibold text-foreground">Razorpay Tax Invoice Dispatched</p>
                   <p className="text-muted-foreground mt-0.5">
-                    We sent your official welcome receipt, Razorpay tax invoice (<strong>{successData.invoiceNumber}</strong>), and onboarding dossier to <strong>{successData.email}</strong> via Resend.
+                    We sent your official welcome receipt, Razorpay tax invoice (<strong>{successData.invoiceNumber}</strong>), and onboarding dossier to <strong>{successData.email}</strong>.
                   </p>
                 </div>
               </div>
 
               <Button
-                onClick={() => {
-                  setSuccessData(null);
-                  navigate({ to: "/login" });
-                }}
-                className="w-full rounded-full bg-burgundy py-5 font-semibold text-ivory hover:bg-burgundy/90 cursor-pointer"
+                onClick={() => setSuccessData(null)}
+                variant="outline"
+                className="w-full rounded-full py-5 font-semibold text-foreground border-border hover:bg-muted cursor-pointer"
               >
-                Go to Sign In &rarr;
+                Close
               </Button>
             </div>
           </DialogContent>

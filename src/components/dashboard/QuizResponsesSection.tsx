@@ -54,22 +54,40 @@ export function QuizResponsesSection() {
   }, [user, profile]);
 
   const getOptionLabel = (q: QuizQuestion, answerValue: any) => {
+    if (answerValue === null || answerValue === undefined) {
+      return <span className="text-muted-foreground">—</span>;
+    }
+
     if (q.type === "slider") {
+      const num = typeof answerValue === "number" ? answerValue : Number(answerValue) || 50;
       return (
         <span className="font-mono font-bold text-burgundy">
-          Tempo Index: {answerValue || 50}/100 ({answerValue > 50 ? "Lively & Buzzing" : "Intimate & Slow"})
+          Tempo Index: {num}/100 ({num > 50 ? "Lively & Buzzing" : "Intimate & Slow"})
         </span>
       );
     }
 
     if (Array.isArray(answerValue)) {
       const labels = answerValue
-        .map((val) => q.options.find((o) => o.value === val)?.label || val)
+        .map((val) => {
+          if (typeof val === "object" && val !== null) {
+            return val.label || val.value || JSON.stringify(val);
+          }
+          return (q.options || []).find((o) => o.value === val)?.label || String(val);
+        })
         .join(", ");
       return <span className="font-medium text-foreground">{labels || "Selected Multiple"}</span>;
     }
 
-    const matched = q.options.find((o) => o.value === answerValue);
+    if (typeof answerValue === "object" && answerValue !== null) {
+      return (
+        <span className="font-medium text-foreground">
+          {answerValue.label || answerValue.value || JSON.stringify(answerValue)}
+        </span>
+      );
+    }
+
+    const matched = (q.options || []).find((o) => o.value === answerValue);
     if (matched) {
       return (
         <div>

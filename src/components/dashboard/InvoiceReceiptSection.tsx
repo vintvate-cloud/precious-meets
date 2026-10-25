@@ -20,7 +20,7 @@ export function InvoiceReceiptSection() {
   const { user, profile, subscription } = useAuth();
   const [invoiceDate, setInvoiceDate] = useState("22 October 2026");
   const [paymentId, setPaymentId] = useState("pay_PM_99214482");
-  const [memberId, setMemberId] = useState("PM-FOUNDER-8841");
+  const [memberId, setMemberId] = useState("PM-8841");
 
   useEffect(() => {
     if (subscription) {
@@ -40,7 +40,7 @@ export function InvoiceReceiptSection() {
     window.print();
   };
 
-  const displayName = profile?.display_name || user?.user_metadata?.full_name || (user?.email ? user.email.split("@")[0] : "Founding Member");
+  const displayName = profile?.display_name || user?.user_metadata?.full_name || (user?.email ? user.email.split("@")[0] : "Member");
   const email = user?.email || "";
   const city = profile?.city || "Delhi NCR";
   const phone = profile?.phone || "";
@@ -90,7 +90,7 @@ export function InvoiceReceiptSection() {
 
           <div className="text-left sm:text-right space-y-1">
             <span className="font-mono text-xs font-bold text-burgundy block">
-              INVOICE #{memberId.replace("PM-", "INV-2026-")}
+              INVOICE #{String(memberId || "PM-8841").replace("PM-", "INV-2026-")}
             </span>
             <span className="text-xs text-muted-foreground block">
               Application & Payment Date: <strong className="text-foreground">{invoiceDate}</strong>
@@ -145,7 +145,7 @@ export function InvoiceReceiptSection() {
                 <tr>
                   <td className="py-4 pr-4">
                     <p className="font-semibold text-foreground text-sm">
-                      Annual Founding Member Circle Pass
+                      Precious Meets Private Circle Pass
                     </p>
                     <p className="text-[11px] text-muted-foreground mt-0.5 max-w-md">
                       Exclusive admission to 6-person curated dinners, 100% offline Aadhaar identity vetting, table host coordination, seasonal tasting pairings, and safe departure concierge.

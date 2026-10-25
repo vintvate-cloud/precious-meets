@@ -155,7 +155,7 @@ export function UniversalMemberPassModal({
           {/* Dynamic Live Counter */}
           <div className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-forest/15 px-3 py-0.5 text-[10px] font-medium text-forest border border-forest/30">
             <CheckCircle2 className="size-3" />
-            Active for {seatedEvents.length} Seated Meet{seatedEvents.length !== 1 ? "s" : ""}
+            Active for {(seatedEvents || []).length} Seated Meet{(seatedEvents || []).length !== 1 ? "s" : ""}
           </div>
         </div>
 
