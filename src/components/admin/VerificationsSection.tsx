@@ -60,7 +60,7 @@ export interface UnifiedVerifiedUser {
   phone: string;
   avatar: string;
   city: string;
-  memberTier: "Founding Member" | "Annual Pass" | "Invited Guest";
+  memberTier: "Private Member" | "Verified Member" | "Invited Guest";
   memberId: string;
   archetypeTitle: string;
   verificationMethod: string;
@@ -110,7 +110,7 @@ export function VerificationsSection({
   
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState("");
-  const [tierFilter, setTierFilter] = useState<"all" | "Founding Member" | "Annual Pass">("all");
+  const [tierFilter, setTierFilter] = useState<"all" | "Private Member" | "Verified Member">("all");
   const [selectedUserForCert, setSelectedUserForCert] = useState<UnifiedVerifiedUser | null>(null);
   const [certModalOpen, setCertModalOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -173,7 +173,7 @@ export function VerificationsSection({
             app.avatarUrl ||
             "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
           city: app.applicantCity || "Delhi NCR",
-          memberTier: app.status === "approved" ? "Founding Member" : "Annual Pass",
+          memberTier: app.status === "approved" ? "Private Member" : "Verified Member",
           memberId: app.applicationReference.replace("PM-FILE-", "PM-MEMBER-"),
           archetypeTitle: app.archetypeTitle || "Circle Member",
           verificationMethod: app.aadhaarFileUrl ? "Uploaded Aadhaar Card" : "DigiLocker Consent Offline",
@@ -207,7 +207,7 @@ export function VerificationsSection({
             q.avatar ||
             "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80",
           city: q.city || "Delhi NCR",
-          memberTier: "Annual Pass",
+          memberTier: "Verified Member",
           memberId: `PM-VERIFIED-${q.id.replace("ver_", "").padStart(4, "0")}`,
           archetypeTitle: "Curated Dinner Guest",
           verificationMethod: q.aadhaarFileUrl ? "Uploaded Aadhaar Card" : "DigiLocker Offline Consent",
@@ -464,7 +464,7 @@ export function VerificationsSection({
 
             {/* Filter by Tier */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-              {(["all", "Founding Member", "Annual Pass"] as const).map((t) => (
+              {(["all", "Private Member", "Verified Member"] as const).map((t) => (
                 <button
                   key={t}
                   type="button"
@@ -555,7 +555,7 @@ export function VerificationsSection({
                           <div className="space-y-1">
                             <span
                               className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                                u.memberTier === "Founding Member"
+                                u.memberTier === "Private Member"
                                   ? "bg-burgundy/15 text-burgundy"
                                   : "bg-forest/15 text-forest"
                               }`}

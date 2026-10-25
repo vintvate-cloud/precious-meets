@@ -147,52 +147,115 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    // 1. Initial 36-hour session expiry check
-    if (isSessionExpired()) {
-      terminateSession();
-      setLoading(false);
-      return;
-    }
-
-    // Check local session
-    const savedMock = localStorage.getItem(LOCAL_STORAGE_MOCK_USER_KEY);
-    if (savedMock) {
-      try {
-        const parsed = JSON.parse(savedMock);
-        setUser(parsed.user);
-        setProfile(parsed.profile);
+    const initSession = async () => {
+      // 1. Initial 36-hour session expiry check
+      if (isSessionExpired()) {
+        await terminateSession();
         setLoading(false);
         return;
-      } catch (e) {
-        localStorage.removeItem(LOCAL_STORAGE_MOCK_USER_KEY);
       }
-    }
 
-    // Supabase auth state listener
-    supabase.auth.getSession().then(({ data: { session } }) => {
+      // Check local session
+      const savedMock = typeof window !== "undefined" ? localStorage.getItem(LOCAL_STORAGE_MOCK_USER_KEY) : null;
+      if (savedMock) {
+        try {
+          const parsed = JSON.parse(savedMock);
+          const email = parsed?.user?.email?.toLowerCase();
+
+          // Executive admin local session bypass
+          if (email === "admin@preciousmeets.com") {
+            setUser(parsed.user);
+            setProfile(parsed.profile);
+            setLoading(false);
+            return;
+          }
+
+          // Verify with Supabase whether this member actually exists in the database
+          if (email) {
+            const { data: dbProfile } = await supabase
+              .from("profiles")
+              .select("*")
+              .eq("email", email)
+              .maybeSingle();
+
+            const { data: dbApp } = await supabase
+              .from("member_applications")
+              .select("id, applicant_name, applicant_email, membership_status, status, identity_status, created_at, updated_at")
+              .eq("applicant_email", email)
+              .maybeSingle();
+
+            if (!dbProfile && !dbApp) {
+              // The user was deleted from the Supabase database!
+              console.info("[Auth] Member deleted from Supabase. Invalidating local session.");
+              localStorage.removeItem(LOCAL_STORAGE_MOCK_USER_KEY);
+              localStorage.removeItem(LOCAL_STORAGE_SUBSCRIPTION_KEY);
+              localStorage.removeItem("precious_meets_paid_dossier");
+              setUser(null);
+              setProfile(null);
+              setSubscription(null);
+              setLoading(false);
+              return;
+            }
+
+            // User exists in Supabase: sync latest status from database
+            if (dbProfile) {
+              setUser(parsed.user);
+              setProfile(dbProfile as DatabaseProfile);
+            } else if (dbApp) {
+              setUser(parsed.user);
+              setProfile({
+                id: dbApp.id,
+                email: dbApp.applicant_email,
+                full_name: dbApp.applicant_name,
+                display_name: (dbApp.applicant_name || "Member").split(" ")[0],
+                role: "user",
+                membership_status: dbApp.membership_status || "quiz_completed",
+                identity_verified: dbApp.identity_status === "verified",
+                identity_status: dbApp.identity_status || "unverified",
+                onboarding_completed: true,
+                quiz_completed: true,
+                created_at: dbApp.created_at,
+                updated_at: dbApp.updated_at,
+              });
+            }
+            setLoading(false);
+            return;
+          }
+        } catch (e) {
+          localStorage.removeItem(LOCAL_STORAGE_MOCK_USER_KEY);
+        }
+      }
+
+      // Supabase auth state listener
+      const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         if (isSessionExpired()) {
-          terminateSession();
+          await terminateSession();
         } else {
           setUser(session.user);
-          fetchProfile(session.user.id, session.user.email || "");
+          await fetchProfile(session.user.id, session.user.email || "");
           if (!localStorage.getItem(LOCAL_STORAGE_SESSION_TIMESTAMP_KEY)) {
             recordSessionStart();
           }
         }
+      } else {
+        setUser(null);
+        setProfile(null);
       }
       setLoading(false);
-    });
+    };
+
+    initSession();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         if (isSessionExpired()) {
-          terminateSession();
+          await terminateSession();
         } else {
           setUser(session.user);
-          fetchProfile(session.user.id, session.user.email || "");
+          await fetchProfile(session.user.id, session.user.email || "");
           if (!localStorage.getItem(LOCAL_STORAGE_SESSION_TIMESTAMP_KEY)) {
             recordSessionStart();
           }
@@ -350,7 +413,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           full_name: app.applicantName,
           display_name: app.applicantName.split(" ")[0] || "Member",
           avatar_url: app.avatarUrl || null,
-          bio: app.archetypeDescription || "Founding Member at Precious Meets.",
+          bio: app.archetypeDescription || "Member at Precious Meets.",
           city: app.applicantCity || "Delhi NCR",
           phone: app.applicantPhone,
           role: "user",
@@ -426,10 +489,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== "undefined") {
       localStorage.removeItem(LOCAL_STORAGE_MOCK_USER_KEY);
       localStorage.removeItem(LOCAL_STORAGE_SESSION_TIMESTAMP_KEY);
+      localStorage.removeItem(LOCAL_STORAGE_SUBSCRIPTION_KEY);
+      localStorage.removeItem("precious_meets_paid_dossier");
     }
     await supabase.auth.signOut().catch(() => {});
     setUser(null);
     setProfile(null);
+    setSubscription(null);
   };
 
   const refreshProfile = async () => {
@@ -485,7 +551,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     paymentId?: string;
     memberId?: string;
   }): SubscriptionDetails => {
-    const memberId = details.memberId || `PM-FOUNDER-${Math.floor(1000 + Math.random() * 9000)}`;
+    const memberId = details.memberId || `PM-${Math.floor(1000 + Math.random() * 9000)}`;
     const now = new Date();
     const expiry = new Date();
     expiry.setFullYear(expiry.getFullYear() + 1);
@@ -493,7 +559,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Membership is NOT active until admin dispatches credentials!
     const pendingSub: SubscriptionDetails = {
       status: "inactive",
-      plan: "Annual Founding Member Pass (Pending Credentials)",
+      plan: "Precious Meets Membership (Pending Credentials)",
       amount: 1999,
       memberId,
       subscribedAt: now.toISOString(),
@@ -508,8 +574,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Only real active members or executive admins have active platform subscription privileges
   const isSubscribed = Boolean(
-    profile?.membership_status === "active" ||
-    (profile?.role === "admin" && user?.email?.toLowerCase() === "admin@preciousmeets.com")
+    user && (
+      profile?.membership_status === "active" ||
+      (profile?.role === "admin" && user.email?.toLowerCase() === "admin@preciousmeets.com")
+    )
   );
   const isAdmin = Boolean(
     user && user.email?.toLowerCase() === "admin@preciousmeets.com"

@@ -52,8 +52,8 @@ export function EventsListSection({
   pendingInvitationsCount = 0,
   onViewRequests,
   userCity = "Delhi NCR",
-  displayName = "Founding Member",
-  memberId = "PM-FOUNDER-8841",
+  displayName = "Member",
+  memberId = "PM-8841",
 }: EventsListSectionProps) {
   const [selectedPass, setSelectedPass] = useState<UserSeatInvitation | null>(null);
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");

@@ -106,9 +106,9 @@ export class VerificationsService {
                   hour12: true,
                 })}`
               : "Recently",
-            notes: `Annual Founding Member Pass (₹${app.paymentAmountInr || 1999} Razorpay Payment: ${app.razorpayPaymentId || "Paid"}). Archetype: ${app.archetypeTitle}${app.aadhaarFileName ? ` | Aadhaar Doc: ${app.aadhaarFileName}` : ""}`,
+            notes: `Precious Meets Membership (₹${app.paymentAmountInr || 1999} Razorpay Payment: ${app.razorpayPaymentId || "Paid"}). Archetype: ${app.archetypeTitle}${app.aadhaarFileName ? ` | Aadhaar Doc: ${app.aadhaarFileName}` : ""}`,
             amountInr: app.paymentAmountInr || 1999,
-            memberId: app.applicationReference.replace("PM-FILE-", "PM-FOUNDER-"),
+            memberId: app.applicationReference.replace("PM-FILE-", "PM-"),
             aadhaarFileUrl: app.aadhaarFileUrl,
             aadhaarFileName: app.aadhaarFileName,
           });
@@ -169,9 +169,9 @@ export class VerificationsService {
       method: data.method || "digilocker_consent_offline",
       status: "pending",
       requestedAt: `Today, ${formattedTime}`,
-      notes: data.notes || "Annual Founding Member Pass (₹1,999 Razorpay Payment Received)",
+      notes: data.notes || "Precious Meets Membership (₹1,999 Razorpay Payment Received)",
       amountInr: data.amountInr || 1999,
-      memberId: data.memberId || `PM-FOUNDER-${Math.floor(1000 + Math.random() * 9000)}`,
+      memberId: data.memberId || `PM-${Math.floor(1000 + Math.random() * 9000)}`,
       aadhaarFileUrl: data.aadhaarFileUrl,
       aadhaarFileName: data.aadhaarFileName,
     };

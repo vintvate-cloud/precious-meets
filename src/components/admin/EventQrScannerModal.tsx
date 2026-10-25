@@ -878,7 +878,7 @@ export function EventQrScannerModal({
                       type="text"
                       value={manualInput}
                       onChange={(e) => setManualInput(e.target.value)}
-                      placeholder="e.g. PM-FOUNDER-8841 or https://preciousmeets.com/verify-identity..."
+                      placeholder="e.g. PM-8841 or https://preciousmeets.com/verify-identity..."
                       className="w-full rounded-full border border-border bg-background pl-9 pr-3 py-2 text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-burgundy"
                     />
                   </div>

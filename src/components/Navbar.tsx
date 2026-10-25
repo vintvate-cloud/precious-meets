@@ -234,7 +234,7 @@ export function Navbar() {
                 <div className="border-t border-[#171514]/10 my-1 pt-1.5 space-y-1">
                   <div className="px-3 py-1 flex items-center justify-between">
                     <span className="text-[10px] uppercase font-mono text-muted-foreground">Member Session</span>
-                    <span className="text-xs font-medium text-foreground truncate max-w-[140px]">{profile?.display_name || user?.email || "Founding Member"}</span>
+                    <span className="text-xs font-medium text-foreground truncate max-w-[140px]">{profile?.display_name || user?.email || "Member"}</span>
                   </div>
                   {!isDashboard && (
                     <Link

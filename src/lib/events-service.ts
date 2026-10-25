@@ -275,7 +275,7 @@ export class EventsService {
         identityVerified: app.identityStatus === "verified",
         memberTier:
           app.membershipStatus === "active"
-            ? "Founding Table Member"
+            ? "Private Circle Member"
             : "Applicant",
         memberId: app.applicationReference,
       }));
@@ -901,8 +901,8 @@ export class EventsService {
 
     // If still not extracted, check standard Precious Meets patterns
     if (!memberId) {
-      // Look for PM-FOUNDER-xxxx, PM-ANNUAL-xxxx, PM-MEMBER-xxxx
-      const pmMatch = trimmed.match(/PM-[A-Z]+-\d+/i);
+      // Look for PM-xxxx, PM-MEMBER-xxxx
+      const pmMatch = trimmed.match(/PM-(?:[A-Z]+-)?\d+/i);
       if (pmMatch) {
         memberId = pmMatch[0].toUpperCase();
       }

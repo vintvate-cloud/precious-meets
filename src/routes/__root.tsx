@@ -53,15 +53,34 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
         <p className="mt-2 text-sm text-muted-foreground">
           Something went wrong on our end. You can try refreshing or head back home.
         </p>
+
+        {error && (
+          <div className="mt-4 p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-left text-xs font-mono text-destructive break-words max-h-36 overflow-auto">
+            {error instanceof Error ? `${error.name}: ${error.message}` : String(error)}
+          </div>
+        )}
+
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 cursor-pointer"
           >
             Try again
+          </button>
+          <button
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                localStorage.removeItem("precious_meets_mock_user");
+                localStorage.removeItem("precious_meets_session_timestamp");
+                window.location.href = "/login";
+              }
+            }}
+            className="inline-flex items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground transition-colors hover:bg-secondary/80 cursor-pointer"
+          >
+            Reset Session & Sign In
           </button>
           <a
             href="/"
