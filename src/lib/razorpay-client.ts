@@ -36,17 +36,17 @@ export function loadRazorpayScript(): Promise<boolean> {
 export async function openRazorpaySubscriptionCheckout(options: RazorpaySubscriptionOptions) {
   const isLoaded = await loadRazorpayScript();
   const keyId =
-    (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || "rzp_test_YourKeyHere";
+    (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || "rzp_test_Ts3sw4uyv2qQqu";
   
   const memberId = `PM-FOUNDER-${Math.floor(1000 + Math.random() * 9000)}`;
   const orderId = `order_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
 
-  // If Razorpay script loaded and key is valid (not default dummy) or standard test key
-  if (isLoaded && (window as any).Razorpay && keyId && !keyId.includes("YourKeyHere")) {
+  // If Razorpay script loaded and key is valid
+  if (isLoaded && (window as any).Razorpay && keyId) {
     try {
       const rzp = new (window as any).Razorpay({
         key: keyId,
-        amount: options.amountInr * 100, // in paise: 199900
+        amount: options.amountInr * 100, // in paise: 199900 = INR 1,999
         currency: "INR",
         name: "Precious Meets",
         description: "Annual Founding Membership Subscription",
@@ -54,7 +54,7 @@ export async function openRazorpaySubscriptionCheckout(options: RazorpaySubscrip
         prefill: {
           name: options.name,
           email: options.email,
-          contact: options.phone || "+919876543210",
+          contact: options.phone || "",
         },
         notes: {
           membership_tier: "Annual Founding Member",
@@ -86,22 +86,11 @@ export async function openRazorpaySubscriptionCheckout(options: RazorpaySubscrip
       rzp.open();
       return;
     } catch (e: any) {
-      console.warn("Razorpay standard open failed, falling back to instant sandbox flow", e);
+      console.error("Razorpay checkout initialization failed:", e);
+      options.onError(e.message || "Failed to launch Razorpay gateway.");
+      return;
     }
   }
 
-  // Graceful fallback for sandbox/demo environment or when standard checkout is blocked:
-  // Simulate standard Razorpay payment with real confirmation and email triggering
-  const simulatedPaymentId = `pay_rzp_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-  const simulatedSignature = `sig_rzp_${Date.now()}`;
-
-  // Complete after brief simulated gateway confirmation
-  setTimeout(() => {
-    options.onSuccess({
-      paymentId: simulatedPaymentId,
-      orderId,
-      signature: simulatedSignature,
-      memberId,
-    });
-  }, 1200);
+  options.onError("Razorpay payment gateway script could not be loaded. Please check your internet connection.");
 }

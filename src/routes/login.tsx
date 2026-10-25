@@ -16,6 +16,7 @@ import { toast } from "sonner";
 type LoginSearch = {
   redirect?: string | undefined;
   mode?: string | undefined;
+  email?: string | undefined;
 };
 
 export const Route = createFileRoute("/login")({
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/login")({
     return {
       redirect: typeof search["redirect"] === "string" ? (search["redirect"] as string) : undefined,
       mode: typeof search["mode"] === "string" ? (search["mode"] as string) : undefined,
+      email: typeof search["email"] === "string" ? (search["email"] as string) : undefined,
     };
   },
   head: () => ({
@@ -47,7 +49,7 @@ function LoginPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Form State
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(search.email || "");
   const [password, setPassword] = useState("");
 
   const handleGoogleSignIn = async () => {
@@ -272,7 +274,7 @@ function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder={isAdminCandidate ? "Enter admin password (11111111)" : "••••••••"}
+                  placeholder={isAdminCandidate ? "Enter administrator password" : "Enter member password"}
                   className="w-full rounded-xl border border-border/80 bg-card py-3 pl-10 pr-10 text-sm font-medium text-foreground outline-none transition-all placeholder:text-muted-foreground/60 focus:border-burgundy focus:ring-1 focus:ring-burgundy font-mono"
                 />
                 <button

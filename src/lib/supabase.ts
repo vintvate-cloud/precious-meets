@@ -53,6 +53,7 @@ export type DatabaseProfile = {
   city: string;
   phone: string | null;
   role: "user" | "host" | "moderator" | "admin";
+  membership_status?: "quiz_completed" | "paid_pending_credentials" | "active" | "rejected" | "suspended";
   identity_verified: boolean;
   identity_status: "unverified" | "pending" | "verified" | "failed" | "expired" | "manual_review";
   onboarding_completed: boolean;

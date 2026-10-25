@@ -22,14 +22,14 @@ export class RazorpayService {
     return (
       (typeof process !== "undefined" && process.env?.RAZORPAY_KEY_ID) ||
       (import.meta as any).env?.VITE_RAZORPAY_KEY_ID ||
-      "rzp_test_placeholder"
+      "rzp_test_Ts3sw4uyv2qQqu"
     );
   }
 
   private static getKeySecret(): string {
     return (
       (typeof process !== "undefined" && process.env?.RAZORPAY_KEY_SECRET) ||
-      "placeholder_secret"
+      "4wGy4NGQc59EcAabKc6Ech6q"
     );
   }
 

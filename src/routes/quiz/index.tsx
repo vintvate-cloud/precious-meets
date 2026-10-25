@@ -178,33 +178,7 @@ export function QuizPage() {
     };
     localStorage.setItem(LOCAL_STORAGE_CONTACT_KEY, JSON.stringify(contactData));
 
-    const userSession = {
-      id: `u_${Date.now()}`,
-      email: contactData.email,
-      user_metadata: {
-        full_name: contactData.fullName,
-        name: contactData.fullName.split(" ")[0] || "Guest",
-      },
-    };
-    const profileSession = {
-      id: userSession.id,
-      email: contactData.email,
-      full_name: contactData.fullName,
-      display_name: contactData.fullName.split(" ")[0] || "Guest",
-      city: "Delhi NCR",
-      phone: contactData.phone,
-      identity_verified: true,
-      identity_status: "verified",
-      onboarding_completed: true,
-      quiz_completed: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-    localStorage.setItem(
-      "precious_meets_mock_user",
-      JSON.stringify({ user: userSession, profile: profileSession })
-    );
-
+    // Store real applicant contact and calculated social compatibility profile
     const profileResult = calculateSocialProfile(answers);
     profileResult.dimensions.preferredCity = "Delhi NCR";
     localStorage.setItem("precious_meets_latest_profile", JSON.stringify(profileResult));

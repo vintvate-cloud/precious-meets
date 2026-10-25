@@ -34,6 +34,11 @@ export function UsersArchiveSection() {
 
   useEffect(() => {
     setApplications(ApplicationsService.getApplications());
+    ApplicationsService.fetchApplicationsFromDb().then((realApps) => {
+      if (realApps && realApps.length > 0) {
+        setApplications(realApps);
+      }
+    });
   }, []);
 
   const handleOpenDossier = (app: MemberApplication) => {

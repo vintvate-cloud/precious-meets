@@ -1,272 +1,288 @@
-import { useEffect, useRef } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Sparkles } from "lucide-react";
 
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
-
-interface FloatingGreeting {
+interface GreetingItem {
   id: string;
-  word: string;
-  side: "left" | "right";
-  desktop: { top: string; offset: string; rotate: number; size: string };
-  mobile: { top: string; offset: string; rotate: number; size: string };
-  tone: "burgundy" | "ink" | "forest" | "ochre";
+  native: string;
+  roman: string;
+  language: string;
+  region: string;
+  meaning: string;
+  fontFamily: string;
+  accentColor: string;
+  bgGlow: string;
+  textColor: string;
 }
 
-// Ordered in visual pairs from top to bottom so they spawn sequentially as you scroll
-const floatingGreetings: FloatingGreeting[] = [
-  // Pair 1: Top
+const GREETINGS: GreetingItem[] = [
   {
-    id: "hi",
-    word: "Hi",
-    side: "left",
-    desktop: { top: "14%", offset: "8%", rotate: -3, size: "text-5xl lg:text-6xl" },
-    mobile: { top: "12%", offset: "5%", rotate: -3, size: "text-3xl" },
-    tone: "ochre",
+    id: "punjabi",
+    native: "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ",
+    roman: "Sat Sri Akal",
+    language: "Punjabi",
+    region: "Punjab",
+    meaning: "Truth is the Timeless Being",
+    fontFamily: "'Noto Serif Gurmukhi', serif",
+    accentColor: "#B8860B", // Warm Ochre
+    bgGlow: "rgba(184, 134, 11, 0.16)",
+    textColor: "text-[#B8860B]",
   },
   {
-    id: "namaste",
-    word: "Namaste",
-    side: "right",
-    desktop: { top: "14%", offset: "8%", rotate: 2, size: "text-5xl lg:text-7xl" },
-    mobile: { top: "12%", offset: "5%", rotate: 2, size: "text-3xl" },
-    tone: "burgundy",
-  },
-
-  // Pair 2: Upper Mid
-  {
-    id: "adaab",
-    word: "Adaab",
-    side: "left",
-    desktop: { top: "32%", offset: "6%", rotate: 3, size: "text-5xl lg:text-7xl" },
-    mobile: { top: "29%", offset: "5%", rotate: 3, size: "text-3xl" },
-    tone: "forest",
+    id: "hindi",
+    native: "नमस्ते",
+    roman: "Namaste",
+    language: "Hindi",
+    region: "Northern India",
+    meaning: "The divine in me bows to the divine in you",
+    fontFamily: "'Rozha One', 'Noto Serif Devanagari', serif",
+    accentColor: "#691C35", // Deep Burgundy
+    bgGlow: "rgba(105, 28, 53, 0.16)",
+    textColor: "text-[#691C35]",
   },
   {
-    id: "hello",
-    word: "Hello",
-    side: "right",
-    desktop: { top: "32%", offset: "8%", rotate: -2, size: "text-5xl lg:text-6xl" },
-    mobile: { top: "29%", offset: "5%", rotate: -2, size: "text-3xl" },
-    tone: "ink",
-  },
-
-  // Pair 3: Mid
-  {
-    id: "sat-sri-akal",
-    word: "Sat Sri Akal",
-    side: "left",
-    desktop: { top: "50%", offset: "6%", rotate: -2, size: "text-3xl lg:text-5xl" },
-    mobile: { top: "47%", offset: "5%", rotate: -2, size: "text-2xl" },
-    tone: "burgundy",
+    id: "urdu",
+    native: "آداب",
+    roman: "Adaab",
+    language: "Urdu",
+    region: "Delhi & Awadh",
+    meaning: "Respect and grace upon you",
+    fontFamily: "'Noto Nastaliq Urdu', 'Amiri', serif",
+    accentColor: "#5F7045", // Deep Olive/Forest
+    bgGlow: "rgba(95, 112, 69, 0.18)",
+    textColor: "text-[#5F7045]",
   },
   {
-    id: "khamma-ghani",
-    word: "Khamma Ghani",
-    side: "right",
-    desktop: { top: "50%", offset: "6%", rotate: 3, size: "text-3xl lg:text-5xl" },
-    mobile: { top: "47%", offset: "5%", rotate: 2, size: "text-2xl" },
-    tone: "ochre",
-  },
-
-  // Pair 4: Lower Mid
-  {
-    id: "vanakkam",
-    word: "Vanakkam",
-    side: "left",
-    desktop: { top: "68%", offset: "8%", rotate: 2, size: "text-4xl lg:text-5xl" },
-    mobile: { top: "65%", offset: "5%", rotate: 2, size: "text-2xl" },
-    tone: "forest",
+    id: "tamil",
+    native: "வணக்கம்",
+    roman: "Vanakkam",
+    language: "Tamil",
+    region: "Tamil Nadu",
+    meaning: "Humble salutations of warmth",
+    fontFamily: "'Noto Serif Tamil', serif",
+    accentColor: "#C2410C", // Terracotta
+    bgGlow: "rgba(194, 65, 12, 0.16)",
+    textColor: "text-[#C2410C]",
   },
   {
-    id: "bonjour",
-    word: "Bonjour",
-    side: "right",
-    desktop: { top: "68%", offset: "8%", rotate: -3, size: "text-4xl lg:text-5xl" },
-    mobile: { top: "65%", offset: "5%", rotate: -3, size: "text-2xl" },
-    tone: "burgundy",
-  },
-
-  // Pair 5: Bottom
-  {
-    id: "nomoshkar",
-    word: "Nomoshkar",
-    side: "left",
-    desktop: { top: "84%", offset: "8%", rotate: -2, size: "text-3xl lg:text-4xl" },
-    mobile: { top: "82%", offset: "5%", rotate: -2, size: "text-xl" },
-    tone: "ink",
+    id: "bengali",
+    native: "নমস্কার",
+    roman: "Nomoshkar",
+    language: "Bengali",
+    region: "Bengal",
+    meaning: "Reverence, goodwill, and peace",
+    fontFamily: "'Noto Serif Bengali', serif",
+    accentColor: "#1E293B", // Midnight Slate
+    bgGlow: "rgba(30, 41, 59, 0.15)",
+    textColor: "text-[#1E293B]",
   },
   {
-    id: "ciao",
-    word: "Ciao",
-    side: "right",
-    desktop: { top: "84%", offset: "8%", rotate: 2, size: "text-3xl lg:text-5xl" },
-    mobile: { top: "82%", offset: "5%", rotate: 2, size: "text-2xl" },
-    tone: "ochre",
+    id: "rajasthani",
+    native: "खम्मा घणी",
+    roman: "Khamma Ghani",
+    language: "Rajasthani",
+    region: "Marwar & Mewar",
+    meaning: "May you be blessed with abundant grace",
+    fontFamily: "'Rozha One', 'Noto Serif Devanagari', serif",
+    accentColor: "#D97706", // Amber
+    bgGlow: "rgba(217, 119, 6, 0.18)",
+    textColor: "text-[#D97706]",
+  },
+  {
+    id: "telugu",
+    native: "నమస్కారం",
+    roman: "Namaskaram",
+    language: "Telugu",
+    region: "Andhra & Telangana",
+    meaning: "Offerings of heartful reverence",
+    fontFamily: "'Noto Serif Telugu', 'Mandali', sans-serif",
+    accentColor: "#4D6038", // Forest Sage
+    bgGlow: "rgba(77, 96, 56, 0.18)",
+    textColor: "text-[#4D6038]",
+  },
+  {
+    id: "french",
+    native: "Bonjour",
+    roman: "Bonjour",
+    language: "French",
+    region: "Paris & Pondicherry",
+    meaning: "A good and gracious day to you",
+    fontFamily: "'Instrument Serif', serif",
+    accentColor: "#691C35",
+    bgGlow: "rgba(105, 28, 53, 0.15)",
+    textColor: "text-[#691C35]",
+  },
+  {
+    id: "italian",
+    native: "Ciao",
+    roman: "Ciao",
+    language: "Italian",
+    region: "Venice & Rome",
+    meaning: "At your warm companionship",
+    fontFamily: "'Instrument Serif', serif",
+    accentColor: "#5F7045",
+    bgGlow: "rgba(95, 112, 69, 0.15)",
+    textColor: "text-[#5F7045]",
+  },
+  {
+    id: "english",
+    native: "Welcome",
+    roman: "Welcome",
+    language: "English",
+    region: "The Global Table",
+    meaning: "Make yourself at home",
+    fontFamily: "'Instrument Serif', serif",
+    accentColor: "#171514",
+    bgGlow: "rgba(23, 21, 20, 0.12)",
+    textColor: "text-[#171514]",
   },
 ];
 
-const toneClasses: Record<string, { main: string }> = {
-  burgundy: { main: "text-[#691C35]" },
-  forest: { main: "text-[#5F7045]" },
-  ochre: { main: "text-[#B8860B]" },
-  ink: { main: "text-[#171514]" },
-};
-
 export function DoorGreetings() {
-  const sectionRef = useRef<HTMLElement>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
+  const activeGreeting = GREETINGS[currentIndex];
+
+  // Auto-advance timer (cycles automatically and continuously every 3 seconds)
   useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % GREETINGS.length);
+    }, 3000);
 
-    const words = section.querySelectorAll<HTMLElement>("[data-random-word]");
-    const centerInfo = section.querySelector<HTMLElement>("[data-center-info]");
-
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) {
-      gsap.set(words, { opacity: 1, scale: 1, y: 0, filter: "none" });
-      if (centerInfo) gsap.set(centerInfo, { opacity: 1, y: 0 });
-      return;
-    }
-
-    // Initial state: hidden, scaled down with subtle blur
-    gsap.set(words, {
-      opacity: 0,
-      scale: 0.65,
-      y: 35,
-      filter: "blur(6px)",
-    });
-
-    if (centerInfo) {
-      gsap.set(centerInfo, { opacity: 0, scale: 0.96, y: 20 });
-    }
-
-    // Scroll-scrub timeline: spawns as you scroll down, vanishes as you scroll back!
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: section,
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 0.7,
-      },
-    });
-
-    // 1. Center title appears first as you scroll into the section
-    if (centerInfo) {
-      tl.to(centerInfo, {
-        opacity: 1,
-        scale: 1,
-        y: 0,
-        duration: 0.35,
-        ease: "power2.out",
-      });
-    }
-
-    // 2. Greetings spawn sequentially down the left and right flanks
-    tl.to(
-      words,
-      {
-        opacity: 1,
-        scale: 1,
-        y: 0,
-        filter: "blur(0px)",
-        stagger: 0.1,
-        duration: 0.9,
-        ease: "power2.out",
-      },
-      "-=0.1",
-    );
-
-    // Subtle breathing hold at full reveal
-    tl.to({}, { duration: 0.25 });
-
-    const onResize = () => {
-      ScrollTrigger.refresh();
-    };
-    window.addEventListener("resize", onResize);
-
-    return () => {
-      tl.kill();
-      window.removeEventListener("resize", onResize);
-    };
+    return () => clearInterval(timer);
   }, []);
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative h-[230vh] bg-[#FAF7F2] text-ink select-none"
-    >
-      {/* Sticky Fullscreen Stage */}
-      <div className="sticky top-0 flex h-screen w-full flex-col justify-between overflow-hidden py-10 sm:py-14 px-4 sm:px-6 lg:px-8">
-        {/* Ambient Lighting Atmosphere */}
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="w-[75vw] h-[75vw] max-w-[850px] max-h-[850px] rounded-full bg-[#C6A568]/[0.08] blur-[150px]" />
-          <div className="w-[50vw] h-[50vw] max-w-[550px] max-h-[550px] rounded-full bg-[#691C35]/[0.05] blur-[140px]" />
-        </div>
+    <section className="relative min-h-[92vh] sm:min-h-screen w-full bg-[#FAF7F2] text-[#171514] flex flex-col justify-between py-16 sm:py-24 px-4 sm:px-6 lg:px-8 overflow-hidden select-none">
+      {/* ========================================================================= */}
+      {/* 1. DYNAMIC COLOR LIGHTING ATMOSPHERE                                      */}
+      {/* ========================================================================= */}
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+        {/* Soft, Breathing Color Aura matching active greeting */}
+        <motion.div
+          animate={{
+            backgroundColor: activeGreeting.bgGlow,
+            scale: [1, 1.08, 1],
+          }}
+          transition={{ duration: 3.2, ease: "easeInOut" }}
+          className="w-[75vw] h-[75vw] max-w-[700px] max-h-[700px] rounded-full blur-[140px]"
+        />
 
-        {/* Subtle Classical Arch Line in Background */}
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-30">
-          <svg viewBox="0 0 1000 800" className="w-full h-full stroke-ink/[0.07] fill-none">
-            <circle cx="500" cy="400" r="320" strokeDasharray="3 6" strokeWidth="1" />
-            <circle cx="500" cy="400" r="190" strokeWidth="0.8" />
-          </svg>
-        </div>
+        {/* Ambient Gold Core Glow */}
+        <div className="absolute w-[45vw] h-[45vw] max-w-[480px] max-h-[480px] rounded-full bg-[#C6A568]/[0.08] blur-[120px]" />
+      </div>
 
-        {/* Top Spacer */}
-        <div className="relative z-10 w-full" />
+      {/* Classical Geometry Arch Lines in Background */}
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-30">
+        <svg viewBox="0 0 1000 800" className="w-full h-full stroke-[#171514]/[0.07] fill-none">
+          <circle cx="500" cy="400" r="320" strokeDasharray="3 6" strokeWidth="1" />
+          <circle cx="500" cy="400" r="210" strokeWidth="0.8" />
+          <circle cx="500" cy="400" r="90" strokeDasharray="2 4" strokeWidth="0.6" />
+        </svg>
+      </div>
 
-        {/* Floating Canvas: Balanced Left & Right Flanks */}
-        <div className="relative z-10 w-full h-[75vh] sm:h-[82vh] max-w-7xl mx-auto px-4">
-          {/* CENTER ANCHOR: Pure Editorial Whisper (Clear of all text) */}
-          <div
-            data-center-info
-            className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none px-6 z-0"
-          >
-            <div className="max-w-md mx-auto flex flex-col items-center">
-              <h3 className="font-display text-3xl sm:text-4xl md:text-5xl text-ink tracking-tight leading-[1.1]">
-                Welcomed in <em className="italic font-serif text-burgundy">every language.</em>
-              </h3>
-            </div>
-          </div>
+      {/* ========================================================================= */}
+      {/* 2. SECTION HEADER (Editorial Whisper)                                      */}
+      {/* ========================================================================= */}
+      <div className="relative z-10 max-w-2xl mx-auto text-center space-y-3">
+        <h2 className="font-display text-3xl sm:text-4xl md:text-5xl text-[#171514] tracking-tight leading-tight">
+          Welcomed in <span className="italic font-serif text-[#691C35]">every language.</span>
+        </h2>
 
-          {/* SCATTERED GREETINGS TEXT (Balanced Left and Right flanking columns) */}
-          {floatingGreetings.map((item) => {
-            const t = toneClasses[item.tone];
-            const isLeft = item.side === "left";
+        <p className="font-sans text-xs sm:text-sm text-[#171514]/70 max-w-md mx-auto leading-relaxed">
+          No matter how you say hello, there is a thoughtful seat waiting for you at our table.
+        </p>
+      </div>
 
-            return (
-              <div
-                key={item.id}
-                data-random-word
-                style={
-                  {
-                    "--top-d": item.desktop.top,
-                    "--top-m": item.mobile.top,
-                    "--offset-d": item.desktop.offset,
-                    "--offset-m": item.mobile.offset,
-                    "--rot": `${item.desktop.rotate}deg`,
-                    top: "var(--top-m)",
-                    ...(isLeft
-                      ? { left: "var(--offset-m)" }
-                      : { right: "var(--offset-m)" }),
-                    transform: "rotate(var(--rot))",
-                  } as React.CSSProperties
-                }
-                className={`absolute z-20 pointer-events-none select-none sm:[top:var(--top-d)] ${
-                  isLeft
-                    ? "sm:[left:var(--offset-d)] text-left"
-                    : "sm:[right:var(--offset-d)] text-right"
-                }`}
+      {/* ========================================================================= */}
+      {/* 3. CENTERSTAGE GREETING PODIUM (Mesmerizing Changing Animation)            */}
+      {/* ========================================================================= */}
+      <div className="relative z-10 w-full max-w-4xl mx-auto my-auto py-8 sm:py-12 flex flex-col items-center justify-center">
+
+        {/* Dynamic Animated Greeting Container */}
+        <div className="relative w-full min-h-[260px] sm:min-h-[300px] md:min-h-[340px] flex flex-col items-center justify-center text-center px-4">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeGreeting.id}
+              initial={{ opacity: 0, y: 32, filter: "blur(12px)", scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)", scale: 1 }}
+              exit={{ opacity: 0, y: -28, filter: "blur(12px)", scale: 1.04 }}
+              transition={{
+                duration: 0.75,
+                ease: [0.16, 1, 0.3, 1], // Smooth Apple-style cubic bezier
+              }}
+              className="flex flex-col items-center justify-center w-full"
+            >
+              {/* Language & Cultural Region Pill */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15, duration: 0.5 }}
+                className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 bg-white/90 border border-black/8 shadow-xs text-xs font-mono font-medium text-[#171514]/80 mb-4 sm:mb-6"
               >
                 <span
-                  className={`font-display font-normal ${item.desktop.size} ${t.main} tracking-tight drop-shadow-xs whitespace-nowrap`}
-                >
-                  {item.word}
+                  className="size-2 rounded-full animate-ping"
+                  style={{ backgroundColor: activeGreeting.accentColor }}
+                />
+                <span className="font-semibold" style={{ color: activeGreeting.accentColor }}>
+                  {activeGreeting.language}
                 </span>
-              </div>
+                <span className="text-[#171514]/30">·</span>
+                <span className="text-[#171514]/70">{activeGreeting.region}</span>
+              </motion.div>
+
+              {/* 1. THE NATIVE SCRIPT TEXT (Large, Monumental, in Actual Native Script) */}
+              <h1
+                style={{
+                  fontFamily: activeGreeting.fontFamily,
+                  color: activeGreeting.accentColor,
+                }}
+                className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-normal tracking-normal leading-[1.12] drop-shadow-sm select-text transition-colors duration-500 py-1"
+              >
+                {activeGreeting.native}
+              </h1>
+
+              {/* 2. THE PHONETIC ROMANIZATION */}
+              <p className="font-serif italic text-2xl sm:text-3xl md:text-4xl text-[#171514]/85 tracking-wide mt-3 sm:mt-4">
+                "{activeGreeting.roman}"
+              </p>
+
+              {/* 3. PHILOSOPHICAL TRANSLATION & MEANING */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.25, duration: 0.6 }}
+                className="mt-3 sm:mt-4 flex items-center gap-2 text-xs sm:text-sm font-sans text-[#171514]/65 max-w-md mx-auto"
+              >
+                <Sparkles className="size-3.5 text-[#C6A568] shrink-0" />
+                <span className="italic font-normal">{activeGreeting.meaning}</span>
+              </motion.div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 4. LANGUAGE SELECTOR PILLS & PROGRESS INDICATOR                            */}
+      {/* ========================================================================= */}
+      <div className="relative z-10 w-full max-w-3xl mx-auto flex flex-col items-center gap-3">
+        {/* Interactive Clickable Language Tags */}
+        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 px-2">
+          {GREETINGS.map((item, index) => {
+            const isActive = index === currentIndex;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setCurrentIndex(index)}
+                className={`px-3 py-1 rounded-full text-[11px] font-mono transition-all duration-300 cursor-pointer ${
+                  isActive
+                    ? "bg-[#691C35] text-white font-semibold shadow-sm scale-105"
+                    : "bg-white/70 text-[#171514]/60 hover:bg-white hover:text-[#171514] border border-black/5"
+                }`}
+              >
+                {item.language}
+              </button>
             );
           })}
         </div>

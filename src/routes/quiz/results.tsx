@@ -9,7 +9,6 @@ import { ApplicationsService } from "@/lib/applications-service";
 import { VerificationsService } from "@/lib/verifications-service";
 import { openRazorpaySubscriptionCheckout } from "@/lib/razorpay-client";
 import { CryptoService } from "@/lib/crypto-service";
-import { RazorpaySubscriptionModal, type RazorpayPaymentResult } from "@/components/RazorpaySubscriptionModal";
 import {
   Sparkles,
   ArrowRight,
@@ -25,6 +24,7 @@ import {
   Loader2,
   Mail,
   Compass,
+  Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -57,9 +57,9 @@ export function QuizResultsPage() {
   // Subscription Checkout Form State
   const [name, setName] = useState(authProfile?.display_name || user?.user_metadata?.full_name || "");
   const [email, setEmail] = useState(user?.email || "");
-  const [phone, setPhone] = useState(authProfile?.phone || "+91 ");
+  const [phone, setPhone] = useState(authProfile?.phone || "");
   const [paying, setPaying] = useState(false);
-  const [razorpayModalOpen, setRazorpayModalOpen] = useState(false);
+  const [paidDossier, setPaidDossier] = useState<{ memberId: string; paymentId: string; invoiceNumber: string } | null>(null);
 
   // Success Dialog State
   const [successData, setSuccessData] = useState<{
@@ -69,6 +69,15 @@ export function QuizResultsPage() {
     invoiceNumber: string;
     paymentId: string;
   } | null>(null);
+
+  useEffect(() => {
+    const rawPaid = localStorage.getItem("precious_meets_paid_dossier");
+    if (rawPaid) {
+      try {
+        setPaidDossier(JSON.parse(rawPaid));
+      } catch (e) {}
+    }
+  }, []);
 
   useEffect(() => {
     const raw = localStorage.getItem("precious_meets_latest_profile");
@@ -128,7 +137,7 @@ export function QuizResultsPage() {
     }
   }, [user, authProfile]);
 
-  const handleSubscribe = () => {
+  const handleSubscribe = async () => {
     if (!name.trim()) {
       toast.error("Please enter your full name for your Member Pass.");
       return;
@@ -137,38 +146,48 @@ export function QuizResultsPage() {
       toast.error("Please enter a valid email address for subscription access.");
       return;
     }
-    // Launch interactive Razorpay popup modal
-    setRazorpayModalOpen(true);
+
+    setPaying(true);
+
+    try {
+      // Launch the ACTUAL Razorpay payment gateway checkout modal
+      await openRazorpaySubscriptionCheckout({
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        amountInr: 1999,
+        archetypeTitle: profile?.archetype?.title,
+        onSuccess: (result) => {
+          handleRazorpaySuccess({
+            paymentId: result.paymentId,
+            orderId: result.orderId,
+            signature: result.signature,
+          });
+        },
+        onError: (err) => {
+          setPaying(false);
+          toast.info(err || "Payment cancelled. You can retry whenever you are ready.");
+        },
+      });
+    } catch (err: any) {
+      setPaying(false);
+      toast.error(err.message || "Failed to initialize Razorpay gateway.");
+    }
   };
 
-  const handleRazorpaySuccess = async (result: RazorpayPaymentResult) => {
+  const handleRazorpaySuccess = async (result: {
+    paymentId: string;
+    orderId: string;
+    signature: string;
+  }) => {
     setPaying(true);
 
     try {
       const memberId = `PM-FOUNDER-${Math.floor(1000 + Math.random() * 9000)}`;
       const invoiceNumber = CryptoService.generateInvoiceNumber();
 
-      // 1. Activate membership in app state & localStorage
-      activateSubscription({
-        name: name.trim(),
-        email: email.trim(),
-        paymentId: result.paymentId,
-        memberId,
-      });
-
-      // 2. Dispatch a verification request to the Admin Panel's verification queue!
-      VerificationsService.addRequest({
-        userName: name.trim(),
-        email: email.trim(),
-        phone: phone.trim() || "+91 98765 43210",
-        city: "Delhi NCR",
-        method: "digilocker_consent_offline",
-        notes: `Annual Founding Member Pass (₹1,999 Razorpay Payment: ${result.paymentId}). Archetype: ${profile?.archetype?.title || "The Curious Flâneur"}`,
-        amountInr: 1999,
-        memberId,
-      });
-
-      // 3. Record full member application dossier for executive review in ApplicationsService
+      // 1. Record member application dossier for curation review in ApplicationsService & Supabase
+      // Note: User is NOT active yet. Status is 'paid_pending_credentials'
       ApplicationsService.createOrUpdateFromCheckout({
         userId: user?.id,
         name: name.trim(),
@@ -182,12 +201,25 @@ export function QuizResultsPage() {
         boundaries: profile?.dimensions?.boundaries,
         sharedInterests: profile?.dimensions?.sharedInterests,
         paymentId: result.paymentId,
+        orderId: result.orderId,
         amountInr: 1999,
         memberId,
         invoiceNumber,
       });
 
-      // 4. Dispatch automated subscription confirmation email with Razorpay invoice & credentials notice
+      // 2. Dispatch a verification request to the Admin Panel's verification queue
+      VerificationsService.addRequest({
+        userName: name.trim(),
+        email: email.trim(),
+        phone: phone.trim() || "+91 98765 43210",
+        city: "Delhi NCR",
+        method: "digilocker_consent_offline",
+        notes: `Annual Founding Member Pass (₹1,999 Razorpay Payment: ${result.paymentId}). Archetype: ${profile?.archetype?.title || "The Curious Flâneur"}`,
+        amountInr: 1999,
+        memberId,
+      });
+
+      // 3. Dispatch automated receipt & invoice email via Resend
       try {
         await EmailService.send({
           to: email.trim(),
@@ -200,16 +232,24 @@ export function QuizResultsPage() {
             plan: "Annual Founding Member Pass",
             memberId,
             archetype: profile?.archetype?.title || "Curious Flâneur",
-            dashboardUrl: `${window.location.origin}/dashboard`,
+            dashboardUrl: `${window.location.origin}/login`,
             invoiceNumber,
             paymentId: result.paymentId,
             credentialsEtaNotice:
-              "We are reviewing your conversational vibe profile and will email your member sign-in credentials to this email address in a short while.",
+              "We will email your member sign in credentials in a while. Once your credentials have been sent by the admin, you will be able to log in.",
           },
         });
       } catch (emailErr) {
         console.warn("Email service notice:", emailErr);
       }
+
+      const dossierData = {
+        memberId,
+        paymentId: result.paymentId,
+        invoiceNumber,
+      };
+      setPaidDossier(dossierData);
+      localStorage.setItem("precious_meets_paid_dossier", JSON.stringify(dossierData));
 
       setPaying(false);
       setSuccessData({
@@ -219,7 +259,7 @@ export function QuizResultsPage() {
         invoiceNumber,
         paymentId: result.paymentId,
       });
-      toast.success("Payment Successful! Razorpay invoice and subscription confirmation dispatched.");
+      toast.success("Payment Received! Razorpay invoice generated. Awaiting admin credential dispatch.");
     } catch (e: any) {
       setPaying(false);
       toast.error(e.message || "An unexpected error occurred during confirmation.");
@@ -499,13 +539,45 @@ export function QuizResultsPage() {
                       </div>
                       <h3 className="font-display mt-4 text-2xl text-ivory">Active Member</h3>
                       <p className="mt-1 text-xs text-ivory/80">
-                        You hold an active Founding Member Pass (ID: {subscription?.memberId || "PM-FOUNDER"}).
+                        You hold an active Founding Member Pass. Your credentials are fully activated.
                       </p>
                       <Button
                         onClick={() => navigate({ to: "/dashboard" })}
                         className="mt-6 w-full rounded-full bg-[#C6A568] font-bold text-[#171514] hover:bg-[#C6A568]/90"
                       >
                         Enter Member Dashboard &rarr;
+                      </Button>
+                    </div>
+                  ) : paidDossier ? (
+                    <div className="text-center py-6">
+                      <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-[#C6A568]/20 text-[#C6A568]">
+                        <Clock className="size-8 animate-pulse" />
+                      </div>
+                      <h3 className="font-display mt-4 text-2xl text-ivory">Payment Confirmed</h3>
+                      <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-mono">
+                        <span className="size-1.5 rounded-full bg-amber-400 animate-ping" />
+                        <span>Paid · Pending Credential Dispatch</span>
+                      </div>
+                      <p className="mt-3 text-xs leading-relaxed text-ivory/80 max-w-sm mx-auto">
+                        Your payment of ₹1,999 has been authorized via Razorpay (Invoice: {paidDossier.invoiceNumber}). Our executive curation committee is reviewing your cohort seating.
+                      </p>
+                      <div className="mt-4 p-4 rounded-xl bg-ivory/10 border border-ivory/15 text-left text-xs text-ivory/90 space-y-2">
+                        <p className="font-semibold text-[#C6A568]">What Happens Next:</p>
+                        <p className="leading-relaxed text-[11px]">
+                          1. We will email your member sign-in credentials to <strong>{email}</strong> in a while.
+                        </p>
+                        <p className="leading-relaxed text-[11px]">
+                          2. Your password will be auto-generated and follows strong encryption standards.
+                        </p>
+                        <p className="leading-relaxed text-[11px]">
+                          3. Once credentials arrive, sign in to unlock your matched secret tables.
+                        </p>
+                      </div>
+                      <Button
+                        onClick={() => navigate({ to: "/login" })}
+                        className="mt-6 w-full rounded-full bg-[#C6A568] font-bold text-[#171514] hover:bg-[#C6A568]/90 cursor-pointer"
+                      >
+                        Go to Member Sign In &rarr;
                       </Button>
                     </div>
                   ) : (
@@ -604,29 +676,22 @@ export function QuizResultsPage() {
         </section>
       </main>
 
-      {/* Razorpay Interactive Checkout Popup Modal */}
-      <RazorpaySubscriptionModal
-        open={razorpayModalOpen}
-        onOpenChange={setRazorpayModalOpen}
-        userName={name}
-        userEmail={email}
-        userPhone={phone}
-        amountInr={1999}
-        planTitle="Annual Founding Member Pass"
-        onSuccess={handleRazorpaySuccess}
-        onError={(err) => toast.error(err)}
-      />
-
       {/* Subscription Success & Email Dispatched Modal */}
       {successData && (
-        <Dialog open={true} onOpenChange={() => navigate({ to: "/dashboard" })}>
+        <Dialog
+          open={true}
+          onOpenChange={() => {
+            setSuccessData(null);
+            navigate({ to: "/login" });
+          }}
+        >
           <DialogContent className="max-w-md bg-card text-foreground">
             <DialogHeader className="text-center">
               <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-forest/20 text-forest mb-2">
                 <CheckCircle2 className="size-10" />
               </div>
               <DialogTitle className="font-display text-3xl">
-                Payment Successful!
+                Payment Authorized!
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
                 Your ₹1,999 Founding Membership payment has been confirmed by Razorpay.
@@ -665,7 +730,7 @@ export function QuizResultsPage() {
                 <div className="text-xs">
                   <p className="font-semibold text-burgundy">Member Login Credentials Dispatch</p>
                   <p className="text-muted-foreground mt-0.5 leading-relaxed">
-                    We will email your member sign in credentials to <strong>{successData.email}</strong> in a while. Our curation team is verifying your profile and table match.
+                    We will email your member sign-in credentials to <strong>{successData.email}</strong> in a while. Once your credentials have been sent by the admin, you will be marked as an active user and can log in.
                   </p>
                 </div>
               </div>
@@ -682,10 +747,13 @@ export function QuizResultsPage() {
               </div>
 
               <Button
-                onClick={() => navigate({ to: "/dashboard" })}
+                onClick={() => {
+                  setSuccessData(null);
+                  navigate({ to: "/login" });
+                }}
                 className="w-full rounded-full bg-burgundy py-5 font-semibold text-ivory hover:bg-burgundy/90 cursor-pointer"
               >
-                Enter Member Dashboard &rarr;
+                Go to Sign In &rarr;
               </Button>
             </div>
           </DialogContent>
