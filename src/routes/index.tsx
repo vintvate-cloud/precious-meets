@@ -1077,6 +1077,7 @@ function Index() {
     const lenis = reduce ? null : new Lenis({ lerp: 0.1 });
     const raf = (t: number) => lenis?.raf(t * 1000);
     if (lenis) {
+      (window as unknown as { __lenis?: Lenis | null }).__lenis = lenis;
       lenis.on("scroll", ScrollTrigger.update);
       gsap.ticker.add(raf);
       gsap.ticker.lagSmoothing(0);
@@ -1336,6 +1337,7 @@ function Index() {
       ctx.revert();
       if (lenis) gsap.ticker.remove(raf);
       lenis?.destroy();
+      (window as unknown as { __lenis?: Lenis | null }).__lenis = null;
     };
   }, []);
 
