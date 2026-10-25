@@ -3,6 +3,7 @@ import {
   MemberApplication,
   ApplicationsService,
 } from "@/lib/applications-service";
+import { VerificationsService } from "@/lib/verifications-service";
 import { UserDossierModal } from "./UserDossierModal";
 import {
   Search,
@@ -19,8 +20,10 @@ import {
   Inbox,
   AlertCircle,
   KeyRound,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export function UsersArchiveSection() {
   const [applications, setApplications] = useState<MemberApplication[]>([]);
@@ -52,6 +55,19 @@ export function UsersArchiveSection() {
     );
     if (selectedApplication?.id === updated.id) {
       setSelectedApplication(updated);
+    }
+  };
+
+  const handleDeleteCard = async (app: MemberApplication) => {
+    if (
+      window.confirm(
+        `Are you sure you want to permanently delete the application for "${app.applicantName}" (${app.applicantEmail})?`
+      )
+    ) {
+      const remaining = await ApplicationsService.deleteApplication(app.id);
+      VerificationsService.deleteRecord(app.id, app.applicantEmail);
+      setApplications(remaining);
+      toast.success(`Application for "${app.applicantName}" deleted.`);
     }
   };
 
@@ -341,9 +357,22 @@ export function UsersArchiveSection() {
                   <span className="text-[11px] text-muted-foreground">
                     Click to review dossier & answers
                   </span>
-                  <span className="font-semibold text-burgundy flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-                    Open File →
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteCard(app);
+                      }}
+                      className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+                      title="Permanently delete application dossier"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                    <span className="font-semibold text-burgundy flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                      Open File →
+                    </span>
+                  </div>
                 </div>
               </div>
             );

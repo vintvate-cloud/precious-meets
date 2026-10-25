@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
 import {
   ShieldCheck,
+
   ShieldAlert,
   Sparkles,
   BookOpen,
@@ -90,13 +91,16 @@ export function Navbar() {
               <span>Delhi NCR</span>
             </div>
 
-            {/* Solid Pill CTA Button -> routes to /quiz */}
-            <Link
-              to="/quiz"
-              className="rounded-full bg-white text-[#171514] border border-black/10 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold tracking-tight shadow-xs transition-all duration-300 hover:bg-[#691C35] hover:text-white hover:scale-105 active:scale-95"
-            >
-              Save a seat
-            </Link>
+            {/* Solid Pill CTA Button -> routes to /quiz (only shown when not logged in) */}
+            {!isMemberAuthenticated && (
+              <Link
+                to="/quiz"
+                className="rounded-full bg-white text-[#171514] border border-black/10 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold tracking-tight shadow-xs transition-all duration-300 hover:bg-[#691C35] hover:text-white hover:scale-105 active:scale-95"
+              >
+                Save a seat
+              </Link>
+            )}
+
 
             {/* Compact Dropdown Menu Toggle Button - ALWAYS visible on all screen sizes */}
             <button

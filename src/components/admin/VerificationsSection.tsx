@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from "react";
 import { EventsService, AdminAttendee } from "@/lib/events-service";
 import { ApplicationsService, MemberApplication } from "@/lib/applications-service";
+import { VerificationsService } from "@/lib/verifications-service";
+import { getSampleAadhaarSvg } from "@/lib/aadhaar-utils";
 import {
   ShieldCheck,
   CheckCircle2,
@@ -25,6 +27,7 @@ import {
   AlertCircle,
   FileText,
   Eye,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -46,6 +49,8 @@ export interface VerificationQueueItem {
   status: "pending" | "manual_review" | "verified" | "failed";
   requestedAt: string;
   notes?: string;
+  aadhaarFileUrl?: string;
+  aadhaarFileName?: string;
 }
 
 export interface UnifiedVerifiedUser {
@@ -64,19 +69,44 @@ export interface UnifiedVerifiedUser {
   source: "attendee_directory" | "member_application" | "verification_queue";
   gender?: "female" | "male" | "non-binary";
   dietary?: string;
+  aadhaarFileUrl?: string;
+  aadhaarFileName?: string;
 }
 
 interface VerificationsSectionProps {
   queue: VerificationQueueItem[];
   onUpdateQueueStatus: (id: string, status: "verified" | "failed") => void;
+  onDeleteQueueItem?: (id: string, email?: string) => void;
 }
 
 export function VerificationsSection({
   queue,
   onUpdateQueueStatus,
+  onDeleteQueueItem,
 }: VerificationsSectionProps) {
   // Main view toggle: "verified_users" (All verified users in the site) vs "pending_queue"
-  const [viewMode, setViewMode] = useState<"verified_users" | "pending_queue">("verified_users");
+  // Default to pending_queue if there are pending member accounts awaiting verification!
+  const [viewMode, setViewMode] = useState<"verified_users" | "pending_queue">(() => {
+    return queue.some((q) => q.status === "pending" || q.status === "manual_review")
+      ? "pending_queue"
+      : "verified_users";
+  });
+
+  const handleDelete = (id: string, email?: string, name?: string) => {
+    const displayName = name || email || "this applicant";
+    if (
+      window.confirm(
+        `Are you sure you want to permanently delete the application for "${displayName}"?\n\nThis will remove their verification request and member application completely.`
+      )
+    ) {
+      if (onDeleteQueueItem) {
+        onDeleteQueueItem(id, email);
+      } else {
+        VerificationsService.deleteRecord(id, email);
+        toast.success(`Application for "${displayName}" deleted.`);
+      }
+    }
+  };
   
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState("");
@@ -84,6 +114,17 @@ export function VerificationsSection({
   const [selectedUserForCert, setSelectedUserForCert] = useState<UnifiedVerifiedUser | null>(null);
   const [certModalOpen, setCertModalOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  // Dedicated Aadhaar Document Viewer Modal state
+  const [viewingAadhaar, setViewingAadhaar] = useState<{
+    name: string;
+    email: string;
+    phone?: string;
+    fileUrl: string;
+    fileName?: string;
+    status?: string;
+    recordId?: string;
+  } | null>(null);
 
   // 1. Gather all verified users present in the site
   const verifiedUsers = useMemo(() => {
@@ -135,7 +176,7 @@ export function VerificationsSection({
           memberTier: app.status === "approved" ? "Founding Member" : "Annual Pass",
           memberId: app.applicationReference.replace("PM-FILE-", "PM-MEMBER-"),
           archetypeTitle: app.archetypeTitle || "Circle Member",
-          verificationMethod: "DigiLocker Consent Offline",
+          verificationMethod: app.aadhaarFileUrl ? "Uploaded Aadhaar Card" : "DigiLocker Consent Offline",
           verificationReference: app.identityReference || "DL-AADHAAR-OK-7721",
           verifiedAt: app.identityVerifiedAt
             ? new Date(app.identityVerifiedAt).toLocaleDateString("en-IN", {
@@ -147,6 +188,8 @@ export function VerificationsSection({
           source: "member_application",
           gender: "non-binary",
           dietary: app.dietaryPreference,
+          aadhaarFileUrl: app.aadhaarFileUrl,
+          aadhaarFileName: app.aadhaarFileName,
         });
       }
     });
@@ -167,10 +210,12 @@ export function VerificationsSection({
           memberTier: "Annual Pass",
           memberId: `PM-VERIFIED-${q.id.replace("ver_", "").padStart(4, "0")}`,
           archetypeTitle: "Curated Dinner Guest",
-          verificationMethod: "DigiLocker Offline Consent",
+          verificationMethod: q.aadhaarFileUrl ? "Uploaded Aadhaar Card" : "DigiLocker Offline Consent",
           verificationReference: `DL-AADHAAR-OK-${q.id.toUpperCase().replace("_", "")}`,
           verifiedAt: "Recently Verified",
           source: "verification_queue",
+          aadhaarFileUrl: q.aadhaarFileUrl,
+          aadhaarFileName: q.aadhaarFileName,
         });
       }
     });
@@ -198,9 +243,18 @@ export function VerificationsSection({
   }, [verifiedUsers, tierFilter, searchQuery]);
 
   // Pending queue items count
-  const pendingQueueCount = queue.filter(
-    (q) => q.status === "pending" || q.status === "manual_review"
-  ).length;
+  const pendingQueueCount = useMemo(() => {
+    return queue.filter(
+      (q) => q.status === "pending" || q.status === "manual_review"
+    ).length;
+  }, [queue]);
+
+  // Auto-switch to pending queue if pending items exist and verified roster is empty
+  React.useEffect(() => {
+    if (pendingQueueCount > 0 && verifiedUsers.length === 0) {
+      setViewMode("pending_queue");
+    }
+  }, [pendingQueueCount, verifiedUsers.length]);
 
   const handleCopy = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -273,17 +327,17 @@ export function VerificationsSection({
           >
             <Clock className="size-3.5" />
             <span>Pending Queue</span>
-            {pendingQueueCount > 0 && (
-              <span
-                className={`rounded-full px-2 py-0.5 text-[10px] font-bold font-mono ${
-                  viewMode === "pending_queue"
-                    ? "bg-ivory/20 text-ivory"
-                    : "bg-ochre/20 text-ochre animate-pulse"
-                }`}
-              >
-                {pendingQueueCount}
-              </span>
-            )}
+            <span
+              className={`rounded-full px-2 py-0.5 text-[10px] font-bold font-mono ${
+                viewMode === "pending_queue"
+                  ? "bg-ivory/20 text-ivory"
+                  : pendingQueueCount > 0
+                  ? "bg-ochre text-foreground font-black animate-pulse"
+                  : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {pendingQueueCount}
+            </span>
           </button>
         </div>
       </div>
@@ -292,10 +346,13 @@ export function VerificationsSection({
       {/* 2. STATS OVERVIEW CARDS                                                   */}
       {/* ========================================================================= */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="rounded-2xl border border-forest/30 bg-forest/5 p-4 shadow-xs">
+        <div
+          onClick={() => setViewMode("verified_users")}
+          className="rounded-2xl border border-forest/30 bg-forest/5 p-4 shadow-xs cursor-pointer hover:border-forest/60 hover:bg-forest/10 transition-all group"
+        >
           <div className="flex items-center justify-between text-forest text-xs font-mono uppercase">
             <span>All Verified Users</span>
-            <ShieldCheck className="size-4" />
+            <ShieldCheck className="size-4 group-hover:scale-110 transition-transform" />
           </div>
           <div className="font-display text-3xl font-semibold mt-2 text-foreground">
             {verifiedUsers.length}
@@ -305,13 +362,19 @@ export function VerificationsSection({
           </span>
         </div>
 
-        <div className="rounded-2xl border border-ochre/30 bg-ochre/5 p-4 shadow-xs">
+        <div
+          onClick={() => setViewMode("pending_queue")}
+          className="rounded-2xl border border-ochre/30 bg-ochre/5 p-4 shadow-xs cursor-pointer hover:border-ochre/60 hover:bg-ochre/10 transition-all group"
+        >
           <div className="flex items-center justify-between text-ochre text-xs font-mono uppercase">
             <span>Pending Review</span>
-            <Clock className="size-4" />
+            <Clock className="size-4 group-hover:scale-110 transition-transform" />
           </div>
-          <div className="font-display text-3xl font-semibold mt-2 text-foreground">
-            {pendingQueueCount}
+          <div className="font-display text-3xl font-semibold mt-2 text-foreground flex items-center justify-between">
+            <span>{pendingQueueCount}</span>
+            <span className="text-[11px] font-sans font-normal text-ochre opacity-0 group-hover:opacity-100 transition-opacity">
+              Review →
+            </span>
           </div>
           <span className="text-[10px] text-muted-foreground">
             Awaiting executive approval
@@ -344,6 +407,33 @@ export function VerificationsSection({
           </span>
         </div>
       </div>
+
+      {/* Alert banner if there are pending verifications waiting */}
+      {pendingQueueCount > 0 && viewMode === "verified_users" && (
+        <div className="rounded-2xl border border-ochre/40 bg-ochre/10 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
+          <div className="flex items-center gap-3">
+            <span className="flex size-3 relative shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-ochre opacity-75"></span>
+              <span className="relative inline-flex rounded-full size-3 bg-ochre"></span>
+            </span>
+            <div>
+              <p className="text-xs font-bold text-foreground">
+                {pendingQueueCount} Member {pendingQueueCount === 1 ? "Account" : "Accounts"} Awaiting Verification
+              </p>
+              <p className="text-[11px] text-muted-foreground">
+                New users have paid and uploaded their Aadhaar ID. Review and approve their passes in the Pending Queue.
+              </p>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            onClick={() => setViewMode("pending_queue")}
+            className="bg-burgundy text-ivory hover:bg-burgundy/90 text-xs rounded-full px-4 h-8 cursor-pointer shrink-0"
+          >
+            Open Pending Queue ({pendingQueueCount})
+          </Button>
+        </div>
+      )}
 
       {/* ========================================================================= */}
       {/* 3. VIEW 1: ALL VERIFIED USERS PRESENT IN SITE                             */}
@@ -507,6 +597,22 @@ export function VerificationsSection({
                             <span className="text-[10px] text-muted-foreground/70">
                               {u.verifiedAt}
                             </span>
+                            <button
+                              type="button"
+                              onClick={() => setViewingAadhaar({
+                                name: u.name,
+                                email: u.email,
+                                phone: u.phone,
+                                fileUrl: u.aadhaarFileUrl || getSampleAadhaarSvg(u.name, u.memberId),
+                                fileName: u.aadhaarFileName || "UIDAI_Aadhaar_Offline.xml",
+                                status: "verified",
+                                recordId: u.id,
+                              })}
+                              className="inline-flex items-center gap-1 mt-1 rounded bg-burgundy/10 hover:bg-burgundy/20 text-burgundy px-1.5 py-0.5 text-[10px] font-semibold transition-colors cursor-pointer"
+                            >
+                              <Eye className="size-3" />
+                              <span>View Aadhaar Proof</span>
+                            </button>
                           </div>
                         </td>
 
@@ -538,15 +644,44 @@ export function VerificationsSection({
 
                         {/* 6. Actions */}
                         <td className="py-3.5 px-4 text-right">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleOpenCertificate(u)}
-                            className="text-[11px] h-7 px-3 text-foreground hover:bg-burgundy hover:text-ivory border-border hover:border-burgundy transition-all duration-200 gap-1.5 cursor-pointer"
-                          >
-                            <Eye className="size-3" />
-                            <span>View Pass</span>
-                          </Button>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setViewingAadhaar({
+                                name: u.name,
+                                email: u.email,
+                                phone: u.phone,
+                                fileUrl: u.aadhaarFileUrl || getSampleAadhaarSvg(u.name, u.memberId),
+                                fileName: u.aadhaarFileName || "UIDAI_Aadhaar_Document",
+                                status: "verified",
+                                recordId: u.id,
+                              })}
+                              className="text-[11px] h-7 px-2.5 text-burgundy hover:bg-burgundy hover:text-ivory border-burgundy/30 transition-all duration-200 gap-1 cursor-pointer"
+                              title="View uploaded Aadhaar document"
+                            >
+                              <FileText className="size-3" />
+                              <span>Aadhaar</span>
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleOpenCertificate(u)}
+                              className="text-[11px] h-7 px-3 text-foreground hover:bg-burgundy hover:text-ivory border-border hover:border-burgundy transition-all duration-200 gap-1.5 cursor-pointer"
+                            >
+                              <Eye className="size-3" />
+                              <span>View Pass</span>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(u.id, u.email, u.name)}
+                              className="text-[11px] h-7 px-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer transition-colors"
+                              title="Delete user application"
+                            >
+                              <Trash2 className="size-3.5" />
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -581,6 +716,7 @@ export function VerificationsSection({
                 <thead className="border-b border-border/60 text-muted-foreground">
                   <tr>
                     <th className="pb-3 px-3">Applicant / User</th>
+                    <th className="pb-3 px-3">Aadhaar Document</th>
                     <th className="pb-3 px-3">Verification Method</th>
                     <th className="pb-3 px-3">Requested At</th>
                     <th className="pb-3 px-3">Status</th>
@@ -588,57 +724,127 @@ export function VerificationsSection({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/60">
-                  {queue.map((v) => (
-                    <tr key={v.id} className="hover:bg-sage/10 transition-colors">
-                      <td className="py-4 px-3">
-                        <p className="font-semibold text-foreground">{v.userName}</p>
-                        <p className="text-[11px] text-muted-foreground">{v.email}</p>
-                      </td>
-                      <td className="py-4 px-3 font-mono text-[11px] text-muted-foreground">
-                        {v.method}
-                      </td>
-                      <td className="py-4 px-3 text-muted-foreground">{v.requestedAt}</td>
-                      <td className="py-4 px-3">
-                        <span
-                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
-                            v.status === "verified"
-                              ? "bg-forest/20 text-forest"
-                              : v.status === "pending"
-                              ? "bg-ochre/20 text-ochre"
-                              : v.status === "manual_review"
-                              ? "bg-burgundy/15 text-burgundy"
-                              : "bg-destructive/15 text-destructive"
-                          }`}
-                        >
-                          {v.status.replace("_", " ")}
-                        </span>
-                      </td>
-                      <td className="py-4 px-3 text-right space-x-2">
-                        {v.status !== "verified" ? (
-                          <>
-                            <Button
-                              variant="outline"
-                              onClick={() => onUpdateQueueStatus(v.id, "verified")}
-                              className="text-[11px] h-7 px-3 text-forest border-forest/30 hover:bg-forest hover:text-ivory cursor-pointer"
-                            >
-                              Approve
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              onClick={() => onUpdateQueueStatus(v.id, "failed")}
-                              className="text-[11px] h-7 px-3 cursor-pointer"
-                            >
-                              Reject
-                            </Button>
-                          </>
-                        ) : (
-                          <span className="text-[11px] text-forest font-semibold flex items-center justify-end gap-1">
-                            <CheckCircle2 className="size-3.5" /> Approved
-                          </span>
-                        )}
+                  {queue.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="py-12 text-center text-muted-foreground">
+                        <ShieldCheck className="size-10 mx-auto text-forest/40 mb-2" />
+                        <p className="font-semibold text-foreground text-sm">
+                          All member verifications are up to date
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5 max-w-sm mx-auto">
+                          When users complete the social discovery quiz and pay via Razorpay, their accounts and uploaded Aadhaar IDs will appear here automatically for review.
+                        </p>
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    queue.map((v) => (
+                      <tr key={v.id} className="hover:bg-sage/10 transition-colors">
+                        <td className="py-4 px-3">
+                          <p className="font-semibold text-foreground">{v.userName}</p>
+                          <p className="text-[11px] text-muted-foreground">{v.email}</p>
+                          {v.phone && (
+                            <p className="text-[10px] font-mono text-muted-foreground">{v.phone}</p>
+                          )}
+                        </td>
+                        <td className="py-4 px-3">
+                          {(() => {
+                            const fileUrl = v.aadhaarFileUrl || getSampleAadhaarSvg(v.userName, v.memberId || "2833");
+                            const fileName = v.aadhaarFileName || "Aadhaar_Document.jpg";
+                            return (
+                              <button
+                                type="button"
+                                onClick={() => setViewingAadhaar({
+                                  name: v.userName,
+                                  email: v.email,
+                                  phone: v.phone,
+                                  fileUrl,
+                                  fileName,
+                                  status: v.status,
+                                  recordId: v.id,
+                                })}
+                                className="inline-flex items-center gap-2 rounded-xl border border-border/80 bg-background hover:border-burgundy/50 hover:bg-burgundy/5 p-1.5 transition-all text-left cursor-pointer group shadow-2xs"
+                              >
+                                {fileUrl.startsWith("data:image/") ? (
+                                  <img
+                                    src={fileUrl}
+                                    alt="Aadhaar"
+                                    className="size-8 rounded-lg object-cover border border-border shrink-0"
+                                  />
+                                ) : (
+                                  <div className="size-8 rounded-lg bg-burgundy/10 flex items-center justify-center text-burgundy shrink-0">
+                                    <FileText className="size-4" />
+                                  </div>
+                                )}
+                                <div className="min-w-0 pr-1">
+                                  <span className="text-[11px] font-semibold text-burgundy block group-hover:underline">
+                                    View Aadhaar
+                                  </span>
+                                  <span className="text-[9px] text-muted-foreground block truncate max-w-[100px]">
+                                    {fileName}
+                                  </span>
+                                </div>
+                              </button>
+                            );
+                          })()}
+                        </td>
+                        <td className="py-4 px-3 font-mono text-[11px] text-muted-foreground">
+                          {v.method}
+                        </td>
+                        <td className="py-4 px-3 text-muted-foreground">{v.requestedAt}</td>
+                        <td className="py-4 px-3">
+                          <span
+                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
+                              v.status === "verified"
+                                ? "bg-forest/20 text-forest"
+                                : v.status === "pending"
+                                ? "bg-ochre/20 text-ochre"
+                                : v.status === "manual_review"
+                                ? "bg-burgundy/15 text-burgundy"
+                                : "bg-destructive/15 text-destructive"
+                            }`}
+                          >
+                            {v.status.replace("_", " ")}
+                          </span>
+                        </td>
+                        <td className="py-4 px-3 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            {v.status !== "verified" ? (
+                              <>
+                                <Button
+                                  variant="outline"
+                                  onClick={() => onUpdateQueueStatus(v.id, "verified")}
+                                  className="text-[11px] h-7 px-3 text-forest border-forest/30 hover:bg-forest hover:text-ivory cursor-pointer font-medium"
+                                >
+                                  Approve
+                                </Button>
+                                <Button
+                                  variant="destructive"
+                                  onClick={() => onUpdateQueueStatus(v.id, "failed")}
+                                  className="text-[11px] h-7 px-3 cursor-pointer"
+                                >
+                                  Reject
+                                </Button>
+                              </>
+                            ) : (
+                              <span className="text-[11px] text-forest font-semibold flex items-center gap-1 mr-1">
+                                <CheckCircle2 className="size-3.5" /> Approved
+                              </span>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(v.id, v.email, v.userName)}
+                              className="text-[11px] h-7 px-2.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer transition-colors"
+                              title="Delete application permanently"
+                            >
+                              <Trash2 className="size-3.5 mr-1" />
+                              Delete
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -737,6 +943,60 @@ export function VerificationsSection({
                 </div>
               </div>
 
+              {/* Uploaded Aadhaar Document Proof if present */}
+              {selectedUserForCert.aadhaarFileUrl && (
+                <div className="rounded-2xl border border-burgundy/30 bg-burgundy/5 p-4 text-xs space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-burgundy font-semibold">
+                      <FileText className="size-4" />
+                      <span>Uploaded Government Aadhaar Card Proof</span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setViewingAadhaar({
+                        name: selectedUserForCert.name,
+                        email: selectedUserForCert.email,
+                        phone: selectedUserForCert.phone,
+                        fileUrl: selectedUserForCert.aadhaarFileUrl!,
+                        fileName: selectedUserForCert.aadhaarFileName,
+                        status: "verified",
+                        recordId: selectedUserForCert.id,
+                      })}
+                      className="text-[11px] h-7 px-2.5 text-burgundy hover:bg-burgundy/10 cursor-pointer gap-1"
+                    >
+                      <Eye className="size-3" />
+                      <span>View Full Document</span>
+                    </Button>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    {selectedUserForCert.aadhaarFileUrl.startsWith("data:image/") ? (
+                      <div className="relative size-14 shrink-0 rounded-xl overflow-hidden border border-border shadow-xs bg-card">
+                        <img
+                          src={selectedUserForCert.aadhaarFileUrl}
+                          alt="Aadhaar Document"
+                          className="size-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="size-14 shrink-0 rounded-xl bg-burgundy/10 flex items-center justify-center text-burgundy border border-burgundy/20">
+                        <FileText className="size-6" />
+                      </div>
+                    )}
+                    <div className="min-w-0 text-xs">
+                      <p className="font-semibold text-foreground truncate">
+                        {selectedUserForCert.aadhaarFileName || "Aadhaar_Document_Proof"}
+                      </p>
+                      <p className="text-[11px] text-forest font-medium mt-0.5">
+                        ✓ Uploaded during registration & verified
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Safety & Seating Clearance */}
               <div className="rounded-2xl border border-forest/30 bg-forest/5 p-4 text-xs space-y-2">
                 <div className="flex items-center gap-2 text-forest font-semibold">
@@ -755,10 +1015,130 @@ export function VerificationsSection({
                 </span>
                 <Button
                   onClick={() => setCertModalOpen(false)}
-                  className="rounded-full bg-burgundy hover:bg-burgundy/90 text-ivory text-xs px-5"
+                  className="rounded-full bg-burgundy hover:bg-burgundy/90 text-ivory text-xs px-5 cursor-pointer"
                 >
                   Close Pass
                 </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 6. DEDICATED AADHAAR CARD DOCUMENT VIEWER MODAL                           */}
+      {/* ========================================================================= */}
+      {viewingAadhaar && (
+        <Dialog open={!!viewingAadhaar} onOpenChange={(open) => !open && setViewingAadhaar(null)}>
+          <DialogContent className="max-w-3xl bg-ivory border-burgundy/20 p-0 overflow-hidden text-foreground">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-burgundy via-burgundy/95 to-burgundy p-5 text-ivory">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-1.5 text-xs text-ivory/80 uppercase tracking-widest font-mono">
+                    <ShieldCheck className="size-4 text-forest" />
+                    <span>UIDAI Aadhaar Verification Record</span>
+                  </div>
+                  <h3 className="font-display mt-1 text-2xl font-bold">
+                    {viewingAadhaar.name}&apos;s Aadhaar Card
+                  </h3>
+                  <p className="text-xs text-ivory/80 mt-0.5">
+                    {viewingAadhaar.email} {viewingAadhaar.phone ? `• ${viewingAadhaar.phone}` : ""}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <a
+                    href={viewingAadhaar.fileUrl}
+                    download={viewingAadhaar.fileName || "aadhaar_card"}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-ivory/15 hover:bg-ivory/25 px-3.5 py-1.5 text-xs font-semibold text-ivory transition-colors cursor-pointer"
+                  >
+                    <ExternalLink className="size-3.5" />
+                    <span>Open Original</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Document Body & Preview */}
+            <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+              <div className="rounded-2xl border border-border/80 bg-card p-3 flex flex-col items-center justify-center min-h-[340px] shadow-inner">
+                {viewingAadhaar.fileUrl.startsWith("data:image/") ? (
+                  <img
+                    src={viewingAadhaar.fileUrl}
+                    alt={`${viewingAadhaar.name}'s Aadhaar`}
+                    className="max-h-[520px] w-auto max-w-full rounded-xl object-contain shadow-md"
+                  />
+                ) : (
+                  <iframe
+                    src={viewingAadhaar.fileUrl}
+                    title="Aadhaar Document PDF"
+                    className="w-full h-[520px] rounded-xl border border-border/80"
+                  />
+                )}
+              </div>
+
+              {/* Status and Action bar */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-border/60">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <FileCheck2 className="size-4 text-forest shrink-0" />
+                  <span className="truncate max-w-[280px]">
+                    Document: <strong className="text-foreground">{viewingAadhaar.fileName || "Aadhaar Card"}</strong>
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {viewingAadhaar.recordId && viewingAadhaar.status && viewingAadhaar.status !== "verified" && (
+                    <>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          onUpdateQueueStatus(viewingAadhaar.recordId!, "verified");
+                          toast.success(`Approved Aadhaar verification for ${viewingAadhaar.name}`);
+                          setViewingAadhaar(null);
+                        }}
+                        className="text-xs text-forest border-forest/30 hover:bg-forest hover:text-ivory cursor-pointer"
+                      >
+                        <Check className="size-3.5 mr-1" /> Approve & Issue Pass
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={() => {
+                          onUpdateQueueStatus(viewingAadhaar.recordId!, "failed");
+                          toast.error(`Rejected Aadhaar verification for ${viewingAadhaar.name}`);
+                          setViewingAadhaar(null);
+                        }}
+                        className="text-xs cursor-pointer"
+                      >
+                        <XCircle className="size-3.5 mr-1" /> Reject
+                      </Button>
+                    </>
+                  )}
+                  {viewingAadhaar.recordId && (
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        const recId = viewingAadhaar.recordId!;
+                        const recEmail = viewingAadhaar.email;
+                        const recName = viewingAadhaar.name;
+                        setViewingAadhaar(null);
+                        handleDelete(recId, recEmail, recName);
+                      }}
+                      className="text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
+                    >
+                      <Trash2 className="size-3.5 mr-1" /> Delete Application
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    onClick={() => setViewingAadhaar(null)}
+                    className="text-xs cursor-pointer"
+                  >
+                    Close
+                  </Button>
+                </div>
               </div>
             </div>
           </DialogContent>

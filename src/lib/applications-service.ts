@@ -72,6 +72,8 @@ export interface MemberApplication {
   identityProvider: string;
   identityReference?: string;
   identityVerifiedAt?: string;
+  aadhaarFileUrl?: string;
+  aadhaarFileName?: string;
 
   // Credential Provisioning & Dispatch
   credentialsSent: boolean;
@@ -122,6 +124,14 @@ export class ApplicationsService {
     } catch (e) {
       console.warn("[ApplicationsService] Failed to persist dossiers:", e);
     }
+
+    try {
+      fetch("/api/applications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(apps),
+      }).catch((e) => console.warn("[ApplicationsService] Server sync error:", e));
+    } catch (e) {}
   }
 
   /**
@@ -129,6 +139,53 @@ export class ApplicationsService {
    */
   static getApplications(): MemberApplication[] {
     return this.loadApplications();
+  }
+
+  /**
+   * Asynchronously fetches all member applications from the server data file (/api/applications).
+   * Ensures data persistence across browsers, incognito windows, and multi-device sessions.
+   */
+  static async fetchApplicationsFromServer(): Promise<MemberApplication[]> {
+    if (typeof window === "undefined") return this.getApplications();
+    try {
+      const res = await fetch("/api/applications");
+      if (res.ok) {
+        const json = await res.json();
+        if (json.ok && Array.isArray(json.data)) {
+          const serverList: MemberApplication[] = json.data;
+          const localList = this.loadApplications();
+          const map = new Map<string, MemberApplication>();
+
+          serverList.forEach((app) => {
+            if (app.applicantEmail) map.set(app.applicantEmail.toLowerCase(), app);
+          });
+          localList.forEach((app) => {
+            if (app.applicantEmail) {
+              const existing = map.get(app.applicantEmail.toLowerCase());
+              if (!existing) {
+                map.set(app.applicantEmail.toLowerCase(), app);
+              } else {
+                map.set(app.applicantEmail.toLowerCase(), {
+                  ...existing,
+                  ...app,
+                  aadhaarFileUrl: app.aadhaarFileUrl || existing.aadhaarFileUrl,
+                  aadhaarFileName: app.aadhaarFileName || existing.aadhaarFileName,
+                });
+              }
+            }
+          });
+
+          const merged = Array.from(map.values());
+          this.saveApplications(merged);
+          window.dispatchEvent(new Event("storage"));
+          window.dispatchEvent(new CustomEvent("precious_meets_applications_updated"));
+          return merged;
+        }
+      }
+    } catch (e) {
+      console.warn("[ApplicationsService] Server sync notice:", e);
+    }
+    return this.getApplications();
   }
 
   /**
@@ -235,6 +292,8 @@ export class ApplicationsService {
     invoiceNumber?: string;
     amountInr: number;
     memberId?: string;
+    aadhaarFileUrl?: string;
+    aadhaarFileName?: string;
   }): MemberApplication {
     const apps = this.loadApplications();
     const cleanEmail = payload.email.trim().toLowerCase();
@@ -280,8 +339,10 @@ export class ApplicationsService {
       paidAt: now,
       credentialsSent: false,
       identityStatus: "pending",
-      identityProvider: "digilocker_consent_offline",
+      identityProvider: payload.aadhaarFileUrl ? "aadhaar_card_upload" : "digilocker_consent_offline",
       identityReference: `DL-${Math.floor(10000 + Math.random() * 90000)}`,
+      aadhaarFileUrl: payload.aadhaarFileUrl,
+      aadhaarFileName: payload.aadhaarFileName,
       createdAt: existingIndex >= 0 ? apps[existingIndex].createdAt : now,
       updatedAt: now,
     };
@@ -293,6 +354,15 @@ export class ApplicationsService {
     }
 
     this.saveApplications(apps);
+
+    // Sync to local server file so incognito tabs & separate browsers see it instantly
+    if (typeof window !== "undefined") {
+      fetch("/api/applications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(applicationRecord),
+      }).catch((e) => console.warn("[ApplicationsService] Server POST error:", e));
+    }
 
     // Sync to remote Supabase database table
     this.syncToSupabase(applicationRecord).catch((e) =>
@@ -508,6 +578,48 @@ export class ApplicationsService {
     this.syncToSupabase(app).catch(() => {});
 
     return { success: true, application: app };
+  }
+
+  /**
+   * Permanently deletes a member application dossier from local cache, server JSON store,
+   * and remote Supabase database.
+   */
+  static async deleteApplication(idOrEmail: string): Promise<MemberApplication[]> {
+    const apps = this.loadApplications();
+    const clean = idOrEmail.trim().toLowerCase();
+    const cleanId = clean.replace("ver_", "");
+
+    const updated = apps.filter(
+      (a) =>
+        a.id.toLowerCase() !== clean &&
+        a.id.toLowerCase() !== cleanId &&
+        a.applicantEmail.toLowerCase() !== clean &&
+        a.applicationReference.toLowerCase() !== clean
+    );
+
+    this.saveApplications(updated);
+
+    // Call DELETE API on server
+    if (typeof window !== "undefined") {
+      fetch(`/api/applications?id=${encodeURIComponent(idOrEmail)}&email=${encodeURIComponent(idOrEmail)}`, {
+        method: "DELETE",
+      }).catch((e) => console.warn("[ApplicationsService] Server DELETE error:", e));
+    }
+
+    // Attempt delete from remote Supabase if connected
+    try {
+      await supabase
+        .from("member_applications")
+        .delete()
+        .or(`id.eq.${cleanId},applicant_email.eq.${clean}`);
+    } catch (e) {
+      // ignore
+    }
+
+    window.dispatchEvent(new Event("storage"));
+    window.dispatchEvent(new CustomEvent("precious_meets_applications_updated"));
+
+    return updated;
   }
 
   /**

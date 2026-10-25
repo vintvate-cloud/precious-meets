@@ -58,6 +58,8 @@ export function QuizResultsPage() {
   const [name, setName] = useState(authProfile?.display_name || user?.user_metadata?.full_name || "");
   const [email, setEmail] = useState(user?.email || "");
   const [phone, setPhone] = useState(authProfile?.phone || "");
+  const [aadhaarFileUrl, setAadhaarFileUrl] = useState<string | undefined>(undefined);
+  const [aadhaarFileName, setAadhaarFileName] = useState<string | undefined>(undefined);
   const [paying, setPaying] = useState(false);
   const [paidDossier, setPaidDossier] = useState<{ memberId: string; paymentId: string; invoiceNumber: string } | null>(null);
 
@@ -123,6 +125,8 @@ export function QuizResultsPage() {
         if (c.fullName) setName(c.fullName);
         if (c.email) setEmail(c.email);
         if (c.phone) setPhone("+91 " + c.phone);
+        if (c.aadhaarFileUrl) setAadhaarFileUrl(c.aadhaarFileUrl);
+        if (c.aadhaarFileName) setAadhaarFileName(c.aadhaarFileName);
         return;
       } catch (e) {
         // Ignore
@@ -186,6 +190,20 @@ export function QuizResultsPage() {
       const memberId = `PM-FOUNDER-${Math.floor(1000 + Math.random() * 9000)}`;
       const invoiceNumber = CryptoService.generateInvoiceNumber();
 
+      // Retrieve Aadhaar document proof from state or fallback to saved contact in localStorage
+      let effectiveAadhaarUrl = aadhaarFileUrl;
+      let effectiveAadhaarName = aadhaarFileName;
+      if (!effectiveAadhaarUrl && typeof window !== "undefined") {
+        try {
+          const raw = localStorage.getItem("precious_meets_user_contact");
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed.aadhaarFileUrl) effectiveAadhaarUrl = parsed.aadhaarFileUrl;
+            if (parsed.aadhaarFileName) effectiveAadhaarName = parsed.aadhaarFileName;
+          }
+        } catch (e) {}
+      }
+
       // 1. Record member application dossier for curation review in ApplicationsService & Supabase
       // Note: User is NOT active yet. Status is 'paid_pending_credentials'
       ApplicationsService.createOrUpdateFromCheckout({
@@ -205,6 +223,8 @@ export function QuizResultsPage() {
         amountInr: 1999,
         memberId,
         invoiceNumber,
+        aadhaarFileUrl: effectiveAadhaarUrl,
+        aadhaarFileName: effectiveAadhaarName,
       });
 
       // 2. Dispatch a verification request to the Admin Panel's verification queue
@@ -213,10 +233,12 @@ export function QuizResultsPage() {
         email: email.trim(),
         phone: phone.trim() || "+91 98765 43210",
         city: "Delhi NCR",
-        method: "digilocker_consent_offline",
-        notes: `Annual Founding Member Pass (₹1,999 Razorpay Payment: ${result.paymentId}). Archetype: ${profile?.archetype?.title || "The Curious Flâneur"}`,
+        method: effectiveAadhaarUrl ? "aadhaar_card_upload" : "digilocker_consent_offline",
+        notes: `Annual Founding Member Pass (₹1,999 Razorpay Payment: ${result.paymentId}). Archetype: ${profile?.archetype?.title || "The Curious Flâneur"}${effectiveAadhaarName ? ` | Aadhaar Document: ${effectiveAadhaarName}` : ""}`,
         amountInr: 1999,
         memberId,
+        aadhaarFileUrl: effectiveAadhaarUrl,
+        aadhaarFileName: effectiveAadhaarName,
       });
 
       // 3. Dispatch automated receipt & invoice email via Resend
