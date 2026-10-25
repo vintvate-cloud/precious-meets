@@ -78,45 +78,58 @@ export class EmailService {
         `;
         break;
 
-      case "subscription_activated":
+            case "subscription_activated":
         bodyContent = `
           <div style="background: #fbf8f3; border: 1px solid #c6a568; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
             <div style="display: inline-block; background: #691c35; color: #f8f2e7; font-family: monospace; font-size: 10px; padding: 4px 10px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">
-              Founding Member Confirmed
+              Subscription & Payment Confirmed
             </div>
-            <h2 style="font-family: Georgia, serif; color: #171514; font-size: 24px; margin: 0 0 8px 0;">Welcome to the circle, ${data.name || "Member"}.</h2>
-            <p style="color: #4a453f; line-height: 1.6; margin: 0 0 16px 0;">Your annual subscription of <strong>${data.amount || "₹1,999"}</strong> has been processed successfully via Razorpay. Your table is set and your platform access is now unlocked.</p>
+            <h2 style="font-family: Georgia, serif; color: #171514; font-size: 24px; margin: 0 0 8px 0;">Thanks for subscribing to our platform, ${data.name || "Friend"}.</h2>
+            <p style="color: #4a453f; line-height: 1.6; margin: 0 0 16px 0;">
+              Your annual subscription of <strong>${data.amount || "₹1,999"}</strong> has been processed successfully via Razorpay. Your table pass is reserved and your official payment invoice has been generated below.
+            </p>
             
-            <div style="background: #ffffff; border: 1px solid #e0d7c7; border-radius: 6px; padding: 16px; margin: 16px 0;">
+            {/* Formal Razorpay Invoice Box */}
+            <div style="background: #ffffff; border: 1px solid #e0d7c7; border-radius: 6px; padding: 18px; margin: 16px 0;">
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #d1c7b7; padding-bottom: 10px; margin-bottom: 12px;">
+                <span style="font-family: monospace; font-size: 11px; text-transform: uppercase; color: #691c35; font-weight: bold;">TAX INVOICE / RECEIPT</span>
+                <span style="font-family: monospace; font-size: 11px; color: #6b6357;">${data.invoiceNumber || "INV-PM-2026-001"}</span>
+              </div>
               <table style="width: 100%; font-size: 13px; color: #4a453f; border-collapse: collapse;">
                 <tr>
-                  <td style="padding: 6px 0; color: #6b6357;">Membership Pass ID:</td>
-                  <td style="padding: 6px 0; text-align: right; font-family: monospace; font-weight: bold; color: #691c35;">${data.memberId || "PM-FOUNDER-001"}</td>
+                  <td style="padding: 6px 0; color: #6b6357;">Billed To:</td>
+                  <td style="padding: 6px 0; text-align: right; font-weight: bold; color: #171514;">${data.name || "Member"} (${data.email || ""})</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #6b6357;">Payment Reference (Razorpay ID):</td>
+                  <td style="padding: 6px 0; text-align: right; font-family: monospace; font-weight: bold; color: #691c35;">${data.paymentId || "pay_rzp_verified"}</td>
                 </tr>
                 <tr>
                   <td style="padding: 6px 0; color: #6b6357;">Plan Tier:</td>
-                  <td style="padding: 6px 0; text-align: right; font-weight: bold; color: #171514;">${data.plan || "Annual Founding Member"}</td>
+                  <td style="padding: 6px 0; text-align: right; font-weight: bold; color: #171514;">${data.plan || "Annual Founding Member Pass"}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 6px 0; color: #6b6357;">Vibe Archetype:</td>
-                  <td style="padding: 6px 0; text-align: right; font-weight: bold; color: #5f7045;">${data.archetype || "Curious Flâneur"}</td>
+                  <td style="padding: 6px 0; color: #6b6357;">Amount Paid:</td>
+                  <td style="padding: 6px 0; text-align: right; font-weight: bold; color: #047857; font-size: 14px;">${data.amount || "₹1,999"} (Inclusive of all taxes)</td>
                 </tr>
                 <tr>
-                  <td style="padding: 6px 0; color: #6b6357;">Validity:</td>
-                  <td style="padding: 6px 0; text-align: right; font-weight: bold; color: #171514;">1 Full Year (365 Days)</td>
+                  <td style="padding: 6px 0; color: #6b6357;">Payment Date:</td>
+                  <td style="padding: 6px 0; text-align: right; font-family: monospace; color: #6b6357;">${data.date || new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
                 </tr>
               </table>
             </div>
 
-            <p style="color: #4a453f; font-size: 13px; line-height: 1.6;">
-              <strong>What's Next?</strong> Head to your Member Dashboard to browse upcoming secret suppers and RSVP for seats curated specifically to your conversational rhythm.
-            </p>
-
-            <div style="margin: 24px 0 8px 0; text-align: center;">
-              <a href="${data.dashboardUrl || "http://localhost:5173/dashboard"}" style="background-color: #691c35; color: #f8f2e7; padding: 12px 28px; border-radius: 9999px; text-decoration: none; font-size: 13px; font-weight: bold; display: inline-block;">
-                Access Member Dashboard &rarr;
-              </a>
+            {/* Prominent Notice Regarding Credentials Delivery */}
+            <div style="background: #e8ecd8; border-left: 4px solid #5f7045; padding: 16px 18px; margin: 20px 0; border-radius: 4px;">
+              <p style="margin: 0; color: #2d381c; font-size: 13.5px; line-height: 1.6;">
+                <strong>Next Step & Account Credentials:</strong><br />
+                Our curation team is reviewing your conversational vibe archetype to pair you with your ideal 6-seat table cohort. <strong>We will email your member sign-in credentials to this email address in a short while.</strong>
+              </p>
             </div>
+
+            <p style="color: #6b6357; font-size: 12px; line-height: 1.6; margin: 16px 0 0 0;">
+              Please keep this invoice for your personal records. For questions regarding your onboarding, contact invitations@preciousmeets.com.
+            </p>
           </div>
         `;
         break;
@@ -236,6 +249,48 @@ export class EmailService {
             <p style="color: #6b6357; font-size: 12px; line-height: 1.6; margin-top: 20px;">
               You are welcome to re-apply for upcoming seasonal salons after 90 days. We wish you wonderful conversations ahead.
             </p>
+          </div>
+        `;
+        break;
+
+      case "member_credentials":
+        bodyContent = `
+          <div style="background: #fbf8f3; border: 1px solid #c6a568; border-radius: 8px; padding: 26px; margin-bottom: 24px;">
+            <div style="display: inline-block; background: #691c35; color: #f8f2e7; font-family: monospace; font-size: 10px; padding: 4px 10px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">
+              Member Portal Access
+            </div>
+            <h2 style="font-family: Georgia, serif; color: #171514; font-size: 24px; margin: 0 0 8px 0;">Your Sign-In Credentials, ${data.name || "Member"}.</h2>
+            <p style="color: #4a453f; line-height: 1.6; margin: 0 0 18px 0;">
+              Your Precious Meets membership profile has been formally verified and approved by the curation committee. Below are your confidential credentials to access your member portal and RSVP for secret curated tables.
+            </p>
+
+            {/* Credentials Card */}
+            <div style="background: #ffffff; border: 2px dashed #c6a568; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <div style="margin-bottom: 14px;">
+                <span style="font-family: monospace; font-size: 11px; text-transform: uppercase; color: #6b6357; display: block; margin-bottom: 4px;">Sign-In Email Address</span>
+                <span style="font-family: monospace; font-size: 14px; font-weight: bold; color: #171514;">${data.email}</span>
+              </div>
+              <div>
+                <span style="font-family: monospace; font-size: 11px; text-transform: uppercase; color: #6b6357; display: block; margin-bottom: 4px;">Auto-Generated Secure Password</span>
+                <span style="display: inline-block; font-family: 'Courier New', monospace; font-size: 16px; font-weight: bold; color: #691c35; background: #fdf5f7; border: 1px solid #f2c7d2; padding: 6px 14px; border-radius: 6px; letter-spacing: 1.2px;">
+                  ${data.password}
+                </span>
+              </div>
+            </div>
+
+            {/* Sign-In Action CTA */}
+            <div style="margin: 28px 0; text-align: center;">
+              <a href="${data.signInUrl || "http://localhost:5173/login?email=" + encodeURIComponent(data.email || "")}" style="background-color: #691c35; color: #f8f2e7; padding: 14px 34px; border-radius: 9999px; text-decoration: none; font-size: 14px; font-weight: bold; display: inline-block; box-shadow: 0 3px 10px rgba(105, 28, 53, 0.25);">
+                Sign In to Your Member Portal &rarr;
+              </a>
+            </div>
+
+            {/* Mandatory Security Notice */}
+            <div style="background: #fff8f0; border-left: 4px solid #d97706; padding: 14px 16px; margin: 20px 0; border-radius: 4px;">
+              <p style="margin: 0; color: #7c2d12; font-size: 12.5px; line-height: 1.6;">
+                <strong>Security Notice:</strong> Please keep these credentials confidential and do not share them with anyone. For your personal protection, you may update your password at any time in your profile settings after logging in.
+              </p>
+            </div>
           </div>
         `;
         break;

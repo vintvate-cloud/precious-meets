@@ -18,6 +18,7 @@ import {
   Sparkles,
   Inbox,
   AlertCircle,
+  KeyRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -292,8 +293,8 @@ export function UsersArchiveSection() {
                     </div>
                   </div>
 
-                  {/* 3 Verification Checks */}
-                  <div className="grid grid-cols-3 gap-1 pt-1 text-[10px] font-mono">
+                  {/* 4 Member Status Checks */}
+                  <div className="grid grid-cols-4 gap-1 pt-1 text-[9px] font-mono">
                     <div className="flex items-center justify-center gap-1 rounded-lg bg-forest/10 py-1 text-forest font-medium">
                       <CheckCircle2 className="size-2.5" /> Quiz
                     </div>
@@ -316,6 +317,16 @@ export function UsersArchiveSection() {
                     >
                       <ShieldCheck className="size-2.5" />
                       <span>{app.identityStatus === "verified" ? "Aadhaar" : "Pending"}</span>
+                    </div>
+                    <div
+                      className={`flex items-center justify-center gap-1 rounded-lg py-1 font-medium ${
+                        app.credentialsSent
+                          ? "bg-forest/10 text-forest font-bold"
+                          : "bg-purple-500/10 text-purple-700"
+                      }`}
+                    >
+                      <KeyRound className="size-2.5" />
+                      <span>{app.credentialsSent ? "Creds Sent" : "No Creds"}</span>
                     </div>
                   </div>
                 </div>
