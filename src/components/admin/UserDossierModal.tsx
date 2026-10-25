@@ -3,6 +3,8 @@ import {
   MemberApplication,
   ApplicationsService,
 } from "@/lib/applications-service";
+import { VerificationsService } from "@/lib/verifications-service";
+import { getSampleAadhaarSvg } from "@/lib/aadhaar-utils";
 import {
   Dialog,
   DialogContent,
@@ -30,6 +32,7 @@ import {
   UserX,
   KeyRound,
   Copy,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -122,6 +125,27 @@ export function UserDossierModal({
       toast.error(e.message || "Failed to reject application.");
     } finally {
       setProcessing(false);
+    }
+  };
+
+  const handleDeleteDossier = async () => {
+    if (!application) return;
+    if (
+      window.confirm(
+        `Are you sure you want to permanently delete the application for "${application.applicantName}" (${application.applicantEmail})?\n\nThis will remove their file from both dossiers and verifications.`
+      )
+    ) {
+      setProcessing(true);
+      try {
+        await ApplicationsService.deleteApplication(application.id);
+        VerificationsService.deleteRecord(application.id, application.applicantEmail);
+        toast.success(`Application for "${application.applicantName}" permanently deleted.`);
+        onOpenChange(false);
+      } catch (e: any) {
+        toast.error(e.message || "Failed to delete application.");
+      } finally {
+        setProcessing(false);
+      }
     }
   };
 
@@ -616,6 +640,51 @@ export function UserDossierModal({
                   </div>
                 </div>
 
+                {/* Uploaded Aadhaar Document Proof */}
+                {(() => {
+                  const effectiveUrl =
+                    application.aadhaarFileUrl ||
+                    (application.identityProvider === "aadhaar_card_upload" || application.aadhaarFileName
+                      ? getSampleAadhaarSvg(application.applicantName, application.applicationReference)
+                      : null);
+                  if (!effectiveUrl) return null;
+
+                  return (
+                    <div className="rounded-xl bg-ivory p-4 border border-burgundy/30 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 font-semibold text-burgundy text-xs">
+                          <FileText className="size-4" />
+                          <span>Uploaded Aadhaar Document ({application.aadhaarFileName || "UIDAI Aadhaar Copy"})</span>
+                        </div>
+                        <a
+                          href={effectiveUrl}
+                          download={application.aadhaarFileName || "aadhaar_card"}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-burgundy hover:underline cursor-pointer"
+                        >
+                          <ExternalLink className="size-3" /> Open Original
+                        </a>
+                      </div>
+                      {effectiveUrl.startsWith("data:image/") ? (
+                        <div className="flex justify-center bg-card rounded-lg p-2 border border-border">
+                          <img
+                            src={effectiveUrl}
+                            alt="Aadhaar Card"
+                            className="max-h-64 object-contain rounded"
+                          />
+                        </div>
+                      ) : (
+                        <iframe
+                          src={effectiveUrl}
+                          title="Aadhaar PDF"
+                          className="w-full h-64 rounded border border-border"
+                        />
+                      )}
+                    </div>
+                  );
+                })()}
+
                 <div className="rounded-xl bg-forest/5 p-4 border border-forest/20 text-xs text-muted-foreground space-y-1">
                   <div className="flex items-center gap-1.5 font-semibold text-forest">
                     <ShieldCheck className="size-4" />
@@ -786,6 +855,18 @@ export function UserDossierModal({
         {/* ========================================================================= */}
         <div className="border-t border-border/80 bg-card p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="text-xs text-muted-foreground flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDeleteDossier}
+              disabled={processing}
+              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 text-xs px-2.5 h-8 cursor-pointer rounded-lg"
+              title="Permanently delete application dossier"
+            >
+              <Trash2 className="size-3.5 mr-1" />
+              Delete Application
+            </Button>
+            <span>•</span>
             <Lock className="size-3.5 text-burgundy" />
             <span>Executive Action controls are permanently audit-logged.</span>
           </div>

@@ -132,6 +132,21 @@ function AdminConsolePage() {
     };
 
     refreshData();
+
+    // Hydrate applications from server data file (syncs standard and incognito sessions)
+    ApplicationsService.fetchApplicationsFromServer().then((srvApps) => {
+      if (srvApps && srvApps.length > 0) {
+        setApplications(srvApps);
+      }
+    });
+
+    // Hydrate verifications queue from server data file
+    VerificationsService.fetchQueueFromServer().then((srvQueue) => {
+      if (srvQueue && srvQueue.length > 0) {
+        setVerifications(srvQueue);
+      }
+    });
+
     ApplicationsService.fetchApplicationsFromDb().then((dbApps) => {
       if (dbApps && dbApps.length > 0) {
         setApplications(dbApps);
@@ -140,9 +155,11 @@ function AdminConsolePage() {
 
     window.addEventListener("storage", refreshData);
     window.addEventListener("precious_meets_applications_updated", refreshData);
+    window.addEventListener("precious_meets_verification_updated", refreshData);
     return () => {
       window.removeEventListener("storage", refreshData);
       window.removeEventListener("precious_meets_applications_updated", refreshData);
+      window.removeEventListener("precious_meets_verification_updated", refreshData);
     };
   }, [selectedEventId]);
 
@@ -226,15 +243,23 @@ function AdminConsolePage() {
   useEffect(() => {
     setVerifications(VerificationsService.getQueue());
 
+    VerificationsService.fetchQueueFromServer().then((srvQueue) => {
+      if (srvQueue && srvQueue.length > 0) {
+        setVerifications(srvQueue);
+      }
+    });
+
     const handleUpdate = () => {
       setVerifications(VerificationsService.getQueue());
     };
 
     window.addEventListener("storage", handleUpdate);
     window.addEventListener("precious_meets_verification_updated", handleUpdate);
+    window.addEventListener("precious_meets_applications_updated", handleUpdate);
     return () => {
       window.removeEventListener("storage", handleUpdate);
       window.removeEventListener("precious_meets_verification_updated", handleUpdate);
+      window.removeEventListener("precious_meets_applications_updated", handleUpdate);
     };
   }, []);
 
@@ -257,6 +282,13 @@ function AdminConsolePage() {
     const updated = VerificationsService.updateStatus(id, status);
     setVerifications(updated);
     toast.success(`Verification status updated to ${status}.`);
+  };
+
+  const handleDeleteVerification = (id: string, email?: string) => {
+    const updated = VerificationsService.deleteRecord(id, email);
+    setVerifications(updated);
+    setApplications(ApplicationsService.getApplications());
+    toast.success("User application and verification record permanently deleted.");
   };
 
   if (loading || !user || !isAdmin) {
@@ -742,6 +774,7 @@ function AdminConsolePage() {
           <VerificationsSection
             queue={verifications}
             onUpdateQueueStatus={handleUpdateVerification}
+            onDeleteQueueItem={handleDeleteVerification}
           />
         )}
       </main>

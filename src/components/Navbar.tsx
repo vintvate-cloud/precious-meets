@@ -5,7 +5,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   ShieldCheck,
   User,
-  Calendar,
   LogOut,
   ShieldAlert,
   Sparkles,
@@ -97,20 +96,22 @@ export function Navbar() {
               <span>Delhi NCR</span>
             </div>
 
-            {/* Solid Pill CTA Button -> routes to /quiz */}
-            <Link
-              to="/quiz"
-              className="rounded-full bg-white text-[#171514] border border-black/10 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold tracking-tight shadow-xs transition-all duration-300 hover:bg-[#691C35] hover:text-white hover:scale-105 active:scale-95"
-            >
-              Save a seat
-            </Link>
+            {/* Solid Pill CTA Button -> routes to /quiz (only shown when not logged in) */}
+            {!isMemberAuthenticated && (
+              <Link
+                to="/quiz"
+                className="rounded-full bg-white text-[#171514] border border-black/10 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold tracking-tight shadow-xs transition-all duration-300 hover:bg-[#691C35] hover:text-white hover:scale-105 active:scale-95"
+              >
+                Save a seat
+              </Link>
+            )}
 
             {/* User Profile Avatar if authenticated or in dashboard */}
-            {(user || isDashboard) && (
+            {isMemberAuthenticated && (
               <Link
                 to="/dashboard"
                 title="Go to Dashboard"
-                className="hidden sm:inline-flex rounded-full ring-offset-background transition-transform hover:scale-105 cursor-pointer"
+                className="inline-flex rounded-full ring-offset-background transition-transform hover:scale-105 cursor-pointer"
               >
                 <Avatar className="size-8 sm:size-9 border border-black/10 shadow-xs">
                   <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.display_name || "User"} />
@@ -221,14 +222,6 @@ export function Navbar() {
                       <span>My Dashboard</span>
                     </Link>
                   )}
-                  <Link
-                    to="/dashboard/bookings"
-                    onClick={() => setOpen(false)}
-                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-sage/40 transition-colors"
-                  >
-                    <Calendar className="size-4 text-foreground/70" />
-                    <span>My Meets & Passes</span>
-                  </Link>
                   {isAdmin && (
                     <Link
                       to="/admin"
