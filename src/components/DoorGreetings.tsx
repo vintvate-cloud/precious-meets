@@ -270,13 +270,6 @@ export function DoorGreetings() {
             );
           })}
         </div>
-
-        {/* Bottom Footnote */}
-        <div className="relative z-10 w-full text-center px-4 pt-4 border-t border-ink/[0.06]">
-          <p className="font-mono text-[11px] sm:text-xs text-ink/40 tracking-[0.2em] uppercase">
-            Aadhaar Verified Guests · No Resumes · Just Warmth
-          </p>
-        </div>
       </div>
     </section>
   );
