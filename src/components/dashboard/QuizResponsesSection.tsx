@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
+import { useAuth } from "@/lib/auth-context";
 import { QUIZ_QUESTIONS, QuizQuestion } from "@/lib/quiz-data";
 import {
   FileQuestion,
@@ -13,10 +14,12 @@ import {
   Phone,
   Mail,
   MapPin,
+  HelpCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function QuizResponsesSection() {
+  const { user, profile } = useAuth();
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [contact, setContact] = useState<{
     fullName?: string;
@@ -31,37 +34,24 @@ export function QuizResponsesSection() {
       const savedAnswers = localStorage.getItem("precious_meets_quiz_answers");
       if (savedAnswers) {
         setAnswers(JSON.parse(savedAnswers));
-      } else {
-        // Fallback default answers for demonstration
-        setAnswers({
-          q1: "contributor",
-          q2: "fulfilled_balanced",
-          q3: 65,
-          q4: ["art_culture", "philosophy_life", "culinary_travel"],
-          q5: "thoughtful_stories",
-          q6: "culinary_explorer",
-          q7: ["creative_minds", "entrepreneurs_builders"],
-          q8: "friday_saturday_evening",
-          q9: true,
-        });
       }
 
       const savedContact = localStorage.getItem("precious_meets_user_contact");
       if (savedContact) {
         setContact(JSON.parse(savedContact));
-      } else {
+      } else if (user) {
         setContact({
-          fullName: "Aria Sharma",
-          phone: "+91 98100 12345",
-          email: "aria.sharma@example.com",
-          pincode: "110030",
-          submittedAt: "22 October 2026",
+          fullName: profile?.display_name || user.user_metadata?.full_name || (user.email ? user.email.split("@")[0] : "Member"),
+          phone: profile?.phone || "",
+          email: user.email || "",
+          pincode: "",
+          submittedAt: new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }),
         });
       }
     } catch (e) {
       // ignore
     }
-  }, []);
+  }, [user, profile]);
 
   const getOptionLabel = (q: QuizQuestion, answerValue: any) => {
     if (q.type === "slider") {
@@ -135,32 +125,49 @@ export function QuizResponsesSection() {
         <div className="mt-4 grid gap-4 sm:grid-cols-4 text-xs">
           <div>
             <span className="text-muted-foreground block text-[11px]">Applicant Name</span>
-            <span className="font-semibold text-foreground">{contact.fullName || "Founding Member"}</span>
+            <span className="font-semibold text-foreground">{contact.fullName || profile?.display_name || user?.user_metadata?.full_name || "Member"}</span>
           </div>
           <div>
             <span className="text-muted-foreground block text-[11px]">Primary Phone</span>
-            <span className="font-semibold text-foreground">{contact.phone || "+91 98100 12345"}</span>
+            <span className="font-semibold text-foreground">{contact.phone || profile?.phone || "—"}</span>
           </div>
           <div>
             <span className="text-muted-foreground block text-[11px]">Contact Email</span>
-            <span className="font-semibold text-foreground">{contact.email || "member@preciousmeets.com"}</span>
+            <span className="font-semibold text-foreground">{contact.email || user?.email || "—"}</span>
           </div>
           <div>
             <span className="text-muted-foreground block text-[11px]">Postal Pincode</span>
-            <span className="font-semibold text-foreground">{contact.pincode || "110030"}</span>
+            <span className="font-semibold text-foreground">{contact.pincode || "—"}</span>
           </div>
         </div>
       </div>
 
-      {/* 9 Questions List */}
-      <div className="space-y-4">
-        <h3 className="font-display text-xl text-foreground">
-          Questionnaire Breakdown (9 Calibration Dimensions)
-        </h3>
+      {/* 9 Questions List or Empty State */}
+      {Object.keys(answers).length === 0 ? (
+        <div className="rounded-3xl border border-dashed border-border/80 bg-card p-12 text-center">
+          <HelpCircle className="size-12 mx-auto text-muted-foreground/40 mb-3" />
+          <h3 className="font-display text-2xl">No Discovery Quiz Responses Found</h3>
+          <p className="mt-1 text-xs text-muted-foreground max-w-sm mx-auto">
+            You haven't completed the 9-dimension discovery quiz yet. Complete the calibration to discover your table archetype.
+          </p>
+          <div className="mt-6">
+            <Link
+              to="/quiz"
+              className="inline-flex items-center gap-1.5 rounded-full bg-burgundy px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-ivory hover:bg-burgundy/90 transition-transform active:scale-95"
+            >
+              Start Discovery Quiz
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <h3 className="font-display text-xl text-foreground">
+            Questionnaire Breakdown (9 Calibration Dimensions)
+          </h3>
 
-        <div className="space-y-3">
-          {QUIZ_QUESTIONS.map((q, idx) => {
-            const userAnswer = answers[q.id];
+          <div className="space-y-3">
+            {QUIZ_QUESTIONS.map((q, idx) => {
+              const userAnswer = answers[q.id];
 
             return (
               <div
@@ -210,6 +217,7 @@ export function QuizResponsesSection() {
           })}
         </div>
       </div>
+      )}
     </div>
   );
 }

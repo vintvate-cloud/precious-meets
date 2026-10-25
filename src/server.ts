@@ -47,6 +47,58 @@ function isH3SwallowedErrorBody(body: string): boolean {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      const url = new URL(request.url);
+      if (url.pathname === "/api/send-email" && request.method === "POST") {
+        try {
+          const body = (await request.json()) as {
+            to: string | string[];
+            subject: string;
+            html: string;
+            from?: string;
+          };
+          const apiKey =
+            (typeof process !== "undefined" && (process.env?.RESEND_API_KEY || process.env?.VITE_RESEND_API_KEY)) ||
+            ((env as any)?.RESEND_API_KEY || (env as any)?.VITE_RESEND_API_KEY) ||
+            "";
+          const from =
+            body.from ||
+            (typeof process !== "undefined" && (process.env?.RESEND_FROM_EMAIL || process.env?.VITE_RESEND_FROM_EMAIL)) ||
+            ((env as any)?.RESEND_FROM_EMAIL || (env as any)?.VITE_RESEND_FROM_EMAIL) ||
+            "Precious Meets <invitations@cikka.club>";
+
+          const resendRes = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${apiKey.trim()}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              from: from.trim(),
+              to: Array.isArray(body.to) ? body.to : [body.to],
+              subject: body.subject,
+              html: body.html,
+            }),
+          });
+
+          const resData = await resendRes.json();
+          return new Response(
+            JSON.stringify({ ok: resendRes.ok, status: resendRes.status, data: resData }),
+            {
+              status: resendRes.status,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
+        } catch (apiErr: any) {
+          return new Response(
+            JSON.stringify({ ok: false, error: apiErr.message || String(apiErr) }),
+            {
+              status: 500,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
+        }
+      }
+
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
@@ -54,7 +106,7 @@ export default {
       console.error(error);
       return new Response(renderErrorPage(), {
         status: 500,
-        headers: { "content-type": "text/html; charset=utf-8" },
+        headers: { "Content-Type": "text/html; charset=utf-8" },
       });
     }
   },

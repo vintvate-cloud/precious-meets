@@ -40,10 +40,10 @@ export function InvoiceReceiptSection() {
     window.print();
   };
 
-  const displayName = profile?.display_name || user?.user_metadata?.full_name || "Aria Sharma";
-  const email = user?.email || "aria.sharma@example.com";
+  const displayName = profile?.display_name || user?.user_metadata?.full_name || (user?.email ? user.email.split("@")[0] : "Founding Member");
+  const email = user?.email || "";
   const city = profile?.city || "Delhi NCR";
-  const phone = profile?.phone || "+91 98100 12345";
+  const phone = profile?.phone || "";
 
   return (
     <div className="space-y-8">

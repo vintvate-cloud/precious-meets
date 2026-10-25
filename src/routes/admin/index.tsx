@@ -8,6 +8,10 @@ import {
   AdminEvent,
   AdminAttendee,
 } from "@/lib/events-service";
+import {
+  ApplicationsService,
+  MemberApplication,
+} from "@/lib/applications-service";
 import { InteractiveTable } from "@/components/admin/InteractiveTable";
 import { EventFormModal } from "@/components/admin/EventFormModal";
 import { EventQrScannerModal } from "@/components/admin/EventQrScannerModal";
@@ -43,6 +47,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
+export interface SOSIncident {
+  id: string;
+  reference: string;
+  userName: string;
+  userEmail: string;
+  category: string;
+  status: "open" | "acknowledged" | "resolved";
+  createdAt: string;
+  bookingRef: string;
+  location: string;
+}
+
+const STORAGE_INCIDENTS_KEY = "precious_meets_sos_incidents";
+
 export const Route = createFileRoute("/admin/")({
   head: () => ({
     meta: [
@@ -66,6 +84,9 @@ function AdminConsolePage() {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [eventFilter, setEventFilter] = useState<"upcoming" | "past" | "all">("upcoming");
 
+  // Applications (Real member dossiers for overview metrics)
+  const [applications, setApplications] = useState<MemberApplication[]>([]);
+
   // Modal State
   const [eventModalOpen, setEventModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<AdminEvent | null>(null);
@@ -80,21 +101,38 @@ function AdminConsolePage() {
     setScannerModalOpen(true);
   };
 
-  // Load events and attendees from service
+  // Load events, attendees, and applications
   useEffect(() => {
-    const loadedEvents = EventsService.getEvents();
-    const loadedAttendees = EventsService.getAttendees();
-    setEvents(loadedEvents);
-    setAttendees(loadedAttendees);
+    const refreshData = () => {
+      const loadedEvents = EventsService.getEvents();
+      const loadedAttendees = EventsService.getAttendees();
+      const loadedApps = ApplicationsService.getApplications();
+      setEvents(loadedEvents);
+      setAttendees(loadedAttendees);
+      setApplications(loadedApps);
 
-    if (loadedEvents.length > 0 && !selectedEventId) {
-      // Default select the first upcoming event
-      const firstUpcoming = loadedEvents.find((e) => e.status !== "completed") || loadedEvents[0];
-      if (firstUpcoming) {
-        setSelectedEventId(firstUpcoming.id);
+      if (loadedEvents.length > 0 && !selectedEventId) {
+        const firstUpcoming = loadedEvents.find((e) => e.status !== "completed") || loadedEvents[0];
+        if (firstUpcoming) {
+          setSelectedEventId(firstUpcoming.id);
+        }
       }
-    }
-  }, []);
+    };
+
+    refreshData();
+    ApplicationsService.fetchApplicationsFromDb().then((dbApps) => {
+      if (dbApps && dbApps.length > 0) {
+        setApplications(dbApps);
+      }
+    });
+
+    window.addEventListener("storage", refreshData);
+    window.addEventListener("precious_meets_applications_updated", refreshData);
+    return () => {
+      window.removeEventListener("storage", refreshData);
+      window.removeEventListener("precious_meets_applications_updated", refreshData);
+    };
+  }, [selectedEventId]);
 
   const selectedEvent = events.find((e) => e.id === selectedEventId) || events[0];
 
@@ -150,31 +188,26 @@ function AdminConsolePage() {
     }
   };
 
-  // Sample operational SOS & verification data
-  const [incidents, setIncidents] = useState([
-    {
-      id: "inc_01",
-      reference: "SOS-K89A2-Z11",
-      userName: "Aria Sharma",
-      userEmail: "aria.sharma@example.com",
-      category: "discomfort",
-      status: "open",
-      createdAt: "14 mins ago",
-      bookingRef: "PM-X92F8A",
-      location: "Mehrauli, Delhi NCR (GPS Attached)",
-    },
-    {
-      id: "inc_02",
-      reference: "SOS-M44C9-B02",
-      userName: "Rohan Patel",
-      userEmail: "rohan.p@example.com",
-      category: "venue_safety",
-      status: "acknowledged",
-      createdAt: "2 hours ago",
-      bookingRef: "PM-B33G19",
-      location: "Hauz Khas, Delhi NCR",
-    },
-  ]);
+  // Real operational SOS data (initialized empty, mock seeds purged)
+  const [incidents, setIncidents] = useState<SOSIncident[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const saved = localStorage.getItem(STORAGE_INCIDENTS_KEY);
+      if (saved) {
+        const parsed: SOSIncident[] = JSON.parse(saved);
+        // Purge legacy mock incidents
+        return parsed.filter(
+          (inc) =>
+            inc.id !== "inc_01" &&
+            inc.id !== "inc_02" &&
+            !inc.userEmail?.endsWith("@example.com")
+        );
+      }
+    } catch (e) {
+      // ignore
+    }
+    return [];
+  });
 
   const [verifications, setVerifications] = useState<VerificationQueueItem[]>([]);
 
@@ -194,9 +227,17 @@ function AdminConsolePage() {
   }, []);
 
   const handleResolveIncident = (id: string) => {
-    setIncidents((prev) =>
-      prev.map((inc) => (inc.id === id ? { ...inc, status: "resolved" } : inc)),
-    );
+    setIncidents((prev) => {
+      const updated = prev.map((inc) =>
+        inc.id === id ? { ...inc, status: "resolved" as const } : inc
+      );
+      try {
+        localStorage.setItem(STORAGE_INCIDENTS_KEY, JSON.stringify(updated));
+      } catch (e) {
+        // ignore
+      }
+      return updated;
+    });
     toast.success("Incident marked as resolved. Audit logged.");
   };
 
@@ -530,90 +571,110 @@ function AdminConsolePage() {
         )}
 
         {/* 2. EXECUTIVE METRICS TAB */}
-        {activeTab === "overview" && (
-          <div className="mt-8 space-y-8">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="rounded-2xl border border-border/80 bg-card p-6 shadow-sm">
-                <div className="flex items-center justify-between text-muted-foreground">
-                  <span className="text-xs font-medium">Total Registered Members</span>
-                  <Users className="size-4 text-forest" />
+        {activeTab === "overview" && (() => {
+          const totalMembersCount = applications.length;
+          const verifiedCount = applications.filter((a) => a.identityStatus === "verified").length;
+          const grossRevenue = applications
+            .filter((a) => a.paymentStatus === "paid")
+            .reduce((acc, a) => acc + (a.paymentAmountInr || 1999), 0);
+          const activeIncidentsCount = incidents.filter((i) => i.status !== "resolved").length;
+          const verificationRate = totalMembersCount > 0 ? Math.round((verifiedCount / totalMembersCount) * 100) : 0;
+
+          return (
+            <div className="mt-8 space-y-8">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-2xl border border-border/80 bg-card p-6 shadow-sm">
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span className="text-xs font-medium">Total Registered Members</span>
+                    <Users className="size-4 text-forest" />
+                  </div>
+                  <p className="font-display mt-3 text-3xl font-bold">{totalMembersCount.toLocaleString()}</p>
+                  <p className="mt-1 text-[11px] text-forest">Real member applications dossier</p>
                 </div>
-                <p className="font-display mt-3 text-3xl font-bold">1,482</p>
-                <p className="mt-1 text-[11px] text-forest">↑ +24% this week in Delhi NCR</p>
+
+                <div className="rounded-2xl border border-border/80 bg-card p-6 shadow-sm">
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span className="text-xs font-medium">Verified Attendees</span>
+                    <ShieldCheck className="size-4 text-forest" />
+                  </div>
+                  <p className="font-display mt-3 text-3xl font-bold">{verifiedCount.toLocaleString()}</p>
+                  <p className="mt-1 text-[11px] text-muted-foreground">{verificationRate}% DigiLocker / Aadhaar verified</p>
+                </div>
+
+                <div className="rounded-2xl border border-border/80 bg-card p-6 shadow-sm">
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span className="text-xs font-medium">Gross Bookings Revenue</span>
+                    <CreditCard className="size-4 text-burgundy" />
+                  </div>
+                  <p className="font-mono mt-3 text-3xl font-bold text-burgundy">₹{grossRevenue.toLocaleString()}</p>
+                  <p className="mt-1 text-[11px] text-muted-foreground">Razorpay captured passes</p>
+                </div>
+
+                <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-6 shadow-sm">
+                  <div className="flex items-center justify-between text-destructive">
+                    <span className="text-xs font-medium">Active SOS Incidents</span>
+                    <ShieldAlert className="size-4 animate-pulse" />
+                  </div>
+                  <p className="font-display mt-3 text-3xl font-bold text-destructive">
+                    {activeIncidentsCount}
+                  </p>
+                  <p className="mt-1 text-[11px] text-destructive">
+                    {activeIncidentsCount > 0 ? "Requires safety attention" : "All tables secure"}
+                  </p>
+                </div>
               </div>
 
-              <div className="rounded-2xl border border-border/80 bg-card p-6 shadow-sm">
-                <div className="flex items-center justify-between text-muted-foreground">
-                  <span className="text-xs font-medium">Verified Attendees</span>
-                  <ShieldCheck className="size-4 text-forest" />
-                </div>
-                <p className="font-display mt-3 text-3xl font-bold">1,210</p>
-                <p className="mt-1 text-[11px] text-muted-foreground">81.6% DigiLocker Aadhaar verification</p>
-              </div>
-
-              <div className="rounded-2xl border border-border/80 bg-card p-6 shadow-sm">
-                <div className="flex items-center justify-between text-muted-foreground">
-                  <span className="text-xs font-medium">Gross Bookings Revenue</span>
-                  <CreditCard className="size-4 text-burgundy" />
-                </div>
-                <p className="font-mono mt-3 text-3xl font-bold text-burgundy">₹4,82,500</p>
-                <p className="mt-1 text-[11px] text-muted-foreground">Razorpay captured passes</p>
-              </div>
-
-              <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-6 shadow-sm">
-                <div className="flex items-center justify-between text-destructive">
-                  <span className="text-xs font-medium">Active SOS Incidents</span>
-                  <ShieldAlert className="size-4 animate-pulse" />
-                </div>
-                <p className="font-display mt-3 text-3xl font-bold text-destructive">
-                  {incidents.filter((i) => i.status !== "resolved").length}
-                </p>
-                <p className="mt-1 text-[11px] text-destructive">Requires safety attention</p>
-              </div>
-            </div>
-
-            {/* Quick Experiences table */}
-            <div className="rounded-3xl border border-border/80 bg-card p-6 shadow-sm">
-              <h2 className="font-display text-2xl">Active Experiences Across Cities</h2>
-              <div className="mt-4 overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="border-b border-border/60 text-muted-foreground">
-                    <tr>
-                      <th className="pb-3">Experience</th>
-                      <th className="pb-3">City</th>
-                      <th className="pb-3">Price</th>
-                      <th className="pb-3">Booked / Total</th>
-                      <th className="pb-3">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border/60">
-                    {events.map((evt) => (
-                      <tr key={evt.id}>
-                        <td className="py-3 font-medium">{evt.title}</td>
-                        <td className="py-3 text-muted-foreground">{evt.city} ({evt.neighborhood})</td>
-                        <td className="py-3 font-mono">₹{evt.priceInr.toLocaleString()}</td>
-                        <td className="py-3">{evt.seats.filter(Boolean).length} / 6 seats</td>
-                        <td className="py-3">
-                          <span
-                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
-                              evt.status === "published"
-                                ? "bg-forest/20 text-forest"
-                                : evt.status === "completed"
-                                ? "bg-muted text-muted-foreground"
-                                : "bg-ochre/20 text-ochre"
-                            }`}
-                          >
-                            {evt.status}
-                          </span>
-                        </td>
+              {/* Quick Experiences table */}
+              <div className="rounded-3xl border border-border/80 bg-card p-6 shadow-sm">
+                <h2 className="font-display text-2xl">Active Experiences Across Cities</h2>
+                <div className="mt-4 overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="border-b border-border/60 text-muted-foreground">
+                      <tr>
+                        <th className="pb-3">Experience</th>
+                        <th className="pb-3">City</th>
+                        <th className="pb-3">Price</th>
+                        <th className="pb-3">Booked / Total</th>
+                        <th className="pb-3">Status</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-border/60">
+                      {events.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="py-8 text-center text-muted-foreground">
+                            No experiences active yet. Click "+ Host Meet" above to schedule a gathering.
+                          </td>
+                        </tr>
+                      ) : (
+                        events.map((evt) => (
+                          <tr key={evt.id}>
+                            <td className="py-3 font-medium">{evt.title}</td>
+                            <td className="py-3 text-muted-foreground">{evt.city} ({evt.neighborhood})</td>
+                            <td className="py-3 font-mono">₹{evt.priceInr.toLocaleString()}</td>
+                            <td className="py-3">{evt.seats.filter(Boolean).length} / 6 seats</td>
+                            <td className="py-3">
+                              <span
+                                className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
+                                  evt.status === "published"
+                                    ? "bg-forest/20 text-forest"
+                                    : evt.status === "completed"
+                                    ? "bg-muted text-muted-foreground"
+                                    : "bg-ochre/20 text-ochre"
+                                }`}
+                              >
+                                {evt.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* 3. SOS INCIDENTS TAB */}
         {activeTab === "incidents" && (
@@ -628,52 +689,62 @@ function AdminConsolePage() {
             </div>
 
             <div className="space-y-4">
-              {incidents.map((inc) => (
-                <div
-                  key={inc.id}
-                  className={`rounded-2xl border p-6 transition-all ${
-                    inc.status === "resolved"
-                      ? "border-border/60 bg-card/60 opacity-60"
-                      : "border-destructive/30 bg-destructive/5"
-                  }`}
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-4">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs font-bold text-destructive">
-                          {inc.reference}
-                        </span>
-                        <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-[10px] uppercase font-semibold text-destructive">
-                          {inc.category}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground">· {inc.createdAt}</span>
+              {incidents.length === 0 ? (
+                <div className="rounded-3xl border border-dashed border-border p-12 text-center text-muted-foreground bg-card">
+                  <ShieldCheck className="mx-auto size-12 text-forest/60 mb-3" />
+                  <h3 className="font-display text-xl text-foreground">No Emergency Incidents Reported</h3>
+                  <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
+                    All active tables, venues, and seated members are currently operating in complete safety.
+                  </p>
+                </div>
+              ) : (
+                incidents.map((inc) => (
+                  <div
+                    key={inc.id}
+                    className={`rounded-2xl border p-6 transition-all ${
+                      inc.status === "resolved"
+                        ? "border-border/60 bg-card/60 opacity-60"
+                        : "border-destructive/30 bg-destructive/5"
+                    }`}
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs font-bold text-destructive">
+                            {inc.reference}
+                          </span>
+                          <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-[10px] uppercase font-semibold text-destructive">
+                            {inc.category}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground">· {inc.createdAt}</span>
+                        </div>
+                        <h3 className="font-display mt-2 text-xl font-medium">
+                          Reported by {inc.userName} ({inc.userEmail})
+                        </h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Booking: <strong className="text-foreground">{inc.bookingRef}</strong> | Location: {inc.location}
+                        </p>
                       </div>
-                      <h3 className="font-display mt-2 text-xl font-medium">
-                        Reported by {inc.userName} ({inc.userEmail})
-                      </h3>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Booking: <strong className="text-foreground">{inc.bookingRef}</strong> | Location: {inc.location}
-                      </p>
-                    </div>
 
-                    <div>
-                      {inc.status === "resolved" ? (
-                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-forest">
-                          <CheckCircle2 className="size-4" /> Resolved
-                        </span>
-                      ) : (
-                        <Button
-                          variant="destructive"
-                          onClick={() => handleResolveIncident(inc.id)}
-                          className="text-xs rounded-full"
-                        >
-                          Mark as Resolved
-                        </Button>
-                      )}
+                      <div>
+                        {inc.status === "resolved" ? (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-forest">
+                            <CheckCircle2 className="size-4" /> Resolved
+                          </span>
+                        ) : (
+                          <Button
+                            variant="destructive"
+                            onClick={() => handleResolveIncident(inc.id)}
+                            className="text-xs rounded-full"
+                          >
+                            Mark as Resolved
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         )}

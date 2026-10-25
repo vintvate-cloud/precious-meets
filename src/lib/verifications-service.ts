@@ -15,48 +15,36 @@ export interface VerificationRecord {
 
 const STORAGE_KEY = "precious_meets_verification_queue_v1";
 
-const INITIAL_QUEUE: VerificationRecord[] = [
-  {
-    id: "ver_01",
-    userName: "Ananya Deshmukh",
-    email: "ananya.d@example.com",
-    phone: "+91 98210 77651",
-    city: "Delhi NCR",
-    method: "digilocker_consent_offline",
-    status: "pending",
-    requestedAt: "Today, 2:15 PM",
-    notes: "Aadhaar offline XML match pending reviewer clearance",
-  },
-  {
-    id: "ver_02",
-    userName: "Vikram Sengupta",
-    email: "vikram.s@example.com",
-    phone: "+91 98101 44521",
-    city: "Delhi NCR",
-    method: "digilocker_consent_offline",
-    status: "manual_review",
-    requestedAt: "Yesterday, 6:40 PM",
-    notes: "Document photo clarity check required",
-  },
-];
+const INITIAL_QUEUE: VerificationRecord[] = [];
 
 export class VerificationsService {
   /**
-   * Retrieves current verification queue from localStorage
+   * Retrieves current verification queue from localStorage (strictly real submissions)
    */
   static getQueue(): VerificationRecord[] {
-    if (typeof window === "undefined") return INITIAL_QUEUE;
+    if (typeof window === "undefined") return [];
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          // Purge any legacy mock records from old seed data
+          const realQueue = parsed.filter(
+            (v: VerificationRecord) =>
+              !v.id.startsWith("ver_01") &&
+              !v.id.startsWith("ver_02") &&
+              !v.email?.endsWith("@example.com"),
+          );
+          if (realQueue.length !== parsed.length) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(realQueue));
+          }
+          return realQueue;
+        }
       }
     } catch (e) {
       console.warn("[VerificationsService] Failed to parse verification queue:", e);
     }
-    // Initialize default seed queue if not present
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_QUEUE));
-    return INITIAL_QUEUE;
+    return [];
   }
 
   /**

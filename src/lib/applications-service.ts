@@ -326,9 +326,9 @@ export class ApplicationsService {
     try {
       const signInUrl = typeof window !== "undefined"
         ? `${window.location.origin}/login?email=${encodeURIComponent(app.applicantEmail)}`
-        : `http://localhost:5173/login?email=${encodeURIComponent(app.applicantEmail)}`;
+        : `http://localhost:8080/login?email=${encodeURIComponent(app.applicantEmail)}`;
 
-      await EmailService.send({
+      const emailRes = await EmailService.send({
         to: app.applicantEmail,
         subject: "Your Precious Meets Member Sign-in Credentials 🗝️",
         template: "member_credentials",
@@ -339,6 +339,10 @@ export class ApplicationsService {
           signInUrl,
         },
       });
+
+      if (!emailRes.success) {
+        throw new Error(emailRes.error || `Resend failed to deliver credentials to ${app.applicantEmail}`);
+      }
 
       // 3. Mark credentials as sent & promote status to APPROVED and ACTIVE
       app.credentialsSent = true;
