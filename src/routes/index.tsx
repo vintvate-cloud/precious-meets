@@ -23,6 +23,7 @@ import heroSketchBg from "@/assets/hero-sketch-bg.jpg";
 import footerBg from "@/assets/footer-bg.jpg";
 import { ConcaveCarousel } from "@/components/ConcaveCarousel";
 import { HowPhoneMockup } from "@/components/HowPhoneMockup";
+import { AnimatedSummitHero } from "@/components/hero/AnimatedSummitHero";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -638,9 +639,9 @@ function Statement() {
           <div className="w-[70vw] h-[70vw] max-w-[850px] max-h-[850px] rounded-full bg-[#C6A568]/12 blur-[150px] pointer-events-none select-none" />
         </div>
 
-        <div className="relative z-10 w-full max-w-[98vw] lg:max-w-[96vw] xl:max-w-[94vw] 2xl:max-w-[92vw] mx-auto flex flex-col items-center text-center px-1 sm:px-2 pt-12 sm:pt-8">
+        <div className="relative z-10 w-full max-w-[90vw] lg:max-w-[84vw] xl:max-w-[80vw] 2xl:max-w-[76vw] mx-auto flex flex-col items-center text-center px-2 sm:px-4 pt-16 sm:pt-12">
 
-          <h2 className="w-full font-display text-[9vw] sm:text-[7vw] md:text-[5.6vw] lg:text-[5vw] xl:text-[5.4vw] 2xl:text-[5.8vw] leading-[1.08] sm:leading-[1.1] tracking-tight select-none">
+          <h2 className="w-full font-display text-[6.8vw] sm:text-[5.2vw] md:text-[4.2vw] lg:text-[3.6vw] xl:text-[3.8vw] 2xl:text-[4vw] leading-[1.14] sm:leading-[1.18] tracking-tight select-none">
             {manifestoLines.map((line, lIdx) => {
               const words = line.text.split(" ");
               return (
@@ -1779,7 +1780,7 @@ function Index() {
       <Preloader onComplete={handlePreloaderComplete} />
       <Navbar />
       <main>
-        <Hero />
+        <AnimatedSummitHero />
         <HeroMarquee />
         <Statement />
         <DoorGreetings />

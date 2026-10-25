@@ -201,4 +201,759 @@ html.lenis body {
   display: flex;
   width: max-content;
   animation: marquee-reverse 44s linear infinite;
-}
+}
+
+/* ========================================================
+   ANIMATED SUMMIT HERO KEYFRAMES & LOCOMOTION
+   ======================================================== */
+
+@keyframes cloudDrift {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(100vw + 500px)); }
+}
+
+@keyframes helicopterFlight {
+  0% { transform: translate3d(0, 0, 0); }
+  25% { transform: translate3d(-35vw, 15px, 0); }
+  50% { transform: translate3d(-70vw, -8px, 0); }
+  75% { transform: translate3d(-105vw, 12px, 0); }
+  100% { transform: translate3d(-140vw, 0, 0); }
+}
+
+@keyframes chuteSway {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(6deg); }
+}
+
+@keyframes parachuteFloat {
+  0% { transform: translate3d(0, -25px, 0); }
+  50% { transform: translate3d(20px, 30px, 0); }
+  100% { transform: translate3d(0, -25px, 0); }
+}
+
+@keyframes flockFly {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-120vw, -30px, 0); }
+}
+
+@keyframes beamSweepLeft {
+  0%, 100% { transform: rotate(-12deg); }
+  50% { transform: rotate(16deg); }
+}
+
+@keyframes beamSweepRight {
+  0%, 100% { transform: rotate(18deg); }
+  50% { transform: rotate(-10deg); }
+}
+
+@keyframes patrolHover {
+  0%, 100% { transform: translate(1360px, 65px); }
+  50% { transform: translate(1380px, 52px); }
+}
+
+/* Character Leg Strides & Natural Locomotion */
+@keyframes humanLegFront {
+  0% { transform: rotate(-28deg); }
+  50% { transform: rotate(28deg); }
+  100% { transform: rotate(-28deg); }
+}
+
+@keyframes humanLegBack {
+  0% { transform: rotate(28deg); }
+  50% { transform: rotate(-28deg); }
+  100% { transform: rotate(28deg); }
+}
+
+@keyframes humanTorsoBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes humanArmSwing {
+  0% { transform: rotate(-24deg); }
+  50% { transform: rotate(24deg); }
+  100% { transform: rotate(-24deg); }
+}
+
+@keyframes humanArmSwingReverse {
+  0% { transform: rotate(24deg); }
+  50% { transform: rotate(-24deg); }
+  100% { transform: rotate(24deg); }
+}
+
+@keyframes humanArmWave {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-32deg); }
+  50% { transform: rotate(12deg); }
+  75% { transform: rotate(-28deg); }
+}
+
+@keyframes humanArmGesture {
+  0%, 100% { transform: rotate(0deg); }
+  35% { transform: rotate(26deg); }
+  70% { transform: rotate(-16deg); }
+}
+
+@keyframes humanLaptopTyping {
+  0%, 100% { transform: translateY(0); }
+  25% { transform: translateY(-1.5px); }
+  50% { transform: translateY(0); }
+  75% { transform: translateY(-1px); }
+}
+
+/* Core Locomotion Classes (Attached to SVG joints) */
+.leg-stride-front {
+  transform-box: fill-box;
+  transform-origin: top center;
+  animation: humanLegFront 0.8s ease-in-out infinite;
+}
+
+.leg-stride-back {
+  transform-box: fill-box;
+  transform-origin: top center;
+  animation: humanLegBack 0.8s ease-in-out infinite;
+}
+
+.torso-bob {
+  animation: humanTorsoBob 0.4s ease-in-out infinite;
+}
+
+.arm-swing {
+  transform-box: fill-box;
+  transform-origin: top center;
+  animation: humanArmSwing 0.8s ease-in-out infinite;
+}
+
+.arm-swing-reverse {
+  transform-box: fill-box;
+  transform-origin: top center;
+  animation: humanArmSwingReverse 0.8s ease-in-out infinite;
+}
+
+.arm-wave {
+  transform-box: fill-box;
+  transform-origin: top center;
+  animation: humanArmWave 2.2s ease-in-out infinite;
+}
+
+.arm-gesture {
+  transform-box: fill-box;
+  transform-origin: top center;
+  animation: humanArmGesture 2.5s ease-in-out infinite;
+}
+
+.laptop-typing {
+  animation: humanLaptopTyping 1.4s ease-in-out infinite;
+}
+
+.wheel-spin {
+  transform-origin: center center;
+  animation: spin 1.2s linear infinite;
+}
+
+/* ========================================================
+   BROAD WALKING TRAJECTORIES ("idhar se udhar ghumna")
+   ======================================================== */
+
+/* Foreground Hero Tracks */
+@keyframes walkTrackHero1 {
+  0% { transform: translate3d(0, 0, 0) scaleX(1); }
+  46% { transform: translate3d(36vw, 0, 0) scaleX(1); }
+  50% { transform: translate3d(36vw, 0, 0) scaleX(-1); }
+  96% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  100% { transform: translate3d(0, 0, 0) scaleX(1); }
+}
+
+@keyframes walkTrackHero2 {
+  0% { transform: translate3d(0, 0, 0) scaleX(1); }
+  46% { transform: translate3d(32vw, 0, 0) scaleX(1); }
+  50% { transform: translate3d(32vw, 0, 0) scaleX(-1); }
+  96% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  100% { transform: translate3d(0, 0, 0) scaleX(1); }
+}
+
+@keyframes walkTrackHero3 {
+  0% { transform: translate3d(0, 0, 0) scaleX(1); }
+  46% { transform: translate3d(30vw, 0, 0) scaleX(1); }
+  50% { transform: translate3d(30vw, 0, 0) scaleX(-1); }
+  96% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  100% { transform: translate3d(0, 0, 0) scaleX(1); }
+}
+
+@keyframes walkTrackHeroWheelchair {
+  0% { transform: translate3d(0, 0, 0) scaleX(1); }
+  46% { transform: translate3d(34vw, 0, 0) scaleX(1); }
+  50% { transform: translate3d(34vw, 0, 0) scaleX(-1); }
+  96% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  100% { transform: translate3d(0, 0, 0) scaleX(1); }
+}
+
+@keyframes walkTrackHero5 {
+  0% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  46% { transform: translate3d(-34vw, 0, 0) scaleX(-1); }
+  50% { transform: translate3d(-34vw, 0, 0) scaleX(1); }
+  96% { transform: translate3d(0, 0, 0) scaleX(1); }
+  100% { transform: translate3d(0, 0, 0) scaleX(-1); }
+}
+
+@keyframes walkTrackHero6 {
+  0% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  46% { transform: translate3d(-38vw, 0, 0) scaleX(-1); }
+  50% { transform: translate3d(-38vw, 0, 0) scaleX(1); }
+  96% { transform: translate3d(0, 0, 0) scaleX(1); }
+  100% { transform: translate3d(0, 0, 0) scaleX(-1); }
+}
+
+.track-hero-1 { animation: walkTrackHero1 18s ease-in-out infinite; }
+.track-hero-2 { animation: walkTrackHero2 20s ease-in-out infinite; }
+.track-hero-3 { animation: walkTrackHero3 19s ease-in-out infinite; }
+.track-hero-4 { animation: walkTrackHeroWheelchair 21s ease-in-out infinite; }
+.track-hero-5 { animation: walkTrackHero5 17s ease-in-out infinite; }
+.track-hero-6 { animation: walkTrackHero6 22s ease-in-out infinite; }
+
+/* Midground Tracks */
+@keyframes walkTrackMid1 {
+  0% { transform: translate3d(0, 0, 0) scaleX(1); }
+  46% { transform: translate3d(26vw, 0, 0) scaleX(1); }
+  50% { transform: translate3d(26vw, 0, 0) scaleX(-1); }
+  96% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  100% { transform: translate3d(0, 0, 0) scaleX(1); }
+}
+
+@keyframes walkTrackMid2 {
+  0% { transform: translate3d(0, 0, 0) scaleX(1); }
+  46% { transform: translate3d(24vw, 0, 0) scaleX(1); }
+  50% { transform: translate3d(24vw, 0, 0) scaleX(-1); }
+  96% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  100% { transform: translate3d(0, 0, 0) scaleX(1); }
+}
+
+@keyframes walkTrackMid3 {
+  0% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  46% { transform: translate3d(-25vw, 0, 0) scaleX(-1); }
+  50% { transform: translate3d(-25vw, 0, 0) scaleX(1); }
+  96% { transform: translate3d(0, 0, 0) scaleX(1); }
+  100% { transform: translate3d(0, 0, 0) scaleX(-1); }
+}
+
+@keyframes walkTrackMid4 {
+  0% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  46% { transform: translate3d(-26vw, 0, 0) scaleX(-1); }
+  50% { transform: translate3d(-26vw, 0, 0) scaleX(1); }
+  96% { transform: translate3d(0, 0, 0) scaleX(1); }
+  100% { transform: translate3d(0, 0, 0) scaleX(-1); }
+}
+
+.track-mid-1 { animation: walkTrackMid1 23s ease-in-out infinite; }
+.track-mid-2 { animation: walkTrackMid2 21s ease-in-out infinite; }
+.track-mid-3 { animation: walkTrackMid3 24s ease-in-out infinite; }
+.track-mid-4 { animation: walkTrackMid4 22s ease-in-out infinite; }
+
+/* Background Tracks */
+@keyframes walkTrackBg1 {
+  0% { transform: translate3d(0, 0, 0) scaleX(1); }
+  46% { transform: translate3d(20vw, 0, 0) scaleX(1); }
+  50% { transform: translate3d(20vw, 0, 0) scaleX(-1); }
+  96% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  100% { transform: translate3d(0, 0, 0) scaleX(1); }
+}
+
+@keyframes walkTrackBg2 {
+  0% { transform: translate3d(0, 0, 0) scaleX(1); }
+  46% { transform: translate3d(22vw, 0, 0) scaleX(1); }
+  50% { transform: translate3d(22vw, 0, 0) scaleX(-1); }
+  96% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  100% { transform: translate3d(0, 0, 0) scaleX(1); }
+}
+
+@keyframes walkTrackBg3 {
+  0% { transform: translate3d(0, 0, 0) scaleX(1); }
+  46% { transform: translate3d(20vw, 0, 0) scaleX(1); }
+  50% { transform: translate3d(20vw, 0, 0) scaleX(-1); }
+  96% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  100% { transform: translate3d(0, 0, 0) scaleX(1); }
+}
+
+@keyframes walkTrackBg4 {
+  0% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  46% { transform: translate3d(-22vw, 0, 0) scaleX(-1); }
+  50% { transform: translate3d(-22vw, 0, 0) scaleX(1); }
+  96% { transform: translate3d(0, 0, 0) scaleX(1); }
+  100% { transform: translate3d(0, 0, 0) scaleX(-1); }
+}
+
+@keyframes walkTrackBg5 {
+  0% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  46% { transform: translate3d(-22vw, 0, 0) scaleX(-1); }
+  50% { transform: translate3d(-22vw, 0, 0) scaleX(1); }
+  96% { transform: translate3d(0, 0, 0) scaleX(1); }
+  100% { transform: translate3d(0, 0, 0) scaleX(-1); }
+}
+
+.track-bg-1 { animation: walkTrackBg1 26s ease-in-out infinite; }
+.track-bg-2 { animation: walkTrackBg2 28s ease-in-out infinite; }
+.track-bg-3 { animation: walkTrackBg3 25s ease-in-out infinite; }
+.track-bg-4 { animation: walkTrackBg4 27s ease-in-out infinite; }
+.track-bg-5 { animation: walkTrackBg5 24s ease-in-out infinite; }
+
+/* ========================================================
+   THE GEOMETRY OF SIX: DUAL DINING TABLES & 12 GUESTS
+   - Tables spawn on both sides after 3 seconds (at 10.7%)
+   - 6 guests walk to Left Table, 6 guests walk to Right Table at steady, consistent speed
+   - As each guest arrives at their table, their walking legs STOP completely
+   - Seated guests dine, toast wine, and converse while background attendees keep strolling
+   ======================================================== */
+
+/* Table Spawn Animation (Tables do not exist initially; spawn at 3s) */
+@keyframes tableSpawnSequence {
+  0%, 10.7% {
+    opacity: 0;
+    transform: scale(0.35) translateY(24px);
+    visibility: hidden;
+    pointer-events: none;
+  }
+  11.4% {
+    visibility: visible;
+    opacity: 0.45;
+    transform: scale(0.7) translateY(12px);
+  }
+  13.5% {
+    opacity: 1;
+    transform: scale(1.05) translateY(-3px);
+  }
+  15.5%, 88% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    visibility: visible;
+    pointer-events: auto;
+  }
+  92%, 100% {
+    opacity: 0;
+    transform: scale(0.5) translateY(20px);
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+.table-spawn {
+  animation: tableSpawnSequence 28s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+/* Golden Spawn Particle Burst at 3s */
+@keyframes tableSpawnPulse {
+  0%, 10.7% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  11.5% {
+    opacity: 0.95;
+    transform: scale(0.85);
+  }
+  14% {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+  14.1%, 100% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+}
+
+.table-spawn-burst {
+  animation: tableSpawnPulse 28s ease-out infinite;
+}
+
+/* Walking leg stride mechanics */
+.guest-legs-stride-front {
+  transform-box: fill-box;
+  transform-origin: top center;
+  animation: humanLegFront 0.8s ease-in-out infinite;
+}
+
+.guest-legs-stride-back {
+  transform-box: fill-box;
+  transform-origin: top center;
+  animation: humanLegBack 0.8s ease-in-out infinite;
+}
+
+/* ========================================================
+   TABLE LEFT (6 GUESTS - Walking steadily from right to left)
+   ======================================================== */
+
+/* Guest L1 (Back Left) - Arrives at 34% */
+@keyframes guestJourneyL1 {
+  0% { transform: translate3d(36vw, 0, 0) scaleX(-1); }
+  10% { transform: translate3d(25.4vw, 0, 0) scaleX(-1); }
+  20% { transform: translate3d(14.8vw, 0, 0) scaleX(-1); }
+  30% { transform: translate3d(4.2vw, 0, 0) scaleX(-1); }
+  34% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  36%, 88% { transform: translate3d(0, 14px, 0) scaleX(1); }
+  90% { transform: translate3d(0, 0, 0) scaleX(1); }
+  93% { transform: translate3d(0, 0, 0) scaleX(1); }
+  96% { transform: translate3d(18vw, 0, 0) scaleX(1); }
+  100% { transform: translate3d(36vw, 0, 0) scaleX(-1); }
+}
+
+@keyframes showWalkingLegs_L1 {
+  0%, 33.9% { opacity: 1; visibility: visible; }
+  34%, 87.9% { opacity: 0; visibility: hidden; }
+  88%, 100% { opacity: 1; visibility: visible; }
+}
+@keyframes showSeatedLegs_L1 {
+  0%, 33.9% { opacity: 0; visibility: hidden; }
+  34%, 87.9% { opacity: 1; visibility: visible; }
+  88%, 100% { opacity: 0; visibility: hidden; }
+}
+.dinner-guest-L1 { animation: guestJourneyL1 28s ease-in-out infinite; }
+.guest-walking-legs-L1 { animation: showWalkingLegs_L1 28s steps(1) infinite; }
+.guest-seated-legs-L1 { animation: showSeatedLegs_L1 28s steps(1) infinite; }
+
+/* Guest L2 (Back Center) - Arrives at 38% */
+@keyframes guestJourneyL2 {
+  0% { transform: translate3d(42vw, 0, 0) scaleX(-1); }
+  12% { transform: translate3d(28.7vw, 0, 0) scaleX(-1); }
+  24% { transform: translate3d(15.5vw, 0, 0) scaleX(-1); }
+  35% { transform: translate3d(3.3vw, 0, 0) scaleX(-1); }
+  38% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  40%, 88% { transform: translate3d(0, 14px, 0) scaleX(1); }
+  90% { transform: translate3d(0, 0, 0) scaleX(1); }
+  93% { transform: translate3d(0, 0, 0) scaleX(1); }
+  96% { transform: translate3d(21vw, 0, 0) scaleX(1); }
+  100% { transform: translate3d(42vw, 0, 0) scaleX(-1); }
+}
+
+@keyframes showWalkingLegs_L2 {
+  0%, 37.9% { opacity: 1; visibility: visible; }
+  38%, 87.9% { opacity: 0; visibility: hidden; }
+  88%, 100% { opacity: 1; visibility: visible; }
+}
+@keyframes showSeatedLegs_L2 {
+  0%, 37.9% { opacity: 0; visibility: hidden; }
+  38%, 87.9% { opacity: 1; visibility: visible; }
+  88%, 100% { opacity: 0; visibility: hidden; }
+}
+.dinner-guest-L2 { animation: guestJourneyL2 28s ease-in-out infinite; }
+.guest-walking-legs-L2 { animation: showWalkingLegs_L2 28s steps(1) infinite; }
+.guest-seated-legs-L2 { animation: showSeatedLegs_L2 28s steps(1) infinite; }
+
+/* Guest L3 (Back Right) - Arrives at 32% */
+@keyframes guestJourneyL3 {
+  0% { transform: translate3d(28vw, 0, 0) scaleX(-1); }
+  10% { transform: translate3d(19.2vw, 0, 0) scaleX(-1); }
+  20% { transform: translate3d(10.5vw, 0, 0) scaleX(-1); }
+  28% { transform: translate3d(3.5vw, 0, 0) scaleX(-1); }
+  32% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  34%, 88% { transform: translate3d(0, 14px, 0) scaleX(1); }
+  90% { transform: translate3d(0, 0, 0) scaleX(1); }
+  93% { transform: translate3d(0, 0, 0) scaleX(1); }
+  96% { transform: translate3d(14vw, 0, 0) scaleX(1); }
+  100% { transform: translate3d(28vw, 0, 0) scaleX(-1); }
+}
+
+@keyframes showWalkingLegs_L3 {
+  0%, 31.9% { opacity: 1; visibility: visible; }
+  32%, 87.9% { opacity: 0; visibility: hidden; }
+  88%, 100% { opacity: 1; visibility: visible; }
+}
+@keyframes showSeatedLegs_L3 {
+  0%, 31.9% { opacity: 0; visibility: hidden; }
+  32%, 87.9% { opacity: 1; visibility: visible; }
+  88%, 100% { opacity: 0; visibility: hidden; }
+}
+.dinner-guest-L3 { animation: guestJourneyL3 28s ease-in-out infinite; }
+.guest-walking-legs-L3 { animation: showWalkingLegs_L3 28s steps(1) infinite; }
+.guest-seated-legs-L3 { animation: showSeatedLegs_L3 28s steps(1) infinite; }
+
+/* Guest L4 (Front Left) - Arrives at 42% */
+@keyframes guestJourneyL4 {
+  0% { transform: translate3d(48vw, 0, 0) scaleX(-1); }
+  15% { transform: translate3d(30.8vw, 0, 0) scaleX(-1); }
+  30% { transform: translate3d(13.7vw, 0, 0) scaleX(-1); }
+  39% { transform: translate3d(3.4vw, 0, 0) scaleX(-1); }
+  42% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  44%, 88% { transform: translate3d(0, 14px, 0) scaleX(1); }
+  90% { transform: translate3d(0, 0, 0) scaleX(1); }
+  93% { transform: translate3d(0, 0, 0) scaleX(1); }
+  96% { transform: translate3d(24vw, 0, 0) scaleX(1); }
+  100% { transform: translate3d(48vw, 0, 0) scaleX(-1); }
+}
+
+@keyframes showWalkingLegs_L4 {
+  0%, 41.9% { opacity: 1; visibility: visible; }
+  42%, 87.9% { opacity: 0; visibility: hidden; }
+  88%, 100% { opacity: 1; visibility: visible; }
+}
+@keyframes showSeatedLegs_L4 {
+  0%, 41.9% { opacity: 0; visibility: hidden; }
+  42%, 87.9% { opacity: 1; visibility: visible; }
+  88%, 100% { opacity: 0; visibility: hidden; }
+}
+.dinner-guest-L4 { animation: guestJourneyL4 28s ease-in-out infinite; }
+.guest-walking-legs-L4 { animation: showWalkingLegs_L4 28s steps(1) infinite; }
+.guest-seated-legs-L4 { animation: showSeatedLegs_L4 28s steps(1) infinite; }
+
+/* Guest L5 (Front Center) - Arrives at 36% */
+@keyframes guestJourneyL5 {
+  0% { transform: translate3d(34vw, 0, 0) scaleX(-1); }
+  12% { transform: translate3d(22.6vw, 0, 0) scaleX(-1); }
+  24% { transform: translate3d(11.3vw, 0, 0) scaleX(-1); }
+  33% { transform: translate3d(2.8vw, 0, 0) scaleX(-1); }
+  36% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  38%, 88% { transform: translate3d(0, 14px, 0) scaleX(1); }
+  90% { transform: translate3d(0, 0, 0) scaleX(1); }
+  93% { transform: translate3d(0, 0, 0) scaleX(1); }
+  96% { transform: translate3d(17vw, 0, 0) scaleX(1); }
+  100% { transform: translate3d(34vw, 0, 0) scaleX(-1); }
+}
+
+@keyframes showWalkingLegs_L5 {
+  0%, 35.9% { opacity: 1; visibility: visible; }
+  36%, 87.9% { opacity: 0; visibility: hidden; }
+  88%, 100% { opacity: 1; visibility: visible; }
+}
+@keyframes showSeatedLegs_L5 {
+  0%, 35.9% { opacity: 0; visibility: hidden; }
+  36%, 87.9% { opacity: 1; visibility: visible; }
+  88%, 100% { opacity: 0; visibility: hidden; }
+}
+.dinner-guest-L5 { animation: guestJourneyL5 28s ease-in-out infinite; }
+.guest-walking-legs-L5 { animation: showWalkingLegs_L5 28s steps(1) infinite; }
+.guest-seated-legs-L5 { animation: showSeatedLegs_L5 28s steps(1) infinite; }
+
+/* Guest L6 (Front Right) - Arrives at 40% */
+@keyframes guestJourneyL6 {
+  0% { transform: translate3d(44vw, 0, 0) scaleX(-1); }
+  15% { transform: translate3d(27.5vw, 0, 0) scaleX(-1); }
+  30% { transform: translate3d(11vw, 0, 0) scaleX(-1); }
+  37% { transform: translate3d(3.3vw, 0, 0) scaleX(-1); }
+  40% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  42%, 88% { transform: translate3d(0, 14px, 0) scaleX(1); }
+  90% { transform: translate3d(0, 0, 0) scaleX(1); }
+  93% { transform: translate3d(0, 0, 0) scaleX(1); }
+  96% { transform: translate3d(22vw, 0, 0) scaleX(1); }
+  100% { transform: translate3d(44vw, 0, 0) scaleX(-1); }
+}
+
+@keyframes showWalkingLegs_L6 {
+  0%, 39.9% { opacity: 1; visibility: visible; }
+  40%, 87.9% { opacity: 0; visibility: hidden; }
+  88%, 100% { opacity: 1; visibility: visible; }
+}
+@keyframes showSeatedLegs_L6 {
+  0%, 39.9% { opacity: 0; visibility: hidden; }
+  40%, 87.9% { opacity: 1; visibility: visible; }
+  88%, 100% { opacity: 0; visibility: hidden; }
+}
+.dinner-guest-L6 { animation: guestJourneyL6 28s ease-in-out infinite; }
+.guest-walking-legs-L6 { animation: showWalkingLegs_L6 28s steps(1) infinite; }
+.guest-seated-legs-L6 { animation: showSeatedLegs_L6 28s steps(1) infinite; }
+
+/* ========================================================
+   TABLE RIGHT (6 GUESTS - Walking steadily from left to right)
+   ======================================================== */
+
+/* Guest R1 (Back Left) - Arrives at 35% */
+@keyframes guestJourneyR1 {
+  0% { transform: translate3d(-38vw, 0, 0) scaleX(1); }
+  12% { transform: translate3d(-25vw, 0, 0) scaleX(1); }
+  24% { transform: translate3d(-12vw, 0, 0) scaleX(1); }
+  32% { transform: translate3d(-3.2vw, 0, 0) scaleX(1); }
+  35% { transform: translate3d(0, 0, 0) scaleX(1); }
+  37%, 88% { transform: translate3d(0, 14px, 0) scaleX(1); }
+  90% { transform: translate3d(0, 0, 0) scaleX(1); }
+  93% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  96% { transform: translate3d(-19vw, 0, 0) scaleX(-1); }
+  100% { transform: translate3d(-38vw, 0, 0) scaleX(1); }
+}
+
+@keyframes showWalkingLegs_R1 {
+  0%, 34.9% { opacity: 1; visibility: visible; }
+  35%, 87.9% { opacity: 0; visibility: hidden; }
+  88%, 100% { opacity: 1; visibility: visible; }
+}
+@keyframes showSeatedLegs_R1 {
+  0%, 34.9% { opacity: 0; visibility: hidden; }
+  35%, 87.9% { opacity: 1; visibility: visible; }
+  88%, 100% { opacity: 0; visibility: hidden; }
+}
+.dinner-guest-R1 { animation: guestJourneyR1 28s ease-in-out infinite; }
+.guest-walking-legs-R1 { animation: showWalkingLegs_R1 28s steps(1) infinite; }
+.guest-seated-legs-R1 { animation: showSeatedLegs_R1 28s steps(1) infinite; }
+
+/* Guest R2 (Back Center) - Arrives at 39% */
+@keyframes guestJourneyR2 {
+  0% { transform: translate3d(-44vw, 0, 0) scaleX(1); }
+  14% { transform: translate3d(-28.2vw, 0, 0) scaleX(1); }
+  27% { transform: translate3d(-13.5vw, 0, 0) scaleX(1); }
+  36% { transform: translate3d(-3.4vw, 0, 0) scaleX(1); }
+  39% { transform: translate3d(0, 0, 0) scaleX(1); }
+  41%, 88% { transform: translate3d(0, 14px, 0) scaleX(1); }
+  90% { transform: translate3d(0, 0, 0) scaleX(1); }
+  93% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  96% { transform: translate3d(-22vw, 0, 0) scaleX(-1); }
+  100% { transform: translate3d(-44vw, 0, 0) scaleX(1); }
+}
+
+@keyframes showWalkingLegs_R2 {
+  0%, 38.9% { opacity: 1; visibility: visible; }
+  39%, 87.9% { opacity: 0; visibility: hidden; }
+  88%, 100% { opacity: 1; visibility: visible; }
+}
+@keyframes showSeatedLegs_R2 {
+  0%, 38.9% { opacity: 0; visibility: hidden; }
+  39%, 87.9% { opacity: 1; visibility: visible; }
+  88%, 100% { opacity: 0; visibility: hidden; }
+}
+.dinner-guest-R2 { animation: guestJourneyR2 28s ease-in-out infinite; }
+.guest-walking-legs-R2 { animation: showWalkingLegs_R2 28s steps(1) infinite; }
+.guest-seated-legs-R2 { animation: showSeatedLegs_R2 28s steps(1) infinite; }
+
+/* Guest R3 (Back Right) - Arrives at 33% */
+@keyframes guestJourneyR3 {
+  0% { transform: translate3d(-30vw, 0, 0) scaleX(1); }
+  11% { transform: translate3d(-20vw, 0, 0) scaleX(1); }
+  22% { transform: translate3d(-10vw, 0, 0) scaleX(1); }
+  30% { transform: translate3d(-2.7vw, 0, 0) scaleX(1); }
+  33% { transform: translate3d(0, 0, 0) scaleX(1); }
+  35%, 88% { transform: translate3d(0, 14px, 0) scaleX(1); }
+  90% { transform: translate3d(0, 0, 0) scaleX(1); }
+  93% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  96% { transform: translate3d(-15vw, 0, 0) scaleX(-1); }
+  100% { transform: translate3d(-30vw, 0, 0) scaleX(1); }
+}
+
+@keyframes showWalkingLegs_R3 {
+  0%, 32.9% { opacity: 1; visibility: visible; }
+  33%, 87.9% { opacity: 0; visibility: hidden; }
+  88%, 100% { opacity: 1; visibility: visible; }
+}
+@keyframes showSeatedLegs_R3 {
+  0%, 32.9% { opacity: 0; visibility: hidden; }
+  33%, 87.9% { opacity: 1; visibility: visible; }
+  88%, 100% { opacity: 0; visibility: hidden; }
+}
+.dinner-guest-R3 { animation: guestJourneyR3 28s ease-in-out infinite; }
+.guest-walking-legs-R3 { animation: showWalkingLegs_R3 28s steps(1) infinite; }
+.guest-seated-legs-R3 { animation: showSeatedLegs_R3 28s steps(1) infinite; }
+
+/* Guest R4 (Front Left) - Arrives at 43% */
+@keyframes guestJourneyR4 {
+  0% { transform: translate3d(-50vw, 0, 0) scaleX(1); }
+  15% { transform: translate3d(-32.5vw, 0, 0) scaleX(1); }
+  30% { transform: translate3d(-15.1vw, 0, 0) scaleX(1); }
+  40% { transform: translate3d(-3.5vw, 0, 0) scaleX(1); }
+  43% { transform: translate3d(0, 0, 0) scaleX(1); }
+  45%, 88% { transform: translate3d(0, 14px, 0) scaleX(1); }
+  90% { transform: translate3d(0, 0, 0) scaleX(1); }
+  93% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  96% { transform: translate3d(-25vw, 0, 0) scaleX(-1); }
+  100% { transform: translate3d(-50vw, 0, 0) scaleX(1); }
+}
+
+@keyframes showWalkingLegs_R4 {
+  0%, 42.9% { opacity: 1; visibility: visible; }
+  43%, 87.9% { opacity: 0; visibility: hidden; }
+  88%, 100% { opacity: 1; visibility: visible; }
+}
+@keyframes showSeatedLegs_R4 {
+  0%, 42.9% { opacity: 0; visibility: hidden; }
+  43%, 87.9% { opacity: 1; visibility: visible; }
+  88%, 100% { opacity: 0; visibility: hidden; }
+}
+.dinner-guest-R4 { animation: guestJourneyR4 28s ease-in-out infinite; }
+.guest-walking-legs-R4 { animation: showWalkingLegs_R4 28s steps(1) infinite; }
+.guest-seated-legs-R4 { animation: showSeatedLegs_R4 28s steps(1) infinite; }
+
+/* Guest R5 (Front Center) - Arrives at 37% */
+@keyframes guestJourneyR5 {
+  0% { transform: translate3d(-36vw, 0, 0) scaleX(1); }
+  12% { transform: translate3d(-24.3vw, 0, 0) scaleX(1); }
+  25% { transform: translate3d(-11.6vw, 0, 0) scaleX(1); }
+  34% { transform: translate3d(-2.9vw, 0, 0) scaleX(1); }
+  37% { transform: translate3d(0, 0, 0) scaleX(1); }
+  39%, 88% { transform: translate3d(0, 14px, 0) scaleX(1); }
+  90% { transform: translate3d(0, 0, 0) scaleX(1); }
+  93% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  96% { transform: translate3d(-18vw, 0, 0) scaleX(-1); }
+  100% { transform: translate3d(-36vw, 0, 0) scaleX(1); }
+}
+
+@keyframes showWalkingLegs_R5 {
+  0%, 36.9% { opacity: 1; visibility: visible; }
+  37%, 87.9% { opacity: 0; visibility: hidden; }
+  88%, 100% { opacity: 1; visibility: visible; }
+}
+@keyframes showSeatedLegs_R5 {
+  0%, 36.9% { opacity: 0; visibility: hidden; }
+  37%, 87.9% { opacity: 1; visibility: visible; }
+  88%, 100% { opacity: 0; visibility: hidden; }
+}
+.dinner-guest-R5 { animation: guestJourneyR5 28s ease-in-out infinite; }
+.guest-walking-legs-R5 { animation: showWalkingLegs_R5 28s steps(1) infinite; }
+.guest-seated-legs-R5 { animation: showSeatedLegs_R5 28s steps(1) infinite; }
+
+/* Guest R6 (Front Right) - Arrives at 41% */
+@keyframes guestJourneyR6 {
+  0% { transform: translate3d(-46vw, 0, 0) scaleX(1); }
+  15% { transform: translate3d(-29.1vw, 0, 0) scaleX(1); }
+  30% { transform: translate3d(-12.3vw, 0, 0) scaleX(1); }
+  38% { transform: translate3d(-3.3vw, 0, 0) scaleX(1); }
+  41% { transform: translate3d(0, 0, 0) scaleX(1); }
+  43%, 88% { transform: translate3d(0, 14px, 0) scaleX(1); }
+  90% { transform: translate3d(0, 0, 0) scaleX(1); }
+  93% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  96% { transform: translate3d(-23vw, 0, 0) scaleX(-1); }
+  100% { transform: translate3d(-46vw, 0, 0) scaleX(1); }
+}
+
+@keyframes showWalkingLegs_R6 {
+  0%, 40.9% { opacity: 1; visibility: visible; }
+  41%, 87.9% { opacity: 0; visibility: hidden; }
+  88%, 100% { opacity: 1; visibility: visible; }
+}
+@keyframes showSeatedLegs_R6 {
+  0%, 40.9% { opacity: 0; visibility: hidden; }
+  41%, 87.9% { opacity: 1; visibility: visible; }
+  88%, 100% { opacity: 0; visibility: hidden; }
+}
+.dinner-guest-R6 { animation: guestJourneyR6 28s ease-in-out infinite; }
+.guest-walking-legs-R6 { animation: showWalkingLegs_R6 28s steps(1) infinite; }
+.guest-seated-legs-R6 { animation: showSeatedLegs_R6 28s steps(1) infinite; }
+
+/* Wine Clinking Toast when seated at dining table */
+@keyframes guestToastAction {
+  0%, 44% { transform: rotate(0deg); }
+  52% { transform: rotate(-32deg); }
+  58% { transform: rotate(-15deg); }
+  64% { transform: rotate(-34deg); }
+  72% { transform: rotate(-12deg); }
+  78% { transform: rotate(-32deg); }
+  86%, 100% { transform: rotate(0deg); }
+}
+
+.guest-arm-toast {
+  transform-box: fill-box;
+  transform-origin: top left;
+  animation: guestToastAction 28s ease-in-out infinite;
+}
+
+/* Gesturing while conversing at the table */
+@keyframes guestGestureAction {
+  0%, 40% { transform: rotate(0deg); }
+  46% { transform: rotate(24deg); }
+  54% { transform: rotate(-10deg); }
+  62% { transform: rotate(20deg); }
+  72% { transform: rotate(-12deg); }
+  80% { transform: rotate(18deg); }
+  86%, 100% { transform: rotate(0deg); }
+}
+
+.guest-arm-gesturing {
+  transform-box: fill-box;
+  transform-origin: top left;
+  animation: guestGestureAction 28s ease-in-out infinite;
+}
+
+
+
+
