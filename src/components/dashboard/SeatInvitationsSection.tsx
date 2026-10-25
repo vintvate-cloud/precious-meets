@@ -40,9 +40,10 @@ export function SeatInvitationsSection({
   const [declineTarget, setDeclineTarget] = useState<UserSeatInvitation | null>(null);
   const [declineReason, setDeclineReason] = useState<string>("Date conflict");
 
-  const pendingCount = invitations.filter((i) => i.status === "pending").length;
+  const safeInvitations = Array.isArray(invitations) ? invitations.filter(Boolean) : [];
+  const pendingCount = safeInvitations.filter((i) => i.status === "pending").length;
 
-  const filteredInvitations = invitations.filter((inv) => {
+  const filteredInvitations = safeInvitations.filter((inv) => {
     if (filter === "pending") return inv.status === "pending";
     if (filter === "accepted") return inv.status === "accepted";
     return true;

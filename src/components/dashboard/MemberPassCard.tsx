@@ -177,7 +177,7 @@ export function MemberPassCard({
                   {memberId}
                 </span>
                 <span className="text-[10px] text-emerald-300 font-medium block mt-0.5">
-                  1 QR for all {seatedEvents.length} seated meet{seatedEvents.length !== 1 ? "s" : ""}
+                  1 QR for all {(seatedEvents || []).length} seated meet{(seatedEvents || []).length !== 1 ? "s" : ""}
                 </span>
               </div>
             </button>

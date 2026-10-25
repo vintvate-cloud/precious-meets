@@ -90,7 +90,7 @@ export function InvoiceReceiptSection() {
 
           <div className="text-left sm:text-right space-y-1">
             <span className="font-mono text-xs font-bold text-burgundy block">
-              INVOICE #{memberId.replace("PM-", "INV-2026-")}
+              INVOICE #{String(memberId || "PM-FOUNDER-8841").replace("PM-", "INV-2026-")}
             </span>
             <span className="text-xs text-muted-foreground block">
               Application & Payment Date: <strong className="text-foreground">{invoiceDate}</strong>

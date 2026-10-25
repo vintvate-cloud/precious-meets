@@ -118,7 +118,7 @@ export function Navbar() {
                 <Avatar className="size-8 sm:size-9 border border-black/10 shadow-xs">
                   <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.display_name || "User"} />
                   <AvatarFallback className="bg-sage text-xs font-semibold text-forest">
-                    {profile?.display_name?.slice(0, 2).toUpperCase() || "ME"}
+                    {String(profile?.display_name || "ME").slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               </Link>

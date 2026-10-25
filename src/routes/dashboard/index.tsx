@@ -94,29 +94,29 @@ export function DashboardPage() {
     };
   }, [user?.email]);
 
-  const acceptedInvitations = invitations.filter((i) => i.status === "accepted");
+  const acceptedInvitations = (invitations || []).filter((i) => i && i.status === "accepted");
 
-  const nextEvent = acceptedInvitations.length > 0 ? {
-    title: acceptedInvitations[0].eventTitle,
-    dateDisplay: acceptedInvitations[0].dateDisplay,
-    neighborhood: `${acceptedInvitations[0].neighborhood}, ${acceptedInvitations[0].city}`,
-    venueName: acceptedInvitations[0].venueName,
+  const nextEvent = acceptedInvitations.length > 0 && acceptedInvitations[0] ? {
+    title: acceptedInvitations[0].eventTitle || "Curated Gathering",
+    dateDisplay: acceptedInvitations[0].dateDisplay || "Upcoming Date",
+    neighborhood: `${acceptedInvitations[0].neighborhood || "Delhi"}, ${acceptedInvitations[0].city || "NCR"}`,
+    venueName: acceptedInvitations[0].venueName || "Heritage Venue",
     gateCode: acceptedInvitations[0].secretAccessCode || "GATE-402",
   } : null;
 
   const seatedEvents = acceptedInvitations.map((inv) => ({
-    id: inv.eventId,
-    title: inv.eventTitle,
-    dateDisplay: inv.dateDisplay,
-    neighborhood: `${inv.neighborhood}, ${inv.city}`,
-    venueName: inv.venueName,
-    gateCode: inv.secretAccessCode || "GATE-402",
-    seatNumber: inv.seatNumber,
+    id: inv?.eventId || "",
+    title: inv?.eventTitle || "Curated Gathering",
+    dateDisplay: inv?.dateDisplay || "Upcoming Date",
+    neighborhood: `${inv?.neighborhood || "Delhi"}, ${inv?.city || "NCR"}`,
+    venueName: inv?.venueName || "Heritage Venue",
+    gateCode: inv?.secretAccessCode || "GATE-402",
+    seatNumber: inv?.seatNumber || 1,
   }));
 
-  const displayName = profile?.display_name || user?.user_metadata?.full_name || "Founding Member";
-  const memberId = subscription?.memberId || "PM-FOUNDER-8841";
-  const city = profile?.city || "Delhi NCR";
+  const displayName = String(profile?.display_name || user?.user_metadata?.full_name || (user?.email ? user.email.split("@")[0] : "Founding Member"));
+  const memberId = String(subscription?.memberId || "PM-FOUNDER-8841");
+  const city = String(profile?.city || "Delhi NCR");
 
   let userArchetype = "The Curious Flâneur";
   try {
@@ -129,7 +129,7 @@ export function DashboardPage() {
     // ignore
   }
 
-  const pendingInvitationsCount = invitations.filter((i) => i.status === "pending").length;
+  const pendingInvitationsCount = (invitations || []).filter((i) => i && i.status === "pending").length;
 
   const NAV_TABS = [
     { id: "overview", label: "Overview", icon: Sparkles, badge: null },
@@ -192,7 +192,7 @@ export function DashboardPage() {
           <div className="rounded-2xl bg-white/[0.04] border border-white/[0.08] p-3.5">
             <div className="flex items-center gap-3">
               <div className="size-9 rounded-full bg-gradient-to-tr from-[#691C35] to-[#C6A568] flex items-center justify-center text-xs font-serif font-bold text-white shadow-xs">
-                {displayName.slice(0, 2).toUpperCase()}
+                {String(displayName || "PM").slice(0, 2).toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="font-medium text-xs text-white truncate">{displayName}</div>

@@ -65,9 +65,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (localStorage.getItem(LOCAL_STORAGE_MOCK_USER_KEY)) {
         // First initialization for existing active user: give them a fresh 36h window
         localStorage.setItem(LOCAL_STORAGE_SESSION_TIMESTAMP_KEY, Date.now().toString());
-        return false;
       }
-      return true;
+      return false;
     }
     const sessionTime = parseInt(timestampStr, 10);
     if (isNaN(sessionTime) || Date.now() - sessionTime > SESSION_MAX_AGE_MS) {
