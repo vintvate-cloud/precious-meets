@@ -239,6 +239,7 @@ export class ApplicationsService {
     pincode?: string;
     archetypeTitle: string;
     archetypeDescription?: string;
+    archetypeTraits?: string[];
     scores?: {
       socialEnergy?: number;
       conversationDepth?: number;
@@ -282,7 +283,10 @@ export class ApplicationsService {
       archetypeDescription:
         payload.archetypeDescription ||
         "A curious guest who appreciates intimate conversation, thoughtful pauses, and memorable food.",
-      archetypeTraits: ["Cultural Explorer", "Deep Conversationalist", "Curious Mind"],
+      archetypeTraits:
+        payload.archetypeTraits && payload.archetypeTraits.length > 0
+          ? payload.archetypeTraits
+          : ["Cultural Explorer", "Deep Conversationalist", "Curious Mind"],
       socialEnergyScore: payload.scores?.socialEnergy ?? 70,
       conversationDepthScore: payload.scores?.conversationDepth ?? 85,
       playfulnessScore: payload.scores?.playfulness ?? 70,

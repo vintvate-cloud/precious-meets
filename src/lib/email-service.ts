@@ -61,7 +61,7 @@ export class EmailService {
       case "quiz_completed":
         return `Your Social Archetype is Ready (${data.archetype || "Social Discovery"}) | Precious Meets`;
       case "subscription_activated":
-        return "Thanks for Subscribing to Precious Meets — Invoice & Member Access ✨";
+        return "Tax Invoice & Payment Receipt | Precious Meets";
       case "identity_verified":
         return "Identity Verified | Precious Meets Membership Dossier";
       case "booking_confirmed":
@@ -130,53 +130,63 @@ export class EmailService {
 
       case "subscription_activated":
         bodyContent = `
-          <div style="background: #fbf8f3; border: 1px solid #c6a568; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
-            <div style="display: inline-block; background: #691c35; color: #f8f2e7; font-family: monospace; font-size: 10px; padding: 4px 10px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">
-              Subscription & Payment Confirmed
+          <div style="text-align: center; padding-bottom: 24px; border-bottom: 1px solid #ECE7DE;">
+            <div style="display: inline-block; background-color: #EBF3E8; color: #3B6B35; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px;">
+              ✓ Payment Confirmed
             </div>
-            <h2 style="font-family: Georgia, serif; color: #171514; font-size: 24px; margin: 0 0 8px 0;">Thanks for subscribing to our platform, ${data.name || "Friend"}.</h2>
-            <p style="color: #4a453f; line-height: 1.6; margin: 0 0 16px 0;">
-              Your subscription of <strong>${data.amount || "₹1,999"}</strong> has been processed successfully via Razorpay. Your table pass is reserved and your official payment invoice has been generated below.
-            </p>
-            
-            <div style="background: #ffffff; border: 1px solid #e0d7c7; border-radius: 6px; padding: 18px; margin: 16px 0;">
-              <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #d1c7b7; padding-bottom: 10px; margin-bottom: 12px;">
-                <span style="font-family: monospace; font-size: 11px; text-transform: uppercase; color: #691c35; font-weight: bold;">TAX INVOICE / RECEIPT</span>
-                <span style="font-family: monospace; font-size: 11px; color: #6b6357;">${data.invoiceNumber || "INV-PM-2026-001"}</span>
-              </div>
-              <table style="width: 100%; font-size: 13px; color: #4a453f; border-collapse: collapse;">
-                <tr>
-                  <td style="padding: 6px 0; color: #6b6357;">Billed To:</td>
-                  <td style="padding: 6px 0; text-align: right; font-weight: bold; color: #171514;">${data.name || "Member"} (${data.email || ""})</td>
-                </tr>
-                <tr>
-                  <td style="padding: 6px 0; color: #6b6357;">Payment Reference (Razorpay ID):</td>
-                  <td style="padding: 6px 0; text-align: right; font-family: monospace; font-weight: bold; color: #691c35;">${data.paymentId || "pay_rzp_verified"}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 6px 0; color: #6b6357;">Plan Tier:</td>
-                  <td style="padding: 6px 0; text-align: right; font-weight: bold; color: #171514;">${data.plan || "Precious Meets Membership"}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 6px 0; color: #6b6357;">Amount Paid:</td>
-                  <td style="padding: 6px 0; text-align: right; font-weight: bold; color: #047857; font-size: 14px;">${data.amount || "₹1,999"} (Inclusive of all taxes)</td>
-                </tr>
-                <tr>
-                  <td style="padding: 6px 0; color: #6b6357;">Payment Date:</td>
-                  <td style="padding: 6px 0; text-align: right; font-family: monospace; color: #6b6357;">${data.date || new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
-                </tr>
-              </table>
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 36px; font-weight: 700; color: #171514; letter-spacing: -0.5px; line-height: 1; margin: 0;">
+              ${data.amount || "₹1,999"}
             </div>
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; color: #736B63; margin-top: 6px;">
+              ${data.plan || "Precious Meets Membership"}
+            </div>
+          </div>
 
-            <div style="background: #e8ecd8; border-left: 4px solid #5f7045; padding: 16px 18px; margin: 20px 0; border-radius: 4px;">
-              <p style="margin: 0; color: #2d381c; font-size: 13.5px; line-height: 1.6;">
-                <strong>Next Step & Account Credentials:</strong><br />
-                Our curation team is reviewing your conversational vibe archetype to pair you with your ideal 6-seat table cohort. <strong>We will email your member sign-in credentials to this email address in a short while.</strong>
-              </p>
-            </div>
+          <div style="padding: 20px 0 16px 0;">
+            <table style="width: 100%; border-collapse: collapse; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px;">
+              <tr>
+                <td style="padding: 8px 0; color: #8C827A;">Invoice No.</td>
+                <td style="padding: 8px 0; text-align: right; font-family: 'SF Mono', Menlo, Consolas, monospace; font-weight: 600; color: #171514;">
+                  ${data.invoiceNumber || "INV-2026-001"}
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #8C827A; border-top: 1px solid #F0ECE4;">Payment Reference</td>
+                <td style="padding: 8px 0; text-align: right; font-family: 'SF Mono', Menlo, Consolas, monospace; font-weight: 600; color: #691C35; border-top: 1px solid #F0ECE4;">
+                  ${data.paymentId || "pay_rzp_verified"}
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #8C827A; border-top: 1px solid #F0ECE4;">Billed To</td>
+                <td style="padding: 8px 0; text-align: right; font-weight: 500; color: #171514; border-top: 1px solid #F0ECE4;">
+                  ${data.name || "Member"}${data.email ? ` <span style="color: #8C827A; font-weight: normal; font-size: 12px;">(${data.email})</span>` : ""}
+                </td>
+              </tr>
+              ${data.memberId ? `
+              <tr>
+                <td style="padding: 8px 0; color: #8C827A; border-top: 1px solid #F0ECE4;">Member ID</td>
+                <td style="padding: 8px 0; text-align: right; font-family: 'SF Mono', Menlo, Consolas, monospace; font-weight: 600; color: #171514; border-top: 1px solid #F0ECE4;">
+                  ${data.memberId}
+                </td>
+              </tr>` : ""}
+              <tr>
+                <td style="padding: 8px 0; color: #8C827A; border-top: 1px solid #F0ECE4;">Date</td>
+                <td style="padding: 8px 0; text-align: right; color: #171514; border-top: 1px solid #F0ECE4;">
+                  ${data.date || new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 12px 0 4px 0; font-weight: 600; color: #171514; border-top: 1px solid #D8D1C5;">Total Paid</td>
+                <td style="padding: 12px 0 4px 0; text-align: right; font-weight: 700; color: #171514; font-size: 15px; border-top: 1px solid #D8D1C5;">
+                  ${data.amount || "₹1,999"}
+                </td>
+              </tr>
+            </table>
+          </div>
 
-            <p style="color: #6b6357; font-size: 12px; line-height: 1.6; margin: 16px 0 0 0;">
-              Please keep this invoice for your personal records. For questions regarding your onboarding, contact invitations@cikka.club.
+          <div style="background-color: #FAF8F5; border-radius: 8px; padding: 14px 18px; text-align: center; margin-top: 4px;">
+            <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12.5px; color: #554F49; line-height: 1.5;">
+              Your member sign-in credentials will be sent to your email shortly.
             </p>
           </div>
         `;
@@ -202,13 +212,55 @@ export class EmailService {
 
       case "booking_confirmed":
         bodyContent = `
-          <h2 style="font-family: Georgia, serif; color: #171514; font-size: 22px;">Your Seat is Reserved.</h2>
-          <p style="color: #4a453f; line-height: 1.6;">We're delighted to welcome you to <strong>${data.experienceTitle}</strong>.</p>
-          <div style="background: #fffaf1; border: 1px solid #e0d7c7; padding: 18px; margin: 20px 0; border-radius: 6px;">
-            <p style="margin: 0 0 6px 0;"><strong>Date & Time:</strong> ${data.date}</p>
-            <p style="margin: 0 0 6px 0;"><strong>Venue:</strong> ${data.venue}</p>
-            <p style="margin: 0 0 6px 0;"><strong>Host:</strong> ${data.host}</p>
-            <p style="margin: 0;"><strong>Booking Reference:</strong> <span style="font-family: monospace; font-weight: bold;">${data.reference}</span></p>
+          <div style="text-align: center; padding-bottom: 20px; border-bottom: 1px solid #ECE7DE;">
+            <div style="display: inline-block; background-color: #F6EFE6; color: #691C35; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px;">
+              Curated Table Invitation
+            </div>
+            <h2 style="font-family: Georgia, serif; color: #171514; font-size: 24px; margin: 0 0 6px 0; font-weight: normal;">
+              Your Seat is Reserved.
+            </h2>
+            <p style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #736B63; font-size: 13px; line-height: 1.5; margin: 0;">
+              We are delighted to invite you to <strong>${data.experienceTitle}</strong>.
+            </p>
+          </div>
+
+          <div style="padding: 20px 0;">
+            <div style="background-color: #FAF8F5; border: 1px solid #EFEAE1; border-radius: 8px; padding: 18px 20px;">
+              <table style="width: 100%; border-collapse: collapse; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px;">
+                <tr>
+                  <td style="padding: 6px 0; color: #8C827A; width: 35%;">Date & Time</td>
+                  <td style="padding: 6px 0; text-align: right; font-weight: 600; color: #171514;">${data.date}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #8C827A; border-top: 1px solid #F0ECE4;">Venue</td>
+                  <td style="padding: 6px 0; text-align: right; font-weight: 500; color: #171514; border-top: 1px solid #F0ECE4;">${data.venue}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #8C827A; border-top: 1px solid #F0ECE4;">Host</td>
+                  <td style="padding: 6px 0; text-align: right; font-weight: 500; color: #171514; border-top: 1px solid #F0ECE4;">${data.host}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #8C827A; border-top: 1px solid #F0ECE4;">Booking Ref</td>
+                  <td style="padding: 6px 0; text-align: right; font-family: 'SF Mono', Menlo, Consolas, monospace; font-weight: 600; color: #691C35; border-top: 1px solid #F0ECE4;">${data.reference}</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <!-- 24-Hour Action Box: Accept or Reject from Member Dashboard -->
+          <div style="background-color: #FDF9F3; border-left: 3px solid #C6A568; border-radius: 6px; padding: 14px 18px; margin-bottom: 22px;">
+            <p style="margin: 0 0 6px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; font-weight: 600; color: #171514;">
+              Action Required within 24 Hours:
+            </p>
+            <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12.5px; color: #554F49; line-height: 1.6;">
+              You can accept or reject this invitation directly from your <strong>Member Dashboard</strong>. If you do not accept within 24 hours, your place will be given to someone else on the curated waitlist to preserve table parity.
+            </p>
+          </div>
+
+          <div style="text-align: center; margin: 20px 0 8px 0;">
+            <a href="${data.dashboardUrl || 'http://localhost:8080/dashboard'}" style="background-color: #691C35; color: #FAF7F2; padding: 13px 32px; border-radius: 9999px; text-decoration: none; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 600; font-size: 13px; display: inline-block; box-shadow: 0 2px 8px rgba(105, 28, 53, 0.2);">
+              Open Member Dashboard to Respond &rarr;
+            </a>
           </div>
         `;
         break;

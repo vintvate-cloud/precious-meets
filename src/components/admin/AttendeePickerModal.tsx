@@ -18,6 +18,8 @@ import {
   Filter,
   CheckCircle2,
   Clock,
+  Mail,
+  Send,
 } from "lucide-react";
 
 interface AttendeePickerModalProps {
@@ -63,6 +65,7 @@ export function AttendeePickerModal({
 
   const currentAttendee = attendees?.find((a) => a.id === currentAttendeeId);
   const isAccepted = seatAcceptance?.status === "accepted";
+  const isEmailSent = Boolean(seatAcceptance?.emailSent);
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
@@ -102,24 +105,39 @@ export function AttendeePickerModal({
           {/* Seated Guest Acceptance Status Bar */}
           {currentAttendee && (
             <div className="mt-3.5 flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-card border border-border/80 p-3 shadow-xs">
-              <div className="flex items-center gap-2">
-                <img
-                  src={currentAttendee.avatar}
-                  alt={currentAttendee.name}
-                  className="size-7 rounded-full object-cover border border-border/80"
-                />
+              <div className="flex items-center gap-2.5">
+                <div
+                  className={`size-8 rounded-full flex items-center justify-center font-display text-xs font-semibold text-ivory border shadow-xs ${
+                    currentAttendee.gender === "female"
+                      ? "bg-forest border-forest/40"
+                      : "bg-burgundy border-burgundy/40"
+                  }`}
+                >
+                  {currentAttendee.name
+                    .trim()
+                    .split(/\s+/)
+                    .filter(Boolean)
+                    .map((n) => n[0])
+                    .slice(0, 2)
+                    .join("")
+                    .toUpperCase()}
+                </div>
                 <div>
                   <span className="text-xs font-bold text-foreground block leading-tight">
                     {currentAttendee.name}
                   </span>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     {isAccepted ? (
-                      <span className="inline-flex items-center gap-1 font-bold text-emerald-800 bg-emerald-100 dark:bg-emerald-950 dark:text-emerald-300 px-2 py-0.2 rounded-full text-[10px]">
+                      <span className="inline-flex items-center gap-1 font-bold text-emerald-800 bg-emerald-100 dark:bg-emerald-950 dark:text-emerald-300 px-2 py-0.5 rounded-full text-[10px]">
                         <CheckCircle2 className="size-3 text-emerald-600" /> Member Accepted & Booked
                       </span>
+                    ) : isEmailSent ? (
+                      <span className="inline-flex items-center gap-1 font-semibold text-amber-800 bg-amber-100 dark:bg-amber-950 dark:text-amber-300 border border-amber-300/60 px-2 py-0.5 rounded-full text-[10px]">
+                        <Mail className="size-3 text-amber-600" /> Email Sent · Waiting for Acceptance
+                      </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 font-semibold text-ochre bg-ochre/15 px-2 py-0.2 rounded-full text-[10px]">
-                        <Clock className="size-3" /> Awaiting Member Acceptance
+                      <span className="inline-flex items-center gap-1 font-semibold text-blue-700 bg-blue-100 dark:bg-blue-950 dark:text-blue-300 border border-blue-300/60 px-2 py-0.5 rounded-full text-[10px]">
+                        <Send className="size-3 text-blue-600" /> Pass Not Sent Yet
                       </span>
                     )}
                   </div>
@@ -229,11 +247,22 @@ export function AttendeePickerModal({
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <img
-                      src={attendee.avatar}
-                      alt={attendee.name}
-                      className="size-11 rounded-full object-cover border border-border transition-transform duration-200 group-hover:scale-105 group-hover:shadow-xs"
-                    />
+                    <div
+                      className={`size-11 rounded-full flex items-center justify-center font-display text-sm font-semibold border shadow-xs shrink-0 transition-transform duration-200 group-hover:scale-105 select-none ${
+                        attendee.gender === "female"
+                          ? "bg-forest/15 text-forest border-forest/30 group-hover:bg-forest group-hover:text-ivory"
+                          : "bg-burgundy/15 text-burgundy border-burgundy/30 group-hover:bg-burgundy group-hover:text-ivory"
+                      }`}
+                    >
+                      {attendee.name
+                        .trim()
+                        .split(/\s+/)
+                        .filter(Boolean)
+                        .map((n) => n[0])
+                        .slice(0, 2)
+                        .join("")
+                        .toUpperCase()}
+                    </div>
 
                     <div>
                       <div className="flex items-center gap-2">

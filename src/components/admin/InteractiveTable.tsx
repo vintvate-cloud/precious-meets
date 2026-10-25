@@ -63,13 +63,16 @@ export function InteractiveTable({
   const admittedCount = Object.keys(checkIns).length;
   const seatAcceptances = event.seatAcceptances || {};
 
-  // Seated guest acceptance status calculation
+  // Seated guest acceptance & dispatch status calculation
   const seatedAttendeeIds = event.seats.filter(Boolean) as string[];
   const acceptedCount = seatedAttendeeIds.filter(
     (id) => seatAcceptances[id]?.status === "accepted"
   ).length;
   const pendingCount = seatedAttendeeIds.filter(
-    (id) => seatAcceptances[id]?.status === "pending" || (!seatAcceptances[id] && Boolean(event.emailsSentAt))
+    (id) => seatAcceptances[id]?.emailSent && seatAcceptances[id]?.status === "pending"
+  ).length;
+  const unsentCount = seatedAttendeeIds.filter(
+    (id) => !seatAcceptances[id]?.emailSent
   ).length;
   const declinedCount = seatedAttendeeIds.filter(
     (id) => seatAcceptances[id]?.status === "declined"
@@ -108,9 +111,20 @@ export function InteractiveTable({
       const res = await EventsService.sendEventInvitations(event.id);
       const updated = EventsService.getEventById(event.id);
       if (updated) onEventUpdated(updated);
-      toast.success(
-        `Secret table invitations & gate PINs successfully dispatched to ${res.dispatchedCount} guests via email!`,
-      );
+      
+      if (res.dispatchedCount > 0) {
+        toast.success(
+          `Secret table invitations & gate PINs emailed to ${res.dispatchedCount} new guest(s)!${
+            res.alreadySentCount > 0
+              ? ` (${res.alreadySentCount} guests previously received invitations and remain waiting for acceptance).`
+              : ""
+          }`
+        );
+      } else {
+        toast.info(
+          `All ${res.alreadySentCount} seated guest(s) have already received invitations and are waiting for acceptance.`
+        );
+      }
     } catch (err: any) {
       toast.error(err.message || "Failed to send emails.");
     } finally {
@@ -154,9 +168,15 @@ export function InteractiveTable({
               <span>{acceptedCount}/{metrics.seatedCount} Seats Accepted & Booked</span>
             </span>
             {pendingCount > 0 && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-ochre/15 text-ochre border border-ochre/30 px-2.5 py-0.5 text-[11px] font-medium">
-                <Clock className="size-3" />
-                <span>{pendingCount} Awaiting Acceptance</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300/80 px-2.5 py-0.5 text-[11px] font-medium">
+                <Clock className="size-3 text-amber-600" />
+                <span>{pendingCount} Email Sent · Waiting for Acceptance</span>
+              </span>
+            )}
+            {unsentCount > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 border border-blue-300/80 px-2.5 py-0.5 text-[11px] font-medium">
+                <Send className="size-3 text-blue-600" />
+                <span>{unsentCount} Ready to Dispatch</span>
               </span>
             )}
             {declinedCount > 0 && (
@@ -198,7 +218,11 @@ export function InteractiveTable({
             ) : (
               <Send className="size-4 text-ivory transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             )}
-            <span>Dispatch Passes ({metrics.seatedCount}/6)</span>
+            <span>
+              {unsentCount > 0
+                ? `Dispatch Passes (${unsentCount} pending)`
+                : `All Passes Dispatched (${metrics.seatedCount}/6)`}
+            </span>
           </button>
         </div>
       </div>
@@ -368,8 +392,18 @@ export function InteractiveTable({
                     const isCheckedIn = Boolean(checkIns[attendee.id]);
                     const acceptance = seatAcceptances[attendee.id];
                     const isAccepted = acceptance?.status === "accepted";
-                    const isPending = acceptance?.status === "pending" || (!acceptance && Boolean(event.emailsSentAt));
+                    const isEmailSent = Boolean(acceptance?.emailSent);
+                    const isPending = isEmailSent && acceptance?.status === "pending";
+                    const isUnsent = !isEmailSent && acceptance?.status !== "accepted";
                     const isDeclined = acceptance?.status === "declined";
+                    const initials = attendee.name
+                      .trim()
+                      .split(/\s+/)
+                      .filter(Boolean)
+                      .map((n) => n[0])
+                      .slice(0, 2)
+                      .join("")
+                      .toUpperCase();
 
                     return (
                       <div
@@ -377,21 +411,27 @@ export function InteractiveTable({
                         className="group relative flex flex-col items-center cursor-pointer transition-all duration-300 hover:-translate-y-1"
                       >
                         <div className="relative">
-                          <img
-                            src={attendee.avatar}
-                            alt={attendee.name}
-                            className={`size-12 sm:size-14 rounded-full object-cover border-2 shadow-md transition-all duration-300 group-hover:scale-110 ${
+                          {/* Initials Monogram Crest (No mock photos) */}
+                          <div
+                            className={`size-12 sm:size-14 rounded-full flex items-center justify-center border-2 shadow-md transition-all duration-300 group-hover:scale-110 select-none ${
                               isCheckedIn
-                                ? "border-forest ring-2 ring-forest/60"
+                                ? "bg-forest text-ivory border-forest ring-2 ring-forest/60"
                                 : isAccepted
-                                ? "border-emerald-600 ring-2 ring-emerald-500/60 shadow-[0_0_15px_rgba(16,185,129,0.35)]"
+                                ? "bg-emerald-800 text-ivory border-emerald-500 ring-2 ring-emerald-500/60 shadow-[0_0_15px_rgba(16,185,129,0.35)]"
                                 : isPending
-                                ? "border-ochre ring-2 ring-ochre/40"
+                                ? "bg-[#2D2218] text-amber-200 border-ochre ring-2 ring-ochre/40"
+                                : isUnsent
+                                ? "bg-[#1E2638] text-blue-200 border-blue-400 ring-2 ring-blue-400/30"
                                 : attendee.gender === "female"
-                                ? "border-forest ring-2 ring-forest/30"
-                                : "border-burgundy ring-2 ring-burgundy/30"
+                                ? "bg-forest/90 text-ivory border-forest ring-2 ring-forest/30"
+                                : "bg-burgundy/90 text-ivory border-burgundy ring-2 ring-burgundy/30"
                             }`}
-                          />
+                          >
+                            <span className="font-display text-sm sm:text-base font-semibold tracking-wider">
+                              {initials}
+                            </span>
+                          </div>
+
                           <span
                             className={`absolute -bottom-1 -right-1 flex size-5 items-center justify-center rounded-full text-ivory text-[10px] font-bold shadow-xs transition-transform duration-200 group-hover:scale-110 ${
                               isAccepted ? "bg-emerald-700" : "bg-forest"
@@ -423,10 +463,20 @@ export function InteractiveTable({
                           {/* Pending Awaiting Acceptance badge */}
                           {!isCheckedIn && !isAccepted && isPending && (
                             <span
-                              title={`Pass sent · Awaiting member acceptance`}
-                              className="absolute -top-1 -left-1 flex size-5 items-center justify-center rounded-full bg-ochre text-ink shadow-sm ring-2 ring-background animate-in zoom-in"
+                              title={`Email pass sent · Waiting for member acceptance`}
+                              className="absolute -top-1 -left-1 flex size-5 items-center justify-center rounded-full bg-amber-500 text-ink shadow-sm ring-2 ring-background animate-in zoom-in"
                             >
-                              <Clock className="size-3" />
+                              <Clock className="size-3 text-white" />
+                            </span>
+                          )}
+
+                          {/* Unsent badge */}
+                          {!isCheckedIn && !isAccepted && isUnsent && (
+                            <span
+                              title={`Assigned to table · Invitation not dispatched yet`}
+                              className="absolute -top-1 -left-1 flex size-5 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm ring-2 ring-background animate-in zoom-in"
+                            >
+                              <Send className="size-2.5 text-white" />
                             </span>
                           )}
                         </div>
@@ -436,23 +486,27 @@ export function InteractiveTable({
                             {attendee.name.split(" ")[0]}
                           </span>
                           {isCheckedIn ? (
-                            <span className="text-[9px] text-forest font-bold bg-forest/20 px-1.5 py-0.2 rounded-full mt-0.5 flex items-center gap-0.5 shadow-xs">
+                            <span className="text-[9px] text-forest font-bold bg-forest/20 px-1.5 py-0.5 rounded-full mt-0.5 flex items-center gap-0.5 shadow-xs">
                               <CheckCircle2 className="size-2.5" /> Admitted
                             </span>
                           ) : isAccepted ? (
-                            <span className="text-[9px] text-emerald-800 font-bold bg-emerald-100 dark:bg-emerald-950 dark:text-emerald-300 px-1.5 py-0.2 rounded-full mt-0.5 flex items-center gap-0.5 shadow-xs border border-emerald-300/80">
+                            <span className="text-[9px] text-emerald-800 dark:text-emerald-300 font-bold bg-emerald-100 dark:bg-emerald-950 px-1.5 py-0.5 rounded-full mt-0.5 flex items-center gap-0.5 shadow-xs border border-emerald-300/80">
                               <CheckCircle2 className="size-2.5 text-emerald-600" /> Accepted & Booked
                             </span>
                           ) : isPending ? (
-                            <span className="text-[9px] text-ochre font-semibold bg-ochre/15 px-1.5 py-0.2 rounded-full mt-0.5 flex items-center gap-0.5">
-                              <Clock className="size-2.5" /> Awaiting Accept
+                            <span className="text-[9px] text-amber-800 dark:text-amber-300 font-semibold bg-amber-100 dark:bg-amber-950/60 border border-amber-300/60 px-1.5 py-0.5 rounded-full mt-0.5 flex items-center gap-0.5 whitespace-nowrap">
+                              <Mail className="size-2.5 text-amber-600" /> Email Sent · Waiting
+                            </span>
+                          ) : isUnsent ? (
+                            <span className="text-[9px] text-blue-700 dark:text-blue-300 font-semibold bg-blue-100 dark:bg-blue-950/60 border border-blue-300/60 px-1.5 py-0.5 rounded-full mt-0.5 flex items-center gap-0.5 whitespace-nowrap">
+                              <Send className="size-2.5 text-blue-600" /> Pass Not Sent
                             </span>
                           ) : isDeclined ? (
-                            <span className="text-[9px] text-destructive font-semibold bg-destructive/15 px-1.5 py-0.2 rounded-full mt-0.5">
+                            <span className="text-[9px] text-destructive font-semibold bg-destructive/15 px-1.5 py-0.5 rounded-full mt-0.5">
                               Declined
                             </span>
                           ) : (
-                            <span className="text-[10px] text-forest font-medium bg-forest/10 px-1.5 py-0.2 rounded-full mt-0.5">
+                            <span className="text-[10px] text-forest font-medium bg-forest/10 px-1.5 py-0.5 rounded-full mt-0.5">
                               {attendee.archetype.title.replace("The ", "")}
                             </span>
                           )}

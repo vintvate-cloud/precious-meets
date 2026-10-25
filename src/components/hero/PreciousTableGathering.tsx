@@ -1,5 +1,5 @@
 import React from "react";
-import { AvatarFigureSVG } from "./AvatarFigureSVG";
+import { SeatedAttendee } from "./characters/SeatedAttendee";
 
 interface DiningTableSVGProps {
   tableId: string;
@@ -190,7 +190,7 @@ export function PreciousTableGathering() {
     <>
       {/* 
         ====================================================================
-        TABLE 1: LEFT SIDE DINING TABLE & 6 GLOWING AVATAR BADGES
+        TABLE 1: LEFT SIDE DINING TABLE (3 Women, 3 Men - Strict 50:50 Parity)
         ====================================================================
       */}
       <div className="absolute bottom-1 sm:bottom-2 left-[2%] sm:left-[4%] md:left-[6%] w-72 sm:w-80 md:w-92 h-36 sm:h-40 md:h-46 pointer-events-none select-none z-20">
@@ -202,27 +202,39 @@ export function PreciousTableGathering() {
           {/* LAYER 1: BACK ROW CHAIR BACKRESTS (z-5) */}
           <BackChairsSVG tableId="leftTable" />
 
-          {/* LAYER 2: BACK ROW GUESTS (z-10) - Glowing Circular Badges resting in chairs */}
+          {/* LAYER 2: BACK ROW GUESTS (z-10) - Stylized 3D Streetwear Characters */}
 
-          {/* Guest L1 (Seat 1 - Back Left, x=23.75%) */}
-          <div className="absolute bottom-[48%] left-[23.75%] -translate-x-1/2 z-10 dinner-guest-L1 pointer-events-auto">
-            <div className="relative w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12">
-              <AvatarFigureSVG variant="pink" />
-            </div>
+          {/* Guest L1 (Seat 1 - Back Left, x=23.75%) -> WOMAN */}
+          <div className="absolute bottom-[44%] left-[23.75%] -translate-x-1/2 z-10 dinner-guest-L1 pointer-events-auto">
+            <SeatedAttendee
+              seatIndex={0}
+              gender="woman"
+              glowColor="#f472b6"
+              badgeHalo="rgba(244, 114, 182, 0.22)"
+              className="w-13 h-15 sm:w-15 sm:h-17 md:w-17 md:h-19"
+            />
           </div>
 
-          {/* Guest L2 (Seat 2 - Back Center, x=50.0%) */}
-          <div className="absolute bottom-[48%] left-[50%] -translate-x-1/2 z-10 dinner-guest-L2 pointer-events-auto">
-            <div className="relative w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12">
-              <AvatarFigureSVG variant="gold" />
-            </div>
+          {/* Guest L2 (Seat 2 - Back Center, x=50.0%) -> MAN */}
+          <div className="absolute bottom-[44%] left-[50%] -translate-x-1/2 z-10 dinner-guest-L2 pointer-events-auto">
+            <SeatedAttendee
+              seatIndex={1}
+              gender="man"
+              glowColor="#fbbf24"
+              badgeHalo="rgba(251, 191, 36, 0.22)"
+              className="w-13 h-15 sm:w-15 sm:h-17 md:w-17 md:h-19"
+            />
           </div>
 
-          {/* Guest L3 (Seat 3 - Back Right, x=76.25%) */}
-          <div className="absolute bottom-[48%] left-[76.25%] -translate-x-1/2 z-10 dinner-guest-L3 pointer-events-auto">
-            <div className="relative w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12">
-              <AvatarFigureSVG variant="mint" />
-            </div>
+          {/* Guest L3 (Seat 3 - Back Right, x=76.25%) -> WOMAN */}
+          <div className="absolute bottom-[44%] left-[76.25%] -translate-x-1/2 z-10 dinner-guest-L3 pointer-events-auto">
+            <SeatedAttendee
+              seatIndex={2}
+              gender="woman"
+              glowColor="#86efac"
+              badgeHalo="rgba(134, 239, 172, 0.22)"
+              className="w-13 h-15 sm:w-15 sm:h-17 md:w-17 md:h-19"
+            />
           </div>
 
           {/* CONSTELLATION NETWORK LINES (z-15) */}
@@ -231,34 +243,49 @@ export function PreciousTableGathering() {
           {/* LAYER 3: DINING TABLE SURFACE & FRONT STOOL FRAMES (z-20) */}
           <DiningTableSVG tableId="leftTable" />
 
-          {/* LAYER 4: FRONT ROW GUESTS (z-30) - Glowing Circular Badges resting on stools */}
+          {/* LAYER 4: FRONT ROW GUESTS (z-30) - Over-The-Shoulder Characters */}
 
-          {/* Guest L4 (Seat 4 - Front Left, x=25.6%) */}
-          <div className="absolute bottom-[18%] left-[25.6%] -translate-x-1/2 z-30 dinner-guest-L4 pointer-events-auto">
-            <div className="relative w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12">
-              <AvatarFigureSVG variant="ivory" />
-            </div>
+          {/* Guest L4 (Seat 4 - Front Left, x=25.6%) -> MAN */}
+          <div className="absolute bottom-[13%] left-[25.6%] -translate-x-1/2 z-30 dinner-guest-L4 pointer-events-auto">
+            <SeatedAttendee
+              seatIndex={3}
+              gender="man"
+              isFrontRow={true}
+              glowColor="#f8fafc"
+              badgeHalo="rgba(248, 250, 252, 0.22)"
+              className="w-13 h-15 sm:w-15 sm:h-17 md:w-17 md:h-19"
+            />
           </div>
 
-          {/* Guest L5 (Seat 5 - Front Center, x=50.0%) */}
-          <div className="absolute bottom-[18%] left-[50%] -translate-x-1/2 z-30 dinner-guest-L5 pointer-events-auto">
-            <div className="relative w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12">
-              <AvatarFigureSVG variant="pink" />
-            </div>
+          {/* Guest L5 (Seat 5 - Front Center, x=50.0%) -> WOMAN */}
+          <div className="absolute bottom-[13%] left-[50%] -translate-x-1/2 z-30 dinner-guest-L5 pointer-events-auto">
+            <SeatedAttendee
+              seatIndex={4}
+              gender="woman"
+              isFrontRow={true}
+              glowColor="#f472b6"
+              badgeHalo="rgba(244, 114, 182, 0.22)"
+              className="w-13 h-15 sm:w-15 sm:h-17 md:w-17 md:h-19"
+            />
           </div>
 
-          {/* Guest L6 (Seat 6 - Front Right, x=74.4%) */}
-          <div className="absolute bottom-[18%] left-[74.4%] -translate-x-1/2 z-30 dinner-guest-L6 pointer-events-auto">
-            <div className="relative w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12">
-              <AvatarFigureSVG variant="mint" />
-            </div>
+          {/* Guest L6 (Seat 6 - Front Right, x=74.4%) -> MAN */}
+          <div className="absolute bottom-[13%] left-[74.4%] -translate-x-1/2 z-30 dinner-guest-L6 pointer-events-auto">
+            <SeatedAttendee
+              seatIndex={5}
+              gender="man"
+              isFrontRow={true}
+              glowColor="#86efac"
+              badgeHalo="rgba(134, 239, 172, 0.22)"
+              className="w-13 h-15 sm:w-15 sm:h-17 md:w-17 md:h-19"
+            />
           </div>
         </div>
       </div>
 
       {/* 
         ====================================================================
-        TABLE 2: RIGHT SIDE DINING TABLE & 6 GLOWING AVATAR BADGES
+        TABLE 2: RIGHT SIDE DINING TABLE (3 Men, 3 Women - Strict 50:50 Parity)
         ====================================================================
       */}
       <div className="absolute bottom-1 sm:bottom-2 right-[2%] sm:right-[4%] md:right-[6%] w-72 sm:w-80 md:w-92 h-36 sm:h-40 md:h-46 pointer-events-none select-none z-20">
@@ -270,27 +297,39 @@ export function PreciousTableGathering() {
           {/* LAYER 1: BACK ROW CHAIR BACKRESTS (z-5) */}
           <BackChairsSVG tableId="rightTable" />
 
-          {/* LAYER 2: BACK ROW GUESTS (z-10) - Glowing Circular Badges resting in chairs */}
+          {/* LAYER 2: BACK ROW GUESTS (z-10) - Stylized 3D Streetwear Characters */}
 
-          {/* Guest R1 (Seat 1 - Back Left, x=23.75%) */}
-          <div className="absolute bottom-[48%] left-[23.75%] -translate-x-1/2 z-10 dinner-guest-R1 pointer-events-auto">
-            <div className="relative w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12">
-              <AvatarFigureSVG variant="gold" />
-            </div>
+          {/* Guest R1 (Seat 1 - Back Left, x=23.75%) -> MAN */}
+          <div className="absolute bottom-[44%] left-[23.75%] -translate-x-1/2 z-10 dinner-guest-R1 pointer-events-auto">
+            <SeatedAttendee
+              seatIndex={6}
+              gender="man"
+              glowColor="#fbbf24"
+              badgeHalo="rgba(251, 191, 36, 0.22)"
+              className="w-13 h-15 sm:w-15 sm:h-17 md:w-17 md:h-19"
+            />
           </div>
 
-          {/* Guest R2 (Seat 2 - Back Center, x=50.0%) */}
-          <div className="absolute bottom-[48%] left-[50%] -translate-x-1/2 z-10 dinner-guest-R2 pointer-events-auto">
-            <div className="relative w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12">
-              <AvatarFigureSVG variant="mint" />
-            </div>
+          {/* Guest R2 (Seat 2 - Back Center, x=50.0%) -> WOMAN */}
+          <div className="absolute bottom-[44%] left-[50%] -translate-x-1/2 z-10 dinner-guest-R2 pointer-events-auto">
+            <SeatedAttendee
+              seatIndex={7}
+              gender="woman"
+              glowColor="#86efac"
+              badgeHalo="rgba(134, 239, 172, 0.22)"
+              className="w-13 h-15 sm:w-15 sm:h-17 md:w-17 md:h-19"
+            />
           </div>
 
-          {/* Guest R3 (Seat 3 - Back Right, x=76.25%) */}
-          <div className="absolute bottom-[48%] left-[76.25%] -translate-x-1/2 z-10 dinner-guest-R3 pointer-events-auto">
-            <div className="relative w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12">
-              <AvatarFigureSVG variant="pink" />
-            </div>
+          {/* Guest R3 (Seat 3 - Back Right, x=76.25%) -> MAN */}
+          <div className="absolute bottom-[44%] left-[76.25%] -translate-x-1/2 z-10 dinner-guest-R3 pointer-events-auto">
+            <SeatedAttendee
+              seatIndex={8}
+              gender="man"
+              glowColor="#f472b6"
+              badgeHalo="rgba(244, 114, 182, 0.22)"
+              className="w-13 h-15 sm:w-15 sm:h-17 md:w-17 md:h-19"
+            />
           </div>
 
           {/* CONSTELLATION NETWORK LINES (z-15) */}
@@ -299,27 +338,42 @@ export function PreciousTableGathering() {
           {/* LAYER 3: DINING TABLE SURFACE & FRONT STOOL FRAMES (z-20) */}
           <DiningTableSVG tableId="rightTable" />
 
-          {/* LAYER 4: FRONT ROW GUESTS (z-30) - Glowing Circular Badges resting on stools */}
+          {/* LAYER 4: FRONT ROW GUESTS (z-30) - Over-The-Shoulder Characters */}
 
-          {/* Guest R4 (Seat 4 - Front Left, x=25.6%) */}
-          <div className="absolute bottom-[18%] left-[25.6%] -translate-x-1/2 z-30 dinner-guest-R4 pointer-events-auto">
-            <div className="relative w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12">
-              <AvatarFigureSVG variant="mint" />
-            </div>
+          {/* Guest R4 (Seat 4 - Front Left, x=25.6%) -> WOMAN */}
+          <div className="absolute bottom-[13%] left-[25.6%] -translate-x-1/2 z-30 dinner-guest-R4 pointer-events-auto">
+            <SeatedAttendee
+              seatIndex={9}
+              gender="woman"
+              isFrontRow={true}
+              glowColor="#86efac"
+              badgeHalo="rgba(134, 239, 172, 0.22)"
+              className="w-13 h-15 sm:w-15 sm:h-17 md:w-17 md:h-19"
+            />
           </div>
 
-          {/* Guest R5 (Seat 5 - Front Center, x=50.0%) */}
-          <div className="absolute bottom-[18%] left-[50%] -translate-x-1/2 z-30 dinner-guest-R5 pointer-events-auto">
-            <div className="relative w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12">
-              <AvatarFigureSVG variant="ivory" />
-            </div>
+          {/* Guest R5 (Seat 5 - Front Center, x=50.0%) -> MAN */}
+          <div className="absolute bottom-[13%] left-[50%] -translate-x-1/2 z-30 dinner-guest-R5 pointer-events-auto">
+            <SeatedAttendee
+              seatIndex={10}
+              gender="man"
+              isFrontRow={true}
+              glowColor="#f8fafc"
+              badgeHalo="rgba(248, 250, 252, 0.22)"
+              className="w-13 h-15 sm:w-15 sm:h-17 md:w-17 md:h-19"
+            />
           </div>
 
-          {/* Guest R6 (Seat 6 - Front Right, x=74.4%) */}
-          <div className="absolute bottom-[18%] left-[74.4%] -translate-x-1/2 z-30 dinner-guest-R6 pointer-events-auto">
-            <div className="relative w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12">
-              <AvatarFigureSVG variant="gold" />
-            </div>
+          {/* Guest R6 (Seat 6 - Front Right, x=74.4%) -> WOMAN */}
+          <div className="absolute bottom-[13%] left-[74.4%] -translate-x-1/2 z-30 dinner-guest-R6 pointer-events-auto">
+            <SeatedAttendee
+              seatIndex={11}
+              gender="woman"
+              isFrontRow={true}
+              glowColor="#fbbf24"
+              badgeHalo="rgba(251, 191, 36, 0.22)"
+              className="w-13 h-15 sm:w-15 sm:h-17 md:w-17 md:h-19"
+            />
           </div>
         </div>
       </div>

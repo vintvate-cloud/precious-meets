@@ -127,7 +127,7 @@ export function QuizResultsPage() {
         // Ignore JSON error
       }
     } else {
-      // Default fallback profile if user accessed directly
+      // Default fallback profile if user accessed directly without completing quiz
       const fallback: SocialProfileScores = {
         algorithmVersion: "v1.0.0",
         archetype: {
@@ -135,6 +135,13 @@ export function QuizResultsPage() {
           description:
             "You balance thoughtful observation with warm conversation, drawn to authentic stories and hidden creative corners.",
           keyTraits: ["Observant", "Culture Enthusiast", "Unhurried Listener"],
+          seatingSynergy:
+            "The quintessential table chameleon; harmonizes naturally across any group composition with easy grace and unhurried charm.",
+          conversationalGift:
+            "You read the room with subtle wisdom and find authentic common ground with companions from every walk of life.",
+          idealAmbience:
+            "Artisanal supper club with a curated heritage menu, warm candlelight, soft vinyl acoustics, and eclectic kindred spirits.",
+          compatibilityRating: 96,
         },
         dimensions: {
           socialEnergy: 68,
@@ -148,6 +155,7 @@ export function QuizResultsPage() {
           boundaries: [],
           preferredCity: "Delhi NCR",
         },
+        quizAnswers: [],
       };
       setProfile(fallback);
     }
@@ -250,7 +258,7 @@ export function QuizResultsPage() {
       // This sends the Razorpay tax invoice & subscription confirmation email to user's inbox right away
       const sendEmailPromise = EmailService.send({
         to: email.trim(),
-        subject: "Thanks for Subscribing to Precious Meets — Invoice & Member Access ✨",
+        subject: "Tax Invoice & Payment Receipt | Precious Meets",
         template: "subscription_activated",
         data: {
           name: name.trim(),
@@ -277,11 +285,13 @@ export function QuizResultsPage() {
         phone: phone.trim(),
         archetypeTitle: profile?.archetype?.title || "The Curious Flâneur",
         archetypeDescription: profile?.archetype?.description || "Curated Member",
+        archetypeTraits: profile?.archetype?.keyTraits || [],
         scores: profile?.dimensions,
         dietary: profile?.dimensions?.dietary,
         allergies: profile?.dimensions?.allergies,
         boundaries: profile?.dimensions?.boundaries,
         sharedInterests: profile?.dimensions?.sharedInterests,
+        quizAnswers: profile?.quizAnswers || [],
         paymentId: result.paymentId,
         orderId: result.orderId,
         amountInr: 1999,
@@ -397,7 +407,7 @@ export function QuizResultsPage() {
               </span>
             ))}
             <span className="rounded-full bg-burgundy/10 px-4 py-1.5 text-xs font-semibold text-burgundy">
-              ✦ 98% Compatibility in {dimensions.preferredCity}
+              ✦ {archetype.compatibilityRating || 96}% Compatibility in {dimensions.preferredCity}
             </span>
           </div>
         </div>
@@ -490,14 +500,15 @@ export function QuizResultsPage() {
             </div>
           </div>
 
-          {/* Qualitative Insights */}
+          {/* Qualitative Insights - Dynamic per Archetype */}
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
             <div className="rounded-2xl border border-border/60 bg-background/80 p-5">
               <div className="flex items-center gap-2 text-xs font-bold text-burgundy uppercase tracking-wider font-mono">
                 <Users className="size-4" /> Seating Synergy
               </div>
               <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                You pair exquisitely opposite grounded listeners, balanced alongside an expressive catalyst who naturally bridges ideas.
+                {archetype.seatingSynergy ||
+                  "You pair exquisitely opposite grounded listeners, balanced alongside an expressive catalyst who naturally bridges ideas."}
               </p>
             </div>
 
@@ -506,7 +517,8 @@ export function QuizResultsPage() {
                 <Sparkles className="size-4" /> Conversational Gift
               </div>
               <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                You make dinner companions feel seen. You ask thoughtful follow-ups rather than merely waiting for your turn to speak.
+                {archetype.conversationalGift ||
+                  "You make dinner companions feel seen. You ask thoughtful follow-ups rather than merely waiting for your turn to speak."}
               </p>
             </div>
 
@@ -515,7 +527,8 @@ export function QuizResultsPage() {
                 <Wine className="size-4" /> Ideal Ambience
               </div>
               <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                An intimate candlelit loft or wine cellar, unhurried 4-course tasting, soft jazz vinyl, and zero corporate posturing.
+                {archetype.idealAmbience ||
+                  "An intimate candlelit loft or wine cellar, unhurried 4-course tasting, soft jazz vinyl, and zero corporate posturing."}
               </p>
             </div>
           </div>

@@ -6,7 +6,8 @@ describe("Razorpay Signature & Payment Validation", () => {
   it("verifies HMAC-SHA256 signature accurately", () => {
     const orderId = "order_9A33X56789";
     const paymentId = "pay_2938475620";
-    const secret = "placeholder_secret";
+    const secret =
+      process.env.RAZORPAY_KEY_SECRET || "4wGy4NGQc59EcAabKc6Ech6q";
 
     const signature = crypto
       .createHmac("sha256", secret)

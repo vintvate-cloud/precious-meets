@@ -514,11 +514,20 @@ export function EventQrScannerModal({
                   {/* Attendee Profile Dossier */}
                   {scanResult.attendee && (
                     <div className="flex items-center gap-4 rounded-2xl bg-card border border-border/80 p-3.5 shadow-xs">
-                      <img
-                        src={scanResult.attendee.avatar}
-                        alt={scanResult.attendee.name}
-                        className="size-14 rounded-full object-cover border-2 border-forest ring-2 ring-forest/20 shrink-0"
-                      />
+                      <div
+                        className={`size-14 rounded-full flex items-center justify-center font-display text-lg font-semibold border-2 border-forest ring-2 ring-forest/20 shrink-0 select-none ${
+                          scanResult.attendee.gender === "female" ? "bg-forest text-ivory" : "bg-burgundy text-ivory"
+                        }`}
+                      >
+                        {scanResult.attendee.name
+                          .trim()
+                          .split(/\s+/)
+                          .filter(Boolean)
+                          .map((n) => n[0])
+                          .slice(0, 2)
+                          .join("")
+                          .toUpperCase()}
+                      </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-bold text-foreground">
@@ -591,11 +600,16 @@ export function EventQrScannerModal({
                   {scanResult.attendee && (
                     <div className="rounded-2xl border border-destructive/20 bg-background/80 p-3.5 space-y-2">
                       <div className="flex items-center gap-3">
-                        <img
-                          src={scanResult.attendee.avatar}
-                          alt={scanResult.attendee.name}
-                          className="size-10 rounded-full object-cover border border-destructive/30 grayscale"
-                        />
+                        <div className="size-10 rounded-full flex items-center justify-center font-display text-sm font-semibold border border-destructive/30 bg-destructive/15 text-destructive shrink-0 select-none">
+                          {scanResult.attendee.name
+                            .trim()
+                            .split(/\s+/)
+                            .filter(Boolean)
+                            .map((n) => n[0])
+                            .slice(0, 2)
+                            .join("")
+                            .toUpperCase()}
+                        </div>
                         <div>
                           <p className="text-xs font-bold text-foreground">
                             {scanResult.attendee.name} ({scanResult.attendee.memberId})
@@ -931,13 +945,24 @@ export function EventQrScannerModal({
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div className="relative shrink-0">
                         {attendee ? (
-                          <img
-                            src={attendee.avatar}
-                            alt={attendee.name}
-                            className={`size-9 rounded-full object-cover border ${
-                              isCheckedIn ? "border-forest ring-1 ring-forest/30" : "border-border"
+                          <div
+                            className={`size-9 rounded-full flex items-center justify-center font-display text-xs font-semibold select-none border ${
+                              isCheckedIn
+                                ? "bg-forest text-ivory border-forest ring-1 ring-forest/30"
+                                : attendee.gender === "female"
+                                ? "bg-forest/15 text-forest border-forest/30"
+                                : "bg-burgundy/15 text-burgundy border-burgundy/30"
                             }`}
-                          />
+                          >
+                            {attendee.name
+                              .trim()
+                              .split(/\s+/)
+                              .filter(Boolean)
+                              .map((n) => n[0])
+                              .slice(0, 2)
+                              .join("")
+                              .toUpperCase()}
+                          </div>
                         ) : (
                           <div className="flex size-9 items-center justify-center rounded-full bg-muted text-muted-foreground text-xs font-mono font-bold">
                             {seatIdx + 1}

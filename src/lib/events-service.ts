@@ -64,6 +64,8 @@ export interface SeatAcceptance {
   invitedAt: string;
   respondedAt?: string;
   declineReason?: string;
+  emailSent?: boolean;
+  emailSentAt?: string;
 }
 
 export interface EventCheckIn {
@@ -320,14 +322,17 @@ export class EventsService {
     newSeats[seatIndex] = attendeeId;
 
     const seatAcceptances: Record<string, SeatAcceptance> = { ...(event.seatAcceptances || {}) };
-    if (!seatAcceptances[attendeeId] || seatAcceptances[attendeeId].status !== "accepted") {
+    const prevAcceptance = seatAcceptances[attendeeId];
+    if (!prevAcceptance || prevAcceptance.status !== "accepted") {
       seatAcceptances[attendeeId] = {
         attendeeId,
         attendeeEmail: attendee?.email,
         attendeeName: attendee?.name,
         seatNumber: seatIndex + 1,
-        status: "pending",
-        invitedAt: new Date().toISOString(),
+        status: prevAcceptance?.status || "pending",
+        invitedAt: prevAcceptance?.invitedAt || new Date().toISOString(),
+        emailSent: Boolean(prevAcceptance?.emailSent),
+        emailSentAt: prevAcceptance?.emailSentAt,
       };
     }
 
@@ -507,7 +512,9 @@ export class EventsService {
   }
 
   // 12. Send official invitations / table passes to all seated attendees
-  static async sendEventInvitations(eventId: string): Promise<{ success: boolean; dispatchedCount: number }> {
+  static async sendEventInvitations(
+    eventId: string
+  ): Promise<{ success: boolean; dispatchedCount: number; alreadySentCount: number; totalSeated: number }> {
     const event = this.getEventById(eventId);
     if (!event) throw new Error("Event not found");
 
@@ -525,10 +532,26 @@ export class EventsService {
     const updatedInvitations = [...existingInvitations];
     const seatAcceptances: Record<string, SeatAcceptance> = { ...(event.seatAcceptances || {}) };
 
-    // Send emails via EmailService
+    const dashboardUrl = typeof window !== "undefined"
+      ? `${window.location.origin}/dashboard`
+      : "http://localhost:8080/dashboard";
+
     let sentCount = 0;
+    let alreadySentCount = 0;
+
     for (const { attendee, seatIndex } of seatedAttendees) {
       const seatNumber = seatIndex + 1;
+      const existing = seatAcceptances[attendee.id];
+      const hasEmailBeenSent = Boolean(existing?.emailSent);
+
+      // If attendee has ALREADY received an invitation email, DO NOT send again!
+      // They are already marked as email sent and waiting for acceptance (or accepted).
+      if (hasEmailBeenSent) {
+        alreadySentCount++;
+        continue;
+      }
+
+      // Attendee has not received an invitation email yet (newly seated or replacement member)
       try {
         await EmailService.sendEmail({
           to: attendee.email,
@@ -540,6 +563,7 @@ export class EventsService {
             venue: `${event.venueName} (${event.venueAddress}) — Gate PIN: ${event.secretAccessCode}`,
             host: event.hostName,
             reference: `MEET-${event.secretAccessCode}-${attendee.id.slice(-4).toUpperCase()}`,
+            dashboardUrl,
           },
         });
         sentCount++;
@@ -547,9 +571,8 @@ export class EventsService {
         console.warn(`[EventsService] Could not send to ${attendee.email}:`, err);
       }
 
-      // Preserve status if attendee had already accepted
-      const previousStatus = seatAcceptances[attendee.id]?.status;
-      const resolvedStatus = previousStatus === "accepted" ? "accepted" : "pending";
+      // Mark as email sent and waiting for acceptance (status: "pending")
+      const resolvedStatus = existing?.status === "accepted" ? "accepted" : "pending";
 
       seatAcceptances[attendee.id] = {
         attendeeId: attendee.id,
@@ -557,7 +580,9 @@ export class EventsService {
         attendeeName: attendee.name,
         seatNumber,
         status: resolvedStatus,
-        invitedAt: seatAcceptances[attendee.id]?.invitedAt || new Date().toISOString(),
+        invitedAt: existing?.invitedAt || new Date().toISOString(),
+        emailSent: true,
+        emailSentAt: new Date().toISOString(),
       };
 
       // Create or update invitation for user dashboard
@@ -608,7 +633,12 @@ export class EventsService {
       window.dispatchEvent(new Event("storage"));
     }
 
-    return { success: true, dispatchedCount: sentCount };
+    return {
+      success: true,
+      dispatchedCount: sentCount,
+      alreadySentCount,
+      totalSeated: seatedAttendees.length,
+    };
   }
 
   // 13. Get all user seat invitations (with optional email filter)
@@ -712,6 +742,8 @@ export class EventsService {
           invitedAt: updatedInvitation.invitedAt,
           respondedAt: new Date().toISOString(),
           declineReason,
+          emailSent: seatAcceptances[attendeeId]?.emailSent ?? true,
+          emailSentAt: seatAcceptances[attendeeId]?.emailSentAt,
         };
 
         this.updateEvent(event.id, { seatAcceptances });
@@ -764,14 +796,17 @@ export class EventsService {
     const seatNumber = seatIdx !== -1 ? seatIdx + 1 : 1;
 
     const seatAcceptances = { ...(event.seatAcceptances || {}) };
+    const existing = seatAcceptances[attendeeId];
     seatAcceptances[attendeeId] = {
       attendeeId,
       attendeeEmail: attendee?.email,
       attendeeName: attendee?.name,
       seatNumber,
       status,
-      invitedAt: seatAcceptances[attendeeId]?.invitedAt || new Date().toISOString(),
+      invitedAt: existing?.invitedAt || new Date().toISOString(),
       respondedAt: status !== "pending" ? new Date().toISOString() : undefined,
+      emailSent: existing?.emailSent ?? true,
+      emailSentAt: existing?.emailSentAt,
     };
 
     // Also sync UserSeatInvitation

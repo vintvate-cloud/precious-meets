@@ -229,7 +229,7 @@ export function SeatInvitationsSection({
                       {isPending ? (
                         <>
                           <span className="text-xs text-muted-foreground">
-                            Decision requested within 48h to finalize table chemistry
+                            Please accept or decline within 24 hours before seat is reallocated to waitlist
                           </span>
 
                           <div className="flex items-center gap-2">
