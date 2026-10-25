@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { supabase } from "@/lib/supabase";
 import {
   EventsService,
   AdminEvent,
@@ -131,30 +132,35 @@ function AdminConsolePage() {
 
     refreshData();
 
-    // Hydrate applications from server data file
-    ApplicationsService.fetchApplicationsFromServer().then((srvApps) => {
-      if (srvApps && srvApps.length > 0) {
-        setApplications(srvApps);
-      }
-    });
+    // Fetch live user applications from Supabase database
+    const loadFromSupabase = () => {
+      ApplicationsService.fetchApplicationsFromDb().then((dbApps) => {
+        if (dbApps && dbApps.length > 0) {
+          setApplications(dbApps);
+          setVerifications(VerificationsService.getQueue());
+        }
+      });
+    };
 
-    // Hydrate verifications queue from server data file
-    VerificationsService.fetchQueueFromServer().then((srvQueue) => {
-      if (srvQueue && srvQueue.length > 0) {
-        setVerifications(srvQueue);
-      }
-    });
+    loadFromSupabase();
 
-    ApplicationsService.fetchApplicationsFromDb().then((dbApps) => {
-      if (dbApps && dbApps.length > 0) {
-        setApplications(dbApps);
-      }
-    });
+    // Subscribe to realtime database changes on member_applications table
+    const channel = supabase
+      .channel("admin_member_applications_realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "member_applications" },
+        () => {
+          loadFromSupabase();
+        }
+      )
+      .subscribe();
 
     window.addEventListener("storage", refreshData);
     window.addEventListener("precious_meets_applications_updated", refreshData);
     window.addEventListener("precious_meets_verification_updated", refreshData);
     return () => {
+      supabase.removeChannel(channel);
       window.removeEventListener("storage", refreshData);
       window.removeEventListener("precious_meets_applications_updated", refreshData);
       window.removeEventListener("precious_meets_verification_updated", refreshData);

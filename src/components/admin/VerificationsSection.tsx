@@ -972,7 +972,7 @@ export function VerificationsSection({
                   </div>
 
                   <div className="flex items-center gap-3">
-                    {selectedUserForCert.aadhaarFileUrl.startsWith("data:image/") ? (
+                    {!selectedUserForCert.aadhaarFileUrl.startsWith("data:application/pdf") && !selectedUserForCert.aadhaarFileUrl.toLowerCase().includes(".pdf") ? (
                       <div className="relative size-14 shrink-0 rounded-xl overflow-hidden border border-border shadow-xs bg-card">
                         <img
                           src={selectedUserForCert.aadhaarFileUrl}

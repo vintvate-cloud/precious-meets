@@ -666,7 +666,7 @@ export function UserDossierModal({
                           <ExternalLink className="size-3" /> Open Original
                         </a>
                       </div>
-                      {effectiveUrl.startsWith("data:image/") ? (
+                      {!effectiveUrl.startsWith("data:application/pdf") && !effectiveUrl.toLowerCase().includes(".pdf") ? (
                         <div className="flex justify-center bg-card rounded-lg p-2 border border-border">
                           <img
                             src={effectiveUrl}
