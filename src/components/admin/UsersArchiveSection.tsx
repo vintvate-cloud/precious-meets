@@ -90,11 +90,11 @@ export function UsersArchiveSection() {
 
     const query = searchQuery.toLowerCase();
     return (
-      app.applicantName.toLowerCase().includes(query) ||
-      app.applicantEmail.toLowerCase().includes(query) ||
-      app.applicationReference.toLowerCase().includes(query) ||
-      app.archetypeTitle.toLowerCase().includes(query) ||
-      app.applicantCity.toLowerCase().includes(query)
+      (app.applicantName?.toLowerCase() || "").includes(query) ||
+      (app.applicantEmail?.toLowerCase() || "").includes(query) ||
+      (app.applicationReference?.toLowerCase() || "").includes(query) ||
+      (app.archetypeTitle?.toLowerCase() || "").includes(query) ||
+      (app.applicantCity?.toLowerCase() || "").includes(query)
     );
   });
 
@@ -253,7 +253,7 @@ export function UsersArchiveSection() {
                       📁 {app.applicationReference}
                     </span>
                     <span className="text-[10px] text-muted-foreground font-mono">
-                      {new Date(app.createdAt).toLocaleDateString()}
+                      {app.createdAt ? new Date(app.createdAt).toLocaleDateString() : "Recent"}
                     </span>
                   </div>
 

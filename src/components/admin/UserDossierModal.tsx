@@ -155,7 +155,7 @@ export function UserDossierModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden bg-ivory text-foreground border border-border shadow-2xl rounded-3xl max-h-[92vh] flex flex-col">
+      <DialogContent className="max-w-5xl w-[95vw] p-0 overflow-hidden bg-ivory text-foreground border border-border shadow-2xl rounded-3xl max-h-[92vh] flex flex-col">
         {/* ========================================================================= */}
         {/* DOSSIER FOLDER HEADER (Physical Archive Aesthetic)                        */}
         {/* ========================================================================= */}
@@ -167,12 +167,12 @@ export function UserDossierModal({
                 CONFIDENTIAL DOSSIER · {application.applicationReference}
               </span>
               <span className="text-[11px] text-muted-foreground font-mono">
-                Received: {new Date(application.createdAt).toLocaleDateString()}
+                Received: {application.createdAt ? new Date(application.createdAt).toLocaleDateString() : "Recent"}
               </span>
             </div>
 
             {/* Status Stamp */}
-            <div>
+            <div className="pr-8 sm:pr-6">
               {isApproved && (
                 <span className="inline-flex items-center gap-1 rounded-full border border-forest/30 bg-forest/15 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-forest">
                   <CheckCircle2 className="size-3.5" />
@@ -227,7 +227,7 @@ export function UserDossierModal({
             </div>
 
             {/* Quick 3-Pillar Verification Badges */}
-            <div className="flex items-center gap-2 text-[10px] font-mono">
+            <div className="flex flex-wrap items-center gap-2 text-[10px] font-mono">
               <div className="flex items-center gap-1 rounded-xl border border-forest/20 bg-forest/10 px-2.5 py-1.5 text-forest font-semibold">
                 <CheckCircle2 className="size-3 text-forest" />
                 <span>Quiz Complete</span>
@@ -853,32 +853,33 @@ export function UserDossierModal({
         {/* ========================================================================= */}
         {/* DOSSIER FOOTER (Executive Decision Actions)                                */}
         {/* ========================================================================= */}
-        <div className="border-t border-border/80 bg-card p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="text-xs text-muted-foreground flex items-center gap-2">
+        <div className="border-t border-border/80 bg-card/80 backdrop-blur-xs px-4 py-3 sm:px-6 sm:py-3.5 flex flex-col md:flex-row items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-2.5 text-xs text-muted-foreground w-full md:w-auto justify-between md:justify-start shrink-0">
             <Button
               variant="ghost"
               size="sm"
               onClick={handleDeleteDossier}
               disabled={processing}
-              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 text-xs px-2.5 h-8 cursor-pointer rounded-lg"
+              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 text-xs px-2.5 h-8.5 cursor-pointer rounded-xl shrink-0"
               title="Permanently delete application dossier"
             >
-              <Trash2 className="size-3.5 mr-1" />
+              <Trash2 className="size-3.5 mr-1.5" />
               Delete Application
             </Button>
-            <span>•</span>
-            <Lock className="size-3.5 text-burgundy" />
-            <span>Executive Action controls are permanently audit-logged.</span>
+            <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-muted-foreground/75 pl-2 border-l border-border/60 shrink-0">
+              <Lock className="size-3 text-burgundy" />
+              <span>Audit-logged action</span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex flex-wrap items-center justify-end gap-2 w-full md:w-auto">
             {/* Direct Send Credentials Button for Admin */}
             <Button
               variant="outline"
               size="sm"
               onClick={() => setCredentialsModalOpen(true)}
               disabled={sendingCredentials}
-              className={`rounded-full text-xs font-semibold px-4 cursor-pointer flex items-center gap-1.5 ${
+              className={`rounded-full text-xs font-semibold px-3.5 py-1.5 h-9 cursor-pointer flex items-center gap-1.5 shrink-0 ${
                 application.credentialsSent
                   ? "border-forest/40 text-forest hover:bg-forest/10"
                   : "border-purple-600/40 text-purple-700 hover:bg-purple-50"
@@ -896,51 +897,53 @@ export function UserDossierModal({
               <>
                 <Button
                   variant="outline"
+                  size="sm"
                   onClick={() => setRejectModalOpen(true)}
                   disabled={processing}
-                  className="rounded-full border-destructive/40 text-destructive hover:bg-destructive/10 text-xs px-4 cursor-pointer"
+                  className="rounded-full border-destructive/40 text-destructive hover:bg-destructive/10 text-xs font-semibold px-3.5 py-1.5 h-9 cursor-pointer flex items-center gap-1.5 shrink-0"
                 >
-                  <UserX className="size-3.5 mr-1" />
-                  Decline Application
+                  <UserX className="size-3.5" />
+                  <span>Decline Application</span>
                 </Button>
 
                 <Button
+                  size="sm"
                   onClick={handleApprove}
                   disabled={processing}
-                  className="rounded-full bg-forest text-ivory hover:bg-forest/90 text-xs font-semibold px-6 shadow-sm cursor-pointer"
+                  className="rounded-full bg-forest text-ivory hover:bg-forest/90 text-xs font-semibold px-4.5 py-1.5 h-9 shadow-xs cursor-pointer flex items-center gap-1.5 shrink-0"
                 >
                   {processing ? (
-                    <Loader2 className="size-3.5 animate-spin mr-1" />
+                    <Loader2 className="size-3.5 animate-spin" />
                   ) : (
-                    <UserCheck className="size-3.5 mr-1" />
+                    <UserCheck className="size-3.5" />
                   )}
-                  Approve & Issue Member Pass
+                  <span>Approve & Issue Member Pass</span>
                 </Button>
               </>
             ) : isApproved ? (
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-forest font-semibold flex items-center gap-1">
-                  <CheckCircle2 className="size-4" /> Member Officially Inducted
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs text-forest font-semibold flex items-center gap-1 py-1 px-2.5 rounded-full bg-forest/10 border border-forest/20">
+                  <CheckCircle2 className="size-3.5" /> Member Inducted
                 </span>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setRejectModalOpen(true)}
-                  className="rounded-full border-border text-xs text-muted-foreground hover:text-destructive cursor-pointer"
+                  className="rounded-full border-border text-xs text-muted-foreground hover:text-destructive h-9 px-3.5 cursor-pointer shrink-0"
                 >
                   Revoke & Decline
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-destructive font-semibold flex items-center gap-1">
-                  <XCircle className="size-4" /> Application Declined
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs text-destructive font-semibold flex items-center gap-1 py-1 px-2.5 rounded-full bg-destructive/10 border border-destructive/20">
+                  <XCircle className="size-3.5" /> Application Declined
                 </span>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleApprove}
-                  className="rounded-full border-forest/40 text-forest hover:bg-forest/10 text-xs cursor-pointer"
+                  className="rounded-full border-forest/40 text-forest hover:bg-forest/10 text-xs font-semibold h-9 px-3.5 cursor-pointer shrink-0"
                 >
                   Re-evaluate & Approve
                 </Button>

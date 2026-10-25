@@ -532,18 +532,18 @@ export function InteractiveTable({
           open={activeSeatIndex !== null}
           onClose={() => setActiveSeatIndex(null)}
           seatIndex={activeSeatIndex}
-          currentAttendeeId={event.seats[activeSeatIndex] ?? null}
+          currentAttendeeId={event.seats?.[activeSeatIndex] ?? null}
           onSelectAttendee={handleSeatSelect}
           onUnseatAttendee={() => handleUnseat(activeSeatIndex)}
-          alreadySeatedIds={event.seats}
-          attendees={attendees}
+          alreadySeatedIds={event.seats || []}
+          attendees={attendees || []}
           seatAcceptance={
-            event.seats[activeSeatIndex]
+            event.seats?.[activeSeatIndex]
               ? event.seatAcceptances?.[event.seats[activeSeatIndex]!]
               : undefined
           }
           onToggleAcceptance={(status) => {
-            const attId = event.seats[activeSeatIndex];
+            const attId = event.seats?.[activeSeatIndex];
             if (attId) {
               const updated = EventsService.adminSetSeatAcceptance(event.id, attId, status);
               onEventUpdated(updated);
