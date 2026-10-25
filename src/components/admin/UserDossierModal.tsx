@@ -702,149 +702,96 @@ export function UserDossierModal({
 
           {/* SHEET 4: REVIEW HISTORY & EMAILS */}
           {activeSheet === "decision" && (
-            <div className="space-y-6">
-              <div className="rounded-2xl border border-border/80 bg-card p-6 space-y-4">
-                <h3 className="font-display text-xl text-foreground">
-                  Adjudication Trail & Email Notifications
-                </h3>
-
-                <div className="space-y-3 text-xs">
-                  <div className="rounded-xl bg-ivory p-3.5 border border-border">
-                    <div className="flex justify-between font-mono text-[11px] text-muted-foreground">
-                      <span>Reviewed By:</span>
-                      <span className="font-semibold text-foreground">
-                        {application.reviewedBy || "Pending Review"}
-                      </span>
-                    </div>
-                    {application.reviewedAt && (
-                      <div className="flex justify-between font-mono text-[11px] text-muted-foreground mt-1">
-                        <span>Reviewed At:</span>
-                        <span>
-                          {new Date(application.reviewedAt).toLocaleString()}
-                        </span>
-                      </div>
-                    )}
+            <div className="space-y-4">
+              {/* Member Login Credentials Card - Exactly matching image 4 */}
+              <div className="rounded-2xl bg-purple-500/5 p-5 border border-purple-500/20 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <KeyRound className="size-4 text-purple-700" />
+                    <span className="font-semibold text-foreground text-xs sm:text-sm">
+                      Member Login Credentials (Auto-Generated)
+                    </span>
                   </div>
-
-                  {application.reviewDecisionNotes && (
-                    <div className="rounded-xl bg-forest/10 p-3.5 border border-forest/20 text-xs">
-                      <span className="font-mono text-[10px] uppercase font-bold text-forest">
-                        Curation Committee Notes:
-                      </span>
-                      <p className="mt-1 text-foreground leading-relaxed">
-                        {application.reviewDecisionNotes}
-                      </p>
-                    </div>
-                  )}
-
-                  {application.rejectionReason && (
-                    <div className="rounded-xl bg-destructive/10 p-3.5 border border-destructive/20 text-xs">
-                      <span className="font-mono text-[10px] uppercase font-bold text-destructive">
-                        Rejection Feedback Given:
-                      </span>
-                      <p className="mt-1 text-foreground leading-relaxed">
-                        {application.rejectionReason}
-                      </p>
-                    </div>
-                  )}
-
-                  {application.decisionEmailSentAt && (
-                    <div className="rounded-xl bg-ivory p-3.5 border border-border flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2">
-                        <Send className="size-4 text-forest" />
-                        <div>
-                          <div className="font-semibold text-foreground">
-                            Decision Email Sent
-                          </div>
-                          <div className="text-[10px] text-muted-foreground font-mono">
-                            Template: {application.decisionEmailTemplate}
-                          </div>
-                        </div>
-                      </div>
-                      <span className="font-mono text-[10px] text-muted-foreground">
-                        {new Date(
-                          application.decisionEmailSentAt,
-                        ).toLocaleTimeString()}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Member Login Credentials Card */}
-                  <div className="rounded-xl bg-purple-500/5 p-4 border border-purple-500/20 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <KeyRound className="size-4 text-purple-700" />
-                        <span className="font-semibold text-foreground text-xs">
-                          Member Login Credentials (Auto-Generated)
-                        </span>
-                      </div>
-                      <span
-                        className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold uppercase ${
-                          application.credentialsSent
-                            ? "bg-forest/15 text-forest"
-                            : "bg-purple-500/15 text-purple-800"
-                        }`}
-                      >
-                        {application.credentialsSent ? "Dispatched" : "Pending Dispatch"}
-                      </span>
-                    </div>
-
-                    <p className="text-[11px] text-muted-foreground leading-relaxed">
-                      Auto-generated strong passwords follow 16+ characters with uppercase, lowercase, numbers, and symbols. The login link directs to <code>/login</code> with instructions not to share credentials.
-                    </p>
-
-                    <div className="rounded-lg bg-card p-3 border border-border space-y-1.5 text-xs">
-                      <div className="flex justify-between font-mono text-[11px]">
-                        <span className="text-muted-foreground">Sign-In Email:</span>
-                        <span className="font-semibold text-foreground">{application.applicantEmail}</span>
-                      </div>
-                      {application.autoGeneratedPassword && (
-                        <div className="flex items-center justify-between font-mono text-[11px] pt-1 border-t border-border/60">
-                          <span className="text-muted-foreground">Auto-Generated Password:</span>
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-burgundy bg-burgundy/10 px-2 py-0.5 rounded">
-                              {showPassword ? application.autoGeneratedPassword : "••••••••••••••••"}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => setShowPassword(!showPassword)}
-                              className="text-muted-foreground hover:text-foreground text-[10px] underline cursor-pointer"
-                            >
-                              {showPassword ? "Hide" : "Show"}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                navigator.clipboard.writeText(application.autoGeneratedPassword || "");
-                                toast.success("Password copied to clipboard");
-                              }}
-                              className="text-muted-foreground hover:text-foreground cursor-pointer"
-                              title="Copy Password"
-                            >
-                              <Copy className="size-3" />
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                      {application.credentialsSentAt && (
-                        <div className="flex justify-between font-mono text-[10px] text-muted-foreground pt-1">
-                          <span>Dispatched At:</span>
-                          <span>{new Date(application.credentialsSentAt).toLocaleString()}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <Button
-                      size="sm"
-                      onClick={() => setCredentialsModalOpen(true)}
-                      disabled={sendingCredentials}
-                      className="w-full rounded-xl bg-purple-700 hover:bg-purple-800 text-ivory text-xs font-semibold py-2 shadow-xs cursor-pointer flex items-center justify-center gap-2"
-                    >
-                      <KeyRound className="size-3.5" />
-                      <span>{application.credentialsSent ? "Re-generate & Re-send Login Credentials" : "Send Login Credentials to User"}</span>
-                    </Button>
-                  </div>
+                  <span
+                    className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold uppercase ${
+                      application.credentialsSent
+                        ? "bg-forest/15 text-forest"
+                        : "bg-purple-500/15 text-purple-800"
+                    }`}
+                  >
+                    {application.credentialsSent ? "Dispatched" : "Pending Dispatch"}
+                  </span>
                 </div>
+
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  Auto-generated strong passwords follow 16+ characters with uppercase, lowercase, numbers, and symbols. The login link directs to <code className="bg-muted px-1 py-0.5 rounded">/login</code> with instructions not to share credentials.
+                </p>
+
+                <div className="rounded-xl bg-card p-3.5 border border-border space-y-2 text-xs">
+                  <div className="flex justify-between font-mono text-[11px]">
+                    <span className="text-muted-foreground">Sign-In Email:</span>
+                    <span className="font-semibold text-foreground font-mono">{application.applicantEmail}</span>
+                  </div>
+                  {application.autoGeneratedPassword && (
+                    <div className="flex items-center justify-between font-mono text-[11px] pt-1.5 border-t border-border/60">
+                      <span className="text-muted-foreground">Auto-Generated Password:</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-burgundy bg-burgundy/10 px-2 py-0.5 rounded font-mono">
+                          {showPassword ? application.autoGeneratedPassword : "••••••••••••••••"}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="text-muted-foreground hover:text-foreground text-[10px] underline cursor-pointer"
+                        >
+                          {showPassword ? "Hide" : "Show"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(application.autoGeneratedPassword || "");
+                            toast.success("Password copied to clipboard");
+                          }}
+                          className="text-muted-foreground hover:text-foreground cursor-pointer"
+                          title="Copy Password"
+                        >
+                          <Copy className="size-3" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {application.credentialsSentAt && (
+                    <div className="flex justify-between font-mono text-[10px] text-muted-foreground pt-1.5 border-t border-border/40">
+                      <span>Dispatched At:</span>
+                      <span>{new Date(application.credentialsSentAt).toLocaleString()}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Only allow dispatch if NOT yet sent; once sent, duplicate sending is prevented */}
+                {!application.credentialsSent && (
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      if (isApproved) {
+                        setCredentialsModalOpen(true);
+                      }
+                    }}
+                    disabled={sendingCredentials || !isApproved}
+                    className={`w-full rounded-xl text-xs font-semibold py-2.5 shadow-xs flex items-center justify-center gap-2 ${
+                      !isApproved
+                        ? "bg-muted text-muted-foreground cursor-not-allowed opacity-60"
+                        : "bg-purple-700 hover:bg-purple-800 text-ivory cursor-pointer"
+                    }`}
+                  >
+                    <KeyRound className="size-3.5" />
+                    <span>
+                      {!isApproved
+                        ? "Approve application first to send credentials"
+                        : "Send Login Credentials"}
+                    </span>
+                  </Button>
+                )}
               </div>
             </div>
           )}
@@ -873,16 +820,32 @@ export function UserDossierModal({
           </div>
 
           <div className="flex flex-wrap items-center justify-end gap-2 w-full md:w-auto">
-            {/* Direct Send Credentials Button for Admin */}
+            {/* Direct Send Credentials Button:
+                - Not clickable until admin approves application
+                - Clickable once approved
+                - Once sent, permanently disabled so admin cannot send a 2nd time */}
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setCredentialsModalOpen(true)}
-              disabled={sendingCredentials}
-              className={`rounded-full text-xs font-semibold px-3.5 py-1.5 h-9 cursor-pointer flex items-center gap-1.5 shrink-0 ${
+              onClick={() => {
+                if (isApproved && !application.credentialsSent) {
+                  setCredentialsModalOpen(true);
+                }
+              }}
+              disabled={sendingCredentials || !isApproved || application.credentialsSent}
+              title={
+                !isApproved
+                  ? "Approve application first to enable sending credentials"
+                  : application.credentialsSent
+                  ? "Credentials already dispatched (cannot re-send)"
+                  : "Send Login Credentials"
+              }
+              className={`rounded-full text-xs font-semibold px-3.5 py-1.5 h-9 flex items-center gap-1.5 shrink-0 transition-all ${
                 application.credentialsSent
-                  ? "border-forest/40 text-forest hover:bg-forest/10"
-                  : "border-purple-600/40 text-purple-700 hover:bg-purple-50"
+                  ? "border-forest/40 bg-forest/5 text-forest cursor-default opacity-85"
+                  : !isApproved
+                  ? "border-border text-muted-foreground/60 bg-muted/20 opacity-50 cursor-not-allowed"
+                  : "border-purple-600/40 text-purple-700 hover:bg-purple-50 cursor-pointer"
               }`}
             >
               <KeyRound className="size-3.5" />
@@ -925,14 +888,6 @@ export function UserDossierModal({
                 <span className="text-xs text-forest font-semibold flex items-center gap-1 py-1 px-2.5 rounded-full bg-forest/10 border border-forest/20">
                   <CheckCircle2 className="size-3.5" /> Member Inducted
                 </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setRejectModalOpen(true)}
-                  className="rounded-full border-border text-xs text-muted-foreground hover:text-destructive h-9 px-3.5 cursor-pointer shrink-0"
-                >
-                  Revoke & Decline
-                </Button>
               </div>
             ) : (
               <div className="flex flex-wrap items-center gap-2">
