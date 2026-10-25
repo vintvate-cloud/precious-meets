@@ -442,7 +442,7 @@ export class EventsService {
       else if (a.dietary === "Vegan") dietaryCounts.vegan++;
       else if (a.dietary === "Jain") dietaryCounts.jain++;
 
-      a.allergies.forEach((alg) => {
+      (a.allergies || []).forEach((alg) => {
         if (!dietaryCounts.allergies.includes(alg)) {
           dietaryCounts.allergies.push(alg);
         }
@@ -472,10 +472,10 @@ export class EventsService {
     let harmonyScore = 88;
     if (seatedCount >= 2) {
       const avgEnergy =
-        seatedAttendees.reduce((acc, a) => acc + a.archetype.dimensions.socialEnergy, 0) /
+        seatedAttendees.reduce((acc, a) => acc + (a.archetype?.dimensions?.socialEnergy ?? 70), 0) /
         seatedCount;
       const avgDepth =
-        seatedAttendees.reduce((acc, a) => acc + a.archetype.dimensions.conversationDepth, 0) /
+        seatedAttendees.reduce((acc, a) => acc + (a.archetype?.dimensions?.conversationDepth ?? 80), 0) /
         seatedCount;
 
       // Reward high conversation depth and moderate social energy balance

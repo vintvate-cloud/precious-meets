@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import { AdminAttendee, SeatAcceptance } from "@/lib/events-service";
 import {
   Dialog,
@@ -40,7 +41,7 @@ export function AttendeePickerModal({
   onSelectAttendee,
   onUnseatAttendee,
   alreadySeatedIds,
-  attendees,
+  attendees = [],
   seatAcceptance,
   onToggleAcceptance,
 }: AttendeePickerModalProps) {
@@ -48,11 +49,11 @@ export function AttendeePickerModal({
   const [filterGender, setFilterGender] = useState<"all" | "female" | "male">("all");
 
   const filteredAttendees = useMemo(() => {
-    return attendees.filter((a) => {
+    return (attendees || []).filter((a) => {
       const matchSearch =
-        a.name.toLowerCase().includes(search.toLowerCase()) ||
-        a.email.toLowerCase().includes(search.toLowerCase()) ||
-        a.archetype.title.toLowerCase().includes(search.toLowerCase());
+        (a.name?.toLowerCase() || "").includes(search.toLowerCase()) ||
+        (a.email?.toLowerCase() || "").includes(search.toLowerCase()) ||
+        (a.archetype?.title?.toLowerCase() || "").includes(search.toLowerCase());
 
       const matchGender = filterGender === "all" || a.gender === filterGender;
 
@@ -60,7 +61,7 @@ export function AttendeePickerModal({
     });
   }, [attendees, search, filterGender]);
 
-  const currentAttendee = attendees.find((a) => a.id === currentAttendeeId);
+  const currentAttendee = attendees?.find((a) => a.id === currentAttendeeId);
   const isAccepted = seatAcceptance?.status === "accepted";
 
   return (
@@ -261,12 +262,12 @@ export function AttendeePickerModal({
                       <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground mt-0.5">
                         <span className="flex items-center gap-1 text-foreground/80 font-medium">
                           <Sparkles className="size-3 text-ochre" />
-                          {attendee.archetype.title}
+                          {attendee.archetype?.title || "Curated Member"}
                         </span>
                         <span>•</span>
                         <span>{attendee.email}</span>
                         <span>•</span>
-                        <span className="text-forest font-mono">{attendee.dietary}</span>
+                        <span className="text-forest font-mono">{attendee.dietary || "Vegetarian"}</span>
                       </div>
                     </div>
                   </div>
