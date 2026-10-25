@@ -711,7 +711,7 @@ function Collage() {
     // Phase 0: Slow, premium atmospheric transition into brand forest green (#5F7045)
     // Runs across an unhurried 1.6s timeline interval so the user experiences a velvety, cinematic color wash
     tl.to(
-      stage,
+      [stage, section],
       {
         backgroundColor: "#5F7045",
         duration: 1.6,
@@ -836,7 +836,7 @@ function Collage() {
     <section
       id="stories"
       ref={sectionRef}
-      className="relative h-[560vh] bg-[#5F7045] select-none"
+      className="relative h-[560vh] bg-[#FAF7F2] select-none -mt-px"
     >
       {/* Sticky Fullscreen Pinboard Stage */}
       <div
@@ -852,7 +852,7 @@ function Collage() {
         {/* Atmospheric Candlelight Glow in Center */}
         <div
           data-stories-glow
-          className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-60"
+          className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0"
         >
           <div className="w-[70vw] h-[70vw] max-w-[850px] max-h-[850px] rounded-full bg-[#C6A568]/20 blur-[160px] pointer-events-none" />
           <div className="w-[45vw] h-[45vw] max-w-[550px] max-h-[550px] rounded-full bg-[#691C35]/16 blur-[140px] pointer-events-none" />

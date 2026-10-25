@@ -64,31 +64,31 @@ export function FaqSection() {
   return (
     <section
       id="faq"
-      className="relative w-full bg-white text-[#171514] py-24 sm:py-36 px-4 sm:px-8 lg:px-16 border-t border-black/5"
+      className="relative w-full bg-black text-ivory py-24 sm:py-36 px-4 sm:px-8 lg:px-16 border-t border-white/10"
     >
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
           {/* Left Column: Bold Minimal "FAQ" Column */}
           <div className="lg:col-span-4 lg:sticky lg:top-28">
-            <span className="text-xs sm:text-sm font-mono uppercase tracking-[0.25em] text-[#5F7045] font-bold block mb-3">
+            <span className="text-xs sm:text-sm font-mono uppercase tracking-[0.25em] text-ochre font-bold block mb-3">
               Common Questions
             </span>
 
-            <h2 className="font-display text-7xl sm:text-8xl md:text-9xl lg:text-[9.5rem] text-[#171514] tracking-tight leading-none select-none">
+            <h2 className="font-display text-7xl sm:text-8xl md:text-9xl lg:text-[9.5rem] text-ivory tracking-tight leading-none select-none">
               FAQ
             </h2>
 
-            <p className="mt-6 text-base sm:text-lg text-[#171514]/65 leading-relaxed font-sans max-w-sm">
+            <p className="mt-6 text-base sm:text-lg text-ivory/70 leading-relaxed font-sans max-w-sm">
               Everything you need to know about safety, curation, and taking your seat at the table.
             </p>
 
-            <div className="mt-10 pt-8 border-t border-black/8 hidden lg:block">
-              <p className="text-xs font-mono uppercase tracking-wider text-[#171514]/45 mb-3">
+            <div className="mt-10 pt-8 border-t border-white/10 hidden lg:block">
+              <p className="text-xs font-mono uppercase tracking-wider text-ivory/50 mb-3">
                 Have an unlisted query?
               </p>
               <Link
                 to="/quiz"
-                className="inline-flex items-center gap-2 text-sm font-semibold text-[#691C35] hover:text-[#171514] transition-colors group"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-ochre hover:text-white transition-colors group"
               >
                 <span>Take the Discovery Quiz</span>
                 <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -97,7 +97,7 @@ export function FaqSection() {
           </div>
 
           {/* Right Column: Prominent, Bigger Minimal FAQs (7 Items) */}
-          <div className="lg:col-span-8 divide-y divide-black/10">
+          <div className="lg:col-span-8 divide-y divide-white/10">
             {faqs.map((faq, index) => {
               const isOpen = openId === faq.id;
 
@@ -110,12 +110,12 @@ export function FaqSection() {
                     className="w-full flex items-start justify-between text-left gap-6 cursor-pointer select-none group"
                   >
                     <span className="flex items-start gap-4 sm:gap-5 pr-2">
-                      <span className="text-sm sm:text-base md:text-lg font-mono text-[#5F7045] font-bold select-none pt-1">
+                      <span className="text-sm sm:text-base md:text-lg font-mono text-ochre font-bold select-none pt-1">
                         0{index + 1}
                       </span>
                       <span
                         className={`font-display text-xl sm:text-2xl md:text-3xl lg:text-[2rem] leading-tight tracking-tight transition-colors duration-200 ${
-                          isOpen ? "text-[#691C35]" : "text-[#171514] group-hover:text-[#691C35]"
+                          isOpen ? "text-ochre" : "text-ivory group-hover:text-ochre"
                         }`}
                       >
                         {faq.question}
@@ -126,8 +126,8 @@ export function FaqSection() {
                     <span
                       className={`shrink-0 size-9 sm:size-11 rounded-full flex items-center justify-center border transition-all duration-300 mt-1 ${
                         isOpen
-                          ? "bg-[#691C35] text-white border-[#691C35] scale-105"
-                          : "border-black/15 text-[#171514]/70 group-hover:border-[#691C35] group-hover:text-[#691C35] group-hover:scale-105"
+                          ? "bg-ochre text-ink border-ochre scale-105"
+                          : "border-white/20 text-ivory/70 group-hover:border-ochre group-hover:text-ochre group-hover:scale-105"
                       }`}
                     >
                       {isOpen ? (
@@ -147,7 +147,7 @@ export function FaqSection() {
                         transition={{ duration: 0.32, ease: [0.19, 1, 0.22, 1] }}
                         className="overflow-hidden"
                       >
-                        <p className="pt-4 sm:pt-5 pl-9 sm:pl-11 pr-4 sm:pr-8 text-sm sm:text-base md:text-lg text-[#171514]/75 leading-relaxed font-sans max-w-3xl">
+                        <p className="pt-4 sm:pt-5 pl-9 sm:pl-11 pr-4 sm:pr-8 text-sm sm:text-base md:text-lg text-ivory/75 leading-relaxed font-sans max-w-3xl">
                           {faq.answer}
                         </p>
                       </motion.div>
