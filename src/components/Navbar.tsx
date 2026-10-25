@@ -10,7 +10,6 @@ import {
   ShieldAlert,
   Sparkles,
   BookOpen,
-  Utensils,
   ArrowRight,
 } from "lucide-react";
 
@@ -46,6 +45,21 @@ export function Navbar() {
       document.removeEventListener("mousedown", onClickOutside);
     };
   }, []);
+
+  const handleHowItWorksClick = (e: React.MouseEvent) => {
+    setOpen(false);
+    const target = document.getElementById("how");
+    if (target) {
+      e.preventDefault();
+      const lenis = (window as unknown as { __lenis?: { scrollTo: (target: HTMLElement | string, options?: { offset?: number; duration?: number }) => void } }).__lenis;
+      if (lenis) {
+        lenis.scrollTo(target, { offset: 0, duration: 1.5 });
+      } else {
+        target.scrollIntoView({ behavior: "smooth" });
+      }
+      window.history.pushState(null, "", "#how");
+    }
+  };
 
   return (
     <header data-nav className="fixed inset-x-0 top-4 z-50 flex justify-center px-4 pointer-events-none">
@@ -158,23 +172,14 @@ export function Navbar() {
                 </span>
               </Link>
 
-              <Link
-                to="/how-it-works"
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-sage/40 transition-colors"
+              <a
+                href="/#how"
+                onClick={handleHowItWorksClick}
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-sage/40 transition-colors cursor-pointer"
               >
                 <BookOpen className="size-4 text-foreground/70" />
                 <span>How It Works</span>
-              </Link>
-
-              <Link
-                to="/experiences"
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-sage/40 transition-colors"
-              >
-                <Utensils className="size-4 text-foreground/70" />
-                <span>Upcoming Meets</span>
-              </Link>
+              </a>
 
               <Link
                 to="/safety"

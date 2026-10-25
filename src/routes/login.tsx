@@ -2,13 +2,11 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import {
-  ShieldCheck,
   ArrowRight,
   Mail,
   Lock,
   Eye,
   EyeOff,
-  Sparkles,
   AlertCircle,
   Loader2,
 } from "lucide-react";
@@ -133,24 +131,14 @@ function LoginPage() {
         {/* Top Branding */}
         <div className="relative z-10 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 group">
-            <span className="font-display text-2xl xl:text-3xl font-normal tracking-tight text-ivory">
+            <span className="font-display text-3xl xl:text-4xl font-normal tracking-tight text-ivory">
               Precious<em className="text-ochre not-italic">meets</em>
             </span>
           </Link>
-          <div className="flex items-center gap-2 rounded-full border border-ivory/20 bg-ivory/10 px-3.5 py-1 backdrop-blur-md">
-            <span className="size-1.5 rounded-full bg-ochre animate-pulse" />
-            <span className="font-mono text-[10px] uppercase tracking-wider text-ivory/90">
-              Private Dining Circle
-            </span>
-          </div>
         </div>
 
         {/* Bottom Atmospheric Content & Quote */}
         <div className="relative z-10 max-w-lg space-y-4 xl:space-y-5">
-          <div className="inline-flex items-center gap-2 rounded-full bg-burgundy/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-ivory backdrop-blur-sm">
-            <Sparkles className="size-3 text-ochre" />
-            <span>Curated Strangers · Shared Tables</span>
-          </div>
 
           <h2 className="font-display text-3xl xl:text-4xl leading-[1.18] text-ivory">
             Where thoughtful minds sit down as strangers and leave as{" "}
@@ -161,28 +149,6 @@ function LoginPage() {
             Intimate 6-seat supper clubs, single-origin tastings, and cultural salons across Delhi NCR.
             Every guest identity-verified. Every table thoughtfully matched.
           </p>
-
-          {/* Social Proof Pills */}
-          <div className="flex flex-wrap gap-1.5 pt-1">
-            {[
-              "Intimate 6-Seat Tables",
-              "100% ID Verified",
-              "Zero Commercial Small Talk",
-              "Delhi NCR",
-            ].map((feature, i) => (
-              <span
-                key={i}
-                className="rounded-full border border-ivory/20 bg-black/30 px-2.5 py-0.5 font-mono text-[9px] text-ivory/90 backdrop-blur-xs"
-              >
-                {feature}
-              </span>
-            ))}
-          </div>
-
-          <div className="border-t border-ivory/15 pt-3 text-[10px] text-ivory/60 flex items-center gap-2">
-            <ShieldCheck className="size-3.5 text-ochre" />
-            <span>Strict privacy protected by UIDAI-compliant verification standards.</span>
-          </div>
         </div>
       </div>
 
@@ -192,7 +158,7 @@ function LoginPage() {
       <div className="flex h-full w-full flex-col justify-between px-6 py-6 sm:px-10 lg:w-1/2 lg:px-12 xl:px-16 overflow-y-auto lg:overflow-hidden">
         {/* Top Bar */}
         <div className="flex items-center justify-between shrink-0">
-          <Link to="/" className="font-display text-xl tracking-tight text-foreground lg:hidden">
+          <Link to="/" className="font-display text-2xl tracking-tight text-foreground lg:hidden">
             Precious<em className="text-burgundy not-italic">meets</em>
           </Link>
           <Link
@@ -204,49 +170,39 @@ function LoginPage() {
         </div>
 
         {/* Center Auth Container */}
-        <div className="mx-auto my-auto w-full max-w-sm py-2">
+        <div className="mx-auto my-auto w-full max-w-md py-4">
           {/* Header */}
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <span className="label-mono text-[11px] text-forest font-semibold uppercase tracking-wider">
-                Member Authentication
-              </span>
-              {isAdminCandidate && (
-                <span className="rounded-full bg-burgundy/15 px-2 py-0.2 font-mono text-[9px] font-bold text-burgundy">
-                  Admin Terminal
-                </span>
-              )}
-            </div>
+          <div className="space-y-2">
 
-            <h1 className="font-display text-2xl sm:text-3xl leading-snug">
+            <h1 className="font-display text-3xl sm:text-4xl leading-tight">
               Welcome to <em className="italic text-burgundy">the Circle</em>
             </h1>
 
-            <p className="text-xs leading-relaxed text-muted-foreground">
+            <p className="text-sm sm:text-[15px] leading-relaxed text-muted-foreground">
               Sign in with Google or your credentials to access your bookings, table assignments, and compatibility archetype.
             </p>
           </div>
 
           {/* Error Banner */}
           {errorMessage && (
-            <div className="mt-3 flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/10 p-2.5 text-xs text-destructive">
+            <div className="mt-3.5 flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
               <AlertCircle className="size-4 shrink-0 mt-0.5" />
               <div className="leading-relaxed">{errorMessage}</div>
             </div>
           )}
 
           {/* Google OAuth Button */}
-          <div className="mt-4">
+          <div className="mt-5">
             <Button
               type="button"
               onClick={handleGoogleSignIn}
               disabled={loading}
-              className="group flex w-full items-center justify-center gap-3 rounded-xl border border-border/90 bg-card py-4 text-xs font-semibold text-foreground shadow-xs transition-all hover:bg-sage/40 hover:border-burgundy/30 cursor-pointer active:scale-98"
+              className="group flex w-full items-center justify-center gap-3 rounded-xl border border-border/90 bg-card py-4 text-sm font-semibold text-foreground shadow-xs transition-all hover:bg-sage/40 hover:border-burgundy/30 cursor-pointer active:scale-98 h-12"
             >
               {loading ? (
                 <Loader2 className="size-4 animate-spin text-burgundy" />
               ) : (
-                <svg className="size-4 shrink-0" viewBox="0 0 24 24">
+                <svg className="size-4.5 shrink-0" viewBox="0 0 24 24">
                   <path
                     fill="#4285F4"
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -270,17 +226,17 @@ function LoginPage() {
           </div>
 
           {/* Elegant Divider */}
-          <div className="relative my-3.5 flex items-center justify-center">
+          <div className="relative my-4 flex items-center justify-center">
             <div className="w-full border-t border-border/80" />
-            <span className="relative bg-ivory px-3 font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
+            <span className="relative bg-ivory px-3 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
               or continue with email
             </span>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-3">
+          <form onSubmit={handleSubmit} className="space-y-3.5">
             <div>
-              <label className="mb-1 block font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+              <label className="mb-1.5 block font-mono text-xs uppercase tracking-wider text-muted-foreground font-medium">
                 Email Address
               </label>
               <div className="relative">
@@ -291,20 +247,20 @@ function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@domain.com or admin@preciousmeets.com"
-                  className="w-full rounded-xl border border-border/80 bg-card py-2.5 pl-10 pr-4 text-xs font-medium text-foreground outline-none transition-all placeholder:text-muted-foreground/60 focus:border-burgundy focus:ring-1 focus:ring-burgundy"
+                  className="w-full rounded-xl border border-border/80 bg-card py-3 pl-10 pr-4 text-sm font-medium text-foreground outline-none transition-all placeholder:text-muted-foreground/60 focus:border-burgundy focus:ring-1 focus:ring-burgundy"
                 />
               </div>
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="font-mono text-xs uppercase tracking-wider text-muted-foreground font-medium">
                   Password
                 </label>
                 <button
                   type="button"
                   onClick={() => toast.info("Password reset instructions will be sent to your email.")}
-                  className="text-[10px] text-burgundy hover:underline cursor-pointer"
+                  className="text-xs text-burgundy hover:underline cursor-pointer"
                 >
                   Forgot password?
                 </button>
@@ -317,7 +273,7 @@ function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={isAdminCandidate ? "Enter admin password (11111111)" : "••••••••"}
-                  className="w-full rounded-xl border border-border/80 bg-card py-2.5 pl-10 pr-10 text-xs font-medium text-foreground outline-none transition-all placeholder:text-muted-foreground/60 focus:border-burgundy focus:ring-1 focus:ring-burgundy font-mono"
+                  className="w-full rounded-xl border border-border/80 bg-card py-3 pl-10 pr-10 text-sm font-medium text-foreground outline-none transition-all placeholder:text-muted-foreground/60 focus:border-burgundy focus:ring-1 focus:ring-burgundy font-mono"
                 />
                 <button
                   type="button"
@@ -333,7 +289,7 @@ function LoginPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl bg-burgundy py-4 text-xs font-semibold uppercase tracking-wider text-ivory shadow-md transition-all hover:bg-burgundy/90 active:scale-98 cursor-pointer mt-1"
+              className="w-full rounded-xl bg-burgundy py-3.5 h-12 text-sm font-semibold uppercase tracking-wider text-ivory shadow-md transition-all hover:bg-burgundy/90 active:scale-98 cursor-pointer mt-1.5"
             >
               {loading ? (
                 <div className="flex items-center gap-2">
@@ -345,31 +301,13 @@ function LoginPage() {
                   <span>
                     {isAdminCandidate ? "Unlock Executive Console" : "Sign In to Circle"}
                   </span>
-                  <ArrowRight className="size-3.5" />
+                  <ArrowRight className="size-4" />
                 </div>
               )}
             </Button>
           </form>
 
-          {/* Quick Admin Helper Link */}
-          <div className="mt-3.5 border-t border-border/70 pt-2.5 text-center">
-            <button
-              type="button"
-              onClick={() => {
-                setEmail("admin@preciousmeets.com");
-                setPassword("11111111");
-                toast.info("Admin credentials autofilled for operational review.");
-              }}
-              className="text-[10px] text-muted-foreground hover:text-burgundy transition-colors cursor-pointer"
-            >
-              Executive Admin? <span className="underline font-medium">Use credentials for admin@preciousmeets.com</span>
-            </button>
-          </div>
 
-          <div className="mt-2.5 flex items-center justify-center gap-1.5 text-[9px] text-muted-foreground">
-            <ShieldCheck className="size-3 text-forest" />
-            <span>Strict data sovereignty. We never sell your personal information.</span>
-          </div>
         </div>
 
         {/* Footer info */}
