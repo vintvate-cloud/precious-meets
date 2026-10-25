@@ -1,4 +1,5 @@
 import { ApplicationsService } from "./applications-service";
+import { supabase } from "./supabase";
 
 export interface VerificationRecord {
   id: string;
@@ -21,59 +22,14 @@ const STORAGE_KEY = "precious_meets_verification_queue_v1";
 
 export class VerificationsService {
   /**
-   * Asynchronously synchronizes the verification queue with the server data file
-   * (/api/verifications). Ensures records created in regular sessions are immediately visible
-   * in incognito sessions, other tabs, and across devices.
+   * Synchronizes verification queue directly with Supabase via ApplicationsService.
    */
   static async fetchQueueFromServer(): Promise<VerificationRecord[]> {
     if (typeof window === "undefined") return this.getQueue();
     try {
-      const res = await fetch("/api/verifications");
-      if (res.ok) {
-        const json = await res.json();
-        if (json.ok && Array.isArray(json.data)) {
-          const serverList: VerificationRecord[] = json.data;
-          let storedList: VerificationRecord[] = [];
-          try {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            if (raw) storedList = JSON.parse(raw);
-          } catch (e) {}
-
-          const map = new Map<string, VerificationRecord>();
-          serverList.forEach((s) => {
-            if (s.email) map.set(s.email.toLowerCase(), s);
-          });
-          if (Array.isArray(storedList)) {
-            storedList.forEach((l) => {
-              if (l.email) {
-                const s = map.get(l.email.toLowerCase());
-                if (s) {
-                  map.set(l.email.toLowerCase(), {
-                    ...s,
-                    ...l,
-                    aadhaarFileUrl: l.aadhaarFileUrl || s.aadhaarFileUrl,
-                    aadhaarFileName: l.aadhaarFileName || s.aadhaarFileName,
-                  });
-                } else {
-                  map.set(l.email.toLowerCase(), l);
-                }
-              }
-            });
-          }
-
-          const merged = Array.from(map.values());
-          try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-          } catch (e) {
-            // quota safe
-          }
-          window.dispatchEvent(new Event("storage"));
-          window.dispatchEvent(new CustomEvent("precious_meets_verification_updated"));
-          return this.getQueue();
-        }
-      }
+      await ApplicationsService.fetchApplicationsFromDb();
     } catch (err) {
-      console.warn("[VerificationsService] Server sync notice:", err);
+      console.warn("[VerificationsService] Database sync notice:", err);
     }
     return this.getQueue();
   }
@@ -115,7 +71,7 @@ export class VerificationsService {
       }
     });
 
-    // 2. Unify all paid member applications from ApplicationsService
+    // 2. Unify all paid member applications from ApplicationsService (loaded from Supabase)
     try {
       const apps = ApplicationsService.getApplications();
       apps.forEach((app) => {
@@ -210,53 +166,36 @@ export class VerificationsService {
       avatar:
         data.avatar ||
         "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
-      method: data.method || (data.aadhaarFileUrl ? "aadhaar_card_upload" : "digilocker_consent_offline"),
+      method: data.method || "digilocker_consent_offline",
       status: "pending",
       requestedAt: `Today, ${formattedTime}`,
-      notes: data.notes || "Annual Founding Member (₹1,999) - Verification request submitted",
+      notes: data.notes || "Annual Founding Member Pass (₹1,999 Razorpay Payment Received)",
       amountInr: data.amountInr || 1999,
-      memberId: data.memberId,
+      memberId: data.memberId || `PM-FOUNDER-${Math.floor(1000 + Math.random() * 9000)}`,
       aadhaarFileUrl: data.aadhaarFileUrl,
       aadhaarFileName: data.aadhaarFileName,
     };
 
-    // Place at front of queue so it appears first in the admin table
-    const updated = [newRecord, ...queue.filter((q) => q.email?.toLowerCase() !== data.email.toLowerCase())];
+    // Prepend to avoid duplicates
+    const updated = [
+      newRecord,
+      ...queue.filter((q) => q.email.toLowerCase() !== data.email.toLowerCase()),
+    ];
 
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     } catch (e) {
-      console.warn("[VerificationsService] LocalStorage quota hit, saving optimized queue:", e);
-      // Strip oversized base64 to ensure the user record is never dropped
-      const safeUpdated = updated.map((item) => ({
-        ...item,
-        aadhaarFileUrl: item.aadhaarFileUrl && item.aadhaarFileUrl.length > 50000 ? item.aadhaarFileUrl.slice(0, 50000) : item.aadhaarFileUrl,
-      }));
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(safeUpdated));
-      } catch (e2) {
-        const minimal = updated.map((item) => ({ ...item, aadhaarFileUrl: undefined }));
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(minimal));
-        } catch (e3) {}
-      }
+      console.warn("[VerificationsService] Storage quota notice:", e);
     }
 
     // Dispatch storage and verification events
-    window.dispatchEvent(new Event("storage"));
-    window.dispatchEvent(
-      new CustomEvent("precious_meets_verification_updated", {
-        detail: newRecord,
-      })
-    );
-
-    // Sync to server API so other tabs and incognito sessions receive it instantly
     if (typeof window !== "undefined") {
-      fetch("/api/verifications", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newRecord),
-      }).catch((e) => console.warn("[VerificationsService] Server POST error:", e));
+      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(
+        new CustomEvent("precious_meets_verification_updated", {
+          detail: newRecord,
+        })
+      );
     }
 
     return newRecord;
@@ -264,7 +203,7 @@ export class VerificationsService {
 
   /**
    * Updates status of an item in the queue (e.g. verified or failed)
-   * and synchronizes with ApplicationsService to update the member dossier.
+   * and synchronizes with ApplicationsService & Supabase to update the member dossier.
    */
   static updateStatus(
     id: string,
@@ -288,7 +227,7 @@ export class VerificationsService {
       } catch (e2) {}
     }
 
-    // Synchronize with ApplicationsService dossier
+    // Synchronize with ApplicationsService & Supabase
     try {
       const cleanId = id.replace("ver_", "");
       const apps = ApplicationsService.getApplications();
@@ -312,25 +251,32 @@ export class VerificationsService {
           ).catch(() => {});
         }
       }
+
+      // Also update identity_status in Supabase
+      if (targetItem && targetItem.email) {
+        supabase
+          .from("member_applications")
+          .update({
+            identity_status: status === "verified" ? "verified" : status === "failed" ? "failed" : "pending",
+            identity_verified_at: status === "verified" ? new Date().toISOString() : null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("applicant_email", targetItem.email.toLowerCase())
+          .then(() => {})
+          .catch((err: any) => console.warn("[VerificationsService] Supabase identity status update notice:", err));
+      }
     } catch (err) {
       console.warn("[VerificationsService] Applications sync notice:", err);
     }
 
-    window.dispatchEvent(new Event("storage"));
-    window.dispatchEvent(
-      new CustomEvent("precious_meets_verification_updated", {
-        detail: { id, status },
-      })
-    );
-    window.dispatchEvent(new CustomEvent("precious_meets_applications_updated"));
-
-    // Sync full updated queue to server API
     if (typeof window !== "undefined") {
-      fetch("/api/verifications", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updated),
-      }).catch((e) => console.warn("[VerificationsService] Server POST updated error:", e));
+      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(
+        new CustomEvent("precious_meets_verification_updated", {
+          detail: { id, status },
+        })
+      );
+      window.dispatchEvent(new CustomEvent("precious_meets_applications_updated"));
     }
 
     return updated;
@@ -338,7 +284,7 @@ export class VerificationsService {
 
   /**
    * Permanently deletes a verification request and its associated member application dossier
-   * across local storage, server files, and remote database.
+   * across local storage and remote Supabase database.
    */
   static deleteRecord(id: string, email?: string): VerificationRecord[] {
     const queue = this.getQueue();
@@ -363,7 +309,7 @@ export class VerificationsService {
       console.warn("[VerificationsService] Local storage removal error:", e);
     }
 
-    // 2. Cascade delete to ApplicationsService
+    // 2. Cascade delete to ApplicationsService (which deletes from Supabase)
     try {
       if (cleanEmail) {
         ApplicationsService.deleteApplication(cleanEmail);
@@ -373,27 +319,19 @@ export class VerificationsService {
       console.warn("[VerificationsService] ApplicationsService cascade notice:", e);
     }
 
-    // 3. Call server DELETE endpoint
-    if (typeof window !== "undefined") {
-      const query = new URLSearchParams();
-      if (id) query.set("id", id);
-      if (email) query.set("email", email);
-      fetch(`/api/verifications?${query.toString()}`, {
-        method: "DELETE",
-      }).catch((e) => console.warn("[VerificationsService] Server DELETE error:", e));
-    }
-
-    // 4. Update memory queue
+    // 3. Update memory queue
     const updated = queue.filter(
       (item) =>
         item.id.toLowerCase() !== cleanId &&
         (!cleanEmail || item.email?.toLowerCase() !== cleanEmail)
     );
 
-    // 5. Notify all listeners
-    window.dispatchEvent(new Event("storage"));
-    window.dispatchEvent(new CustomEvent("precious_meets_verification_updated"));
-    window.dispatchEvent(new CustomEvent("precious_meets_applications_updated"));
+    // 4. Notify all listeners
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(new CustomEvent("precious_meets_verification_updated"));
+      window.dispatchEvent(new CustomEvent("precious_meets_applications_updated"));
+    }
 
     return updated;
   }

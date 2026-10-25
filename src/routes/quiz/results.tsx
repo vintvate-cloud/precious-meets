@@ -204,9 +204,9 @@ export function QuizResultsPage() {
         } catch (e) {}
       }
 
-      // 1. Record member application dossier for curation review in ApplicationsService & Supabase
+      // 1. Record member application dossier for curation review directly in Supabase
       // Note: User is NOT active yet. Status is 'paid_pending_credentials'
-      ApplicationsService.createOrUpdateFromCheckout({
+      await ApplicationsService.createOrUpdateFromCheckout({
         userId: user?.id,
         name: name.trim(),
         email: email.trim(),

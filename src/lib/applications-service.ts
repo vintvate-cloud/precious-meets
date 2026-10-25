@@ -99,7 +99,7 @@ const STORAGE_KEY = "precious_meets_member_applications_dossiers";
 
 export class ApplicationsService {
   /**
-   * Loads applications from persistent storage or returns empty list (no fake seed records)
+   * Loads applications from local cache for instant UI rendering.
    */
   private static loadApplications(): MemberApplication[] {
     if (typeof window === "undefined") return [];
@@ -122,74 +122,26 @@ export class ApplicationsService {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(apps));
     } catch (e) {
-      console.warn("[ApplicationsService] Failed to persist dossiers:", e);
+      console.warn("[ApplicationsService] Failed to persist dossiers to cache:", e);
     }
-
-    try {
-      fetch("/api/applications", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(apps),
-      }).catch((e) => console.warn("[ApplicationsService] Server sync error:", e));
-    } catch (e) {}
   }
 
   /**
-   * Retrieves all member applications / dossiers.
+   * Retrieves all member applications / dossiers from local cache.
    */
   static getApplications(): MemberApplication[] {
     return this.loadApplications();
   }
 
   /**
-   * Asynchronously fetches all member applications from the server data file (/api/applications).
-   * Ensures data persistence across browsers, incognito windows, and multi-device sessions.
+   * Legacy alias: fetches all applications directly from Supabase database.
    */
   static async fetchApplicationsFromServer(): Promise<MemberApplication[]> {
-    if (typeof window === "undefined") return this.getApplications();
-    try {
-      const res = await fetch("/api/applications");
-      if (res.ok) {
-        const json = await res.json();
-        if (json.ok && Array.isArray(json.data)) {
-          const serverList: MemberApplication[] = json.data;
-          const localList = this.loadApplications();
-          const map = new Map<string, MemberApplication>();
-
-          serverList.forEach((app) => {
-            if (app.applicantEmail) map.set(app.applicantEmail.toLowerCase(), app);
-          });
-          localList.forEach((app) => {
-            if (app.applicantEmail) {
-              const existing = map.get(app.applicantEmail.toLowerCase());
-              if (!existing) {
-                map.set(app.applicantEmail.toLowerCase(), app);
-              } else {
-                map.set(app.applicantEmail.toLowerCase(), {
-                  ...existing,
-                  ...app,
-                  aadhaarFileUrl: app.aadhaarFileUrl || existing.aadhaarFileUrl,
-                  aadhaarFileName: app.aadhaarFileName || existing.aadhaarFileName,
-                });
-              }
-            }
-          });
-
-          const merged = Array.from(map.values());
-          this.saveApplications(merged);
-          window.dispatchEvent(new Event("storage"));
-          window.dispatchEvent(new CustomEvent("precious_meets_applications_updated"));
-          return merged;
-        }
-      }
-    } catch (e) {
-      console.warn("[ApplicationsService] Server sync notice:", e);
-    }
-    return this.getApplications();
+    return this.fetchApplicationsFromDb();
   }
 
   /**
-   * Asynchronously fetches all member applications from Supabase database
+   * Asynchronously fetches all member applications directly from Supabase database (member_applications table).
    */
   static async fetchApplicationsFromDb(): Promise<MemberApplication[]> {
     try {
@@ -198,20 +150,25 @@ export class ApplicationsService {
         .select("*")
         .order("created_at", { ascending: false });
 
-      if (data && !error && data.length > 0) {
+      if (error) {
+        console.warn("[ApplicationsService] Supabase fetch error:", error.message);
+        return this.loadApplications();
+      }
+
+      if (data && Array.isArray(data)) {
         const mapped: MemberApplication[] = data.map((d: any) => ({
           id: d.id,
           userId: d.auth_user_id || undefined,
-          applicationReference: d.application_reference,
+          applicationReference: d.application_reference || `PM-FOUNDER-${d.id.slice(0, 4)}`,
           status: d.status || "pending_review",
           membershipStatus: d.membership_status || (d.credentials_sent ? "active" : "paid_pending_credentials"),
-          applicantName: d.applicant_name,
+          applicantName: d.applicant_name || "Applicant",
           applicantEmail: d.applicant_email,
-          applicantPhone: d.applicant_phone,
+          applicantPhone: d.applicant_phone || "",
           applicantCity: d.applicant_city || "Delhi NCR",
           applicantPincode: d.applicant_pincode || undefined,
           avatarUrl: d.avatar_url || undefined,
-          archetypeTitle: d.archetype_title,
+          archetypeTitle: d.archetype_title || "The Curious Flâneur",
           archetypeDescription: d.archetype_description || "",
           archetypeTraits: Array.isArray(d.archetype_traits) ? d.archetype_traits : [],
           socialEnergyScore: d.scores?.socialEnergy ?? (d.social_energy_score || 50),
@@ -235,6 +192,9 @@ export class ApplicationsService {
           identityStatus: d.identity_status || "unverified",
           identityProvider: d.identity_provider || "digilocker_consent_offline",
           identityReference: d.identity_reference || undefined,
+          identityVerifiedAt: d.identity_verified_at || undefined,
+          aadhaarFileUrl: d.aadhaar_file_url || undefined,
+          aadhaarFileName: d.aadhaar_file_name || undefined,
           credentialsSent: Boolean(d.credentials_sent),
           credentialsSentAt: d.credentials_sent_at || undefined,
           credentialsSentBy: d.credentials_sent_by || undefined,
@@ -247,6 +207,10 @@ export class ApplicationsService {
         }));
 
         this.saveApplications(mapped);
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("storage"));
+          window.dispatchEvent(new CustomEvent("precious_meets_applications_updated"));
+        }
         return mapped;
       }
     } catch (e) {
@@ -264,10 +228,9 @@ export class ApplicationsService {
   }
 
   /**
-   * Records a member application when a user completes their quiz and payment.
-   * Note: The member is NOT active yet! Status is 'paid_pending_credentials' until admin issues credentials.
+   * Records a member application when a user completes their quiz and payment directly into Supabase.
    */
-  static createOrUpdateFromCheckout(payload: {
+  static async createOrUpdateFromCheckout(payload: {
     userId?: string;
     name: string;
     email: string;
@@ -294,7 +257,7 @@ export class ApplicationsService {
     memberId?: string;
     aadhaarFileUrl?: string;
     aadhaarFileName?: string;
-  }): MemberApplication {
+  }): Promise<MemberApplication> {
     const apps = this.loadApplications();
     const cleanEmail = payload.email.trim().toLowerCase();
     const existingIndex = apps.findIndex((a) => a.applicantEmail.toLowerCase() === cleanEmail);
@@ -307,7 +270,7 @@ export class ApplicationsService {
       userId: payload.userId || (existingIndex >= 0 ? apps[existingIndex].userId : undefined),
       applicationReference: reference,
       status: "pending_review",
-      membershipStatus: "paid_pending_credentials", // NOT active yet!
+      membershipStatus: "paid_pending_credentials",
       applicantName: payload.name.trim(),
       applicantEmail: cleanEmail,
       applicantPhone: payload.phone.trim(),
@@ -347,6 +310,16 @@ export class ApplicationsService {
       updatedAt: now,
     };
 
+    // Save directly to Supabase member_applications table
+    try {
+      const dbRow = await this.syncToSupabase(applicationRecord);
+      if (dbRow && dbRow.id) {
+        applicationRecord.id = dbRow.id;
+      }
+    } catch (e: any) {
+      console.warn("[ApplicationsService] Supabase insert warning:", e.message);
+    }
+
     if (existingIndex >= 0) {
       apps[existingIndex] = applicationRecord;
     } else {
@@ -354,27 +327,17 @@ export class ApplicationsService {
     }
 
     this.saveApplications(apps);
-
-    // Sync to local server file so incognito tabs & separate browsers see it instantly
     if (typeof window !== "undefined") {
-      fetch("/api/applications", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(applicationRecord),
-      }).catch((e) => console.warn("[ApplicationsService] Server POST error:", e));
+      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(new CustomEvent("precious_meets_applications_updated"));
     }
-
-    // Sync to remote Supabase database table
-    this.syncToSupabase(applicationRecord).catch((e) =>
-      console.warn("[ApplicationsService] Supabase sync notice (using local storage):", e.message),
-    );
 
     return applicationRecord;
   }
 
   /**
    * Generates a strong password, provisions/activates user in Supabase,
-   * sends credentials email via Resend, and marks member as ACTIVE!
+   * sends credentials email via Resend, and marks member as ACTIVE in Supabase.
    */
   static async sendMemberCredentials(
     id: string
@@ -389,7 +352,7 @@ export class ApplicationsService {
     const app = apps[index];
     const now = new Date().toISOString();
 
-    // 1. Generate strong cryptographic password (16 chars, uppercase, lowercase, numbers, symbols)
+    // 1. Generate strong password
     const strongPassword = CryptoService.generateStrongPassword(16);
 
     // 2. Dispatch credentials email via Resend
@@ -420,7 +383,7 @@ export class ApplicationsService {
       app.credentialsSentBy = "admin@preciousmeets.com";
       app.autoGeneratedPassword = strongPassword;
       app.status = "approved";
-      app.membershipStatus = "active"; // USER IS NOW AN ACTIVE MEMBER
+      app.membershipStatus = "active";
       app.identityStatus = "verified";
       app.updatedAt = now;
     } catch (err: any) {
@@ -428,13 +391,36 @@ export class ApplicationsService {
       throw new Error("Failed to dispatch credentials email via Resend: " + (err.message || String(err)));
     }
 
+    // 4. Update directly in Supabase member_applications table
+    try {
+      await supabase
+        .from("member_applications")
+        .update({
+          credentials_sent: true,
+          credentials_sent_at: now,
+          credentials_sent_by: "admin@preciousmeets.com",
+          status: "approved",
+          membership_status: "active",
+          identity_status: "verified",
+          updated_at: now,
+        })
+        .eq("applicant_email", app.applicantEmail);
+    } catch (e) {
+      console.warn("[ApplicationsService] Supabase credentials update warning:", e);
+    }
+
     apps[index] = app;
     this.saveApplications(apps);
 
-    // 4. Provision / sync member in Supabase database & auth
+    // 5. Provision in Supabase Auth & public.profiles
     this.provisionMemberInDatabase(app, strongPassword).catch((e) =>
       console.warn("[ApplicationsService] Supabase provisioning notice:", e)
     );
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(new CustomEvent("precious_meets_applications_updated"));
+    }
 
     return { success: true, application: app, password: strongPassword };
   }
@@ -444,14 +430,10 @@ export class ApplicationsService {
    */
   private static async provisionMemberInDatabase(app: MemberApplication, password: string) {
     try {
-      // 1. Update application in member_applications table
-      await this.syncToSupabase(app);
-
-      // 2. Attempt to provision in Supabase Auth if service role available
       const adminClient = getSupabaseAdmin();
       if (adminClient && adminClient.auth && (adminClient.auth as any).admin) {
         try {
-          const { data: user, error: userError } = await (adminClient.auth as any).admin.createUser({
+          const { data: user } = await (adminClient.auth as any).admin.createUser({
             email: app.applicantEmail,
             password: password,
             email_confirm: true,
@@ -471,7 +453,7 @@ export class ApplicationsService {
         }
       }
 
-      // 3. Update public.profiles if table exists
+      // Update public.profiles in Supabase
       try {
         await supabase.from("profiles").upsert({
           email: app.applicantEmail,
@@ -487,7 +469,7 @@ export class ApplicationsService {
           quiz_completed: true,
         }, { onConflict: "email" });
       } catch {
-        // Table may not be active yet
+        // Ignored if table not active
       }
     } catch (e) {
       console.warn("[ApplicationsService] provisionMemberInDatabase notice:", e);
@@ -514,11 +496,29 @@ export class ApplicationsService {
     app.reviewDecisionNotes = reviewerNotes || "Approved by executive curation committee.";
     app.updatedAt = now;
 
+    // Update directly in Supabase
+    try {
+      await supabase
+        .from("member_applications")
+        .update({
+          status: "approved",
+          reviewed_by: "admin@preciousmeets.com",
+          reviewed_at: now,
+          review_decision_notes: app.reviewDecisionNotes,
+          updated_at: now,
+        })
+        .eq("applicant_email", app.applicantEmail);
+    } catch (e) {
+      console.warn("[ApplicationsService] Supabase approve error:", e);
+    }
+
     apps[index] = app;
     this.saveApplications(apps);
 
-    // Sync state to remote Supabase if connected
-    this.syncToSupabase(app).catch(() => {});
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(new CustomEvent("precious_meets_applications_updated"));
+    }
 
     return { success: true, application: app };
   }
@@ -549,40 +549,54 @@ export class ApplicationsService {
     }
     app.updatedAt = now;
 
-    // Send Rejection Email Notification
+    // Send polite rejection email
     try {
       await EmailService.send({
         to: app.applicantEmail,
-        subject: "Update regarding your Precious Meets Membership Application",
-        template: "application_rejected",
+        subject: "An Update on Your Precious Meets Application",
+        template: "membership_rejected",
         data: {
           name: app.applicantName,
-          reference: app.applicationReference,
-          rejectionReason: app.rejectionReason,
-          refundNote:
-            app.paymentStatus === "refunded"
-              ? `Your payment of ₹${app.paymentAmountInr} has been refunded in full via Razorpay reference ${app.razorpayPaymentId || "REF-PM"}.`
-              : undefined,
+          reason: app.rejectionReason,
         },
       });
       app.decisionEmailSentAt = now;
-      app.decisionEmailTemplate = "application_rejected";
+      app.decisionEmailTemplate = "membership_rejected";
     } catch (err) {
       console.warn("[ApplicationsService] Could not send rejection email:", err);
+    }
+
+    // Update directly in Supabase
+    try {
+      await supabase
+        .from("member_applications")
+        .update({
+          status: "rejected",
+          membership_status: "rejected",
+          payment_status: "refunded",
+          reviewed_by: "admin@preciousmeets.com",
+          reviewed_at: now,
+          rejection_reason: app.rejectionReason,
+          updated_at: now,
+        })
+        .eq("applicant_email", app.applicantEmail);
+    } catch (e) {
+      console.warn("[ApplicationsService] Supabase reject error:", e);
     }
 
     apps[index] = app;
     this.saveApplications(apps);
 
-    // Sync state to remote Supabase if connected
-    this.syncToSupabase(app).catch(() => {});
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(new CustomEvent("precious_meets_applications_updated"));
+    }
 
     return { success: true, application: app };
   }
 
   /**
-   * Permanently deletes a member application dossier from local cache, server JSON store,
-   * and remote Supabase database.
+   * Permanently deletes a member application dossier directly from Supabase database.
    */
   static async deleteApplication(idOrEmail: string): Promise<MemberApplication[]> {
     const apps = this.loadApplications();
@@ -599,35 +613,30 @@ export class ApplicationsService {
 
     this.saveApplications(updated);
 
-    // Call DELETE API on server
-    if (typeof window !== "undefined") {
-      fetch(`/api/applications?id=${encodeURIComponent(idOrEmail)}&email=${encodeURIComponent(idOrEmail)}`, {
-        method: "DELETE",
-      }).catch((e) => console.warn("[ApplicationsService] Server DELETE error:", e));
-    }
-
-    // Attempt delete from remote Supabase if connected
+    // Delete directly from Supabase member_applications table
     try {
       await supabase
         .from("member_applications")
         .delete()
         .or(`id.eq.${cleanId},applicant_email.eq.${clean}`);
     } catch (e) {
-      // ignore
+      console.warn("[ApplicationsService] Supabase delete error:", e);
     }
 
-    window.dispatchEvent(new Event("storage"));
-    window.dispatchEvent(new CustomEvent("precious_meets_applications_updated"));
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(new CustomEvent("precious_meets_applications_updated"));
+    }
 
     return updated;
   }
 
   /**
-   * Syncs application record directly to Supabase table public.member_applications
+   * Syncs application record directly to Supabase table public.member_applications.
    */
-  private static async syncToSupabase(app: MemberApplication) {
+  private static async syncToSupabase(app: MemberApplication): Promise<any> {
     try {
-      const { error } = await supabase.from("member_applications").upsert({
+      const payload: any = {
         application_reference: app.applicationReference,
         status: app.status,
         membership_status: app.membershipStatus,
@@ -659,16 +668,30 @@ export class ApplicationsService {
         credentials_sent_by: app.credentialsSentBy,
         identity_status: app.identityStatus,
         identity_reference: app.identityReference,
+        aadhaar_file_url: app.aadhaarFileUrl,
+        aadhaar_file_name: app.aadhaarFileName,
         review_decision_notes: app.reviewDecisionNotes,
         rejection_reason: app.rejectionReason,
         reviewed_at: app.reviewedAt,
-      }, { onConflict: "applicant_email" });
+      };
+
+      if (app.id && app.id.includes("-")) {
+        payload.id = app.id;
+      }
+
+      const { data, error } = await supabase
+        .from("member_applications")
+        .upsert(payload, { onConflict: "applicant_email" })
+        .select()
+        .single();
 
       if (error) {
         console.warn("[ApplicationsService] Supabase member_applications upsert error:", error.message);
       }
+      return data;
     } catch (err: any) {
       console.warn("[ApplicationsService] Supabase sync exception:", err.message);
+      return null;
     }
   }
 }
