@@ -28,11 +28,13 @@ import { toast } from "sonner";
 interface SeatInvitationsSectionProps {
   invitations: UserSeatInvitation[];
   onInvitationUpdated: () => void;
+  onViewAcceptedMeets?: () => void;
 }
 
 export function SeatInvitationsSection({
   invitations,
   onInvitationUpdated,
+  onViewAcceptedMeets,
 }: SeatInvitationsSectionProps) {
   const [filter, setFilter] = useState<"pending" | "accepted" | "all">("pending");
   const [declineTarget, setDeclineTarget] = useState<UserSeatInvitation | null>(null);
@@ -251,16 +253,27 @@ export function SeatInvitationsSection({
                           </div>
                         </>
                       ) : isAccepted ? (
-                        <div className="flex items-center justify-between w-full">
+                        <div className="flex flex-wrap items-center justify-between w-full gap-2">
                           <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-forest">
                             <CheckCircle2 className="size-4" /> Secret Door Gate PIN:{" "}
                             <strong className="font-mono text-foreground font-bold ml-1">
                               {inv.secretAccessCode}
                             </strong>
                           </span>
-                          <span className="text-[11px] text-muted-foreground">
-                            Pass registered in My Meets
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] text-muted-foreground hidden sm:inline">
+                              Booked & Confirmed
+                            </span>
+                            {onViewAcceptedMeets && (
+                              <Button
+                                size="sm"
+                                onClick={onViewAcceptedMeets}
+                                className="rounded-full bg-forest text-ivory text-xs px-3.5 hover:bg-forest/90 font-semibold cursor-pointer"
+                              >
+                                View in My Meets →
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       ) : (
                         <div className="flex items-center justify-between w-full text-xs text-muted-foreground">

@@ -61,6 +61,19 @@ export function InteractiveTable({
   const metrics = EventsService.calculateTableMetrics(event, attendees);
   const checkIns = event.checkIns || {};
   const admittedCount = Object.keys(checkIns).length;
+  const seatAcceptances = event.seatAcceptances || {};
+
+  // Seated guest acceptance status calculation
+  const seatedAttendeeIds = event.seats.filter(Boolean) as string[];
+  const acceptedCount = seatedAttendeeIds.filter(
+    (id) => seatAcceptances[id]?.status === "accepted"
+  ).length;
+  const pendingCount = seatedAttendeeIds.filter(
+    (id) => seatAcceptances[id]?.status === "pending" || (!seatAcceptances[id] && Boolean(event.emailsSentAt))
+  ).length;
+  const declinedCount = seatedAttendeeIds.filter(
+    (id) => seatAcceptances[id]?.status === "declined"
+  ).length;
 
   const handleSeatSelect = (attendeeId: string) => {
     if (activeSeatIndex === null) return;
@@ -133,6 +146,25 @@ export function InteractiveTable({
 
           <h2 className="font-display text-2xl sm:text-3xl mt-1.5">{event.title}</h2>
           <p className="text-xs text-muted-foreground mt-0.5">{event.theme}</p>
+
+          {/* Seat Acceptance Status Tracker */}
+          <div className="mt-2.5 flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300/80 px-2.5 py-0.5 text-[11px] font-bold shadow-2xs">
+              <CheckCircle2 className="size-3 text-emerald-600" />
+              <span>{acceptedCount}/{metrics.seatedCount} Seats Accepted & Booked</span>
+            </span>
+            {pendingCount > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-ochre/15 text-ochre border border-ochre/30 px-2.5 py-0.5 text-[11px] font-medium">
+                <Clock className="size-3" />
+                <span>{pendingCount} Awaiting Acceptance</span>
+              </span>
+            )}
+            {declinedCount > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 px-2.5 py-0.5 text-[11px] font-medium">
+                <span>{declinedCount} Declined</span>
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Quick Action Buttons: Scan Entry QR & Email Dispatch */}
@@ -334,6 +366,11 @@ export function InteractiveTable({
                   // OCCUPIED SEAT CARD
                   (() => {
                     const isCheckedIn = Boolean(checkIns[attendee.id]);
+                    const acceptance = seatAcceptances[attendee.id];
+                    const isAccepted = acceptance?.status === "accepted";
+                    const isPending = acceptance?.status === "pending" || (!acceptance && Boolean(event.emailsSentAt));
+                    const isDeclined = acceptance?.status === "declined";
+
                     return (
                       <div
                         onClick={() => setActiveSeatIndex(seat.id)}
@@ -343,24 +380,53 @@ export function InteractiveTable({
                           <img
                             src={attendee.avatar}
                             alt={attendee.name}
-                            className={`size-12 sm:size-14 rounded-full object-cover border-2 shadow-md transition-all duration-300 group-hover:scale-110 group-hover:shadow-[0_0_18px_rgba(105,28,53,0.35)] ${
+                            className={`size-12 sm:size-14 rounded-full object-cover border-2 shadow-md transition-all duration-300 group-hover:scale-110 ${
                               isCheckedIn
                                 ? "border-forest ring-2 ring-forest/60"
+                                : isAccepted
+                                ? "border-emerald-600 ring-2 ring-emerald-500/60 shadow-[0_0_15px_rgba(16,185,129,0.35)]"
+                                : isPending
+                                ? "border-ochre ring-2 ring-ochre/40"
                                 : attendee.gender === "female"
                                 ? "border-forest ring-2 ring-forest/30"
                                 : "border-burgundy ring-2 ring-burgundy/30"
                             }`}
                           />
-                          <span className="absolute -bottom-1 -right-1 flex size-5 items-center justify-center rounded-full bg-forest text-ivory text-[10px] font-bold shadow-xs transition-transform duration-200 group-hover:scale-110">
+                          <span
+                            className={`absolute -bottom-1 -right-1 flex size-5 items-center justify-center rounded-full text-ivory text-[10px] font-bold shadow-xs transition-transform duration-200 group-hover:scale-110 ${
+                              isAccepted ? "bg-emerald-700" : "bg-forest"
+                            }`}
+                          >
                             {seat.id + 1}
                           </span>
 
+                          {/* Checked In badge */}
                           {isCheckedIn && (
                             <span
                               title={`Admitted at ${new Date(checkIns[attendee.id]?.checkedInAt || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
                               className="absolute -top-1 -left-1 flex size-5 items-center justify-center rounded-full bg-forest text-ivory shadow-sm ring-2 ring-background animate-in zoom-in"
                             >
                               <CheckCircle2 className="size-3.5" />
+                            </span>
+                          )}
+
+                          {/* Accepted & Booked badge (if not checked in) */}
+                          {!isCheckedIn && isAccepted && (
+                            <span
+                              title={`Seat #${seat.id + 1} Accepted & Booked by member`}
+                              className="absolute -top-1 -left-1 flex size-5 items-center justify-center rounded-full bg-emerald-600 text-ivory shadow-sm ring-2 ring-background animate-in zoom-in"
+                            >
+                              <CheckCircle2 className="size-3.5" />
+                            </span>
+                          )}
+
+                          {/* Pending Awaiting Acceptance badge */}
+                          {!isCheckedIn && !isAccepted && isPending && (
+                            <span
+                              title={`Pass sent · Awaiting member acceptance`}
+                              className="absolute -top-1 -left-1 flex size-5 items-center justify-center rounded-full bg-ochre text-ink shadow-sm ring-2 ring-background animate-in zoom-in"
+                            >
+                              <Clock className="size-3" />
                             </span>
                           )}
                         </div>
@@ -372,6 +438,18 @@ export function InteractiveTable({
                           {isCheckedIn ? (
                             <span className="text-[9px] text-forest font-bold bg-forest/20 px-1.5 py-0.2 rounded-full mt-0.5 flex items-center gap-0.5 shadow-xs">
                               <CheckCircle2 className="size-2.5" /> Admitted
+                            </span>
+                          ) : isAccepted ? (
+                            <span className="text-[9px] text-emerald-800 font-bold bg-emerald-100 dark:bg-emerald-950 dark:text-emerald-300 px-1.5 py-0.2 rounded-full mt-0.5 flex items-center gap-0.5 shadow-xs border border-emerald-300/80">
+                              <CheckCircle2 className="size-2.5 text-emerald-600" /> Accepted & Booked
+                            </span>
+                          ) : isPending ? (
+                            <span className="text-[9px] text-ochre font-semibold bg-ochre/15 px-1.5 py-0.2 rounded-full mt-0.5 flex items-center gap-0.5">
+                              <Clock className="size-2.5" /> Awaiting Accept
+                            </span>
+                          ) : isDeclined ? (
+                            <span className="text-[9px] text-destructive font-semibold bg-destructive/15 px-1.5 py-0.2 rounded-full mt-0.5">
+                              Declined
                             </span>
                           ) : (
                             <span className="text-[10px] text-forest font-medium bg-forest/10 px-1.5 py-0.2 rounded-full mt-0.5">
@@ -459,6 +537,23 @@ export function InteractiveTable({
           onUnseatAttendee={() => handleUnseat(activeSeatIndex)}
           alreadySeatedIds={event.seats}
           attendees={attendees}
+          seatAcceptance={
+            event.seats[activeSeatIndex]
+              ? event.seatAcceptances?.[event.seats[activeSeatIndex]!]
+              : undefined
+          }
+          onToggleAcceptance={(status) => {
+            const attId = event.seats[activeSeatIndex];
+            if (attId) {
+              const updated = EventsService.adminSetSeatAcceptance(event.id, attId, status);
+              onEventUpdated(updated);
+              toast.success(
+                status === "accepted"
+                  ? "Seat marked as Accepted & Booked!"
+                  : "Seat reverted to Pending acceptance."
+              );
+            }
+          }}
         />
       )}
 

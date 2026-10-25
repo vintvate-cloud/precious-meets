@@ -52,6 +52,18 @@ export interface AdminEvent {
   emailsSentAt?: string | null;
   notes?: string;
   checkIns?: Record<string, EventCheckIn>; // Keyed by attendeeId
+  seatAcceptances?: Record<string, SeatAcceptance>; // Keyed by attendeeId
+}
+
+export interface SeatAcceptance {
+  attendeeId: string;
+  attendeeEmail?: string;
+  attendeeName?: string;
+  seatNumber: number; // 1 to 6
+  status: "pending" | "accepted" | "declined";
+  invitedAt: string;
+  respondedAt?: string;
+  declineReason?: string;
 }
 
 export interface EventCheckIn {
@@ -66,6 +78,8 @@ export interface UserSeatInvitation {
   id: string;
   eventId: string;
   eventTitle: string;
+  attendeeId?: string;
+  attendeeEmail?: string;
   city: string;
   neighborhood: string;
   venueName: string;
@@ -284,18 +298,76 @@ export class EventsService {
     const event = events.find((e) => e.id === eventId);
     if (!event) throw new Error("Event not found");
 
+    const attendees = this.getAttendees();
+    const attendee = attendees.find((a) => a.id === attendeeId);
+
     // Clone seats
     const newSeats = [...event.seats];
 
     // Check if attendee is already seated in another seat in the same event
     const existingIndex = newSeats.findIndex((id) => id === attendeeId);
     if (existingIndex !== -1 && existingIndex !== seatIndex) {
-      // Clear previous seat to avoid duplication
       newSeats[existingIndex] = null;
     }
 
     newSeats[seatIndex] = attendeeId;
-    return this.updateEvent(eventId, { seats: newSeats });
+
+    const seatAcceptances: Record<string, SeatAcceptance> = { ...(event.seatAcceptances || {}) };
+    if (!seatAcceptances[attendeeId] || seatAcceptances[attendeeId].status !== "accepted") {
+      seatAcceptances[attendeeId] = {
+        attendeeId,
+        attendeeEmail: attendee?.email,
+        attendeeName: attendee?.name,
+        seatNumber: seatIndex + 1,
+        status: "pending",
+        invitedAt: new Date().toISOString(),
+      };
+    }
+
+    // Also auto-prepare the UserSeatInvitation so user sees it in their dashboard
+    if (attendee) {
+      const invitations = this.getUserInvitations();
+      const existingIdx = invitations.findIndex(
+        (i) => i.eventId === event.id && (i.attendeeId === attendee.id || i.attendeeEmail?.toLowerCase() === attendee.email.toLowerCase())
+      );
+
+      const invData: UserSeatInvitation = {
+        id: existingIdx !== -1 ? invitations[existingIdx].id : "inv_" + event.id + "_" + attendee.id,
+        eventId: event.id,
+        eventTitle: event.title,
+        attendeeId: attendee.id,
+        attendeeEmail: attendee.email,
+        city: event.city,
+        neighborhood: event.neighborhood,
+        venueName: event.venueName,
+        venueAddress: event.venueAddress,
+        dateDisplay: event.dateDisplay,
+        coverImage: event.coverImage,
+        hostName: event.hostName,
+        hostRole: event.hostRole,
+        theme: event.theme,
+        secretAccessCode: event.secretAccessCode,
+        seatNumber: seatIndex + 1,
+        vibeMatch: 95,
+        curatorNote: `Hand-selected by our table curators based on conversational chemistry with ${event.hostName}.`,
+        status: seatAcceptances[attendeeId].status,
+        invitedAt: new Date().toISOString(),
+      };
+
+      if (existingIdx !== -1) {
+        invitations[existingIdx] = { ...invitations[existingIdx], ...invData };
+      } else {
+        invitations.unshift(invData);
+      }
+      this.saveUserInvitations(invitations);
+    }
+
+    const updated = this.updateEvent(eventId, { seats: newSeats, seatAcceptances });
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("precious_meets_events_updated", { detail: { eventId } }));
+      window.dispatchEvent(new Event("storage"));
+    }
+    return updated;
   }
 
   // 9. Unseat an attendee from a seat index (0..5)
@@ -304,9 +376,26 @@ export class EventsService {
     const event = events.find((e) => e.id === eventId);
     if (!event) throw new Error("Event not found");
 
+    const previousAttendeeId = event.seats[seatIndex];
     const newSeats = [...event.seats];
     newSeats[seatIndex] = null;
-    return this.updateEvent(eventId, { seats: newSeats });
+
+    const seatAcceptances = { ...(event.seatAcceptances || {}) };
+    if (previousAttendeeId) {
+      delete seatAcceptances[previousAttendeeId];
+      // remove invitation from user invitations
+      const invitations = this.getUserInvitations().filter(
+        (inv) => !(inv.eventId === eventId && (inv.attendeeId === previousAttendeeId || inv.seatNumber === seatIndex + 1))
+      );
+      this.saveUserInvitations(invitations);
+    }
+
+    const updated = this.updateEvent(eventId, { seats: newSeats, seatAcceptances });
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("precious_meets_events_updated", { detail: { eventId } }));
+      window.dispatchEvent(new Event("storage"));
+    }
+    return updated;
   }
 
   // 10. Swap seats between two positions
@@ -417,16 +506,22 @@ export class EventsService {
 
     const attendees = this.getAttendees();
     const seatedAttendees = event.seats
-      .map((id) => (id ? attendees.find((a) => a.id === id) : null))
-      .filter((a): a is AdminAttendee => Boolean(a));
+      .map((id, index) => (id ? { attendee: attendees.find((a) => a.id === id), seatIndex: index } : null))
+      .filter((x): x is { attendee: AdminAttendee; seatIndex: number } => Boolean(x && x.attendee));
 
     if (seatedAttendees.length === 0) {
       throw new Error("No attendees are seated on this table to email.");
     }
 
+    // Load existing invitations to update or prepend
+    const existingInvitations = this.getUserInvitations();
+    const updatedInvitations = [...existingInvitations];
+    const seatAcceptances: Record<string, SeatAcceptance> = { ...(event.seatAcceptances || {}) };
+
     // Send emails via EmailService
     let sentCount = 0;
-    for (const attendee of seatedAttendees) {
+    for (const { attendee, seatIndex } of seatedAttendees) {
+      const seatNumber = seatIndex + 1;
       try {
         await EmailService.sendEmail({
           to: attendee.email,
@@ -444,18 +539,73 @@ export class EventsService {
       } catch (err) {
         console.warn(`[EventsService] Could not send to ${attendee.email}:`, err);
       }
+
+      // Preserve status if attendee had already accepted
+      const previousStatus = seatAcceptances[attendee.id]?.status;
+      const resolvedStatus = previousStatus === "accepted" ? "accepted" : "pending";
+
+      seatAcceptances[attendee.id] = {
+        attendeeId: attendee.id,
+        attendeeEmail: attendee.email,
+        attendeeName: attendee.name,
+        seatNumber,
+        status: resolvedStatus,
+        invitedAt: seatAcceptances[attendee.id]?.invitedAt || new Date().toISOString(),
+      };
+
+      // Create or update invitation for user dashboard
+      const invIndex = updatedInvitations.findIndex(
+        (i) => i.eventId === event.id && (i.attendeeId === attendee.id || i.attendeeEmail?.toLowerCase() === attendee.email.toLowerCase())
+      );
+
+      const invData: UserSeatInvitation = {
+        id: invIndex !== -1 ? updatedInvitations[invIndex].id : "inv_" + event.id + "_" + attendee.id,
+        eventId: event.id,
+        eventTitle: event.title,
+        attendeeId: attendee.id,
+        attendeeEmail: attendee.email,
+        city: event.city,
+        neighborhood: event.neighborhood,
+        venueName: event.venueName,
+        venueAddress: event.venueAddress,
+        dateDisplay: event.dateDisplay,
+        coverImage: event.coverImage,
+        hostName: event.hostName,
+        hostRole: event.hostRole,
+        theme: event.theme,
+        secretAccessCode: event.secretAccessCode,
+        seatNumber,
+        vibeMatch: 95,
+        curatorNote: `Hand-selected by our table curators based on conversational chemistry with ${event.hostName}.`,
+        status: resolvedStatus,
+        invitedAt: new Date().toISOString(),
+      };
+
+      if (invIndex !== -1) {
+        updatedInvitations[invIndex] = { ...updatedInvitations[invIndex], ...invData };
+      } else {
+        updatedInvitations.unshift(invData);
+      }
     }
 
-    // Mark timestamp in event record
+    this.saveUserInvitations(updatedInvitations);
+
+    // Mark timestamp and acceptances in event record
     this.updateEvent(eventId, {
       emailsSentAt: new Date().toISOString(),
+      seatAcceptances,
     });
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("precious_meets_events_updated", { detail: { eventId } }));
+      window.dispatchEvent(new Event("storage"));
+    }
 
     return { success: true, dispatchedCount: sentCount };
   }
 
-  // 13. Get all user seat invitations (with localStorage persistence and legacy mock purge)
-  static getUserInvitations(): UserSeatInvitation[] {
+  // 13. Get all user seat invitations (with optional email filter)
+  static getUserInvitations(userEmail?: string): UserSeatInvitation[] {
     if (typeof window === "undefined") return INITIAL_USER_INVITATIONS;
     try {
       const stored = localStorage.getItem(STORAGE_USER_INVITATIONS_KEY);
@@ -472,6 +622,16 @@ export class EventsService {
         if (cleaned.length !== parsed.length) {
           localStorage.setItem(STORAGE_USER_INVITATIONS_KEY, JSON.stringify(cleaned));
         }
+
+        // If userEmail is provided and has matches, return matched invitations
+        if (userEmail && userEmail.trim()) {
+          const lower = userEmail.trim().toLowerCase();
+          const userSpecific = cleaned.filter(
+            (inv) => !inv.attendeeEmail || inv.attendeeEmail.toLowerCase() === lower
+          );
+          if (userSpecific.length > 0) return userSpecific;
+        }
+
         return cleaned;
       }
       localStorage.setItem(STORAGE_USER_INVITATIONS_KEY, JSON.stringify(INITIAL_USER_INVITATIONS));
@@ -512,6 +672,46 @@ export class EventsService {
     invitations[index] = updatedInvitation;
     this.saveUserInvitations(invitations);
 
+    // Sync acceptance into AdminEvent so Admin panel immediately reflects user acceptance
+    const event = this.getEventById(updatedInvitation.eventId);
+    if (event) {
+      const seatAcceptances = { ...(event.seatAcceptances || {}) };
+
+      // Identify attendee
+      let attendeeId = updatedInvitation.attendeeId;
+      if (!attendeeId && event.seats[updatedInvitation.seatNumber - 1]) {
+        attendeeId = event.seats[updatedInvitation.seatNumber - 1]!;
+      }
+      if (!attendeeId) {
+        const attendees = this.getAttendees();
+        const matched = attendees.find(
+          (a) => a.email.toLowerCase() === (updatedInvitation.attendeeEmail || "").toLowerCase()
+        );
+        if (matched) attendeeId = matched.id;
+      }
+
+      if (attendeeId) {
+        seatAcceptances[attendeeId] = {
+          attendeeId,
+          attendeeEmail: updatedInvitation.attendeeEmail,
+          seatNumber: updatedInvitation.seatNumber,
+          status: status,
+          invitedAt: updatedInvitation.invitedAt,
+          respondedAt: new Date().toISOString(),
+          declineReason,
+        };
+
+        this.updateEvent(event.id, { seatAcceptances });
+
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent("precious_meets_events_updated", { detail: { eventId: event.id } })
+          );
+          window.dispatchEvent(new Event("storage"));
+        }
+      }
+    }
+
     // If accepted, ensure the event reservation is recorded in member's active RSVPs
     if (typeof window !== "undefined") {
       try {
@@ -533,6 +733,53 @@ export class EventsService {
     }
 
     return updatedInvitation;
+  }
+
+  // 15b. Admin Manual Override for Seat Acceptance (Accepted & Booked / Pending / Declined)
+  static adminSetSeatAcceptance(
+    eventId: string,
+    attendeeId: string,
+    status: "pending" | "accepted" | "declined"
+  ): AdminEvent {
+    const event = this.getEventById(eventId);
+    if (!event) throw new Error("Event not found");
+
+    const attendees = this.getAttendees();
+    const attendee = attendees.find((a) => a.id === attendeeId);
+
+    const seatIdx = event.seats.findIndex((id) => id === attendeeId);
+    const seatNumber = seatIdx !== -1 ? seatIdx + 1 : 1;
+
+    const seatAcceptances = { ...(event.seatAcceptances || {}) };
+    seatAcceptances[attendeeId] = {
+      attendeeId,
+      attendeeEmail: attendee?.email,
+      attendeeName: attendee?.name,
+      seatNumber,
+      status,
+      invitedAt: seatAcceptances[attendeeId]?.invitedAt || new Date().toISOString(),
+      respondedAt: status !== "pending" ? new Date().toISOString() : undefined,
+    };
+
+    // Also sync UserSeatInvitation
+    const invitations = this.getUserInvitations();
+    const invIndex = invitations.findIndex(
+      (i) => i.eventId === eventId && (i.attendeeId === attendeeId || i.seatNumber === seatNumber)
+    );
+    if (invIndex !== -1) {
+      invitations[invIndex].status = status;
+      invitations[invIndex].respondedAt = status !== "pending" ? new Date().toISOString() : undefined;
+      this.saveUserInvitations(invitations);
+    }
+
+    const updated = this.updateEvent(eventId, { seatAcceptances });
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("precious_meets_events_updated", { detail: { eventId } })
+      );
+      window.dispatchEvent(new Event("storage"));
+    }
+    return updated;
   }
 
   // 16. Create a new invitation for a user (called by Admin or Curator)

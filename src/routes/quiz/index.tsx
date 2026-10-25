@@ -50,29 +50,17 @@ export function QuizPage() {
   const [pincode, setPincode] = useState("");
   const [email, setEmail] = useState("");
 
-  // Restore previous answers and contacts if any
+  // Always initialize quiz with clean empty fields for all users
   useEffect(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (saved) {
-      try {
-        setAnswers(JSON.parse(saved));
-      } catch (e) {
-        // Ignore
-      }
-    }
-
-    const savedContact = localStorage.getItem(LOCAL_STORAGE_CONTACT_KEY);
-    if (savedContact) {
-      try {
-        const c = JSON.parse(savedContact);
-        if (c.fullName) setFullName(c.fullName);
-        if (c.phone) setPhone(c.phone);
-        if (c.pincode) setPincode(c.pincode);
-        if (c.email) setEmail(c.email);
-      } catch (e) {
-        // Ignore
-      }
-    }
+    // Clear any previous answers and contact data so questions always start unselected
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
+    localStorage.removeItem(LOCAL_STORAGE_CONTACT_KEY);
+    setAnswers({});
+    setCurrentIndex(0);
+    setFullName("");
+    setPhone("");
+    setPincode("");
+    setEmail("");
 
     // Set initial history state
     window.history.replaceState({ quizStep: 0 }, "");

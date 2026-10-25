@@ -49,8 +49,18 @@ const LOCAL_STORAGE_RESERVATIONS_KEY = "precious_meets_member_rsvps";
 type DashboardTab = "overview" | "meets" | "requests" | "profile" | "questions" | "invoice";
 
 export function DashboardPage() {
-  const { user, profile, subscription, signOut } = useAuth();
+  const { user, profile, subscription, signOut, loading } = useAuth();
   const navigate = useNavigate();
+
+  // Security Gate: Direct access without authentication is blocked
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate({
+        to: "/login",
+        search: { redirect: "/dashboard" } as any,
+      });
+    }
+  }, [user, loading, navigate]);
 
   const [activeTab, setActiveTab] = useState<DashboardTab>("overview");
   const [events, setEvents] = useState<AdminEvent[]>([]);
@@ -62,7 +72,7 @@ export function DashboardPage() {
     const loadedEvents = EventsService.getEvents();
     setEvents(loadedEvents);
 
-    const loadedInvitations = EventsService.getUserInvitations();
+    const loadedInvitations = EventsService.getUserInvitations(user?.email || undefined);
     setInvitations(loadedInvitations);
 
     const savedRsvps = localStorage.getItem(LOCAL_STORAGE_RESERVATIONS_KEY);
@@ -73,52 +83,41 @@ export function DashboardPage() {
         // ignore
       }
     } else {
-      // Default reserve first event for founder demo
-      const initialRsvps = ["evt_delhi_supper"];
-      setReservedEventIds(initialRsvps);
-      localStorage.setItem(LOCAL_STORAGE_RESERVATIONS_KEY, JSON.stringify(initialRsvps));
+      setReservedEventIds([]);
     }
   };
 
   useEffect(() => {
     loadDashboardData();
-  }, []);
+    window.addEventListener("precious_meets_events_updated", loadDashboardData);
+    window.addEventListener("storage", loadDashboardData);
+    return () => {
+      window.removeEventListener("precious_meets_events_updated", loadDashboardData);
+      window.removeEventListener("storage", loadDashboardData);
+    };
+  }, [user?.email]);
 
-  // Handle RSVP toggle
-  const handleToggleRsvp = (event: AdminEvent) => {
-    let updated: string[];
-    if (reservedEventIds.includes(event.id)) {
-      updated = reservedEventIds.filter((id) => id !== event.id);
-      toast.info(`Reservation for "${event.title}" cancelled. Seat credit retained.`);
-    } else {
-      updated = [...reservedEventIds, event.id];
-      toast.success(
-        `Seat reserved for "${event.title}"! Secret venue gate pass: ${event.secretAccessCode || "GATE-402"}`
-      );
-    }
-    setReservedEventIds(updated);
-    localStorage.setItem(LOCAL_STORAGE_RESERVATIONS_KEY, JSON.stringify(updated));
-  };
+  // Only accepted invitations represent confirmed meets the user can attend
+  const acceptedInvitations = invitations.filter((i) => i.status === "accepted");
 
   // Next confirmed event for the countdown card
-  const confirmedEvents = events.filter((e) => reservedEventIds.includes(e.id));
-  const nextEvent = confirmedEvents.length > 0 ? {
-    title: confirmedEvents[0].title,
-    dateDisplay: confirmedEvents[0].dateDisplay,
-    neighborhood: `${confirmedEvents[0].neighborhood}, ${confirmedEvents[0].city}`,
-    venueName: confirmedEvents[0].venueName,
-    gateCode: confirmedEvents[0].secretAccessCode || "GATE-402",
+  const nextEvent = acceptedInvitations.length > 0 ? {
+    title: acceptedInvitations[0].eventTitle,
+    dateDisplay: acceptedInvitations[0].dateDisplay,
+    neighborhood: `${acceptedInvitations[0].neighborhood}, ${acceptedInvitations[0].city}`,
+    venueName: acceptedInvitations[0].venueName,
+    gateCode: acceptedInvitations[0].secretAccessCode || "GATE-402",
   } : null;
 
   // Formatted seated events for the universal QR pass
-  const seatedEvents = confirmedEvents.map((e, index) => ({
-    id: e.id,
-    title: e.title,
-    dateDisplay: e.dateDisplay,
-    neighborhood: `${e.neighborhood}, ${e.city}`,
-    venueName: e.venueName,
-    gateCode: e.secretAccessCode || "GATE-402",
-    seatNumber: index + 1,
+  const seatedEvents = acceptedInvitations.map((inv) => ({
+    id: inv.eventId,
+    title: inv.eventTitle,
+    dateDisplay: inv.dateDisplay,
+    neighborhood: `${inv.neighborhood}, ${inv.city}`,
+    venueName: inv.venueName,
+    gateCode: inv.secretAccessCode || "GATE-402",
+    seatNumber: inv.seatNumber,
   }));
 
   const displayName = profile?.display_name || user?.user_metadata?.full_name || "Founding Member";
@@ -141,17 +140,38 @@ export function DashboardPage() {
 
   const NAV_TABS = [
     { id: "overview", label: "Overview", icon: Sparkles, badge: null },
-    { id: "meets", label: "Meets", icon: Wine, badge: null },
+    {
+      id: "meets",
+      label: "Meets",
+      icon: Wine,
+      badge: acceptedInvitations.length > 0 ? `${acceptedInvitations.length}` : null,
+    },
     {
       id: "requests",
       label: "Requests",
       icon: Mail,
-      badge: pendingInvitationsCount > 0 ? pendingInvitationsCount : null,
+      badge: pendingInvitationsCount > 0 ? `${pendingInvitationsCount} New` : null,
     },
     { id: "profile", label: "Profile", icon: User, badge: null },
     { id: "questions", label: "Quiz Record", icon: FileQuestion, badge: null },
     { id: "invoice", label: "Invoices", icon: Receipt, badge: null },
   ];
+
+  if (loading || !user) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-ivory text-foreground px-4 text-center">
+        <div className="flex flex-col items-center space-y-4 max-w-sm p-8 rounded-3xl border border-border/70 bg-card/90 shadow-lg backdrop-blur">
+          <div className="h-10 w-10 animate-spin rounded-full border-3 border-burgundy border-t-transparent" />
+          <h2 className="font-serif text-xl font-medium tracking-tight text-foreground">
+            Verifying Member Credentials...
+          </h2>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Direct access to the salon dashboard requires an authenticated member account. Redirecting you to sign in...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-ivory text-foreground selection:bg-burgundy/20">
@@ -212,13 +232,18 @@ export function DashboardPage() {
               >
                 <div className="flex items-center justify-between text-burgundy">
                   <Wine className="size-5" />
-                  <ArrowRight className="size-4 text-muted-foreground" />
+                  {acceptedInvitations.length > 0 && (
+                    <span className="rounded-full bg-forest/20 text-forest font-mono text-[10px] font-bold px-2 py-0.5">
+                      {acceptedInvitations.length} Booked
+                    </span>
+                  )}
+                  {acceptedInvitations.length === 0 && <ArrowRight className="size-4 text-muted-foreground" />}
                 </div>
                 <h4 className="font-display mt-3 text-base text-foreground">
-                  Explore Curated Meets
+                  My Confirmed Meets
                 </h4>
                 <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                  Browse upcoming 6-person dinners and reserve your complimentary seat.
+                  View accepted 6-person tables, your allocated seat, and secret gate PIN.
                 </p>
               </button>
 
@@ -262,14 +287,17 @@ export function DashboardPage() {
           </div>
         )}
 
-        {/* Tab 2: MEETS & TABLE BROWSING */}
+        {/* Tab 2: MEETS & TABLE PASSES (ONLY ACCEPTED MEETS) */}
         {activeTab === "meets" && (
           <div className="animate-in fade-in duration-300">
             <EventsListSection
               events={events}
-              reservedEventIds={reservedEventIds}
-              onToggleRsvp={handleToggleRsvp}
+              acceptedInvitations={acceptedInvitations}
+              pendingInvitationsCount={pendingInvitationsCount}
+              onViewRequests={() => setActiveTab("requests")}
               userCity={city}
+              displayName={displayName}
+              memberId={memberId}
             />
           </div>
         )}
@@ -280,6 +308,7 @@ export function DashboardPage() {
             <SeatInvitationsSection
               invitations={invitations}
               onInvitationUpdated={loadDashboardData}
+              onViewAcceptedMeets={() => setActiveTab("meets")}
             />
           </div>
         )}

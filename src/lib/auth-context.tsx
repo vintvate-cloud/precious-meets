@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { supabase, type DatabaseProfile } from "./supabase";
+import { toast } from "sonner";
 
 export interface SubscriptionDetails {
   status: "active" | "inactive";
@@ -40,12 +41,55 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const LOCAL_STORAGE_MOCK_USER_KEY = "precious_meets_mock_user";
 const LOCAL_STORAGE_SUBSCRIPTION_KEY = "precious_meets_subscription";
+export const LOCAL_STORAGE_SESSION_TIMESTAMP_KEY = "precious_meets_session_timestamp";
+export const SESSION_MAX_AGE_MS = 36 * 60 * 60 * 1000; // 36 hours in milliseconds
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any | null>(null);
   const [profile, setProfile] = useState<DatabaseProfile | null>(null);
   const [subscription, setSubscription] = useState<SubscriptionDetails | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Helper to record fresh session start
+  const recordSessionStart = () => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(LOCAL_STORAGE_SESSION_TIMESTAMP_KEY, Date.now().toString());
+    }
+  };
+
+  // Helper to verify if session has exceeded 36 hours
+  const isSessionExpired = (): boolean => {
+    if (typeof window === "undefined") return false;
+    const timestampStr = localStorage.getItem(LOCAL_STORAGE_SESSION_TIMESTAMP_KEY);
+    if (!timestampStr) {
+      if (localStorage.getItem(LOCAL_STORAGE_MOCK_USER_KEY)) {
+        // First initialization for existing active user: give them a fresh 36h window
+        localStorage.setItem(LOCAL_STORAGE_SESSION_TIMESTAMP_KEY, Date.now().toString());
+        return false;
+      }
+      return true;
+    }
+    const sessionTime = parseInt(timestampStr, 10);
+    if (isNaN(sessionTime) || Date.now() - sessionTime > SESSION_MAX_AGE_MS) {
+      return true;
+    }
+    return false;
+  };
+
+  // Terminate expired session
+  const terminateSession = async () => {
+    const wasLoggedIn = !!(user || (typeof window !== "undefined" && localStorage.getItem(LOCAL_STORAGE_MOCK_USER_KEY)));
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(LOCAL_STORAGE_MOCK_USER_KEY);
+      localStorage.removeItem(LOCAL_STORAGE_SESSION_TIMESTAMP_KEY);
+    }
+    await supabase.auth.signOut().catch(() => {});
+    setUser(null);
+    setProfile(null);
+    if (wasLoggedIn) {
+      toast.info("Session expired after 36 hours. Please sign in again.");
+    }
+  };
 
   // Load existing subscription on mount
   useEffect(() => {
@@ -104,6 +148,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    // 1. Initial 36-hour session expiry check
+    if (isSessionExpired()) {
+      terminateSession();
+      setLoading(false);
+      return;
+    }
+
     // Check local session
     const savedMock = localStorage.getItem(LOCAL_STORAGE_MOCK_USER_KEY);
     if (savedMock) {
@@ -121,8 +172,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Supabase auth state listener
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        setUser(session.user);
-        fetchProfile(session.user.id, session.user.email || "");
+        if (isSessionExpired()) {
+          terminateSession();
+        } else {
+          setUser(session.user);
+          fetchProfile(session.user.id, session.user.email || "");
+          if (!localStorage.getItem(LOCAL_STORAGE_SESSION_TIMESTAMP_KEY)) {
+            recordSessionStart();
+          }
+        }
       }
       setLoading(false);
     });
@@ -131,8 +189,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        setUser(session.user);
-        fetchProfile(session.user.id, session.user.email || "");
+        if (isSessionExpired()) {
+          terminateSession();
+        } else {
+          setUser(session.user);
+          fetchProfile(session.user.id, session.user.email || "");
+          if (!localStorage.getItem(LOCAL_STORAGE_SESSION_TIMESTAMP_KEY)) {
+            recordSessionStart();
+          }
+        }
       } else if (!localStorage.getItem(LOCAL_STORAGE_MOCK_USER_KEY)) {
         setUser(null);
         setProfile(null);
@@ -140,8 +205,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     });
 
+    // 2. Periodic background check every 60s
+    const expiryInterval = setInterval(() => {
+      if (isSessionExpired()) {
+        terminateSession();
+      }
+    }, 60 * 1000);
+
+    // 3. Tab visibility / window focus check (e.g. user reopens Chrome or focuses tab after 36h)
+    const handleVisibilityOrFocus = () => {
+      if (document.visibilityState === "visible") {
+        if (isSessionExpired()) {
+          terminateSession();
+        }
+      }
+    };
+
+    window.addEventListener("focus", handleVisibilityOrFocus);
+    document.addEventListener("visibilitychange", handleVisibilityOrFocus);
+
     return () => {
       subscription.unsubscribe();
+      clearInterval(expiryInterval);
+      window.removeEventListener("focus", handleVisibilityOrFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityOrFocus);
     };
   }, []);
 
@@ -162,6 +249,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.warn("[Auth] Supabase Google OAuth notice:", error.message);
       return { error };
     }
+    recordSessionStart();
     return { error: null };
   };
 
@@ -206,6 +294,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           LOCAL_STORAGE_MOCK_USER_KEY,
           JSON.stringify({ user: adminUser, profile: adminProfile }),
         );
+        recordSessionStart();
         return { error: null };
       } else {
         return { error: new Error("Invalid admin password. Access denied.") };
@@ -281,6 +370,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           LOCAL_STORAGE_MOCK_USER_KEY,
           JSON.stringify({ user: memberUser, profile: memberProfile })
         );
+        recordSessionStart();
         return { error: null };
       }
     } catch (e) {
@@ -300,6 +390,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (data?.user) {
       setUser(data.user);
       await fetchProfile(data.user.id, data.user.email || "");
+      recordSessionStart();
     }
 
     return { error: null };
@@ -326,14 +417,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (data?.user) {
       setUser(data.user);
       await fetchProfile(data.user.id, data.user.email || "");
+      recordSessionStart();
     }
 
     return { error: null, data };
   };
 
   const signOut = async () => {
-    localStorage.removeItem(LOCAL_STORAGE_MOCK_USER_KEY);
-    await supabase.auth.signOut();
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(LOCAL_STORAGE_MOCK_USER_KEY);
+      localStorage.removeItem(LOCAL_STORAGE_SESSION_TIMESTAMP_KEY);
+    }
+    await supabase.auth.signOut().catch(() => {});
     setUser(null);
     setProfile(null);
   };
@@ -382,6 +477,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       LOCAL_STORAGE_MOCK_USER_KEY,
       JSON.stringify({ user: mockUser, profile: mockProfile }),
     );
+    recordSessionStart();
   };
 
   const activateSubscription = (details: {

@@ -47,6 +47,11 @@ export function Footer() {
                   Safety Protocol
                 </Link>
               </li>
+              <li>
+                <Link to="/faq" className="text-muted-foreground hover:text-burgundy font-medium">
+                  Frequently Asked Questions (FAQ)
+                </Link>
+              </li>
             </ul>
           </div>
 

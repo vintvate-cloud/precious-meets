@@ -1,7 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { useAuth } from "@/lib/auth-context";
 import { SosModal } from "@/components/SosModal";
 import { ShieldAlert, PhoneCall, UserX, AlertTriangle, ShieldCheck, HeartHandshake } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,9 +19,36 @@ export const Route = createFileRoute("/dashboard/safety")({
 });
 
 function DashboardSafetyPage() {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [reportUser, setReportUser] = useState("");
   const [reportReason, setReportReason] = useState("");
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate({
+        to: "/login",
+        search: { redirect: "/dashboard/safety" } as any,
+      });
+    }
+  }, [user, loading, navigate]);
+
+  if (loading || !user) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-ivory text-foreground px-4 text-center">
+        <div className="flex flex-col items-center space-y-4 max-w-sm p-8 rounded-3xl border border-border/70 bg-card/90 shadow-lg backdrop-blur">
+          <div className="h-10 w-10 animate-spin rounded-full border-3 border-burgundy border-t-transparent" />
+          <h2 className="font-serif text-xl font-medium tracking-tight text-foreground">
+            Verifying Member Credentials...
+          </h2>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Direct access to the safety hub requires an active member account. Redirecting you to sign in...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const handleReportSubmit = (e: React.FormEvent) => {
     e.preventDefault();

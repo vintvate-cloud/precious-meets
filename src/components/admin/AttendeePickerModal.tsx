@@ -1,5 +1,4 @@
-import { useState, useMemo } from "react";
-import { AdminAttendee } from "@/lib/events-service";
+import { AdminAttendee, SeatAcceptance } from "@/lib/events-service";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +15,8 @@ import {
   X,
   Check,
   Filter,
+  CheckCircle2,
+  Clock,
 } from "lucide-react";
 
 interface AttendeePickerModalProps {
@@ -27,6 +28,8 @@ interface AttendeePickerModalProps {
   onUnseatAttendee?: () => void;
   alreadySeatedIds: (string | null)[];
   attendees: AdminAttendee[];
+  seatAcceptance?: SeatAcceptance;
+  onToggleAcceptance?: (status: "pending" | "accepted") => void;
 }
 
 export function AttendeePickerModal({
@@ -38,6 +41,8 @@ export function AttendeePickerModal({
   onUnseatAttendee,
   alreadySeatedIds,
   attendees,
+  seatAcceptance,
+  onToggleAcceptance,
 }: AttendeePickerModalProps) {
   const [search, setSearch] = useState("");
   const [filterGender, setFilterGender] = useState<"all" | "female" | "male">("all");
@@ -56,6 +61,7 @@ export function AttendeePickerModal({
   }, [attendees, search, filterGender]);
 
   const currentAttendee = attendees.find((a) => a.id === currentAttendeeId);
+  const isAccepted = seatAcceptance?.status === "accepted";
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
@@ -91,6 +97,49 @@ export function AttendeePickerModal({
               </button>
             )}
           </div>
+
+          {/* Seated Guest Acceptance Status Bar */}
+          {currentAttendee && (
+            <div className="mt-3.5 flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-card border border-border/80 p-3 shadow-xs">
+              <div className="flex items-center gap-2">
+                <img
+                  src={currentAttendee.avatar}
+                  alt={currentAttendee.name}
+                  className="size-7 rounded-full object-cover border border-border/80"
+                />
+                <div>
+                  <span className="text-xs font-bold text-foreground block leading-tight">
+                    {currentAttendee.name}
+                  </span>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    {isAccepted ? (
+                      <span className="inline-flex items-center gap-1 font-bold text-emerald-800 bg-emerald-100 dark:bg-emerald-950 dark:text-emerald-300 px-2 py-0.2 rounded-full text-[10px]">
+                        <CheckCircle2 className="size-3 text-emerald-600" /> Member Accepted & Booked
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 font-semibold text-ochre bg-ochre/15 px-2 py-0.2 rounded-full text-[10px]">
+                        <Clock className="size-3" /> Awaiting Member Acceptance
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {onToggleAcceptance && (
+                <button
+                  type="button"
+                  onClick={() => onToggleAcceptance(isAccepted ? "pending" : "accepted")}
+                  className={`rounded-full px-3 py-1 text-xs font-semibold transition-all cursor-pointer ${
+                    isAccepted
+                      ? "border border-border/80 bg-background text-muted-foreground hover:bg-sage/40"
+                      : "bg-forest text-ivory hover:bg-forest/90 shadow-sm"
+                  }`}
+                >
+                  {isAccepted ? "Revert to Pending" : "Mark as Accepted (Manual Override)"}
+                </button>
+              )}
+            </div>
+          )}
 
           {/* Search & Gender Filter Chips */}
           <div className="mt-4 flex flex-col sm:flex-row items-center gap-3">

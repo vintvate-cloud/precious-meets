@@ -112,8 +112,6 @@ function LoginPage() {
     }
   };
 
-  const isAdminCandidate = email.trim().toLowerCase() === "admin@preciousmeets.com";
-
   return (
     <div className="flex h-screen w-full overflow-hidden bg-ivory text-foreground selection:bg-burgundy/20">
       {/* ========================================================================= */}
@@ -248,7 +246,7 @@ function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@domain.com or admin@preciousmeets.com"
+                  placeholder="you@gmail.com"
                   className="w-full rounded-xl border border-border/80 bg-card py-3 pl-10 pr-4 text-sm font-medium text-foreground outline-none transition-all placeholder:text-muted-foreground/60 focus:border-burgundy focus:ring-1 focus:ring-burgundy"
                 />
               </div>
@@ -274,7 +272,7 @@ function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder={isAdminCandidate ? "Enter administrator password" : "Enter member password"}
+                  placeholder="Enter your password"
                   className="w-full rounded-xl border border-border/80 bg-card py-3 pl-10 pr-10 text-sm font-medium text-foreground outline-none transition-all placeholder:text-muted-foreground/60 focus:border-burgundy focus:ring-1 focus:ring-burgundy font-mono"
                 />
                 <button
@@ -300,16 +298,34 @@ function LoginPage() {
                 </div>
               ) : (
                 <div className="flex items-center justify-center gap-2">
-                  <span>
-                    {isAdminCandidate ? "Unlock Executive Console" : "Sign In to Circle"}
-                  </span>
+                  <span>Sign In to Circle</span>
                   <ArrowRight className="size-4" />
                 </div>
               )}
             </Button>
           </form>
 
-
+          {/* New Member Registration / Discovery Quiz Gate */}
+          <div className="mt-6 rounded-2xl border border-ochre/30 bg-ochre/5 p-4 text-center sm:text-left sm:flex sm:items-center sm:justify-between sm:gap-4">
+            <div className="space-y-1">
+              <span className="inline-block rounded-full bg-ochre/20 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-ochre">
+                New to Precious Meets?
+              </span>
+              <h4 className="font-display text-base font-medium text-foreground">
+                Apply for Curated Membership
+              </h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Direct registration is closed. New members join by completing our 3-minute conversational quiz to find matched salons.
+              </p>
+            </div>
+            <Link
+              to="/quiz"
+              className="mt-3 inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-burgundy px-4 py-2.5 text-xs font-semibold text-ivory transition-all hover:bg-burgundy/90 sm:mt-0"
+            >
+              <span>Take Quiz</span>
+              <ArrowRight className="size-3.5" />
+            </Link>
+          </div>
         </div>
 
         {/* Footer info */}

@@ -11,6 +11,7 @@ import {
   Sparkles,
   BookOpen,
   ArrowRight,
+  HelpCircle,
 } from "lucide-react";
 
 export function Navbar() {
@@ -188,6 +189,20 @@ export function Navbar() {
               >
                 <ShieldAlert className="size-4 text-red-600" />
                 <span>24/7 Safety & SOS</span>
+              </Link>
+
+              <Link
+                to="/faq"
+                onClick={() => setOpen(false)}
+                className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-sage/40 transition-colors"
+              >
+                <div className="flex items-center gap-2.5">
+                  <HelpCircle className="size-4 text-foreground/70" />
+                  <span>Frequently Asked Questions</span>
+                </div>
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-black/5 text-muted-foreground font-semibold">
+                  FAQ
+                </span>
               </Link>
 
               {isMemberAuthenticated ? (

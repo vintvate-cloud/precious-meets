@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useAuth } from "@/lib/auth-context";
@@ -20,14 +20,40 @@ import { useState, useEffect } from "react";
 import { EventsService, UserSeatInvitation } from "@/lib/events-service";
 
 function DashboardBookingsPage() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [invitations, setInvitations] = useState<UserSeatInvitation[]>([]);
 
   useEffect(() => {
-    const allInvitations = EventsService.getUserInvitations();
+    if (!loading && !user) {
+      navigate({
+        to: "/login",
+        search: { redirect: "/dashboard/bookings" } as any,
+      });
+    }
+  }, [user, loading, navigate]);
+
+  useEffect(() => {
+    const allInvitations = EventsService.getUserInvitations(user?.email || undefined);
     // Show accepted seat reservations or pending passes
     setInvitations(allInvitations.filter((inv) => inv.status === "accepted" || inv.status === "pending"));
-  }, []);
+  }, [user?.email]);
+
+  if (loading || !user) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-ivory text-foreground px-4 text-center">
+        <div className="flex flex-col items-center space-y-4 max-w-sm p-8 rounded-3xl border border-border/70 bg-card/90 shadow-lg backdrop-blur">
+          <div className="h-10 w-10 animate-spin rounded-full border-3 border-burgundy border-t-transparent" />
+          <h2 className="font-serif text-xl font-medium tracking-tight text-foreground">
+            Verifying Member Credentials...
+          </h2>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Direct access to reservations requires an active member account. Redirecting you to sign in...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-ivory text-foreground">

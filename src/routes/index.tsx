@@ -9,7 +9,6 @@ import { Preloader } from "@/components/Preloader";
 import { Navbar } from "@/components/Navbar";
 import { HeroMarquee } from "@/components/HeroMarquee";
 import { ConversationStarters } from "@/components/ConversationStarters";
-import { FaqSection } from "@/components/FaqSection";
 import { DoorGreetings } from "@/components/DoorGreetings";
 import { SosModal } from "@/components/SosModal";
 import { ShieldAlert, ShieldCheck, Sparkles, BookOpen, Utensils, User, ArrowRight, X } from "lucide-react";
@@ -141,28 +140,30 @@ function Statement() {
       return;
     }
 
-    // Initial dimmed state: subtle low-contrast silhouettes
-    gsap.set(words, { opacity: 0.16 });
-    if (cta) gsap.set(cta, { opacity: 0, y: 30, scale: 0.96 });
+    // Initial dimmed state: subtle readable silhouette
+    gsap.set(words, { opacity: 0.22 });
+    if (cta) gsap.set(cta, { opacity: 0, y: 20, scale: 0.96 });
 
+    // Smooth scrub that plays naturally while the user scrolls down the page
+    // No pinning, no screen freeze: completes as the section reaches the center of the screen
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: section,
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 0.5,
+        start: "top 75%",
+        end: "center 42%",
+        scrub: 0.2,
       },
     });
 
-    // Reveal words sequentially as the user scrolls
+    // Reveal words sequentially one by one as user scrolls
     tl.to(words, {
       opacity: 1,
       stagger: {
-        each: 0.04,
+        each: 0.03,
         from: "start",
       },
-      duration: 0.85,
-      ease: "power1.inOut",
+      duration: 0.8,
+      ease: "power1.out",
     });
 
     if (cta) {
@@ -172,7 +173,7 @@ function Statement() {
           opacity: 1,
           y: 0,
           scale: 1,
-          duration: 0.2,
+          duration: 0.25,
           ease: "power2.out",
         },
         "-=0.1",
@@ -194,46 +195,43 @@ function Statement() {
   return (
     <section
       ref={sectionRef}
-      className="relative h-[220vh] bg-ivory select-none"
+      className="relative bg-ivory select-none py-20 sm:py-28 lg:py-36 px-4 sm:px-6 lg:px-8 overflow-hidden border-b border-border/30"
     >
-      <div className="sticky top-0 flex h-screen w-full flex-col items-center justify-center px-2 sm:px-4 md:px-6 lg:px-8 overflow-hidden">
-        {/* Subtle Warm Atmospheric Glow */}
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="w-[70vw] h-[70vw] max-w-[850px] max-h-[850px] rounded-full bg-[#C6A568]/12 blur-[150px] pointer-events-none select-none" />
-        </div>
+      {/* Subtle Warm Atmospheric Glow */}
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+        <div className="w-[70vw] h-[70vw] max-w-[850px] max-h-[850px] rounded-full bg-[#C6A568]/12 blur-[150px] pointer-events-none select-none" />
+      </div>
 
-        <div className="relative z-10 w-full max-w-[98vw] lg:max-w-[96vw] mx-auto flex flex-col items-center text-center px-1 sm:px-2 pt-16 sm:pt-12">
+      <div className="relative z-10 w-full max-w-[98vw] lg:max-w-[96vw] mx-auto flex flex-col items-center text-center px-1 sm:px-2">
+        <h2 className="w-full font-display text-[6.5vw] sm:text-[4.8vw] md:text-[3.9vw] lg:text-[3.3vw] xl:text-[3.5vw] 2xl:text-[3.7vw] leading-[1.16] sm:leading-[1.2] tracking-tight select-none">
+          {manifestoLines.map((line, lIdx) => {
+            const words = line.text.split(" ");
+            return (
+              <span
+                key={lIdx}
+                className={`block w-full ${
+                  line.isBurgundyItalic
+                    ? "italic font-serif text-burgundy pt-1 sm:pt-2"
+                    : "text-ink"
+                } ${lIdx === 0 ? "sm:whitespace-nowrap" : ""}`}
+              >
+                {words.map((word, wIdx) => (
+                  <span
+                    key={wIdx}
+                    data-reveal-word
+                    className="inline-block mr-[0.2em] will-change-[opacity]"
+                  >
+                    {word}
+                  </span>
+                ))}
+              </span>
+            );
+          })}
+        </h2>
 
-          <h2 className="w-full font-display text-[6.5vw] sm:text-[4.8vw] md:text-[3.9vw] lg:text-[3.3vw] xl:text-[3.5vw] 2xl:text-[3.7vw] leading-[1.16] sm:leading-[1.2] tracking-tight select-none">
-            {manifestoLines.map((line, lIdx) => {
-              const words = line.text.split(" ");
-              return (
-                <span
-                  key={lIdx}
-                  className={`block w-full ${
-                    line.isBurgundyItalic
-                      ? "italic font-serif text-burgundy pt-1 sm:pt-2"
-                      : "text-ink"
-                  } ${lIdx === 0 ? "sm:whitespace-nowrap" : ""}`}
-                >
-                  {words.map((word, wIdx) => (
-                    <span
-                      key={wIdx}
-                      data-reveal-word
-                      className="inline-block mr-[0.2em] will-change-[opacity]"
-                    >
-                      {word}
-                    </span>
-                  ))}
-                </span>
-              );
-            })}
-          </h2>
-
-          {/* Clean Luxury CTA Button */}
-          <div data-statement-cta className="relative mt-8 sm:mt-12 flex flex-col items-center">
-            <CtaButton tone="burgundy" href="/quiz">Find your table</CtaButton>
-          </div>
+        {/* Clean Luxury CTA Button */}
+        <div data-statement-cta className="relative mt-8 sm:mt-12 flex flex-col items-center">
+          <CtaButton tone="burgundy" href="/quiz">Find your table</CtaButton>
         </div>
       </div>
     </section>
@@ -704,7 +702,7 @@ function Collage() {
         trigger: section,
         start: "top top",
         end: "bottom bottom",
-        scrub: 1.1,
+        scrub: 0.3,
       },
     });
 
@@ -1058,6 +1056,7 @@ function Index() {
     if (typeof window !== "undefined") {
       window.scrollTo(0, 0);
       ScrollTrigger.refresh();
+      (window as unknown as { __lenis?: Lenis | null }).__lenis?.resize();
     }
     if (heroEntranceRef.current) {
       heroEntranceRef.current.play();
@@ -1074,14 +1073,35 @@ function Index() {
 
     gsap.registerPlugin(ScrollTrigger);
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const lenis = reduce ? null : new Lenis({ lerp: 0.1 });
-    const raf = (t: number) => lenis?.raf(t * 1000);
+    const lenis = reduce
+      ? null
+      : new Lenis({
+          duration: 1.1,
+          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          orientation: "vertical",
+          gestureOrientation: "vertical",
+          smoothWheel: true,
+          wheelMultiplier: 1.0,
+          touchMultiplier: 1.2,
+          syncTouch: false,
+        });
+
+    let rafCallback: ((time: number) => void) | null = null;
     if (lenis) {
       (window as unknown as { __lenis?: Lenis | null }).__lenis = lenis;
       lenis.on("scroll", ScrollTrigger.update);
-      gsap.ticker.add(raf);
-      gsap.ticker.lagSmoothing(0);
+      rafCallback = (time: number) => {
+        lenis.raf(time * 1000);
+      };
+      gsap.ticker.add(rafCallback);
+      gsap.ticker.lagSmoothing(500, 33);
     }
+
+    const handleResize = () => {
+      lenis?.resize();
+      ScrollTrigger.refresh();
+    };
+    window.addEventListener("resize", handleResize, { passive: true });
 
     const ctx = gsap.context(() => {
       if (reduce) {
@@ -1170,14 +1190,6 @@ function Index() {
       gsap.utils.toArray<HTMLElement>("[data-reveal-row]").forEach((el) =>
         gsap.from(el, { y: 60, opacity: 0, duration: 1.2, ease, scrollTrigger: { trigger: el, start: "top 85%" } }),
       );
-      gsap.from("[data-photo]", {
-        y: 50,
-        opacity: 0,
-        duration: 1.0,
-        ease: "power3.out",
-        stagger: 0.08,
-        scrollTrigger: { trigger: "#stories", start: "top 75%" },
-      });
 
       // Geometry storytelling (Architectural dinner table based on reference image)
       gsap.set("[data-geo-text='0']", { opacity: 1, y: 0 });
@@ -1206,7 +1218,7 @@ function Index() {
           trigger: "[data-geo]",
           start: "top top",
           end: "bottom bottom",
-          scrub: 0.8,
+          scrub: 0.3,
         },
       });
 
@@ -1268,27 +1280,6 @@ function Index() {
         .to("[data-table-center]", { opacity: 1, duration: 0.6 }, 2.2)
         .to("[data-table-caption]", { opacity: 1, duration: 0.6 }, 2.3);
 
-      // Ambient Green Transition into #5F7045 (Forest Green) happens slowly and luxuriously as user scrolls into the stories section
-      gsap.fromTo(
-        root.current,
-        {
-          backgroundColor: "#FAF7F2",
-          color: "#171514",
-        },
-        {
-          backgroundColor: "#5F7045", // Pure Brand Forest Green
-          color: "#F8F2E7", // Luminous Ivory
-          ease: "sine.inOut",
-          scrollTrigger: {
-            trigger: "#stories",
-            start: "top top",
-            end: "+=1400",
-            scrub: 1.2,
-            invalidateOnRefresh: true,
-          },
-        }
-      );
-
       // Footer Parallax Background
       gsap.to("[data-footer-bg]", {
         yPercent: -12,
@@ -1335,9 +1326,10 @@ function Index() {
 
     return () => {
       ctx.revert();
-      if (lenis) gsap.ticker.remove(raf);
+      if (lenis && rafCallback) gsap.ticker.remove(rafCallback);
       lenis?.destroy();
       (window as unknown as { __lenis?: Lenis | null }).__lenis = null;
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -1349,13 +1341,12 @@ function Index() {
         <AnimatedSummitHero />
         <HeroMarquee />
         <Statement />
-        <DoorGreetings />
-        <Geometry />
-        <ConversationStarters />
         <Collage />
+        <DoorGreetings />
+        <ConversationStarters />
+        <Geometry />
         <How />
         <CuratedGallerySection />
-        <FaqSection />
       </main>
       <Footer />
 

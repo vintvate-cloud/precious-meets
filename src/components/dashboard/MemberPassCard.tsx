@@ -15,6 +15,7 @@ import {
   Lightbulb,
   CheckCircle2,
   Lock,
+  Mail,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -292,14 +293,15 @@ export function MemberPassCard({
             <div className="mt-6 text-center py-6">
               <Ticket className="size-10 text-muted-foreground/40 mx-auto" />
               <p className="mt-2 text-sm font-medium">No upcoming table confirmed yet</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Your annual pass includes unlimited reservations to curated 6-person tables.
+              <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
+                Tables are strictly invite-only. Check your Requests to accept curator seat invitations.
               </p>
               <Button
-                onClick={onExploreMeets}
-                className="mt-4 rounded-full bg-burgundy text-ivory text-xs px-5 cursor-pointer"
+                onClick={onViewInvitations}
+                className="mt-4 rounded-full bg-burgundy text-ivory text-xs px-5 cursor-pointer shadow-sm hover:bg-burgundy/90"
               >
-                Browse & Reserve a Seat
+                <Mail className="size-3.5 mr-1.5" />
+                <span>View Seat Invitations</span>
               </Button>
             </div>
           )}

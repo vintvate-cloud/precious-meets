@@ -152,70 +152,49 @@ export function ConversationStarters() {
   // Triple arrays for smooth infinite looping
   const row1 = [...rowOnePrompts, ...rowOnePrompts, ...rowOnePrompts];
   const row2 = [...rowTwoPrompts, ...rowTwoPrompts, ...rowTwoPrompts];
-  const row3 = [...rowThreePrompts, ...rowThreePrompts, ...rowThreePrompts];
 
   return (
-    <section className="relative w-full bg-[#FAF7F2] py-24 sm:py-32 overflow-hidden border-t border-black/5">
-      {/* Editorial Header */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center mb-14 sm:mb-20">
-        <p className="text-xs sm:text-[13px] font-mono font-bold tracking-[0.25em] uppercase text-[#5F7045] mb-3">
+    <section className="relative w-full bg-[#FAF7F2] py-10 sm:py-14 overflow-hidden border-t border-black/5">
+      {/* Editorial Header (Minimal & Compact) */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center mb-6 sm:mb-8">
+        <p className="text-[11px] font-mono font-semibold tracking-[0.22em] uppercase text-[#5F7045] mb-2">
           BIG CONVERSATIONS
         </p>
 
-        <h2 className="font-display text-4xl sm:text-5xl md:text-6xl text-[#171514] tracking-tight leading-[1.08] mb-5">
+        <h2 className="font-display text-2xl sm:text-3xl md:text-4xl text-[#171514] tracking-tight leading-tight">
           Leave the resumes outside. <br className="hidden sm:inline" />
           <em className="text-[#691C35] font-serif not-italic">Start somewhere honest.</em>
         </h2>
-
-        <p className="max-w-2xl mx-auto text-sm sm:text-base text-[#171514]/70 leading-relaxed font-sans">
-          Every Precious Meets table comes with handcrafted conversation spark cards. No elevator
-          pitches, no awkward pauses—just real questions that make room for laughter, unexpected stories,
-          and genuine connection.
-        </p>
       </div>
 
-      {/* Infinite Horizontal Conveyor Belts (Slightly Bigger Pills) */}
-      <div className="relative w-full space-y-4 sm:space-y-5">
+      {/* Infinite Horizontal Conveyor Belts (2 Compact Rows Only) */}
+      <div className="relative w-full space-y-2.5 sm:space-y-3">
         {/* Soft Edge Fade Gradient Masks */}
         <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-20 sm:w-40 md:w-56 bg-gradient-to-r from-[#FAF7F2] via-[#FAF7F2]/85 to-transparent z-10" />
         <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-20 sm:w-40 md:w-56 bg-gradient-to-l from-[#FAF7F2] via-[#FAF7F2]/85 to-transparent z-10" />
 
-        {/* Row 1: Drifts Left */}
+        {/* Row 1: Drifts Left (Small & Minimal) */}
         <div className="flex w-max items-center animate-[scrollLeft_55s_linear_infinite] hover:[animation-play-state:paused] will-change-transform">
           {row1.map((item, idx) => (
             <button
               type="button"
               key={`row1-${item.text}-${idx}`}
               onClick={() => setSelectedPrompt(item)}
-              className={`inline-flex items-center mx-2.5 sm:mx-3 px-5 sm:px-7 py-3.5 sm:py-4 rounded-full border text-sm sm:text-base md:text-[17px] font-semibold tracking-tight shadow-xs transition-all duration-300 hover:scale-105 hover:shadow-md active:scale-95 cursor-pointer whitespace-nowrap ${item.colorClass}`}
+              className={`inline-flex items-center mx-1.5 sm:mx-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full border text-xs sm:text-sm font-medium tracking-normal shadow-2xs transition-all duration-300 hover:scale-105 hover:shadow-xs active:scale-95 cursor-pointer whitespace-nowrap ${item.colorClass}`}
             >
               <span>{item.text}</span>
             </button>
           ))}
         </div>
 
-        {/* Row 2: Drifts Right */}
+        {/* Row 2: Drifts Right (Small & Minimal) */}
         <div className="flex w-max items-center animate-[scrollRight_50s_linear_infinite] hover:[animation-play-state:paused] will-change-transform">
           {row2.map((item, idx) => (
             <button
               type="button"
               key={`row2-${item.text}-${idx}`}
               onClick={() => setSelectedPrompt(item)}
-              className={`inline-flex items-center mx-2.5 sm:mx-3 px-5 sm:px-7 py-3.5 sm:py-4 rounded-full border text-sm sm:text-base md:text-[17px] font-semibold tracking-tight shadow-xs transition-all duration-300 hover:scale-105 hover:shadow-md active:scale-95 cursor-pointer whitespace-nowrap ${item.colorClass}`}
-            >
-              <span>{item.text}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Row 3: Drifts Left */}
-        <div className="flex w-max items-center animate-[scrollLeft_60s_linear_infinite] hover:[animation-play-state:paused] will-change-transform">
-          {row3.map((item, idx) => (
-            <button
-              type="button"
-              key={`row3-${item.text}-${idx}`}
-              onClick={() => setSelectedPrompt(item)}
-              className={`inline-flex items-center mx-2.5 sm:mx-3 px-5 sm:px-7 py-3.5 sm:py-4 rounded-full border text-sm sm:text-base md:text-[17px] font-semibold tracking-tight shadow-xs transition-all duration-300 hover:scale-105 hover:shadow-md active:scale-95 cursor-pointer whitespace-nowrap ${item.colorClass}`}
+              className={`inline-flex items-center mx-1.5 sm:mx-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full border text-xs sm:text-sm font-medium tracking-normal shadow-2xs transition-all duration-300 hover:scale-105 hover:shadow-xs active:scale-95 cursor-pointer whitespace-nowrap ${item.colorClass}`}
             >
               <span>{item.text}</span>
             </button>
@@ -224,8 +203,8 @@ export function ConversationStarters() {
       </div>
 
       {/* Subtle Hint */}
-      <div className="mt-12 sm:mt-14 text-center px-4">
-        <p className="inline-flex items-center gap-2 text-xs sm:text-sm font-mono text-[#171514]/50 tracking-wider">
+      <div className="mt-8 sm:mt-10 text-center px-4">
+        <p className="inline-flex items-center gap-2 text-xs font-mono text-[#171514]/50 tracking-wider">
           <span className="size-1.5 rounded-full bg-[#5F7045] animate-ping" />
           Click any card to open the table prompt
         </p>

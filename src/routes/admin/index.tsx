@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -76,6 +76,18 @@ export const Route = createFileRoute("/admin/")({
 
 function AdminConsolePage() {
   const { user, profile, isAdmin, loading } = useAuth();
+  const navigate = useNavigate();
+
+  // Security Gate: Direct access without admin credentials immediately redirects to /login
+  useEffect(() => {
+    if (!loading && (!user || !isAdmin)) {
+      navigate({
+        to: "/login",
+        search: { redirect: "/admin" } as any,
+      });
+    }
+  }, [user, isAdmin, loading, navigate]);
+
   const [activeTab, setActiveTab] = useState<"users" | "events" | "overview" | "incidents" | "verifications">("users");
 
   // Events & Seating State
@@ -247,54 +259,18 @@ function AdminConsolePage() {
     toast.success(`Verification status updated to ${status}.`);
   };
 
-  if (loading) {
+  if (loading || !user || !isAdmin) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-ivory text-foreground">
-        <div className="size-8 animate-spin rounded-full border-2 border-burgundy border-t-transparent" />
-        <p className="font-display mt-4 text-xl">Verifying executive clearance...</p>
-      </div>
-    );
-  }
-
-  if (!user || !isAdmin) {
-    return (
-      <div className="flex min-h-screen flex-col bg-ivory text-foreground">
-        <Navbar />
-        <main className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center px-6 py-28 text-center">
-          <div className="rounded-3xl border border-burgundy/20 bg-card p-8 shadow-sm">
-            <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-burgundy/10 text-burgundy ring-8 ring-burgundy/5">
-              <ShieldAlert className="size-7" />
-            </div>
-            <span className="label-mono mt-4 block text-xs text-burgundy">Security Protocol</span>
-            <h1 className="font-display mt-2 text-2xl md:text-3xl">Executive Clearance Required</h1>
-            <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-              This operational console is strictly restricted to verified Precious Meets administrators.
-              Access is exclusively granted to <span className="font-mono text-foreground font-semibold">admin@preciousmeets.com</span>.
-            </p>
-            {user && (
-              <p className="mt-2 rounded-lg bg-burgundy/5 p-2 text-[11px] text-muted-foreground">
-                Currently authenticated as <strong className="text-foreground">{user.email}</strong> (Non-admin account).
-              </p>
-            )}
-            <div className="mt-6 flex flex-col gap-2">
-              <Link
-                to="/login"
-                search={{ redirect: "/admin" } as any}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-burgundy py-3 text-xs font-semibold uppercase tracking-wider text-ivory hover:bg-burgundy/90 transition-transform active:scale-98"
-              >
-                Sign in with Admin Credentials
-                <ArrowRight className="size-3.5" />
-              </Link>
-              <Link
-                to="/"
-                className="inline-flex w-full items-center justify-center rounded-full border border-border bg-card py-2.5 text-xs font-semibold text-muted-foreground hover:bg-sage/40 hover:text-foreground"
-              >
-                Return to Experiences
-              </Link>
-            </div>
-          </div>
-        </main>
-        <Footer />
+      <div className="flex min-h-screen flex-col items-center justify-center bg-ivory text-foreground px-4 text-center">
+        <div className="flex flex-col items-center space-y-4 max-w-sm p-8 rounded-3xl border border-border/70 bg-card/90 shadow-lg backdrop-blur">
+          <div className="h-10 w-10 animate-spin rounded-full border-3 border-burgundy border-t-transparent" />
+          <h2 className="font-serif text-xl font-medium tracking-tight text-foreground">
+            Verifying Clearance...
+          </h2>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Direct access to the executive console requires administrator credentials. Redirecting to login...
+          </p>
+        </div>
       </div>
     );
   }
@@ -471,11 +447,23 @@ function AdminConsolePage() {
 
                         {/* Seating Progress Pill */}
                         <div className="mt-3 flex items-center justify-between border-t border-border/50 pt-2 text-xs">
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex flex-wrap items-center gap-1.5">
                             <span className={`flex size-2 rounded-full ${seatedCount === 6 ? "bg-forest" : "bg-burgundy"}`} />
                             <span className="font-medium text-foreground text-[11px]">
                               {seatedCount} / 6 Seated
                             </span>
+                            {(() => {
+                              const acceptances = evt.seatAcceptances || {};
+                              const accepted = evt.seats.filter((id) => id && acceptances[id]?.status === "accepted").length;
+                              if (accepted > 0) {
+                                return (
+                                  <span className="text-[9px] text-emerald-800 bg-emerald-100 dark:bg-emerald-950 dark:text-emerald-300 font-bold font-mono px-1.5 py-0.2 rounded-full border border-emerald-300/80 flex items-center gap-0.5">
+                                    <CheckCircle2 className="size-2.5 text-emerald-600" /> {accepted} Booked
+                                  </span>
+                                );
+                              }
+                              return null;
+                            })()}
                             {seatedCount === 6 && (
                               <span className="text-[9px] text-forest font-bold font-mono bg-forest/10 px-1.5 py-0.2 rounded-full">
                                 Full
