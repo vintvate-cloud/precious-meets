@@ -6,7 +6,7 @@ interface SummitAttendeesProps {
 
 const PAL = ["#ff9933", "#ffd166", "#2ec4b6", "#ff5d8f", "#7c9cff", "#4cc46a"];
 const WORDS = ["Namaste", "Hi!", "Chai?", "Hello", "Kya haal?", "Welcome"];
-const LOOP = 20; // 20-second perfectly seamless cycle with zero cut points
+const LOOP = 29; // 29-second extended, perfectly smooth sequential cycle
 
 interface Person {
   i: number;
@@ -19,6 +19,9 @@ interface Person {
   ph: number;
   ang: number;
   rad: number;
+  v: number; // verification factor 0 -> 1
+  pop: number; // timestamp when verification card popped
+  popT: number; // scheduled loop time T when this person verifies
 }
 
 interface GreetingBubble {
@@ -44,11 +47,13 @@ function seeded(s: number) {
 
 /**
  * SUMMIT ATTENDEES ANIMATION
- * Grounded Promenade Walkway Animation:
- * - Strictly constrained to the bottom promenade walkway area (no floating in the sky/monuments)
- * - Proportional minimal black SVGs (never squashed or distorted)
- * - Roaming within a natural radius on the promenade
- * - Seamless loop: random wander -> speech bubbles -> 6-6 grouping -> dispersing
+ * Exact Sequential Storyline:
+ * 1. (0s - 7s): Normal Random Wandering — strangers freely strolling on promenade
+ * 2. (7s - 11.5s): Random Verification Checks — ID card with green checkmark pops on random people
+ * 3. (10.5s - 15s): Verified People Connect — connecting lines link verified people together
+ * 4. (14s - 20.5s): Grouping — they assemble into 6-6 table clusters
+ * 5. (18.5s - 24.5s): Hi / Hello Text — speech bubbles appear only once grouped at their tables
+ * 6. (24s - 29s): Disperse & Seamless Loop — groups disperse and return to normal wandering with 0 cuts
  */
 export function SummitAttendees({ isNight = true }: SummitAttendeesProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -73,11 +78,27 @@ export function SummitAttendees({ isNight = true }: SummitAttendeesProps) {
     let fx: GreetingBubble[] = [];
     let lastSpawn = 0;
     let lastTime = 0;
+    let lastCycleId = -1;
     const t0 = performance.now();
 
     // 4 cluster locations flanking the central promenade walkway
     const CF_DESKTOP = [0.16, 0.36, 0.64, 0.84];
     const CF_MOBILE = [0.26, 0.74];
+
+    function scheduleRandomVerifications(cycleId: number) {
+      const r = seeded(cycleId * 1337 + 7);
+      for (const p of P) {
+        // ~50% random members get verified in this cycle
+        if (r() < 0.5) {
+          // Stagger verification pop times across Step 2 (T = 7.0s to 11.2s)
+          p.popT = 7.0 + r() * 4.2;
+        } else {
+          p.popT = -1;
+        }
+        p.pop = -1;
+        p.v = 0;
+      }
+    }
 
     function layout() {
       const isMobile = W < 640;
@@ -103,7 +124,6 @@ export function SummitAttendees({ isNight = true }: SummitAttendeesProps) {
           const groupCenterX = W * CF[g];
           for (let m = 0; m < personsPerGroup; m++) {
             const idx = g * personsPerGroup + m;
-            // Spawn each person within their roaming radius on the promenade walkway
             const spawnX = Math.max(25, Math.min(W - 25, groupCenterX + (r() - 0.5) * (W * 0.18)));
             const spawnY = walkMinY + r() * (walkMaxY - walkMinY);
 
@@ -118,9 +138,13 @@ export function SummitAttendees({ isNight = true }: SummitAttendeesProps) {
               ph: r() * 9,
               ang: (m / personsPerGroup) * Math.PI * 2 + (r() - 0.5) * 0.5,
               rad: 0.35 + r() * 0.65,
+              v: 0,
+              pop: -1,
+              popT: -1,
             });
           }
         }
+        scheduleRandomVerifications(0);
       }
     }
 
@@ -140,8 +164,7 @@ export function SummitAttendees({ isNight = true }: SummitAttendeesProps) {
 
     /**
      * DRAW PERSON
-     * Minimal Black (#000000) matching PromenadeHumanFigure specification
-     * Perfectly proportional circular head and semicircular dome bust (never squashed)
+     * Minimal Black (day) / Pure White (night) matching PromenadeHumanFigure
      */
     function drawPerson(x: number, y: number, r: number) {
       if (!ctx) return;
@@ -159,6 +182,102 @@ export function SummitAttendees({ isNight = true }: SummitAttendeesProps) {
       ctx.fill();
     }
 
+    /**
+     * DRAW VERIFICATION CARD
+     * Exact match to user screenshot:
+     * - Off-white card body with soft shadow
+     * - Top accent color bar
+     * - Green circular badge with crisp white checkmark
+     * - Placeholder text lines
+     */
+    function drawVerificationCard(p: Person, now: number) {
+      if (!ctx || p.pop <= 0) return;
+      const duration = 2200; // visible for 2.2s
+      const elapsed = now - p.pop;
+      if (elapsed < 0 || elapsed > duration) return;
+
+      const t = elapsed / duration;
+      // Fast fade-in, steady hold, then smooth fade-out
+      const alpha = t < 0.12 ? t / 0.12 : t > 0.7 ? (1 - t) / 0.3 : 1;
+      const s = sc;
+      const x = p.x;
+      // Gently floats upwards from head
+      const y = p.y - (26 + t * 14) * s;
+
+      ctx.save();
+      ctx.globalAlpha = alpha;
+
+      // Card shadow
+      ctx.shadowColor = "rgba(0, 0, 0, 0.28)";
+      ctx.shadowBlur = 6 * s;
+      ctx.shadowOffsetY = 2 * s;
+
+      // 1. Card Body
+      const w = 34 * s;
+      const h = 22 * s;
+      const cr = 3.5 * s;
+      ctx.fillStyle = "#fffaf0";
+      ctx.beginPath();
+      if ("roundRect" in ctx) {
+        ctx.roundRect(x - w / 2, y - h / 2, w, h, cr);
+      } else {
+        ctx.rect(x - w / 2, y - h / 2, w, h);
+      }
+      ctx.fill();
+
+      // Reset shadow for card elements
+      ctx.shadowColor = "transparent";
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetY = 0;
+
+      // 2. Top Color Banner
+      ctx.fillStyle = p.c;
+      ctx.beginPath();
+      if ("roundRect" in ctx) {
+        ctx.roundRect(x - w / 2, y - h / 2, w, 4.5 * s, [cr, cr, 0, 0]);
+      } else {
+        ctx.fillRect(x - w / 2, y - h / 2, w, 4.5 * s);
+      }
+      ctx.fill();
+
+      // 3. Green Circular Verification Badge
+      const badgeX = x - 8.5 * s;
+      const badgeY = y + 2 * s;
+      const badgeR = 4.8 * s;
+      ctx.beginPath();
+      ctx.arc(badgeX, badgeY, badgeR, 0, Math.PI * 2);
+      ctx.fillStyle = "#12a150";
+      ctx.fill();
+
+      // 4. White Checkmark Icon
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 1.4 * s;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.beginPath();
+      ctx.moveTo(badgeX - 2.4 * s, badgeY + 0.1 * s);
+      ctx.lineTo(badgeX - 0.7 * s, badgeY + 1.9 * s);
+      ctx.lineTo(badgeX + 2.4 * s, badgeY - 1.8 * s);
+      ctx.stroke();
+
+      // 5. Placeholder Text Lines
+      ctx.fillStyle = "#b9b0c4";
+      const lineX = x - 0.5 * s;
+      if ("roundRect" in ctx) {
+        ctx.beginPath();
+        ctx.roundRect(lineX, y - 1.5 * s, 13 * s, 2 * s, 1 * s);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.roundRect(lineX, y + 3 * s, 9 * s, 2 * s, 1 * s);
+        ctx.fill();
+      } else {
+        ctx.fillRect(lineX, y - 1.5 * s, 13 * s, 2 * s);
+        ctx.fillRect(lineX, y + 3 * s, 9 * s, 2 * s);
+      }
+
+      ctx.restore();
+    }
+
     function frame(now: number) {
       if (!ctx || !canvas) return;
       const dt = Math.min(0.05, (now - lastTime || 16) / 1000);
@@ -169,21 +288,29 @@ export function SummitAttendees({ isNight = true }: SummitAttendeesProps) {
       const walkMinY = H * 0.64;
       const walkMaxY = H * 0.90;
 
-      // Continuous loop time
-      const T = (((now - t0) / 1000) * 1.0) % LOOP;
+      // Continuous loop time & cycle detection
+      const totalSec = (now - t0) / 1000;
+      const cycleId = Math.floor(totalSec / LOOP);
+      const T = totalSec % LOOP;
+
+      // New cycle: schedule fresh random members for verification
+      if (cycleId !== lastCycleId) {
+        lastCycleId = cycleId;
+        scheduleRandomVerifications(cycleId);
+      }
 
       // Grouping Weight (wc):
-      // T = 0 to 5.5s: 0 (random wandering on the promenade)
-      // T = 5.5 to 9.5s: ramp up to 1 (pulling into 6-person groups)
-      // T = 9.5 to 13.5s: hold at 1 (connected 6-person clusters)
-      // T = 13.5 to 17.5s: ramp down to 0 (smoothly dispersing back to wander)
-      // T = 17.5 to 20s: 0 (wandering freely, seamless loop)
-      const wc = sm(5.5, 9.5, T) * (1 - sm(13.5, 17.5, T));
+      // T = 0 to 14.0s: 0 (Step 1 wandering, Step 2 verifications, Step 3 connections begin)
+      // T = 14.0 to 18.0s: ramp up to 1 (Step 4: members pull into 6-person groups)
+      // T = 18.0 to 23.5s: hold at 1 (Step 5: assembled groups talking with speech bubbles)
+      // T = 23.5 to 27.0s: ramp down to 0 (Step 6: smoothly dispersing back to wander)
+      // T = 27.0 to 29.0s: 0 (freely wandering strangers, seamless return to 0s)
+      const wc = sm(14.0, 18.0, T) * (1 - sm(23.5, 27.0, T));
       const ww = Math.max(0.25, 1 - wc * 0.75);
 
       const pull = 1 - Math.exp(-dt * 2.2);
 
-      // Physics update: smooth grounded motion within promenade band
+      // Physics and Verification updates
       for (const p of P) {
         const a =
           Math.sin(p.x * 0.004 + now * 0.0003 + p.ph) +
@@ -223,37 +350,60 @@ export function SummitAttendees({ isNight = true }: SummitAttendeesProps) {
         // Pull towards 6-person group
         p.x += (cx - p.x) * pull * wc;
         p.y += (cy - p.y) * pull * wc;
+
+        // Verification Triggering: only scheduled random people pop their check card (Step 2)
+        if (p.popT > 0 && T >= p.popT && p.pop < 0) {
+          p.pop = now;
+        }
+
+        // Verification progress: ramps up once popped, fades out when groups disperse (Step 6)
+        if (p.pop > 0 && T < 23.5) {
+          p.v = Math.min(1, p.v + dt * 2.2);
+        } else if (T >= 23.5) {
+          p.v = Math.max(0, p.v - dt * 1.5);
+        }
       }
 
       // Clear canvas (transparent to let Delhi skyline show through)
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
       ctx.clearRect(0, 0, W, H);
 
-      // Constellation Network Connections
-      const D = 110 * sc;
-      ctx.lineWidth = 1.3;
-      for (let i = 0; i < P.length; i++) {
-        const p = P[i];
-        for (let j = i + 1; j < P.length; j++) {
-          const q = P[j];
-          const d = Math.hypot(p.x - q.x, p.y - q.y);
-          if (d < D) {
-            // Enhanced alpha when clustering in 6s
-            const baseAlpha = (1 - d / D) * 0.7;
-            const groupBonus = p.cl === q.cl ? (0.45 + wc * 0.45) : (0.2 + wc * 0.15);
-            ctx.strokeStyle = p.c;
-            ctx.globalAlpha = Math.min(0.85, baseAlpha * groupBonus);
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y - 6 * sc);
-            ctx.lineTo(q.x, q.y - 6 * sc);
-            ctx.stroke();
+      // Constellation Network Connections:
+      // Active ONLY AFTER people get verified check (Step 3: starts at T = 10.5s)
+      const linePhase = sm(10.5, 13.5, T) * (1 - sm(24.0, 26.5, T));
+      const D = 120 * sc;
+      ctx.lineWidth = 1.35;
+
+      if (linePhase > 0.02) {
+        for (let i = 0; i < P.length; i++) {
+          const p = P[i];
+          if (p.v < 0.15) continue; // Only verified connect
+
+          for (let j = i + 1; j < P.length; j++) {
+            const q = P[j];
+            if (q.v < 0.15) continue; // Only verified connect
+
+            const d = Math.hypot(p.x - q.x, p.y - q.y);
+            if (d < D) {
+              const baseAlpha = (1 - d / D) * 0.75;
+              // Enhanced alpha as verified members assemble in their 6-person group
+              const groupBonus = p.cl === q.cl ? (0.5 + wc * 0.5) : 0.35;
+              const verifiedFactor = Math.min(p.v, q.v);
+
+              ctx.strokeStyle = p.c;
+              ctx.globalAlpha = Math.min(0.85, baseAlpha * groupBonus * verifiedFactor * linePhase);
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y - 6 * sc);
+              ctx.lineTo(q.x, q.y - 6 * sc);
+              ctx.stroke();
+            }
           }
         }
       }
 
       ctx.globalAlpha = 1;
 
-      // Render People (slightly increased size for optimal visibility on promenade)
+      // Render People
       const r = 6.6 * sc;
       const sortedP = [...P].sort((a, b) => a.y - b.y);
 
@@ -263,25 +413,33 @@ export function SummitAttendees({ isNight = true }: SummitAttendeesProps) {
         // Soft ground contact shadow under each figure on the promenade walkway
         ctx.beginPath();
         ctx.ellipse(p.x, p.y + bob + r * 1.6, r * 1.25, r * 0.38, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(0, 0, 0, 0.22)";
+        ctx.fillStyle = isNight ? "rgba(0, 0, 0, 0.45)" : "rgba(0, 0, 0, 0.22)";
         ctx.fill();
 
-        // The SVG figure itself ALWAYS stays in minimal black (#000000), perfectly proportional without any outer circle
+        // The SVG figure itself: pure minimal black (day) / white (night)
         drawPerson(p.x, p.y + bob, r);
+
+        // Render Floating Verification Card Badge over verified members (Step 2)
+        if (p.pop > 0) {
+          drawVerificationCard(p, now);
+        }
       }
 
-      // Greetings speech bubbles appearing over people on the promenade
-      if (now - lastSpawn > 900) {
-        lastSpawn = now;
-        const availableP = P[Math.floor(Math.random() * P.length)];
-        if (availableP) {
-          fx.push({
-            x: availableP.x,
-            y: availableP.y - 22 * sc,
-            t: now,
-            w: WORDS[Math.floor(Math.random() * WORDS.length)],
-            personIndex: availableP.i,
-          });
+      // STEP 5: Hi / Hello Speech Bubbles APPEAR ONLY AFTER GROUPING (T = 18.0s to 24.5s)
+      if (T >= 18.0 && T < 24.5) {
+        if (now - lastSpawn > 800) {
+          lastSpawn = now;
+          // Spawn over members assembled in their groups
+          const availableP = P[Math.floor(Math.random() * P.length)];
+          if (availableP) {
+            fx.push({
+              x: availableP.x,
+              y: availableP.y - 22 * sc,
+              t: now,
+              w: WORDS[Math.floor(Math.random() * WORDS.length)],
+              personIndex: availableP.i,
+            });
+          }
         }
       }
 
