@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 
 interface SummitAttendeesProps {
   isNight?: boolean;
+  onStageChange?: (stage: 0 | 1 | 2) => void;
 }
 
 const PAL = ["#ff9933", "#ffd166", "#2ec4b6", "#ff5d8f", "#7c9cff", "#4cc46a"];
@@ -55,7 +56,7 @@ function seeded(s: number) {
  * 5. (18.5s - 24.5s): Hi / Hello Text — speech bubbles appear only once grouped at their tables
  * 6. (24s - 29s): Disperse & Seamless Loop — groups disperse and return to normal wandering with 0 cuts
  */
-export function SummitAttendees({ isNight = true }: SummitAttendeesProps) {
+export function SummitAttendees({ isNight = true, onStageChange }: SummitAttendeesProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -79,6 +80,7 @@ export function SummitAttendees({ isNight = true }: SummitAttendeesProps) {
     let lastSpawn = 0;
     let lastTime = 0;
     let lastCycleId = -1;
+    let lastStage: 0 | 1 | 2 = -1;
     const t0 = performance.now();
 
     // 4 cluster locations flanking the central promenade walkway
@@ -297,6 +299,24 @@ export function SummitAttendees({ isNight = true }: SummitAttendeesProps) {
       if (cycleId !== lastCycleId) {
         lastCycleId = cycleId;
         scheduleRandomVerifications(cycleId);
+      }
+      // Headline Stage Tracking:
+      // Stage 0: (0s - 7.2s) Wandering -> "Six strangers. One table."
+      // Stage 1: (7.2s - 14.0s) Verifying -> "Everyone is verified here."
+      // Stage 2: (14.0s - 27.5s) Grouping & Talking -> "Six strangers. One table."
+      // Stage 0: (27.5s - 29.0s) Quiet reset to Stage 0
+      let currentStage: 0 | 1 | 2 = 0;
+      if (T >= 7.2 && T < 14.0) {
+        currentStage = 1;
+      } else if (T >= 14.0 && T < 27.5) {
+        currentStage = 2;
+      } else {
+        currentStage = 0;
+      }
+
+      if (currentStage !== lastStage) {
+        lastStage = currentStage;
+        onStageChange?.(currentStage);
       }
 
       // Grouping Weight (wc):
