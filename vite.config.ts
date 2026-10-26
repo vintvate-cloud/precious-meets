@@ -45,7 +45,7 @@ export default defineConfig({
                   env.VITE_RESEND_FROM_EMAIL ||
                   process.env.RESEND_FROM_EMAIL ||
                   process.env.VITE_RESEND_FROM_EMAIL ||
-                  "Precious Meets <invitations@cikka.club>";
+                  "Precious Meets <invitations@preciousmeets.com>";
 
                 const response = await fetch("https://api.resend.com/emails", {
                   method: "POST",

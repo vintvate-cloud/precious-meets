@@ -28,7 +28,7 @@ import { toast } from "sonner";
 export function UsersArchiveSection() {
   const [applications, setApplications] = useState<MemberApplication[]>([]);
   const [filter, setFilter] = useState<
-    "all" | "pending_review" | "approved" | "rejected"
+    "all" | "pending_review" | "reuploaded" | "approved" | "rejected"
   >("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedApplication, setSelectedApplication] =
@@ -82,10 +82,17 @@ export function UsersArchiveSection() {
   const rejectedCount = applications.filter(
     (a) => a.status === "rejected",
   ).length;
+  const reuploadedCount = applications.filter(
+    (a) => a.identityStatus === "reuploaded",
+  ).length;
 
   // Filtered List
   const filteredApplications = applications.filter((app) => {
-    if (filter !== "all" && app.status !== filter) return false;
+    if (filter === "reuploaded") {
+      if (app.identityStatus !== "reuploaded") return false;
+    } else if (filter !== "all" && app.status !== filter) {
+      return false;
+    }
     if (!searchQuery.trim()) return true;
 
     const query = searchQuery.toLowerCase();
@@ -164,6 +171,39 @@ export function UsersArchiveSection() {
         </div>
       </div>
 
+      {/* Aadhaar Re-upload Alert Banner */}
+      {reuploadedCount > 0 && (
+        <div className="rounded-2xl bg-blue-500/10 border border-blue-500/30 p-4 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-3">
+            <span className="relative flex size-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+              <span className="relative inline-flex rounded-full size-3 bg-blue-600" />
+            </span>
+            <div>
+              <div className="font-semibold text-blue-900 flex items-center gap-2">
+                <span>{reuploadedCount} Member{reuploadedCount > 1 ? "s" : ""} Re-uploaded Aadhaar</span>
+                <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-[10px] font-mono text-blue-800 uppercase font-bold">
+                  Awaiting Review
+                </span>
+              </div>
+              <p className="text-[11px] text-blue-900/80 mt-0.5">
+                Revised identity documents have been submitted and are ready for administrative verification.
+              </p>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            onClick={() => {
+              const nextApp = applications.find((a) => a.identityStatus === "reuploaded");
+              if (nextApp) handleOpenDossier(nextApp);
+            }}
+            className="rounded-full bg-blue-700 hover:bg-blue-800 text-ivory text-xs font-semibold px-4 h-8.5 cursor-pointer shrink-0"
+          >
+            Review Re-uploaded Dossier
+          </Button>
+        </div>
+      )}
+
       {/* ========================================================================= */}
       {/* 2. TOOLBAR: SEARCH & STATUS FILTER CHIPS                                   */}
       {/* ========================================================================= */}
@@ -177,6 +217,15 @@ export function UsersArchiveSection() {
               label: "Awaiting Action",
               count: pendingCount,
             },
+            ...(reuploadedCount > 0
+              ? [
+                  {
+                    id: "reuploaded",
+                    label: "Re-uploaded",
+                    count: reuploadedCount,
+                  },
+                ]
+              : []),
             {
               id: "approved",
               label: "Verified Members",
@@ -189,7 +238,11 @@ export function UsersArchiveSection() {
               onClick={() => setFilter(tab.id as any)}
               className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all duration-200 cursor-pointer ${
                 filter === tab.id
-                  ? "bg-foreground text-background shadow-xs ring-1 ring-foreground/20"
+                  ? tab.id === "reuploaded"
+                    ? "bg-blue-700 text-ivory shadow-xs ring-1 ring-blue-700/20"
+                    : "bg-foreground text-background shadow-xs ring-1 ring-foreground/20"
+                  : tab.id === "reuploaded"
+                  ? "border border-blue-500/30 bg-blue-50/50 text-blue-700 hover:bg-blue-100/60"
                   : "border border-border/80 bg-card text-muted-foreground hover:bg-sage/40 hover:text-foreground"
               }`}
             >
@@ -198,6 +251,8 @@ export function UsersArchiveSection() {
                 className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono ${
                   filter === tab.id
                     ? "bg-background text-foreground"
+                    : tab.id === "reuploaded"
+                    ? "bg-blue-200 text-blue-900"
                     : "bg-muted text-muted-foreground"
                 }`}
               >
@@ -333,11 +388,23 @@ export function UsersArchiveSection() {
                       className={`flex items-center justify-center gap-1 rounded-lg py-1 font-medium ${
                         app.identityStatus === "verified"
                           ? "bg-forest/10 text-forest"
-                          : "bg-amber-500/10 text-amber-700"
+                          : app.identityStatus === "reuploaded"
+                          ? "bg-blue-500/15 text-blue-700 font-bold animate-pulse"
+                          : app.identityStatus === "reupload_requested"
+                          ? "bg-amber-500/10 text-amber-700"
+                          : "bg-muted text-muted-foreground"
                       }`}
                     >
                       <ShieldCheck className="size-2.5" />
-                      <span>{app.identityStatus === "verified" ? "Aadhaar" : "Pending"}</span>
+                      <span>
+                        {app.identityStatus === "verified"
+                          ? "Aadhaar ✓"
+                          : app.identityStatus === "reuploaded"
+                          ? "Re-uploaded"
+                          : app.identityStatus === "reupload_requested"
+                          ? "Re-up Req"
+                          : "Pending"}
+                      </span>
                     </div>
                     <div
                       className={`flex items-center justify-center gap-1 rounded-lg py-1 font-medium ${

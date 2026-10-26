@@ -33,6 +33,10 @@ import {
   KeyRound,
   Copy,
   Trash2,
+  Check,
+  RefreshCw,
+  FileUp,
+  RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -61,7 +65,77 @@ export function UserDossierModal({
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [sendingCredentials, setSendingCredentials] = useState(false);
   const [credentialsModalOpen, setCredentialsModalOpen] = useState(false);
+  const [reassignModalOpen, setReassignModalOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  // Aadhaar Verification Action States
+  const [processingAadhaar, setProcessingAadhaar] = useState(false);
+  const [aadhaarDecisionModalOpen, setAadhaarDecisionModalOpen] = useState(false);
+  const [aadhaarDecisionTab, setAadhaarDecisionTab] = useState<"reupload" | "reject">("reupload");
+  const [reuploadSubject, setReuploadSubject] = useState(
+    "Action Required: Please Re-verify Your Aadhaar Document | Precious Meets"
+  );
+  const [reuploadFeedback, setReuploadFeedback] = useState(
+    "The uploaded Aadhaar document was unclear or details could not be matched. Please upload a clear photo or DigiLocker e-Aadhaar PDF."
+  );
+  const [refundReason, setRefundReason] = useState(
+    "Aadhaar document verification was declined. A 100% refund of ₹1,999 has been initiated to your original payment method."
+  );
+
+  const handleApproveAadhaar = async () => {
+    setProcessingAadhaar(true);
+    try {
+      const res = await ApplicationsService.approveAadhaar(application.id);
+      toast.success("Aadhaar verified successfully!", {
+        description: "Member identity confirmed. You may now dispatch login credentials.",
+      });
+      onApplicationUpdated(res.application);
+    } catch (e: any) {
+      toast.error(e.message || "Failed to approve Aadhaar.");
+    } finally {
+      setProcessingAadhaar(false);
+    }
+  };
+
+  const handleSendAadhaarReuploadRequest = async () => {
+    setProcessingAadhaar(true);
+    try {
+      const res = await ApplicationsService.requestAadhaarReupload(
+        application.id,
+        reuploadSubject,
+        reuploadFeedback,
+      );
+      toast.success(`Re-verification request dispatched to ${application.applicantEmail}!`, {
+        description: "Email contains a one-click button directing user to the re-upload portal.",
+      });
+      onApplicationUpdated(res.application);
+      setAadhaarDecisionModalOpen(false);
+    } catch (e: any) {
+      toast.error(e.message || "Failed to dispatch re-verification email.");
+    } finally {
+      setProcessingAadhaar(false);
+    }
+  };
+
+  const handleRejectWithRefund = async () => {
+    setProcessingAadhaar(true);
+    try {
+      const res = await ApplicationsService.rejectWithRefund(
+        application.id,
+        refundReason,
+      );
+      toast.info(`Application ${application.applicationReference} declined with refund guarantee.`, {
+        description: `Notice email dispatched. ₹1,999 refund registered to process under 7 days.`,
+      });
+      onApplicationUpdated(res.application);
+      setAadhaarDecisionModalOpen(false);
+      onOpenChange(false);
+    } catch (e: any) {
+      toast.error(e.message || "Failed to decline and process refund.");
+    } finally {
+      setProcessingAadhaar(false);
+    }
+  };
 
   const handleSendCredentials = async () => {
     setSendingCredentials(true);
@@ -77,6 +151,25 @@ export function UserDossierModal({
       setCredentialsModalOpen(false);
     } catch (e: any) {
       toast.error(e.message || "Failed to dispatch credentials.");
+    } finally {
+      setSendingCredentials(false);
+    }
+  };
+
+  const handleReassignCredentials = async () => {
+    setSendingCredentials(true);
+    try {
+      const res = await ApplicationsService.reassignMemberCredentials(application.id);
+      toast.success(
+        `New credentials reassigned and emailed to ${application.applicantEmail}!`,
+        {
+          description: `Previous credentials invalidated. A brand new 16-character password has been generated and dispatched.`,
+        },
+      );
+      onApplicationUpdated(res.application);
+      setReassignModalOpen(false);
+    } catch (e: any) {
+      toast.error(e.message || "Failed to reassign credentials.");
     } finally {
       setSendingCredentials(false);
     }
@@ -561,7 +654,7 @@ export function UserDossierModal({
 
                   <div className="rounded-xl bg-ivory p-3 border border-border">
                     <span className="font-mono text-[10px] uppercase text-muted-foreground">
-                      Member Pass Reference
+                      Application Reference
                     </span>
                     <div className="font-mono text-xs font-bold text-foreground mt-1">
                       {application.applicationReference}
@@ -597,12 +690,65 @@ export function UserDossierModal({
                     className={`rounded-full px-3 py-1 font-mono text-xs font-bold uppercase tracking-wider ${
                       application.identityStatus === "verified"
                         ? "bg-forest/15 text-forest border border-forest/30"
+                        : application.identityStatus === "reuploaded"
+                        ? "bg-blue-500/15 text-blue-700 border border-blue-500/30 animate-pulse"
+                        : application.identityStatus === "reupload_requested"
+                        ? "bg-amber-500/15 text-amber-700 border border-amber-500/30"
+                        : application.identityStatus === "rejected"
+                        ? "bg-destructive/15 text-destructive border border-destructive/30"
                         : "bg-amber-500/15 text-amber-700 border border-amber-500/30"
                     }`}
                   >
-                    {application.identityStatus}
+                    {application.identityStatus === "verified"
+                      ? "✓ Verified"
+                      : application.identityStatus === "reuploaded"
+                      ? "★ Re-uploaded (Pending Review)"
+                      : application.identityStatus === "reupload_requested"
+                      ? "⚠ Re-upload Requested"
+                      : application.identityStatus === "rejected"
+                      ? "✕ Rejected"
+                      : application.identityStatus}
                   </span>
                 </div>
+
+                {/* Re-uploaded notification banner */}
+                {application.identityStatus === "reuploaded" && (
+                  <div className="rounded-xl bg-blue-500/10 border border-blue-500/30 p-4 text-xs text-blue-900 flex items-start gap-3">
+                    <RefreshCw className="size-5 text-blue-600 shrink-0 mt-0.5 animate-spin" />
+                    <div className="space-y-1">
+                      <div className="font-semibold text-blue-800">
+                        Member Re-uploaded Aadhaar Document
+                      </div>
+                      <p className="text-[11px] text-blue-900/80 leading-relaxed">
+                        The applicant submitted a revised document on{" "}
+                        {application.aadhaarReuploadedAt
+                          ? new Date(application.aadhaarReuploadedAt).toLocaleString()
+                          : "recently"}
+                        . Please inspect the updated document below and approve or reject.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Re-upload requested banner */}
+                {application.identityStatus === "reupload_requested" && (
+                  <div className="rounded-xl bg-amber-500/10 border border-amber-500/30 p-4 text-xs text-amber-900 flex items-start gap-3">
+                    <AlertTriangle className="size-5 text-amber-600 shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <div className="font-semibold text-amber-800">
+                        Re-upload Request Pending Member Action
+                      </div>
+                      <p className="text-[11px] text-amber-900/80 leading-relaxed">
+                        A re-verification email has been dispatched to {application.applicantEmail}.
+                        {application.aadhaarRejectionFeedback && (
+                          <span className="block mt-1 font-mono text-[10px] bg-card/60 p-2 rounded border border-amber-500/20">
+                            Reason: &ldquo;{application.aadhaarRejectionFeedback}&rdquo;
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                   <div className="rounded-xl bg-ivory p-3 border border-border">
@@ -684,6 +830,55 @@ export function UserDossierModal({
                     </div>
                   );
                 })()}
+
+                {/* Aadhaar Verification Decision Action Bar */}
+                <div className="rounded-xl bg-ivory p-4 border border-border flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <div>
+                    <h4 className="font-semibold text-xs text-foreground">
+                      Aadhaar Document Decision
+                    </h4>
+                    <p className="text-[11px] text-muted-foreground">
+                      {application.identityStatus === "verified"
+                        ? "Aadhaar verified. You may now dispatch login credentials to this member."
+                        : "Verify the uploaded Aadhaar document before credentials can be issued."}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setAadhaarDecisionTab("reupload");
+                        setAadhaarDecisionModalOpen(true);
+                      }}
+                      disabled={processingAadhaar}
+                      className="rounded-full border-amber-600/40 text-amber-700 hover:bg-amber-50 text-xs font-semibold px-3.5 h-8.5 cursor-pointer"
+                    >
+                      <AlertTriangle className="size-3.5 mr-1 text-amber-600" />
+                      Reject / Re-verify
+                    </Button>
+
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={handleApproveAadhaar}
+                      disabled={processingAadhaar || application.identityStatus === "verified"}
+                      className={`rounded-full text-xs font-semibold px-4 h-8.5 shadow-xs ${
+                        application.identityStatus === "verified"
+                          ? "bg-forest/15 text-forest border border-forest/30 cursor-default"
+                          : "bg-forest hover:bg-forest/90 text-ivory cursor-pointer"
+                      }`}
+                    >
+                      {processingAadhaar ? (
+                        <Loader2 className="size-3.5 animate-spin mr-1" />
+                      ) : (
+                        <Check className="size-3.5 mr-1" />
+                      )}
+                      {application.identityStatus === "verified" ? "Aadhaar Verified ✓" : "Approve Aadhaar"}
+                    </Button>
+                  </div>
+                </div>
 
                 <div className="rounded-xl bg-forest/5 p-4 border border-forest/20 text-xs text-muted-foreground space-y-1">
                   <div className="flex items-center gap-1.5 font-semibold text-forest">
@@ -768,18 +963,44 @@ export function UserDossierModal({
                   )}
                 </div>
 
-                {/* Only allow dispatch if NOT yet sent; once sent, duplicate sending is prevented */}
-                {!application.credentialsSent && (
+                {/* If credentials already sent, allow admin to Reassign new credentials. Otherwise allow initial send. Gated on Aadhaar verification. */}
+                {application.credentialsSent ? (
                   <Button
                     size="sm"
                     onClick={() => {
-                      if (isApproved) {
+                      if (isApproved && application.identityStatus === "verified") {
+                        setReassignModalOpen(true);
+                      }
+                    }}
+                    disabled={
+                      sendingCredentials ||
+                      !isApproved ||
+                      application.identityStatus !== "verified"
+                    }
+                    className={`w-full rounded-xl text-xs font-semibold py-2.5 shadow-xs flex items-center justify-center gap-2 ${
+                      !isApproved || application.identityStatus !== "verified"
+                        ? "bg-muted text-muted-foreground cursor-not-allowed opacity-60"
+                        : "bg-burgundy hover:bg-burgundy/90 text-ivory cursor-pointer"
+                    }`}
+                  >
+                    <RotateCcw className="size-3.5" />
+                    <span>Reassign & Dispatch New Credentials</span>
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      if (isApproved && application.identityStatus === "verified") {
                         setCredentialsModalOpen(true);
                       }
                     }}
-                    disabled={sendingCredentials || !isApproved}
+                    disabled={
+                      sendingCredentials ||
+                      !isApproved ||
+                      application.identityStatus !== "verified"
+                    }
                     className={`w-full rounded-xl text-xs font-semibold py-2.5 shadow-xs flex items-center justify-center gap-2 ${
-                      !isApproved
+                      !isApproved || application.identityStatus !== "verified"
                         ? "bg-muted text-muted-foreground cursor-not-allowed opacity-60"
                         : "bg-purple-700 hover:bg-purple-800 text-ivory cursor-pointer"
                     }`}
@@ -788,6 +1009,8 @@ export function UserDossierModal({
                     <span>
                       {!isApproved
                         ? "Approve application first to send credentials"
+                        : application.identityStatus !== "verified"
+                        ? "Verify Aadhaar first to enable credentials dispatch"
                         : "Send Login Credentials"}
                     </span>
                   </Button>
@@ -820,41 +1043,78 @@ export function UserDossierModal({
           </div>
 
           <div className="flex flex-wrap items-center justify-end gap-2 w-full md:w-auto">
-            {/* Direct Send Credentials Button:
-                - Not clickable until admin approves application
-                - Clickable once approved
-                - Once sent, permanently disabled so admin cannot send a 2nd time */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                if (isApproved && !application.credentialsSent) {
-                  setCredentialsModalOpen(true);
+            {/* Direct Send / Reassign Credentials Button:
+                - Not clickable until admin approves application AND Aadhaar is verified
+                - If not yet sent: allows initial send
+                - If already sent: allows reassigning brand new credentials */}
+            {application.credentialsSent ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (isApproved && application.identityStatus === "verified") {
+                    setReassignModalOpen(true);
+                  }
+                }}
+                disabled={
+                  sendingCredentials ||
+                  !isApproved ||
+                  application.identityStatus !== "verified"
                 }
-              }}
-              disabled={sendingCredentials || !isApproved || application.credentialsSent}
-              title={
-                !isApproved
-                  ? "Approve application first to enable sending credentials"
-                  : application.credentialsSent
-                  ? "Credentials already dispatched (cannot re-send)"
-                  : "Send Login Credentials"
-              }
-              className={`rounded-full text-xs font-semibold px-3.5 py-1.5 h-9 flex items-center gap-1.5 shrink-0 transition-all ${
-                application.credentialsSent
-                  ? "border-forest/40 bg-forest/5 text-forest cursor-default opacity-85"
-                  : !isApproved
-                  ? "border-border text-muted-foreground/60 bg-muted/20 opacity-50 cursor-not-allowed"
-                  : "border-purple-600/40 text-purple-700 hover:bg-purple-50 cursor-pointer"
-              }`}
-            >
-              <KeyRound className="size-3.5" />
-              <span>
-                {application.credentialsSent
-                  ? "Credentials Sent ✓"
-                  : "Send Login Credentials"}
-              </span>
-            </Button>
+                title={
+                  !isApproved
+                    ? "Approve application first to enable reassigning credentials"
+                    : application.identityStatus !== "verified"
+                    ? "Aadhaar document must be verified before reassigning credentials"
+                    : "Reassign brand new credentials and dispatch email to member"
+                }
+                className={`rounded-full text-xs font-semibold px-3.5 py-1.5 h-9 flex items-center gap-1.5 shrink-0 transition-all ${
+                  !isApproved || application.identityStatus !== "verified"
+                    ? "border-border text-muted-foreground/60 bg-muted/20 opacity-50 cursor-not-allowed"
+                    : "border-burgundy/40 text-burgundy hover:bg-burgundy/10 cursor-pointer"
+                }`}
+              >
+                <RotateCcw className="size-3.5" />
+                <span>Reassign Credentials</span>
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (
+                    isApproved &&
+                    application.identityStatus === "verified"
+                  ) {
+                    setCredentialsModalOpen(true);
+                  }
+                }}
+                disabled={
+                  sendingCredentials ||
+                  !isApproved ||
+                  application.identityStatus !== "verified"
+                }
+                title={
+                  !isApproved
+                    ? "Approve application first to enable sending credentials"
+                    : application.identityStatus !== "verified"
+                    ? "Aadhaar document must be verified before dispatching credentials"
+                    : "Send Login Credentials"
+                }
+                className={`rounded-full text-xs font-semibold px-3.5 py-1.5 h-9 flex items-center gap-1.5 shrink-0 transition-all ${
+                  !isApproved || application.identityStatus !== "verified"
+                    ? "border-border text-muted-foreground/60 bg-muted/20 opacity-50 cursor-not-allowed"
+                    : "border-purple-600/40 text-purple-700 hover:bg-purple-50 cursor-pointer"
+                }`}
+              >
+                <KeyRound className="size-3.5" />
+                <span>
+                  {application.identityStatus !== "verified"
+                    ? "Aadhaar Unverified"
+                    : "Send Login Credentials"}
+                </span>
+              </Button>
+            )}
 
             {isPending ? (
               <>
@@ -880,7 +1140,7 @@ export function UserDossierModal({
                   ) : (
                     <UserCheck className="size-3.5" />
                   )}
-                  <span>Approve & Issue Member Pass</span>
+                  <span>Approve Application</span>
                 </Button>
               </>
             ) : isApproved ? (
@@ -1029,6 +1289,243 @@ export function UserDossierModal({
                 )}
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reassign Credentials Confirmation Modal */}
+      <Dialog open={reassignModalOpen} onOpenChange={setReassignModalOpen}>
+        <DialogContent className="max-w-lg bg-ivory rounded-3xl p-6 border border-border">
+          <DialogHeader>
+            <div className="flex items-center gap-2 mb-1">
+              <div className="size-8 rounded-full bg-burgundy/10 text-burgundy flex items-center justify-center">
+                <RotateCcw className="size-4" />
+              </div>
+              <DialogTitle className="font-display text-xl text-foreground">
+                Reassign Member Credentials
+              </DialogTitle>
+            </div>
+          </DialogHeader>
+
+          <div className="space-y-4 pt-2">
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              This will <strong>immediately revoke the member&apos;s current password</strong>, generate a brand new cryptographically strong 16-character password, update Supabase records, and dispatch a replacement credentials email to <strong>{application.applicantEmail}</strong>.
+            </p>
+
+            <div className="rounded-2xl bg-card border border-border p-4 space-y-2.5 text-xs">
+              <div className="flex justify-between items-center">
+                <span className="font-mono uppercase text-[10px] text-muted-foreground">Recipient Email</span>
+                <span className="font-semibold text-foreground font-mono">{application.applicantEmail}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="font-mono uppercase text-[10px] text-muted-foreground">Member Name</span>
+                <span className="font-medium text-foreground">{application.applicantName}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="font-mono uppercase text-[10px] text-muted-foreground">Previous Password</span>
+                <span className="text-[11px] font-mono text-destructive line-through">
+                  {application.autoGeneratedPassword ? application.autoGeneratedPassword.slice(0, 4) + "••••••••" : "••••••••••••"}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="font-mono uppercase text-[10px] text-muted-foreground">Security Action</span>
+                <span className="text-[11px] text-forest font-semibold">Immediate Old Token Revocation + New 16-char Password</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="font-mono uppercase text-[10px] text-muted-foreground">Sign-In Destination</span>
+                <span className="text-[11px] font-mono text-burgundy font-semibold">/login</span>
+              </div>
+            </div>
+
+            <div className="rounded-xl bg-burgundy/10 border border-burgundy/20 p-3 text-[11px] text-burgundy flex items-start gap-2">
+              <AlertTriangle className="size-4 text-burgundy shrink-0 mt-0.5" />
+              <span>
+                <strong>Warning:</strong> Any active session with previous credentials will be invalidated. The member must sign in using the new replacement password sent to their inbox.
+              </span>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setReassignModalOpen(false)}
+                className="rounded-full text-xs"
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleReassignCredentials}
+                disabled={sendingCredentials}
+                className="rounded-full bg-burgundy text-ivory hover:bg-burgundy/90 text-xs font-semibold px-4 cursor-pointer"
+              >
+                {sendingCredentials ? (
+                  <>
+                    <Loader2 className="size-3.5 animate-spin mr-1" />
+                    Reassigning & Dispatching...
+                  </>
+                ) : (
+                  <>
+                    <RotateCcw className="size-3.5 mr-1" />
+                    Confirm & Reassign New Credentials
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Aadhaar Decision Modal: Re-verify or Direct Rejection with Refund */}
+      <Dialog open={aadhaarDecisionModalOpen} onOpenChange={setAadhaarDecisionModalOpen}>
+        <DialogContent className="max-w-lg bg-ivory rounded-3xl p-6 border border-border">
+          <DialogHeader>
+            <div className="flex items-center gap-2 mb-1">
+              <div className="size-8 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center">
+                <AlertTriangle className="size-4" />
+              </div>
+              <DialogTitle className="font-display text-xl text-foreground">
+                Aadhaar Review: {application.applicantName}
+              </DialogTitle>
+            </div>
+          </DialogHeader>
+
+          <div className="space-y-4 pt-2">
+            {/* Tabs */}
+            <div className="grid grid-cols-2 p-1 rounded-xl bg-card border border-border text-xs">
+              <button
+                type="button"
+                onClick={() => setAadhaarDecisionTab("reupload")}
+                className={`py-2 px-3 rounded-lg font-semibold transition-all cursor-pointer ${
+                  aadhaarDecisionTab === "reupload"
+                    ? "bg-amber-600 text-ivory shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Request Re-upload
+              </button>
+              <button
+                type="button"
+                onClick={() => setAadhaarDecisionTab("reject")}
+                className={`py-2 px-3 rounded-lg font-semibold transition-all cursor-pointer ${
+                  aadhaarDecisionTab === "reject"
+                    ? "bg-destructive text-ivory shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Reject & Refund
+              </button>
+            </div>
+
+            {aadhaarDecisionTab === "reupload" ? (
+              <div className="space-y-3">
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Send an email to <strong>{application.applicantEmail}</strong> requesting them to re-upload their Aadhaar. The email includes a secure link to the minimal re-verification upload portal.
+                </p>
+
+                <div className="space-y-1">
+                  <label className="font-mono text-[10px] uppercase text-muted-foreground">
+                    Email Subject
+                  </label>
+                  <input
+                    type="text"
+                    value={reuploadSubject}
+                    onChange={(e) => setReuploadSubject(e.target.value)}
+                    className="w-full rounded-xl border border-border bg-card p-2.5 text-xs outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-mono text-[10px] uppercase text-muted-foreground">
+                    Feedback / Instructions for Member
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={reuploadFeedback}
+                    onChange={(e) => setReuploadFeedback(e.target.value)}
+                    placeholder="e.g. The photo was blurry or edges were cropped. Please upload a clear photo or e-Aadhaar PDF."
+                    className="w-full rounded-xl border border-border bg-card p-2.5 text-xs outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600"
+                  />
+                </div>
+
+                <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 text-[11px] text-amber-800 space-y-1">
+                  <div className="font-semibold flex items-center gap-1.5">
+                    <Mail className="size-3.5" />
+                    <span>Dispatched via safety@preciousmeets.com</span>
+                  </div>
+                  <p>
+                    Includes a button: <strong>&ldquo;Re-verify Aadhaar / Re-upload Document&rdquo;</strong> directing to the minimal document re-upload page.
+                  </p>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setAadhaarDecisionModalOpen(false)}
+                    className="rounded-full text-xs"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleSendAadhaarReuploadRequest}
+                    disabled={processingAadhaar}
+                    className="rounded-full bg-amber-600 text-ivory hover:bg-amber-700 text-xs font-semibold px-4 cursor-pointer"
+                  >
+                    {processingAadhaar ? (
+                      <Loader2 className="size-3.5 animate-spin mr-1" />
+                    ) : (
+                      <Send className="size-3.5 mr-1" />
+                    )}
+                    Send Re-upload Email
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="rounded-xl bg-destructive/10 border border-destructive/20 p-3 text-[11px] text-destructive leading-relaxed">
+                  <strong>Permanent Rejection & Refund Notice:</strong> This will reject the application and register an automatic 100% refund of ₹1,999 to the member's original payment method, processed within 5-7 business days.
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-mono text-[10px] uppercase text-muted-foreground">
+                    Reason for Rejection & Refund
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={refundReason}
+                    onChange={(e) => setRefundReason(e.target.value)}
+                    placeholder="e.g. Identity document could not be validated after review."
+                    className="w-full rounded-xl border border-border bg-card p-2.5 text-xs outline-none focus:border-destructive focus:ring-1 focus:ring-destructive"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setAadhaarDecisionModalOpen(false)}
+                    className="rounded-full text-xs"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleRejectWithRefund}
+                    disabled={processingAadhaar}
+                    className="rounded-full bg-destructive text-ivory hover:bg-destructive/90 text-xs font-semibold px-4 cursor-pointer"
+                  >
+                    {processingAadhaar ? (
+                      <Loader2 className="size-3.5 animate-spin mr-1" />
+                    ) : (
+                      <XCircle className="size-3.5 mr-1" />
+                    )}
+                    Confirm Rejection & Process Refund
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>

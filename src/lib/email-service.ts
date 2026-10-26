@@ -4,6 +4,7 @@ import { sendEmailServer } from "./server-email";
 export interface EmailPayload {
   to: string;
   subject?: string;
+  from?: string;
   template:
     | "welcome"
     | "quiz_completed"
@@ -14,7 +15,8 @@ export interface EmailPayload {
     | "sos_incident_alert"
     | "application_approved"
     | "application_rejected"
-    | "member_credentials";
+    | "member_credentials"
+    | "aadhaar_reverify_required";
   data: Record<string, any>;
 }
 
@@ -40,14 +42,54 @@ export class EmailService {
   }
 
   /**
-   * Verified sender address for Resend delivery:
-   * Uses verified domain cikka.club to guarantee global inbox delivery.
+   * Verified sender addresses on preciousmeets.com by email category:
+   * 1. Invoices & Receipts: Precious Meets Billing <billing@preciousmeets.com>
+   * 2. Passes, Seats & Reservations: Precious Meets Concierge <invitations@preciousmeets.com>
+   * 3. Membership & Credentials: Precious Meets Membership <membership@preciousmeets.com>
+   * 4. Safety & Verification: Precious Meets Safety <safety@preciousmeets.com>
+   * 5. General / Welcome: Precious Meets <invitations@preciousmeets.com>
    */
-  private static getFromAddress(): string {
+  static getSenderForTemplate(template?: EmailPayload["template"]): string {
+    switch (template) {
+      case "subscription_activated":
+        return "Precious Meets Billing <billing@preciousmeets.com>";
+      case "booking_confirmed":
+      case "booking_cancelled":
+        return "Precious Meets Concierge <invitations@preciousmeets.com>";
+      case "application_approved":
+      case "application_rejected":
+      case "member_credentials":
+      case "quiz_completed":
+        return "Precious Meets Membership <membership@preciousmeets.com>";
+      case "sos_incident_alert":
+      case "identity_verified":
+      case "aadhaar_reverify_required":
+        return "Precious Meets Safety <safety@preciousmeets.com>";
+      case "welcome":
+      default:
+        return "Precious Meets <invitations@preciousmeets.com>";
+    }
+  }
+
+  /**
+   * Resolves the verified sender address for Resend delivery:
+   * Prioritizes:
+   * 1. Explicit custom sender in payload
+   * 2. Role-based sender on preciousmeets.com matched to template
+   * 3. Environment variable overrides (VITE_RESEND_FROM_EMAIL / RESEND_FROM_EMAIL)
+   * 4. Verified fallback: Precious Meets <invitations@preciousmeets.com>
+   */
+  private static getFromAddress(template?: EmailPayload["template"], customFrom?: string): string {
+    if (customFrom && customFrom.trim()) {
+      return customFrom.trim();
+    }
+    if (template) {
+      return this.getSenderForTemplate(template);
+    }
     const from =
       (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_RESEND_FROM_EMAIL) ||
       (typeof process !== "undefined" && process.env?.RESEND_FROM_EMAIL) ||
-      "Precious Meets <invitations@cikka.club>";
+      "Precious Meets <invitations@preciousmeets.com>";
     return String(from).trim();
   }
 
@@ -76,6 +118,8 @@ export class EmailService {
         return "Update regarding your Precious Meets Membership Application";
       case "member_credentials":
         return "Your Precious Meets Member Sign-in Credentials 🗝️";
+      case "aadhaar_reverify_required":
+        return "Action Required: Please Re-verify Your Aadhaar Document | Precious Meets";
       default:
         return "Important Notification | Precious Meets";
     }
@@ -421,6 +465,47 @@ export class EmailService {
         `;
         break;
 
+      case "aadhaar_reverify_required":
+        bodyContent = `
+          <div style="background: #fbf8f3; border: 1px solid #c6a568; border-radius: 8px; padding: 26px; margin-bottom: 24px;">
+            <div style="display: inline-block; background-color: #fef3c7; color: #92400e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; border: 1px solid #fde68a;">
+              ⚠️ Identity Reverification Required
+            </div>
+            <h2 style="font-family: Georgia, serif; color: #171514; font-size: 24px; margin: 0 0 8px 0; font-weight: normal;">
+              Action Required: Please Re-verify Your Aadhaar Document
+            </h2>
+            <p style="color: #4a453f; line-height: 1.6; margin: 0 0 16px 0;">
+              Dear ${data.name || "Member"}, during our curation and trust audit, our verification team noticed that your uploaded Aadhaar document requires your attention.
+            </p>
+
+            <div style="background: #ffffff; border-left: 4px solid #b45309; border-radius: 6px; padding: 16px 20px; margin: 18px 0; border-top: 1px solid #f1ece4; border-right: 1px solid #f1ece4; border-bottom: 1px solid #f1ece4;">
+              <span style="font-family: monospace; font-size: 11px; text-transform: uppercase; color: #92400e; font-weight: bold; display: block; margin-bottom: 6px;">
+                Curator Feedback / Reason:
+              </span>
+              <p style="margin: 0; color: #171514; font-size: 13.5px; line-height: 1.6; font-style: italic;">
+                "${data.feedback || "Your uploaded Aadhaar card document was blurry, partially cut off, or unreadable. Please upload a clear, legible copy."}"
+              </p>
+            </div>
+
+            <p style="color: #4a453f; line-height: 1.6; margin: 16px 0;">
+              To protect the trust and safety of all curated 6-person dinner tables, please click below to upload a clear copy of your Aadhaar Card (front or full PDF).
+            </p>
+
+            <div style="margin: 28px 0 20px 0; text-align: center;">
+              <a href="${data.reverifyUrl || "https://preciousmeets.com/verify-identity"}" style="background-color: #691c35; color: #f8f2e7; padding: 14px 34px; border-radius: 9999px; text-decoration: none; font-size: 14px; font-weight: bold; display: inline-block; box-shadow: 0 3px 10px rgba(105, 28, 53, 0.25);">
+                Re-verify Aadhaar Document &rarr;
+              </a>
+            </div>
+
+            <div style="background: #f4efe6; border-radius: 6px; padding: 12px 16px; margin-top: 22px;">
+              <p style="margin: 0; color: #6b6357; font-size: 11.5px; line-height: 1.5;">
+                <strong>UIDAI Offline Privacy Guarantee:</strong> In strict compliance with Indian DPDP Act and UIDAI guidelines, we never store raw biometric data or 12-digit Aadhaar numbers. Your document is processed with enterprise end-to-end encryption.
+              </p>
+            </div>
+          </div>
+        `;
+        break;
+
       default:
         bodyContent = `<p style="color: #4a453f;">${data.message || "Important notification from Precious Meets."}</p>`;
     }
@@ -443,7 +528,7 @@ export class EmailService {
 
   static async send(payload: EmailPayload): Promise<EmailSendResult> {
     const apiKey = this.getApiKey();
-    const fromAddress = this.getFromAddress();
+    const fromAddress = this.getFromAddress(payload.template, payload.from);
     const subject = payload.subject || this.getDefaultSubject(payload.template, payload.data);
     const html = this.renderTemplate(payload.template, payload.data);
 

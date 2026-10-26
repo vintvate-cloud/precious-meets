@@ -8,8 +8,9 @@ import { EmailService } from "@/lib/email-service";
 import { ApplicationsService } from "@/lib/applications-service";
 import { VerificationsService } from "@/lib/verifications-service";
 import { openRazorpaySubscriptionCheckout } from "@/lib/razorpay-client";
-import { CryptoService } from "@/lib/crypto-service";
+import { supabase } from "@/lib/supabase";
 import {
+
   Sparkles,
   ArrowRight,
   ShieldCheck,

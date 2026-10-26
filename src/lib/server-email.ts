@@ -9,7 +9,7 @@ export const sendEmailServer = createServerFn({ method: "POST" })
     const fromAddress =
       data.from ||
       (typeof process !== "undefined" && process.env?.RESEND_FROM_EMAIL) ||
-      "Precious Meets <invitations@cikka.club>";
+      "Precious Meets <invitations@preciousmeets.com>";
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",

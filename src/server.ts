@@ -64,7 +64,7 @@ export default {
             body.from ||
             (typeof process !== "undefined" && (process.env?.RESEND_FROM_EMAIL || process.env?.VITE_RESEND_FROM_EMAIL)) ||
             ((env as any)?.RESEND_FROM_EMAIL || (env as any)?.VITE_RESEND_FROM_EMAIL) ||
-            "Precious Meets <invitations@cikka.club>";
+            "Precious Meets <invitations@preciousmeets.com>";
 
           const resendRes = await fetch("https://api.resend.com/emails", {
             method: "POST",
