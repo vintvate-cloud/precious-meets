@@ -181,62 +181,46 @@ export function DoorGreetings() {
         </svg>
       </div>
 
-      <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col items-center justify-center my-auto space-y-10 sm:space-y-16 text-center">
+      <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col items-center justify-center my-auto space-y-8 sm:space-y-12 text-center">
         {/* ========================================================================= */}
-        {/* 2. SECTION HEADER (Editorial Whisper)                                      */}
+        {/* CENTERSTAGE GREETING STATEMENT (Say -> [Language Greeting] -> to 5 new people) */}
         {/* ========================================================================= */}
-        <div className="max-w-2xl mx-auto space-y-3">
-          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl text-[#171514] tracking-tight leading-tight">
-            Welcomed in <span className="italic font-serif text-[#691C35]">every language.</span>
+        <div className="w-full flex flex-col items-center justify-center px-4">
+          {/* Top: Say */}
+          <h2 className="font-display text-[clamp(2.5rem,7vw,6.5rem)] font-normal tracking-tight text-[#171514] select-none leading-none mt-2 sm:mt-4">
+            Say
           </h2>
 
-          <p className="font-sans text-xs sm:text-sm text-[#171514]/70 max-w-md mx-auto leading-relaxed">
-            No matter how you say hello, there is a thoughtful seat waiting for you at our table.
-          </p>
-        </div>
-
-        {/* ========================================================================= */}
-        {/* 3. CENTERSTAGE GREETING STATEMENT (Monumental Say [Greeting] to 5 new people) */}
-        {/* ========================================================================= */}
-        <div className="w-full flex flex-col items-center justify-center px-2">
-          {/* Main Statement: Monumental, grand, fluidly responsive */}
-          <div className="flex flex-nowrap whitespace-nowrap items-baseline justify-center gap-x-2 sm:gap-x-4 md:gap-x-7 text-center w-full max-w-full px-1">
-            {/* Left Static Side */}
-            <span className="font-display text-[clamp(2rem,6.8vw,7.5rem)] font-normal tracking-tight text-[#171514] select-none shrink-0 leading-none">
-              Say
-            </span>
-
-            {/* Center Animated Greeting */}
-            <div className="inline-flex items-baseline justify-center px-1 sm:px-2">
-              <AnimatePresence mode="wait">
-                <motion.span
-                  key={activeGreeting.id}
-                  initial={{ opacity: 0, y: 22, filter: "blur(10px)", scale: 0.92 }}
-                  animate={{ opacity: 1, y: 0, filter: "blur(0px)", scale: 1 }}
-                  exit={{ opacity: 0, y: -22, filter: "blur(10px)", scale: 1.06 }}
-                  transition={{
-                    duration: 0.65,
-                    ease: [0.16, 1, 0.3, 1],
-                  }}
-                  style={{
-                    fontFamily: activeGreeting.fontFamily,
-                    color: activeGreeting.accentColor,
-                  }}
-                  className="text-[clamp(2rem,6.8vw,7.5rem)] font-normal leading-none inline-block drop-shadow-sm transition-colors duration-500 py-1"
-                >
-                  {activeGreeting.native}
-                </motion.span>
-              </AnimatePresence>
-            </div>
-
-            {/* Right Static Side */}
-            <span className="font-display text-[clamp(2rem,6.8vw,7.5rem)] font-normal tracking-tight text-[#171514] select-none shrink-0 leading-none">
-              to 5 new people
-            </span>
+          {/* Center Animated Greeting */}
+          <div className="min-h-[1.2em] flex items-center justify-center my-1 sm:my-2">
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={activeGreeting.id}
+                initial={{ opacity: 0, y: 24, filter: "blur(10px)", scale: 0.92 }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)", scale: 1 }}
+                exit={{ opacity: 0, y: -24, filter: "blur(10px)", scale: 1.06 }}
+                transition={{
+                  duration: 0.65,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
+                style={{
+                  fontFamily: activeGreeting.fontFamily,
+                  color: activeGreeting.accentColor,
+                }}
+                className="text-[clamp(4.25rem,12vw,10.5rem)] font-normal leading-[1.12] inline-block drop-shadow-sm transition-colors duration-500 py-1"
+              >
+                {activeGreeting.native}
+              </motion.span>
+            </AnimatePresence>
           </div>
 
+          {/* Bottom: to 5 new people */}
+          <span className="font-display text-[clamp(2.5rem,7vw,6.5rem)] font-normal tracking-tight text-[#171514] select-none leading-none mt-1 sm:mt-2">
+            to 5 new people
+          </span>
+
           {/* Pronunciation & Cultural Meaning (Animated with active greeting) */}
-          <div className="min-h-[72px] sm:min-h-[84px] flex items-center justify-center mt-6 sm:mt-10">
+          <div className="min-h-[72px] sm:min-h-[84px] flex items-center justify-center mt-8 sm:mt-12">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeGreeting.id}
