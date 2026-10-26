@@ -219,7 +219,7 @@ export function AnimatedSummitHero() {
       {/* 6. PROMENADE DINNER TABLE & SEATED GUESTS                                  */}
       {/* ========================================================================= */}
       <div className="relative z-30 w-full flex flex-col items-center">
-        <SummitAttendees />
+        <SummitAttendees isNight={isNight} />
       </div>
 
       {/* Bottom ambient border */}

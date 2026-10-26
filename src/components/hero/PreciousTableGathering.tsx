@@ -211,7 +211,7 @@ export function PreciousTableGathering() {
               gender="woman"
               glowColor="#f472b6"
               badgeHalo="rgba(244, 114, 182, 0.22)"
-              className="w-13 h-15 sm:w-15 sm:h-17 md:w-17 md:h-19"
+              className="w-10 h-10"
             />
           </div>
 
@@ -222,7 +222,7 @@ export function PreciousTableGathering() {
               gender="man"
               glowColor="#fbbf24"
               badgeHalo="rgba(251, 191, 36, 0.22)"
-              className="w-13 h-15 sm:w-15 sm:h-17 md:w-17 md:h-19"
+              className="w-10 h-10"
             />
           </div>
 
@@ -233,7 +233,7 @@ export function PreciousTableGathering() {
               gender="woman"
               glowColor="#86efac"
               badgeHalo="rgba(134, 239, 172, 0.22)"
-              className="w-13 h-15 sm:w-15 sm:h-17 md:w-17 md:h-19"
+              className="w-10 h-10"
             />
           </div>
 
@@ -253,7 +253,7 @@ export function PreciousTableGathering() {
               isFrontRow={true}
               glowColor="#f8fafc"
               badgeHalo="rgba(248, 250, 252, 0.22)"
-              className="w-13 h-15 sm:w-15 sm:h-17 md:w-17 md:h-19"
+              className="w-10 h-10"
             />
           </div>
 
@@ -265,7 +265,7 @@ export function PreciousTableGathering() {
               isFrontRow={true}
               glowColor="#f472b6"
               badgeHalo="rgba(244, 114, 182, 0.22)"
-              className="w-13 h-15 sm:w-15 sm:h-17 md:w-17 md:h-19"
+              className="w-10 h-10"
             />
           </div>
 
@@ -277,7 +277,7 @@ export function PreciousTableGathering() {
               isFrontRow={true}
               glowColor="#86efac"
               badgeHalo="rgba(134, 239, 172, 0.22)"
-              className="w-13 h-15 sm:w-15 sm:h-17 md:w-17 md:h-19"
+              className="w-10 h-10"
             />
           </div>
         </div>
@@ -306,7 +306,7 @@ export function PreciousTableGathering() {
               gender="man"
               glowColor="#fbbf24"
               badgeHalo="rgba(251, 191, 36, 0.22)"
-              className="w-13 h-15 sm:w-15 sm:h-17 md:w-17 md:h-19"
+              className="w-10 h-10"
             />
           </div>
 
@@ -317,7 +317,7 @@ export function PreciousTableGathering() {
               gender="woman"
               glowColor="#86efac"
               badgeHalo="rgba(134, 239, 172, 0.22)"
-              className="w-13 h-15 sm:w-15 sm:h-17 md:w-17 md:h-19"
+              className="w-10 h-10"
             />
           </div>
 
@@ -328,7 +328,7 @@ export function PreciousTableGathering() {
               gender="man"
               glowColor="#f472b6"
               badgeHalo="rgba(244, 114, 182, 0.22)"
-              className="w-13 h-15 sm:w-15 sm:h-17 md:w-17 md:h-19"
+              className="w-10 h-10"
             />
           </div>
 
@@ -348,7 +348,7 @@ export function PreciousTableGathering() {
               isFrontRow={true}
               glowColor="#86efac"
               badgeHalo="rgba(134, 239, 172, 0.22)"
-              className="w-13 h-15 sm:w-15 sm:h-17 md:w-17 md:h-19"
+              className="w-10 h-10"
             />
           </div>
 
@@ -360,7 +360,7 @@ export function PreciousTableGathering() {
               isFrontRow={true}
               glowColor="#f8fafc"
               badgeHalo="rgba(248, 250, 252, 0.22)"
-              className="w-13 h-15 sm:w-15 sm:h-17 md:w-17 md:h-19"
+              className="w-10 h-10"
             />
           </div>
 
@@ -372,7 +372,7 @@ export function PreciousTableGathering() {
               isFrontRow={true}
               glowColor="#fbbf24"
               badgeHalo="rgba(251, 191, 36, 0.22)"
-              className="w-13 h-15 sm:w-15 sm:h-17 md:w-17 md:h-19"
+              className="w-10 h-10"
             />
           </div>
         </div>
