@@ -12,6 +12,7 @@ export function AnimatedSummitHero() {
   const [timeMode, setTimeMode] = useState<TimeMode>("auto");
   const [currentTimeStr, setCurrentTimeStr] = useState<string>("");
   const [isNightComputed, setIsNightComputed] = useState<boolean>(false);
+  const [headlineStage, setHeadlineStage] = useState<0 | 1 | 2>(0);
 
   useEffect(() => {
     const updateTime = () => {
@@ -172,34 +173,142 @@ export function AnimatedSummitHero() {
       {/* 5. CENTER BRAND TITLE, SUBTITLE & TAKE THE QUIZ CTA                       */}
       {/* ========================================================================= */}
       <div className="absolute inset-x-0 top-[16%] sm:top-[18%] md:top-[20%] z-25 flex flex-col items-center text-center px-4 pointer-events-none select-none">
-        <h1
-          className={`font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-[1.08] transition-colors duration-1000 ${
-            isNight
-              ? "text-[#FDFBF7] drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]"
-              : "text-[#171514]"
-          }`}
-        >
-          Six strangers.{" "}
-          <span
-            className={`italic font-normal transition-colors duration-1000 ${
-              isNight
-                ? "text-[#E5C17D] drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]"
-                : "text-[#691C35]"
+        {/* Animated Carousel Header (Slides Upwards) */}
+        <div className="relative h-12 sm:h-14 md:h-18 lg:h-20 w-full overflow-hidden flex flex-col items-center justify-start">
+          <div
+            className={`w-full flex flex-col items-center ${
+              headlineStage === 0
+                ? "transition-none"
+                : "transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
             }`}
+            style={{
+              transform: `translateY(${
+                headlineStage === 0 ? "0%" : headlineStage === 1 ? "-33.333%" : "-66.666%"
+              })`,
+            }}
           >
-            One table.
-          </span>
-        </h1>
+            {/* Slide 0: Six strangers. One table. (Initial Wander) */}
+            <div className="h-12 sm:h-14 md:h-18 lg:h-20 w-full flex items-center justify-center">
+              <h1
+                className={`font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-[1.08] transition-colors duration-1000 ${
+                  isNight
+                    ? "text-[#FDFBF7] drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]"
+                    : "text-[#171514]"
+                }`}
+              >
+                Six strangers.{" "}
+                <span
+                  className={`italic font-normal transition-colors duration-1000 ${
+                    isNight
+                      ? "text-[#E5C17D] drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]"
+                      : "text-[#691C35]"
+                  }`}
+                >
+                  One table.
+                </span>
+              </h1>
+            </div>
 
-        <p
-          className={`mt-2 sm:mt-2.5 text-xs sm:text-sm md:text-base max-w-md md:max-w-lg font-sans font-medium leading-relaxed transition-colors duration-1000 ${
-            isNight
-              ? "text-[#E2E8F0]/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]"
-              : "text-[#171514]/75"
-          }`}
-        >
-          Curated dinners designed for meaningful human connections across Delhi NCR.
-        </p>
+            {/* Slide 1: Everyone is verified here. (Verification Checks Pop Up) */}
+            <div className="h-12 sm:h-14 md:h-18 lg:h-20 w-full flex items-center justify-center">
+              <h1
+                className={`font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-[1.08] transition-colors duration-1000 ${
+                  isNight
+                    ? "text-[#FDFBF7] drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]"
+                    : "text-[#171514]"
+                }`}
+              >
+                Everyone is{" "}
+                <span
+                  className={`italic font-normal transition-colors duration-1000 ${
+                    isNight
+                      ? "text-[#22c55e] drop-shadow-[0_2px_14px_rgba(34,197,94,0.65)]"
+                      : "text-[#12a150]"
+                  }`}
+                >
+                  verified here.
+                </span>
+              </h1>
+            </div>
+
+            {/* Slide 2: Six strangers. One table. (Grouping in 6s Assembled) */}
+            <div className="h-12 sm:h-14 md:h-18 lg:h-20 w-full flex items-center justify-center">
+              <h1
+                className={`font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-[1.08] transition-colors duration-1000 ${
+                  isNight
+                    ? "text-[#FDFBF7] drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]"
+                    : "text-[#171514]"
+                }`}
+              >
+                Six strangers.{" "}
+                <span
+                  className={`italic font-normal transition-colors duration-1000 ${
+                    isNight
+                      ? "text-[#E5C17D] drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]"
+                      : "text-[#691C35]"
+                  }`}
+                >
+                  One table.
+                </span>
+              </h1>
+            </div>
+          </div>
+        </div>
+
+        {/* Animated Carousel Subtitle (Slides Upwards in sync) */}
+        <div className="relative h-10 sm:h-11 w-full max-w-md md:max-w-lg mt-2 sm:mt-2.5 overflow-hidden flex flex-col items-center justify-start">
+          <div
+            className={`w-full flex flex-col items-center ${
+              headlineStage === 0
+                ? "transition-none"
+                : "transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+            }`}
+            style={{
+              transform: `translateY(${
+                headlineStage === 0 ? "0%" : headlineStage === 1 ? "-33.333%" : "-66.666%"
+              })`,
+            }}
+          >
+            {/* Subtitle 0 */}
+            <div className="h-10 sm:h-11 w-full flex items-center justify-center">
+              <p
+                className={`text-xs sm:text-sm md:text-base font-sans font-medium leading-relaxed transition-colors duration-1000 ${
+                  isNight
+                    ? "text-[#E2E8F0]/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]"
+                    : "text-[#171514]/75"
+                }`}
+              >
+                Curated dinners designed for meaningful human connections across Delhi NCR.
+              </p>
+            </div>
+
+            {/* Subtitle 1 */}
+            <div className="h-10 sm:h-11 w-full flex items-center justify-center">
+              <p
+                className={`text-xs sm:text-sm md:text-base font-sans font-medium leading-relaxed transition-colors duration-1000 ${
+                  isNight
+                    ? "text-[#E2E8F0]/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]"
+                    : "text-[#171514]/75"
+                }`}
+              >
+                Every member confirms their identity before they ever say hello.
+              </p>
+            </div>
+
+            {/* Subtitle 2 */}
+            <div className="h-10 sm:h-11 w-full flex items-center justify-center">
+              <p
+                className={`text-xs sm:text-sm md:text-base font-sans font-medium leading-relaxed transition-colors duration-1000 ${
+                  isNight
+                    ? "text-[#E2E8F0]/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]"
+                    : "text-[#171514]/75"
+                }`}
+              >
+                Curated dinners designed for meaningful human connections across Delhi NCR.
+              </p>
+            </div>
+          </div>
+        </div>
 
         {/* Take the Quiz CTA Button */}
         <Link
@@ -219,7 +328,7 @@ export function AnimatedSummitHero() {
       {/* 6. PROMENADE DINNER TABLE & SEATED GUESTS                                  */}
       {/* ========================================================================= */}
       <div className="relative z-30 w-full flex flex-col items-center">
-        <SummitAttendees />
+        <SummitAttendees isNight={isNight} onStageChange={setHeadlineStage} />
       </div>
 
       {/* Bottom ambient border */}

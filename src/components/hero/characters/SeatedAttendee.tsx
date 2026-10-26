@@ -1,9 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useAttendeeLifeEngine } from "./useAttendeeLifeEngine";
-import { FemaleAttendeeFigure } from "./FemaleAttendeeFigure";
-import { MaleAttendeeFigure } from "./MaleAttendeeFigure";
-import { AttendeeRearFigure } from "./AttendeeRearFigure";
 
 export interface SeatedAttendeeProps {
   seatIndex: number;
@@ -17,14 +14,14 @@ export interface SeatedAttendeeProps {
 /**
  * SEATED ATTENDEE COMPONENT
  *
- * Combines Framer Motion interactive responsiveness with GSAP-driven
- * real-life biomechanics (asynchronous breathing, listening tilts, nods).
+ * Renders the clean user avatar silhouette matching the user-provided SVG specification.
+ * Head and torso are linked to the life engine for subtle breathing & nodding animations.
  */
 export function SeatedAttendee({
   seatIndex,
   gender,
   isFrontRow = false,
-  className = "w-14 h-16 sm:w-16 sm:h-18 md:w-18 md:h-20",
+  className = "w-10 h-10",
   glowColor = "#fbbf24",
   badgeHalo,
 }: SeatedAttendeeProps) {
@@ -36,16 +33,16 @@ export function SeatedAttendee({
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.9, y: 8 }}
+      initial={{ opacity: 0, scale: 0.9, y: 6 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{
         duration: 0.8,
-        delay: 0.2 + (seatIndex * 0.1),
+        delay: 0.2 + seatIndex * 0.08,
         ease: [0.16, 1, 0.3, 1],
       }}
       whileHover={{
-        scale: 1.04,
-        y: -2,
+        scale: 1.08,
+        y: -3,
         transition: { type: "spring", stiffness: 260, damping: 20 },
       }}
       className={`relative inline-block cursor-pointer ${className}`}
@@ -54,36 +51,41 @@ export function SeatedAttendee({
       {/* Subtle constellation glow node matching the social network lines */}
       {badgeHalo && (
         <div
-          className="absolute inset-0 -m-1 rounded-full pointer-events-none blur-sm opacity-25"
+          className="absolute inset-0 -m-1 rounded-full pointer-events-none blur-sm opacity-30"
           style={{ backgroundColor: badgeHalo }}
         />
       )}
 
       {/* GSAP Managed Life Rig Container */}
       <div ref={containerRef} className="relative w-full h-full">
-        {isFrontRow ? (
-          <AttendeeRearFigure
-            gender={gender}
-            headRef={headRef}
-            torsoRef={torsoRef}
-            className="w-full h-full"
-            glowColor={glowColor}
-          />
-        ) : gender === "woman" ? (
-          <FemaleAttendeeFigure
-            headRef={headRef}
-            torsoRef={torsoRef}
-            className="w-full h-full"
-            glowColor={glowColor}
-          />
-        ) : (
-          <MaleAttendeeFigure
-            headRef={headRef}
-            torsoRef={torsoRef}
-            className="w-full h-full"
-            glowColor={glowColor}
-          />
-        )}
+        <svg
+          viewBox="0 0 640 640"
+          className="w-full h-full overflow-visible drop-shadow-md select-none pointer-events-none"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          {/* Subtle colored glow ring rim */}
+          {glowColor && (
+            <g opacity="0.4" style={{ filter: `drop-shadow(0 0 5px ${glowColor})` }}>
+              <circle cx="320" cy="204" r="118" stroke={glowColor} strokeWidth="6" />
+              <path
+                d="M 106 550 A 214 214 0 0 1 534 550 Z"
+                stroke={glowColor}
+                strokeWidth="6"
+              />
+            </g>
+          )}
+
+          {/* Head: Solid Circle linked to subtle head nod/tilt */}
+          <g ref={headRef}>
+            <circle cx="320" cy="204" r="117.5" fill="#000000" />
+          </g>
+
+          {/* Shoulders / Bust: Semicircular Dome linked to breathing */}
+          <g ref={torsoRef}>
+            <path d="M 106 550 A 214 214 0 0 1 534 550 Z" fill="#000000" />
+          </g>
+        </svg>
       </div>
     </motion.div>
   );
