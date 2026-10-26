@@ -222,8 +222,8 @@ export function AnimatedSummitHero() {
                 <span
                   className={`italic font-normal transition-colors duration-1000 ${
                     isNight
-                      ? "text-[#2ec4b6] drop-shadow-[0_2px_14px_rgba(46,196,182,0.65)]"
-                      : "text-[#0f8f84]"
+                      ? "text-[#22c55e] drop-shadow-[0_2px_14px_rgba(34,197,94,0.65)]"
+                      : "text-[#12a150]"
                   }`}
                 >
                   verified here.
