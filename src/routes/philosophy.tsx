@@ -14,7 +14,6 @@ import {
   Sparkles,
   MapPin,
   HeartHandshake,
-  Car,
   EyeOff,
   Flame,
   ArrowRight,
@@ -82,16 +81,8 @@ export function PhilosophyPage() {
       icon: <ShieldCheck className="size-6 text-[#691C35]" />,
       title: "Vetted Enclaves & Guardian Hosts",
       subtitle: "Safe Spaces, Present Custodians",
-      desc: "No public chaos. Our dinners take place in secluded private chef lofts, sunlit studios, and private heritage dining rooms in Mehrauli, Hauz Khas, and Central Delhi. Dedicated table hosts remain present throughout the evening to guide conversational tempo and immediately enforce our zero-tolerance code.",
+      desc: "No public chaos. Our dinners take place in reputable restaurants and cafes in Mehrauli, Hauz Khas, and Central Delhi. Dedicated table hosts remain present throughout the evening to guide conversational tempo and immediately enforce our zero-tolerance code.",
       badge: "Dedicated Host on Site",
-    },
-    {
-      num: "04",
-      icon: <Car className="size-6 text-[#C6A568]" />,
-      title: "Safe Departure & Verified Cab Drops",
-      subtitle: "From Table to Front Door",
-      desc: "Safety does not end when dessert is served. Our venue hosts coordinate verified cab drop-offs for female guests, monitor vehicle dispatch, and ensure every guest reaches home comfortably. Our real-time Safety SOS beacon remains active on the attendee dashboard 24/7.",
-      badge: "Door-to-Door Escort",
     },
   ];
 
@@ -145,7 +136,7 @@ export function PhilosophyPage() {
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Delhi is an electric metropolis of 33 million stories, yet finding safe, authentic human connection often feels exhausting—especially for women. Here is why Precious Meets was born, and the sacred safety architecture that protects every seat.
+            Delhi is an electric metropolis of 33 million stories, yet finding safe, authentic human connection often feels exhausting, especially for women. Here is why Precious Meets was born, and the sacred safety architecture that protects every seat.
           </p>
         </div>
 
@@ -166,7 +157,7 @@ export function PhilosophyPage() {
                 <p>
                   Dating apps and public nightlife have amplified this exhaustion. Anonymous profiles allow bad actors to hide behind false identities, while crowded bars make meaningful dialogue impossible.
                 </p>
-                <p className="font-medium text-foreground">
+                <p className="font-bold text-foreground text-sm sm:text-base leading-relaxed">
                   Precious Meets replaces that exhaustion with architectural safety. We believe you shouldn't have to sacrifice your peace of mind simply to share an inspiring dinner with interesting people.
                 </p>
               </div>
@@ -200,21 +191,21 @@ export function PhilosophyPage() {
           </div>
         </div>
 
-        {/* Four Safety Pillars */}
+        {/* Three Safety Pillars */}
         <div className="mt-20">
           <div className="text-center max-w-xl mx-auto">
             <span className="label-mono text-xs uppercase text-forest font-semibold">
               The Security Architecture
             </span>
             <h2 className="font-display mt-2 text-3xl sm:text-5xl text-foreground">
-              Four Pillars of Protection
+              Three Pillars of Protection
             </h2>
             <p className="mt-3 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-              Every meet in Delhi NCR operates under strict real-world protocols enforced from the moment you RSVP until you are safely home.
+              Every meet in Delhi NCR operates under strict real-world protocols enforced from the moment you RSVP through the curated evening.
             </p>
           </div>
 
-          <div className="mt-12 grid gap-8 sm:grid-cols-2">
+          <div className="mt-12 grid gap-8 md:grid-cols-3">
             {pillars.map((pillar) => (
               <div
                 key={pillar.num}

@@ -77,7 +77,7 @@ const FAQ_DATA: FaqItem[] = [
     category: "curation",
     question: "Can I come alone, or should I bring a friend?",
     answer:
-      "Everyone arrives alone by design. When guests arrive with existing friends, cliques naturally form and people stick to their comfort zone. Solo arrival levels the playing field—everyone enters with the same curiosity and openness to connect.",
+      "Everyone arrives alone by design. When guests arrive with existing friends, cliques naturally form and people stick to their comfort zone. Solo arrival levels the playing field so everyone enters with the same curiosity and openness to connect.",
     tags: ["solo", "alone", "friend", "cliques", "first time"],
   },
   {
@@ -85,7 +85,7 @@ const FAQ_DATA: FaqItem[] = [
     category: "curation",
     question: "How do you decide who sits at my table?",
     answer:
-      "Our Discovery Quiz maps your conversational energy, curiosity archetype, and life stage. Rather than matching people with identical careers or backgrounds, we curate tables for conversational harmony—balancing quiet reflective thinkers with warm conversational anchors.",
+      "Our Discovery Quiz maps your conversational energy, curiosity archetype, and life stage. Rather than matching people with identical careers or backgrounds, we curate tables for conversational harmony, balancing quiet reflective thinkers with warm conversational anchors.",
     tags: ["quiz", "matching", "archetype", "compatibility", "strangers"],
   },
   {

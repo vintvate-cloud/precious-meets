@@ -68,7 +68,7 @@ export function HeroSection({
   leftFlankText = "every",
   rightFlankText = "matters.",
   kicker = "DELHI NCR · 6 GUESTS ONLY",
-  subtitle = "Curated dinners designed for meaningful human connections across Delhi NCR.",
+  subtitle = "Curated experiences designed for meaningful human connections across Delhi NCR.",
   autoPlayInterval = 6500,
   ctaText = "Take the Quiz",
   ctaHref = "/quiz",

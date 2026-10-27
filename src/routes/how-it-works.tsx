@@ -18,7 +18,7 @@ function HowItWorksPage() {
     {
       num: "01",
       title: "The Discovery Quiz",
-      desc: "Complete 9 intentional questions examining your conversational tempo, social battery, and emotional curiosity. Zero corporate credentials—strictly who you are beneath the noise.",
+      desc: "Complete 9 intentional questions examining your conversational tempo, social battery, and emotional curiosity. Zero corporate credentials, strictly who you are beneath the noise.",
       icon: <Sparkles className="size-6 text-burgundy" />,
     },
     {
@@ -36,7 +36,7 @@ function HowItWorksPage() {
     {
       num: "04",
       title: "The Long Table Gathering",
-      desc: "Arrive at an intimate private venue in Mehrauli, Hauz Khas, Sunder Nursery, or Chanakyapuri. Share an unhurried 4-course meal guided by a vetted, trained host.",
+      desc: "Arrive at an intimate private venue like Mehrauli, Hauz Khas, and many more. Share an unhurried 4-course meal guided by a vetted, trained host.",
       icon: <Utensils className="size-6 text-burgundy" />,
     },
   ];
@@ -52,7 +52,7 @@ function HowItWorksPage() {
             From Strangers to <em className="italic text-burgundy">Stories</em>
           </h1>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            Modern cities are crowded yet lonely. Precious Meets creates intentional small tables where authentic conversation replaces superficial nightlife—backed by India's strictest trust and safety architecture.
+            Modern cities are crowded yet lonely. Precious Meets creates intentional small tables where authentic conversation replaces superficial nightlife, backed by India's strictest trust and safety architecture.
           </p>
         </div>
 

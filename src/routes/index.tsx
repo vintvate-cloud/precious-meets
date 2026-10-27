@@ -424,7 +424,7 @@ function Geometry() {
             </div>
             {/* Architectural caption */}
             <p data-table-caption className="mt-4 label-mono text-[11px] text-muted-foreground tracking-widest text-center">
-              Six seats. One table. Pulled up for people who haven't met — yet.
+              Six seats. One table. Pulled up for people who haven't met yet.
             </p>
           </div>
 

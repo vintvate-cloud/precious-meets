@@ -14,7 +14,7 @@ const faqs: FaqItem[] = [
     id: "verification",
     question: "How does offline Aadhaar verification work?",
     answer:
-      "Every guest completes a secure government DigiLocker check before a seat is confirmed. No biometrics are ever stored—ensuring 100% vetted identities and zero fake or anonymous profiles.",
+      "Every guest completes a secure government DigiLocker check before a seat is confirmed. No biometrics are ever stored, ensuring 100% vetted identities and zero fake or anonymous profiles.",
   },
   {
     id: "solo-arrival",

@@ -136,7 +136,7 @@ export function AnimatedSummitHero() {
             {/* Subtitle 0 */}
             <div className="h-10 sm:h-11 w-full flex items-center justify-center">
               <p className="text-xs sm:text-sm md:text-base font-sans font-medium leading-relaxed text-[#E2E8F0]/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]">
-                Curated dinners designed for meaningful human connections across Delhi NCR.
+                Curated experiences designed for meaningful human connections across Delhi NCR.
               </p>
             </div>
 
@@ -150,7 +150,7 @@ export function AnimatedSummitHero() {
             {/* Subtitle 2 */}
             <div className="h-10 sm:h-11 w-full flex items-center justify-center">
               <p className="text-xs sm:text-sm md:text-base font-sans font-medium leading-relaxed text-[#E2E8F0]/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]">
-                Curated dinners designed for meaningful human connections across Delhi NCR.
+                Curated experiences designed for meaningful human connections across Delhi NCR.
               </p>
             </div>
           </div>

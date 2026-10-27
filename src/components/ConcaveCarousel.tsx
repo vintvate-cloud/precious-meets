@@ -425,9 +425,11 @@ export const ConcaveCarousel = forwardRef<ConcaveCarouselRef, ConcaveCarouselPro
                     <h4 className="font-sans font-semibold text-xs sm:text-sm text-ivory truncate select-none">
                       {item.author}
                     </h4>
-                    <p className="font-sans text-[11px] text-ivory/60 truncate select-none">
-                      {item.role ? `${item.role} • ` : ""}{item.city}
-                    </p>
+                    {item.role && (
+                      <p className="font-sans text-[11px] text-ivory/60 truncate select-none">
+                        {item.role}
+                      </p>
+                    )}
                   </div>
                 </div>
               </>
