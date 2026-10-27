@@ -37,7 +37,6 @@ import {
   ScanLine,
   Menu,
   X,
-  Compass,
   LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -297,9 +296,9 @@ function AdminConsolePage() {
   const handleSignOut = async () => {
     try {
       await signOut();
-      navigate({ to: "/" });
+      navigate({ to: "/login" });
     } catch (e) {
-      navigate({ to: "/" });
+      navigate({ to: "/login" });
     }
   };
 
@@ -447,13 +446,6 @@ function AdminConsolePage() {
         {/* Bottom Utility Links */}
         <div className="border-t border-white/10 pt-4 space-y-1">
           <Link
-            to="/dashboard"
-            className="w-full flex items-center gap-2.5 rounded-xl px-3.5 py-2 text-xs text-white/60 hover:text-white hover:bg-white/[0.04] transition-colors"
-          >
-            <Compass className="size-4 text-white/40" />
-            <span>Member Portal</span>
-          </Link>
-          <Link
             to="/"
             className="w-full flex items-center gap-2.5 rounded-xl px-3.5 py-2 text-xs text-white/60 hover:text-white hover:bg-white/[0.04] transition-colors"
           >
@@ -544,12 +536,12 @@ function AdminConsolePage() {
 
             <div className="border-t border-white/10 pt-4 space-y-1">
               <Link
-                to="/dashboard"
+                to="/"
                 onClick={() => setMobileMenuOpen(false)}
                 className="w-full flex items-center gap-2.5 rounded-xl px-3.5 py-2 text-xs text-white/60"
               >
-                <Compass className="size-4 text-white/40" />
-                <span>Member Portal</span>
+                <ArrowRight className="size-4 text-white/40" />
+                <span>Public Website</span>
               </Link>
               <button
                 onClick={handleSignOut}

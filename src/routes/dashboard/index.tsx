@@ -80,7 +80,7 @@ const LOCAL_STORAGE_RESERVATIONS_KEY = "precious_meets_member_rsvps";
 type DashboardTab = "overview" | "meets" | "requests" | "profile" | "questions" | "invoice";
 
 export function DashboardPage() {
-  const { user, profile, subscription, signOut, loading } = useAuth();
+  const { user, profile, subscription, signOut, loading, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   // Security Gate: Direct access without authentication is blocked
@@ -88,10 +88,17 @@ export function DashboardPage() {
     if (!loading && !user) {
       navigate({
         to: "/login",
-        search: { redirect: "/dashboard" } as any,
       });
     }
   }, [user, loading, navigate]);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } finally {
+      navigate({ to: "/login" });
+    }
+  };
 
   const [activeTab, setActiveTab] = useState<DashboardTab>("overview");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -277,7 +284,18 @@ export function DashboardPage() {
         </div>
 
         {/* Bottom Panel Utilities */}
-        <div className="space-y-1 pt-4 border-t border-white/10 text-xs">
+        <div className="space-y-1.5 pt-4 border-t border-white/10 text-xs">
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-xs font-semibold bg-[#E5C17D] text-[#151212] hover:bg-white transition-all shadow-md group"
+            >
+              <ShieldCheck className="size-4 text-[#151212] shrink-0" />
+              <span className="truncate">Back to Admin Console</span>
+              <span className="ml-auto text-xs opacity-70 group-hover:translate-x-0.5 transition-transform">&rarr;</span>
+            </Link>
+          )}
+
           <Link
             to="/safety"
             className="flex items-center gap-2.5 rounded-xl px-3.5 py-2 text-white/60 hover:text-red-400 hover:bg-white/[0.04] transition-colors"
@@ -295,7 +313,7 @@ export function DashboardPage() {
           </Link>
 
           <button
-            onClick={() => signOut()}
+            onClick={handleSignOut}
             className="w-full flex items-center gap-2.5 rounded-xl px-3.5 py-2 text-white/60 hover:text-red-400 hover:bg-white/[0.04] transition-colors cursor-pointer text-left"
           >
             <LogOut className="size-4" />
@@ -313,6 +331,15 @@ export function DashboardPage() {
         </Link>
 
         <div className="flex items-center gap-2">
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#E5C17D] text-[#151212] font-semibold text-[11px]"
+            >
+              <ShieldCheck className="size-3.5" />
+              <span>Admin</span>
+            </Link>
+          )}
           <span className="font-mono text-[11px] text-[#C6A568] bg-white/10 px-2.5 py-1 rounded-full">
             {memberId}
           </span>
@@ -328,6 +355,19 @@ export function DashboardPage() {
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <div className="lg:hidden bg-[#151212] border-b border-white/10 px-4 py-3 space-y-1 animate-in fade-in slide-in-from-top-2">
+          {isAdmin && (
+            <Link
+              to="/admin"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full flex items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-semibold bg-[#E5C17D] text-[#151212] mb-2"
+            >
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="size-4" />
+                <span>Back to Admin Console</span>
+              </div>
+              <span>&rarr;</span>
+            </Link>
+          )}
           {NAV_TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -356,7 +396,7 @@ export function DashboardPage() {
           })}
           <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs text-white/60">
             <Link to="/safety" className="text-red-400">Emergency SOS</Link>
-            <button onClick={() => signOut()}>Sign Out</button>
+            <button onClick={handleSignOut} className="hover:text-red-400">Sign Out</button>
           </div>
         </div>
       )}
@@ -365,6 +405,22 @@ export function DashboardPage() {
       {/* 3. MAIN RIGHT CONTENT AREA                                                */}
       {/* ========================================================================= */}
       <main className="lg:pl-64 xl:pl-72 min-h-screen flex flex-col justify-between">
+        {isAdmin && (
+          <div className="sticky top-0 z-20 bg-[#151212] border-b border-[#E5C17D]/30 px-4 sm:px-8 py-2.5 flex items-center justify-between text-xs text-white backdrop-blur-md shadow-sm">
+            <div className="flex items-center gap-2.5">
+              <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="font-semibold text-[#E5C17D]">Admin Session Preview</span>
+              <span className="hidden sm:inline text-white/50 font-mono text-[11px]">— Logged in as Administrator</span>
+            </div>
+            <Link
+              to="/admin"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E5C17D] text-[#151212] font-semibold text-[11px] hover:bg-white transition-colors shadow-xs"
+            >
+              <ShieldCheck className="size-3.5" />
+              <span>Back to Admin Console &rarr;</span>
+            </Link>
+          </div>
+        )}
         <div className="max-w-5xl mx-auto w-full p-5 sm:p-8 lg:p-10 space-y-6">
 
           {/* TAB 1: OVERVIEW */}

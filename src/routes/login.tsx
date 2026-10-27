@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import {
   ArrowRight,
@@ -42,11 +42,24 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const navigate = useNavigate();
   const search = Route.useSearch();
-  const { signInWithEmail } = useAuth();
+  const { signInWithEmail, user, isAdmin, loading: authLoading } = useAuth();
 
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // If already authenticated, redirect to appropriate destination immediately
+  useEffect(() => {
+    if (!authLoading && user) {
+      if (isAdmin) {
+        const dest = search.redirect && search.redirect.startsWith("/admin") ? search.redirect : "/admin";
+        navigate({ to: dest as any });
+      } else {
+        const dest = search.redirect && !search.redirect.startsWith("/admin") ? search.redirect : "/dashboard";
+        navigate({ to: dest as any });
+      }
+    }
+  }, [user, isAdmin, authLoading, navigate, search.redirect]);
 
   // Form State
   const [email, setEmail] = useState(search.email || "");
@@ -79,15 +92,19 @@ function LoginPage() {
         return;
       }
 
+      const isAdminUser = cleanEmail === "admin@preciousmeets.com" || cleanEmail === "safety@preciousmeets.com";
+
       toast.success(
-        cleanEmail === "admin@preciousmeets.com"
+        isAdminUser
           ? "Welcome back, Administrator."
           : "Successfully signed in.",
       );
 
-      const targetRoute = cleanEmail === "admin@preciousmeets.com"
-        ? (search.redirect || "/admin")
-        : (search.redirect || "/dashboard");
+      // Admins should always route to /admin unless explicitly heading to an /admin subroute.
+      // Never trap an admin in /dashboard redirect.
+      const targetRoute = isAdminUser
+        ? (search.redirect && search.redirect.startsWith("/admin") ? search.redirect : "/admin")
+        : (search.redirect && !search.redirect.startsWith("/admin") ? search.redirect : "/dashboard");
       navigate({ to: targetRoute as any });
     } catch (err: any) {
       setErrorMessage(err?.message || "An error occurred during authentication.");
