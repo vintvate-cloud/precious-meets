@@ -154,16 +154,10 @@ export function ConversationStarters() {
   const row2 = [...rowTwoPrompts, ...rowTwoPrompts, ...rowTwoPrompts];
 
   return (
-    <section className="relative w-full bg-[#FAF7F2] py-10 sm:py-14 overflow-hidden border-t border-black/5">
-      {/* Editorial Header (Minimal & Compact) */}
+    <section className="relative w-full bg-[#FAF7F2] py-10 sm:py-14 overflow-hidden">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center mb-6 sm:mb-8">
-        <p className="text-[11px] font-mono font-semibold tracking-[0.22em] uppercase text-[#5F7045] mb-2">
+        <h2 className="font-display text-3xl sm:text-4xl md:text-5xl text-[#171514] tracking-tight">
           BIG CONVERSATIONS
-        </p>
-
-        <h2 className="font-display text-2xl sm:text-3xl md:text-4xl text-[#171514] tracking-tight leading-tight">
-          Leave the resumes outside. <br className="hidden sm:inline" />
-          <em className="text-[#691C35] font-serif not-italic">Start somewhere honest.</em>
         </h2>
       </div>
 

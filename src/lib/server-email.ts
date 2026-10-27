@@ -5,11 +5,13 @@ export const sendEmailServer = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const apiKey =
       (typeof process !== "undefined" && (process.env?.RESEND_API_KEY || process.env?.VITE_RESEND_API_KEY)) ||
+      (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_RESEND_API_KEY) ||
       "";
+
     const fromAddress =
       data.from ||
       (typeof process !== "undefined" && process.env?.RESEND_FROM_EMAIL) ||
-      "Precious Meets <invitations@preciousmeets.com>";
+      "Precious Meets Billing <billing@preciousmeets.com>";
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -19,7 +21,7 @@ export const sendEmailServer = createServerFn({ method: "POST" })
       },
       body: JSON.stringify({
         from: fromAddress.trim(),
-        to: [data.to],
+        to: Array.isArray(data.to) ? data.to : [data.to],
         subject: data.subject,
         html: data.html,
       }),

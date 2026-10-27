@@ -16,6 +16,8 @@ export interface VerificationRecord {
   memberId?: string | undefined;
   aadhaarFileUrl?: string | undefined;
   aadhaarFileName?: string | undefined;
+  userPhotoUrl?: string | undefined;
+  userPhotoFileName?: string | undefined;
 }
 
 const STORAGE_KEY = "precious_meets_verification_queue_v1";
@@ -95,6 +97,7 @@ export class VerificationsService {
             phone: app.applicantPhone || "+91 98765 43210",
             city: app.applicantCity || "Delhi NCR",
             avatar:
+              app.userPhotoUrl ||
               app.avatarUrl ||
               "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
             method: app.aadhaarFileUrl ? "aadhaar_card_upload" : "digilocker_consent_offline",
@@ -111,6 +114,8 @@ export class VerificationsService {
             memberId: app.applicationReference.replace("PM-FILE-", "PM-"),
             aadhaarFileUrl: app.aadhaarFileUrl,
             aadhaarFileName: app.aadhaarFileName,
+            userPhotoUrl: app.userPhotoUrl || app.avatarUrl,
+            userPhotoFileName: app.userPhotoFileName,
           });
         } else {
           // If already in queue, make sure aadhaar file is synced if missing
@@ -119,6 +124,11 @@ export class VerificationsService {
             if (!existing.aadhaarFileUrl && app.aadhaarFileUrl) {
               existing.aadhaarFileUrl = app.aadhaarFileUrl;
               existing.aadhaarFileName = app.aadhaarFileName;
+            }
+            if (!existing.userPhotoUrl && (app.userPhotoUrl || app.avatarUrl)) {
+              existing.userPhotoUrl = app.userPhotoUrl || app.avatarUrl;
+              existing.userPhotoFileName = app.userPhotoFileName;
+              existing.avatar = app.userPhotoUrl || app.avatarUrl;
             }
             if (isApproved && existing.status !== "verified") {
               existing.status = "verified";
@@ -148,6 +158,8 @@ export class VerificationsService {
     memberId?: string | undefined;
     aadhaarFileUrl?: string | undefined;
     aadhaarFileName?: string | undefined;
+    userPhotoUrl?: string | undefined;
+    userPhotoFileName?: string | undefined;
   }): VerificationRecord {
     const queue = this.getQueue();
     const now = new Date();
@@ -174,6 +186,8 @@ export class VerificationsService {
       memberId: data.memberId || `PM-${Math.floor(1000 + Math.random() * 9000)}`,
       aadhaarFileUrl: data.aadhaarFileUrl,
       aadhaarFileName: data.aadhaarFileName,
+      userPhotoUrl: data.userPhotoUrl,
+      userPhotoFileName: data.userPhotoFileName,
     };
 
     // Prepend to avoid duplicates

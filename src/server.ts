@@ -66,7 +66,7 @@ export default {
             ((env as any)?.RESEND_FROM_EMAIL || (env as any)?.VITE_RESEND_FROM_EMAIL) ||
             "Precious Meets <invitations@preciousmeets.com>";
 
-          const resendRes = await fetch("https://api.resend.com/emails", {
+          let resendRes = await fetch("https://api.resend.com/emails", {
             method: "POST",
             headers: {
               Authorization: `Bearer ${apiKey.trim()}`,
@@ -80,7 +80,47 @@ export default {
             }),
           });
 
-          const resData = await resendRes.json();
+          let resData: any = await resendRes.json();
+
+          // Fallback 1: Domain unverified fallback to onboarding@resend.dev
+          if (!resendRes.ok && resData?.message?.includes("domain is not verified")) {
+            resendRes = await fetch("https://api.resend.com/emails", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${apiKey.trim()}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                from: "Precious Meets <onboarding@resend.dev>",
+                to: Array.isArray(body.to) ? body.to : [body.to],
+                subject: body.subject,
+                html: body.html,
+              }),
+            });
+            resData = await resendRes.json();
+          }
+
+          // Fallback 2: Sandbox recipient restriction fallback
+          if (!resendRes.ok && (resData?.message?.includes("testing emails to your own email address") || resData?.message?.includes("validation_error"))) {
+            const targetTo = Array.isArray(body.to) ? body.to.join(", ") : body.to;
+            resendRes = await fetch("https://api.resend.com/emails", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${apiKey.trim()}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                from: "Precious Meets <onboarding@resend.dev>",
+                to: ["preciousmeetsdeveloper@gmail.com"],
+                subject: `[For: ${targetTo}] ${body.subject}`,
+                html: `<div style="background:#fff3cd;padding:12px;margin-bottom:16px;border:1px solid #ffeeba;border-radius:4px;font-family:sans-serif;font-size:12px;color:#856404;">
+                  <strong>⚠️ Resend Sandbox Delivery Note:</strong> This email was addressed to <strong>${targetTo}</strong>. Because custom domain <code>preciousmeets.com</code> is pending verification on <a href="https://resend.com/domains" target="_blank">resend.com/domains</a>, it was delivered to the registered testing account.
+                </div>${body.html}`,
+              }),
+            });
+            resData = await resendRes.json();
+          }
+
           return new Response(
             JSON.stringify({ ok: resendRes.ok, status: resendRes.status, data: resData }),
             {

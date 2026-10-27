@@ -154,33 +154,6 @@ export function DoorGreetings() {
 
   return (
     <section className="relative min-h-[85vh] sm:min-h-screen w-full bg-[#FAF7F2] text-[#171514] flex flex-col justify-center items-center py-16 sm:py-24 px-4 sm:px-6 lg:px-8 overflow-hidden select-none">
-      {/* ========================================================================= */}
-      {/* 1. DYNAMIC COLOR LIGHTING ATMOSPHERE                                      */}
-      {/* ========================================================================= */}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        {/* Soft, Breathing Color Aura matching active greeting */}
-        <motion.div
-          animate={{
-            backgroundColor: activeGreeting.bgGlow,
-            scale: [1, 1.08, 1],
-          }}
-          transition={{ duration: 3.2, ease: "easeInOut" }}
-          className="w-[80vw] h-[80vw] max-w-[850px] max-h-[850px] rounded-full blur-[150px]"
-        />
-
-        {/* Ambient Gold Core Glow */}
-        <div className="absolute w-[50vw] h-[50vw] max-w-[550px] max-h-[550px] rounded-full bg-[#C6A568]/[0.08] blur-[130px]" />
-      </div>
-
-      {/* Classical Geometry Arch Lines in Background */}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-30">
-        <svg viewBox="0 0 1000 800" className="w-full h-full stroke-[#171514]/[0.07] fill-none">
-          <circle cx="500" cy="400" r="320" strokeDasharray="3 6" strokeWidth="1" />
-          <circle cx="500" cy="400" r="210" strokeWidth="0.8" />
-          <circle cx="500" cy="400" r="90" strokeDasharray="2 4" strokeWidth="0.6" />
-        </svg>
-      </div>
-
       <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col items-center justify-center my-auto space-y-8 sm:space-y-12 text-center">
         {/* ========================================================================= */}
         {/* CENTERSTAGE GREETING STATEMENT (Say -> [Language Greeting] -> to 5 new people) */}

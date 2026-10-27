@@ -195,12 +195,8 @@ function Statement() {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-ivory select-none py-20 sm:py-28 lg:py-36 px-4 sm:px-6 lg:px-8 overflow-hidden border-b border-border/30"
+      className="relative bg-[#FAF7F2] select-none py-20 sm:py-28 lg:py-36 px-4 sm:px-6 lg:px-8 overflow-hidden"
     >
-      {/* Subtle Warm Atmospheric Glow */}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <div className="w-[70vw] h-[70vw] max-w-[850px] max-h-[850px] rounded-full bg-[#C6A568]/12 blur-[150px] pointer-events-none select-none" />
-      </div>
 
       <div className="relative z-10 w-full max-w-[98vw] lg:max-w-[96vw] mx-auto flex flex-col items-center text-center px-1 sm:px-2">
         <h2 className="w-full font-display text-[6.5vw] sm:text-[4.8vw] md:text-[3.9vw] lg:text-[3.3vw] xl:text-[3.5vw] 2xl:text-[3.7vw] leading-[1.16] sm:leading-[1.2] tracking-tight select-none">
@@ -818,8 +814,67 @@ function Collage() {
       }
     });
 
-    // Step 7: Final hold with all 6 pinned postcards resting proudly on the board before unpinning
-    tl.to({}, { duration: 0.6 });
+    // Step 7: Comfortable pause so user can view all 6 pinned postcards on the green board
+    tl.to({}, { duration: 0.7 });
+
+    // Step 8: Smooth cinematic transition from forest green back to cream white (#FAF7F2)
+    // so background matches the lower section seamlessly before scrolling down
+    tl.to(
+      [stage, section],
+      {
+        backgroundColor: "#FAF7F2",
+        duration: 1.4,
+        ease: "power2.inOut",
+      },
+    )
+      .to(
+        "[data-stories-glow]",
+        {
+          opacity: 0,
+          duration: 1.2,
+          ease: "power2.inOut",
+        },
+        "<",
+      )
+      .to(
+        "[data-stories-vignette]",
+        {
+          opacity: 0,
+          duration: 1.2,
+          ease: "power2.inOut",
+        },
+        "<",
+      )
+      .to(
+        "[data-stories-watermark-sub]",
+        {
+          color: "rgba(23, 21, 20, 0.4)",
+          duration: 1.2,
+          ease: "power2.inOut",
+        },
+        "<",
+      )
+      .to(
+        "[data-stories-watermark-title]",
+        {
+          color: "rgba(23, 21, 20, 0.2)",
+          duration: 1.2,
+          ease: "power2.inOut",
+        },
+        "<",
+      )
+      .to(
+        "[data-stories-watermark-em]",
+        {
+          color: "rgba(105, 28, 53, 0.25)",
+          duration: 1.2,
+          ease: "power2.inOut",
+        },
+        "<",
+      );
+
+    // Brief settling moment so right as it turns white, it immediately releases and moves down
+    tl.to({}, { duration: 0.2 });
 
     const onResize = () => ScrollTrigger.refresh();
     window.addEventListener("resize", onResize);
@@ -834,7 +889,7 @@ function Collage() {
     <section
       id="stories"
       ref={sectionRef}
-      className="relative h-[560vh] bg-[#FAF7F2] select-none -mt-px"
+      className="relative h-[660vh] bg-[#FAF7F2] select-none -mt-px"
     >
       {/* Sticky Fullscreen Pinboard Stage */}
       <div
