@@ -20,7 +20,6 @@ import {
   Inbox,
   AlertCircle,
   KeyRound,
-  Trash2,
   Instagram,
   Linkedin,
 } from "lucide-react";
@@ -459,22 +458,9 @@ export function UsersArchiveSection() {
                   <span className="text-[11px] text-muted-foreground">
                     Click to review dossier & answers
                   </span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteCard(app);
-                      }}
-                      className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
-                      title="Permanently delete application dossier"
-                    >
-                      <Trash2 className="size-3.5" />
-                    </button>
-                    <span className="font-semibold text-burgundy flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-                      Open File →
-                    </span>
-                  </div>
+                  <span className="font-semibold text-burgundy flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                    Open File →
+                  </span>
                 </div>
               </div>
             );
