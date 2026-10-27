@@ -5,7 +5,7 @@ interface SummitAttendeesProps {
   onStageChange?: (stage: 0 | 1 | 2) => void;
 }
 
-const PAL = ["#ff9933", "#ffd166", "#2ec4b6", "#ff5d8f", "#7c9cff", "#4cc46a"];
+const PAL = ["#f472b6", "#fbbf24", "#22d3ee", "#fb923c", "#818cf8", "#34d399"];
 const WORDS = ["Namaste", "Hi!", "Chai?", "Hello", "Kya haal?", "Welcome"];
 const LOOP = 29; // 29-second extended, perfectly smooth sequential cycle
 
@@ -166,12 +166,15 @@ export function SummitAttendees({ isNight = true, onStageChange }: SummitAttende
 
     /**
      * DRAW PERSON
-     * Minimal Black (day) / Pure White (night) matching PromenadeHumanFigure
+     * Clean SVG human figure rendered in vibrant color palette (no outer circles/rings)
      */
-    function drawPerson(x: number, y: number, r: number) {
+    function drawPerson(x: number, y: number, r: number, color: string) {
       if (!ctx) return;
+      ctx.save();
       ctx.globalAlpha = 1;
-      ctx.fillStyle = isNight ? "#ffffff" : "#000000";
+      ctx.fillStyle = color;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 4 * sc;
 
       // Head: Solid Circle (exact 1:1 circle, no distortion)
       ctx.beginPath();
@@ -182,6 +185,7 @@ export function SummitAttendees({ isNight = true, onStageChange }: SummitAttende
       ctx.beginPath();
       ctx.ellipse(x, y + r * 0.8, r * 1.35, r * 1.6, 0, Math.PI, Math.PI * 2);
       ctx.fill();
+      ctx.restore();
     }
 
     /**
@@ -436,8 +440,8 @@ export function SummitAttendees({ isNight = true, onStageChange }: SummitAttende
         ctx.fillStyle = isNight ? "rgba(0, 0, 0, 0.45)" : "rgba(0, 0, 0, 0.22)";
         ctx.fill();
 
-        // The SVG figure itself: pure minimal black (day) / white (night)
-        drawPerson(p.x, p.y + bob, r);
+        // The SVG figure itself: clean colorful figure without any outer circles
+        drawPerson(p.x, p.y + bob, r, p.c);
 
         // Render Floating Verification Card Badge over verified members (Step 2)
         if (p.pop > 0) {
