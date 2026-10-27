@@ -82,7 +82,10 @@ export class VerificationsService {
 
         const isApproved = app.identityStatus === "verified" || app.status === "approved";
         const isFailed = app.identityStatus === "failed" || app.status === "rejected";
-        const queueStatus: VerificationRecord["status"] = isApproved
+        const isReuploaded = app.identityStatus === "reuploaded";
+        const queueStatus: VerificationRecord["status"] = isReuploaded
+          ? "manual_review"
+          : isApproved
           ? "verified"
           : isFailed
           ? "failed"
@@ -109,7 +112,9 @@ export class VerificationsService {
                   hour12: true,
                 })}`
               : "Recently",
-            notes: `Precious Meets Membership (₹${app.paymentAmountInr || 1999} Razorpay Payment: ${app.razorpayPaymentId || "Paid"}). Archetype: ${app.archetypeTitle}${app.aadhaarFileName ? ` | Aadhaar Doc: ${app.aadhaarFileName}` : ""}`,
+            notes: isReuploaded
+              ? `★ RE-UPLOADED: Member uploaded revised document (${app.aadhaarFileName || "Document"}). Archetype: ${app.archetypeTitle}`
+              : `Precious Meets Membership (₹${app.paymentAmountInr || 1999} Razorpay Payment: ${app.razorpayPaymentId || "Paid"}). Archetype: ${app.archetypeTitle}${app.aadhaarFileName ? ` | Aadhaar Doc: ${app.aadhaarFileName}` : ""}`,
             amountInr: app.paymentAmountInr || 1999,
             memberId: app.applicationReference.replace("PM-FILE-", "PM-"),
             aadhaarFileUrl: app.aadhaarFileUrl,
@@ -118,20 +123,26 @@ export class VerificationsService {
             userPhotoFileName: app.userPhotoFileName,
           });
         } else {
-          // If already in queue, make sure aadhaar file is synced if missing
+          // If already in queue, update with newly re-uploaded Aadhaar file
           const existing = unified.find((u) => u.email.toLowerCase() === cleanEmail);
           if (existing) {
-            if (!existing.aadhaarFileUrl && app.aadhaarFileUrl) {
+            if (app.aadhaarFileUrl) {
               existing.aadhaarFileUrl = app.aadhaarFileUrl;
               existing.aadhaarFileName = app.aadhaarFileName;
+              existing.method = "aadhaar_card_upload";
             }
             if (!existing.userPhotoUrl && (app.userPhotoUrl || app.avatarUrl)) {
               existing.userPhotoUrl = app.userPhotoUrl || app.avatarUrl;
               existing.userPhotoFileName = app.userPhotoFileName;
               existing.avatar = app.userPhotoUrl || app.avatarUrl;
             }
-            if (isApproved && existing.status !== "verified") {
+            if (app.identityStatus === "reuploaded") {
+              existing.status = "manual_review";
+              existing.notes = `★ RE-UPLOADED: Member uploaded revised document (${app.aadhaarFileName || "Document"})`;
+            } else if (isApproved && existing.status !== "verified") {
               existing.status = "verified";
+            } else if (isFailed && existing.status !== "failed") {
+              existing.status = "failed";
             }
           }
         }
@@ -276,8 +287,10 @@ export class VerificationsService {
             updated_at: new Date().toISOString(),
           })
           .eq("applicant_email", targetItem.email.toLowerCase())
-          .then(() => {})
-          .catch((err: any) => console.warn("[VerificationsService] Supabase identity status update notice:", err));
+          .then(
+            () => {},
+            (err: any) => console.warn("[VerificationsService] Supabase identity status update notice:", err)
+          );
       }
     } catch (err) {
       console.warn("[VerificationsService] Applications sync notice:", err);
@@ -348,5 +361,38 @@ export class VerificationsService {
     }
 
     return updated;
+  }
+
+  /**
+   * Directly syncs a newly re-uploaded Aadhaar card into the verifications queue
+   */
+  static syncReuploadedAadhaar(email: string, fileUrl: string, fileName: string): void {
+    const cleanEmail = email.trim().toLowerCase();
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      let list: VerificationRecord[] = stored ? JSON.parse(stored) : [];
+      if (!Array.isArray(list)) list = [];
+
+      const idx = list.findIndex((v) => v.email?.trim().toLowerCase() === cleanEmail);
+      if (idx !== -1) {
+        const item = list[idx];
+        if (item) {
+          item.aadhaarFileUrl = fileUrl;
+          item.aadhaarFileName = fileName;
+          item.status = "manual_review";
+          item.method = "aadhaar_card_upload";
+          item.notes = `★ RE-UPLOADED: Member uploaded revised document (${fileName || "Document"})`;
+          item.requestedAt = "Just now (Re-uploaded)";
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+        }
+      }
+    } catch (e) {
+      console.warn("[VerificationsService] syncReuploadedAadhaar local storage notice:", e);
+    }
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(new CustomEvent("precious_meets_verification_updated"));
+    }
   }
 }

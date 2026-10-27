@@ -366,24 +366,6 @@ export function DashboardPage() {
       {/* ========================================================================= */}
       <main className="lg:pl-64 xl:pl-72 min-h-screen flex flex-col justify-between">
         <div className="max-w-5xl mx-auto w-full p-5 sm:p-8 lg:p-10 space-y-6">
-          {/* Header Bar: Minimal, crisp */}
-          <div className="flex items-center justify-between border-b border-black/5 pb-4">
-            <div>
-              <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                Precious Meets · Private Circle
-              </span>
-              <h1 className="font-display text-2xl sm:text-3xl text-[#171514]">
-                {NAV_TABS.find((t) => t.id === activeTab)?.label}
-              </h1>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-xs text-[#5F7045] bg-[#5F7045]/10 border border-[#5F7045]/20 px-3 py-1 rounded-full hidden sm:inline-flex items-center gap-1.5 font-semibold">
-                <span className="size-1.5 rounded-full bg-[#5F7045] animate-pulse" />
-                Delhi NCR
-              </span>
-            </div>
-          </div>
 
           {/* TAB 1: OVERVIEW */}
           {activeTab === "overview" && (

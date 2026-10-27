@@ -139,6 +139,16 @@ html {
     background: var(--burgundy);
     color: var(--ivory);
   }
+
+  /* Enforce authentic regular weight on serif display typography to prevent browser faux-bold doubling */
+  .font-display,
+  h1.font-display,
+  h2.font-display,
+  h3.font-display,
+  h4.font-display {
+    font-family: var(--font-display);
+    font-weight: 400;
+  }
 }
 
 html.lenis,

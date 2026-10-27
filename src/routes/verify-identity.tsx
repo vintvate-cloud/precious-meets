@@ -68,16 +68,32 @@ function VerifyIdentityPage() {
   // Load application if appId or email is present
   useEffect(() => {
     if (appId || emailParam) {
-      const apps = ApplicationsService.getApplications();
-      const found = apps.find(
-        (a: MemberApplication) =>
-          (appId && a.id === appId) ||
-          (emailParam &&
-            a.applicantEmail.toLowerCase() === emailParam.toLowerCase()),
-      );
-      if (found) {
-        setApp(found);
-      }
+      const loadApp = async () => {
+        let apps = ApplicationsService.getApplications();
+        let found = apps.find(
+          (a: MemberApplication) =>
+            (appId && a.id.toLowerCase() === appId.toLowerCase()) ||
+            (emailParam &&
+              a.applicantEmail.toLowerCase() === emailParam.toLowerCase()),
+        );
+        if (!found) {
+          try {
+            apps = await ApplicationsService.fetchApplicationsFromDb();
+            found = apps.find(
+              (a: MemberApplication) =>
+                (appId && a.id.toLowerCase() === appId.toLowerCase()) ||
+                (emailParam &&
+                  a.applicantEmail.toLowerCase() === emailParam.toLowerCase()),
+            );
+          } catch (e) {
+            console.warn("[VerifyIdentity] Failed to fetch application from DB:", e);
+          }
+        }
+        if (found) {
+          setApp(found);
+        }
+      };
+      loadApp();
     }
   }, [appId, emailParam]);
 
