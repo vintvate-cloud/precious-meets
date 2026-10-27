@@ -36,12 +36,23 @@ export function UsersArchiveSection() {
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
-    setApplications(ApplicationsService.getApplications());
-    ApplicationsService.fetchApplicationsFromDb().then((realApps) => {
-      if (realApps && realApps.length > 0) {
-        setApplications(realApps);
-      }
-    });
+    const refreshData = () => {
+      setApplications(ApplicationsService.getApplications());
+      ApplicationsService.fetchApplicationsFromDb().then((realApps) => {
+        if (realApps && realApps.length > 0) {
+          setApplications(realApps);
+        }
+      });
+    };
+
+    refreshData();
+    window.addEventListener("precious_meets_applications_updated", refreshData);
+    window.addEventListener("storage", refreshData);
+
+    return () => {
+      window.removeEventListener("precious_meets_applications_updated", refreshData);
+      window.removeEventListener("storage", refreshData);
+    };
   }, []);
 
   const handleOpenDossier = (app: MemberApplication) => {

@@ -549,36 +549,43 @@ export class EmailService {
           }),
         });
 
-        const resData = await response.json();
+        let resData: any = {};
+        try {
+          resData = await response.json();
+        } catch (e) {
+          resData = {};
+        }
+
         if (response.ok && (resData.ok || resData.id || resData.data?.id)) {
           const emailId = resData.id || resData.data?.id || "resend_api_ok";
           console.log(`[EmailService] Live email successfully dispatched via /api/send-email to ${payload.to} (ID: ${emailId})`);
           return { success: true, id: emailId };
-        } else {
-          const errMsg = resData.error || resData.data?.message || resData.message || `Resend error HTTP ${response.status}`;
-          console.error("[EmailService] /api/send-email returned failure:", errMsg);
-          return { success: false, error: errMsg };
         }
+
+        console.warn(`[EmailService] /api/send-email returned status ${response.status}, triggering RPC fallback...`);
       } catch (clientErr: any) {
-        console.warn("[EmailService] /api/send-email failed, attempting RPC server function:", clientErr);
-        try {
-          const rpcRes = await sendEmailServer({
-            data: {
-              from: fromAddress,
-              to: payload.to,
-              subject,
-              html,
-            },
-          });
-          if (rpcRes.ok && rpcRes.data?.id) {
-            console.log(`[EmailService] Live email successfully dispatched via RPC to ${payload.to} (ID: ${rpcRes.data.id})`);
-            return { success: true, id: rpcRes.data.id };
-          }
-          return { success: false, error: rpcRes.data?.message || "Failed to send email via RPC" };
-        } catch (rpcErr: any) {
-          console.error("[EmailService] RPC send failed:", rpcErr);
-          return { success: false, error: rpcErr.message || String(rpcErr) };
+        console.warn("[EmailService] /api/send-email network call failed, triggering RPC fallback:", clientErr);
+      }
+
+      // Seamless Secondary Fallback: TanStack Start Server Function
+      try {
+        const rpcRes = await sendEmailServer({
+          data: {
+            from: fromAddress,
+            to: payload.to,
+            subject,
+            html,
+          },
+        });
+        if (rpcRes.ok && (rpcRes.data?.id || rpcRes.status === 200)) {
+          const emailId = rpcRes.data?.id || "resend_rpc_ok";
+          console.log(`[EmailService] Live email successfully dispatched via RPC to ${payload.to} (ID: ${emailId})`);
+          return { success: true, id: emailId };
         }
+        return { success: false, error: rpcRes.data?.message || `RPC failed HTTP ${rpcRes.status}` };
+      } catch (rpcErr: any) {
+        console.error("[EmailService] RPC send failed:", rpcErr);
+        return { success: false, error: rpcErr.message || String(rpcErr) };
       }
     }
 

@@ -115,6 +115,8 @@ CREATE TABLE IF NOT EXISTS public.member_applications (
     identity_verified_at TIMESTAMPTZ,
     aadhaar_file_url TEXT,
     aadhaar_file_name TEXT,
+    user_photo_url TEXT,
+    user_photo_name TEXT,
     
     -- Credential Dispatch
     credentials_sent BOOLEAN NOT NULL DEFAULT FALSE,

@@ -7,6 +7,7 @@ import { Footer } from "@/components/Footer";
 import { EmailService } from "@/lib/email-service";
 import { ApplicationsService } from "@/lib/applications-service";
 import { VerificationsService } from "@/lib/verifications-service";
+import { CryptoService } from "@/lib/crypto-service";
 import { openRazorpaySubscriptionCheckout } from "@/lib/razorpay-client";
 import { supabase } from "@/lib/supabase";
 import {
@@ -26,6 +27,7 @@ import {
   Mail,
   Compass,
   Clock,
+  Printer,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -61,6 +63,8 @@ export function QuizResultsPage() {
   const [phone, setPhone] = useState(authProfile?.phone || "");
   const [aadhaarFileUrl, setAadhaarFileUrl] = useState<string | undefined>(undefined);
   const [aadhaarFileName, setAadhaarFileName] = useState<string | undefined>(undefined);
+  const [userPhotoUrl, setUserPhotoUrl] = useState<string | undefined>(undefined);
+  const [userPhotoFileName, setUserPhotoFileName] = useState<string | undefined>(undefined);
   const [paying, setPaying] = useState(false);
   const [paidDossier, setPaidDossier] = useState<{ memberId: string; paymentId: string; invoiceNumber: string } | null>(null);
 
@@ -173,6 +177,8 @@ export function QuizResultsPage() {
         if (c.phone) setPhone("+91 " + c.phone);
         if (c.aadhaarFileUrl) setAadhaarFileUrl(c.aadhaarFileUrl);
         if (c.aadhaarFileName) setAadhaarFileName(c.aadhaarFileName);
+        if (c.userPhotoUrl) setUserPhotoUrl(c.userPhotoUrl);
+        if (c.userPhotoFileName) setUserPhotoFileName(c.userPhotoFileName);
         return;
       } catch (e) {
         // Ignore
@@ -206,7 +212,7 @@ export function QuizResultsPage() {
         email: email.trim(),
         phone: phone.trim(),
         amountInr: 1999,
-        archetypeTitle: profile?.archetype?.title,
+        archetypeTitle: profile?.archetype?.title || "The Curious Flâneur",
         onSuccess: (result) => {
           handleRazorpaySuccess({
             paymentId: result.paymentId,
@@ -241,29 +247,44 @@ export function QuizResultsPage() {
         year: "numeric",
       });
 
-      // Retrieve Aadhaar document proof from state or fallback to saved contact in localStorage
+      // Retrieve Aadhaar document, personal photo proof, and contact details from state or fallback to saved contact in localStorage
+      let effectiveEmail = email.trim();
+      let effectiveName = name.trim();
+      let effectivePhone = phone.trim();
       let effectiveAadhaarUrl = aadhaarFileUrl;
       let effectiveAadhaarName = aadhaarFileName;
-      if (!effectiveAadhaarUrl && typeof window !== "undefined") {
+      let effectiveUserPhotoUrl = userPhotoUrl;
+      let effectiveUserPhotoName = userPhotoFileName;
+
+      if (typeof window !== "undefined") {
         try {
           const raw = localStorage.getItem("precious_meets_user_contact");
           if (raw) {
             const parsed = JSON.parse(raw);
-            if (parsed.aadhaarFileUrl) effectiveAadhaarUrl = parsed.aadhaarFileUrl;
-            if (parsed.aadhaarFileName) effectiveAadhaarName = parsed.aadhaarFileName;
+            if (!effectiveEmail && parsed.email) effectiveEmail = parsed.email.trim();
+            if (!effectiveName && parsed.fullName) effectiveName = parsed.fullName.trim();
+            if (!effectivePhone && parsed.phone) effectivePhone = ("+91 " + parsed.phone).trim();
+            if (!effectiveAadhaarUrl && parsed.aadhaarFileUrl) effectiveAadhaarUrl = parsed.aadhaarFileUrl;
+            if (!effectiveAadhaarName && parsed.aadhaarFileName) effectiveAadhaarName = parsed.aadhaarFileName;
+            if (!effectiveUserPhotoUrl && parsed.userPhotoUrl) effectiveUserPhotoUrl = parsed.userPhotoUrl;
+            if (!effectiveUserPhotoName && parsed.userPhotoFileName) effectiveUserPhotoName = parsed.userPhotoFileName;
           }
         } catch (e) {}
       }
 
+      if (!effectiveEmail && user?.email) {
+        effectiveEmail = user.email.trim();
+      }
+
       // 1. Dispatch automated subscription & payment confirmed email IMMEDIATELY
-      // This sends the Razorpay tax invoice & subscription confirmation email to user's inbox right away
+      // This sends the Razorpay tax invoice & subscription confirmation email directly to the applicant's inbox
       const sendEmailPromise = EmailService.send({
-        to: email.trim(),
+        to: effectiveEmail,
         subject: "Tax Invoice & Payment Receipt | Precious Meets",
         template: "subscription_activated",
         data: {
-          name: name.trim(),
-          email: email.trim(),
+          name: effectiveName || "Member",
+          email: effectiveEmail,
           amount: "₹1,999",
           plan: "Precious Meets Membership",
           memberId,
@@ -281,13 +302,21 @@ export function QuizResultsPage() {
       // Note: User is pending admin credential issuance
       await ApplicationsService.createOrUpdateFromCheckout({
         userId: user?.id,
-        name: name.trim(),
-        email: email.trim(),
-        phone: phone.trim(),
+        name: effectiveName,
+        email: effectiveEmail,
+        phone: effectivePhone,
         archetypeTitle: profile?.archetype?.title || "The Curious Flâneur",
         archetypeDescription: profile?.archetype?.description || "Curated Member",
         archetypeTraits: profile?.archetype?.keyTraits || [],
-        scores: profile?.dimensions,
+        scores: profile?.dimensions
+          ? {
+              socialEnergy: profile.dimensions.socialEnergy,
+              conversationDepth: profile.dimensions.conversationDepth,
+              playfulness: profile.dimensions.playfulness,
+              curiosity: profile.dimensions.curiosity,
+              adventure: profile.dimensions.adventure,
+            }
+          : undefined,
         dietary: profile?.dimensions?.dietary,
         allergies: profile?.dimensions?.allergies,
         boundaries: profile?.dimensions?.boundaries,
@@ -300,20 +329,25 @@ export function QuizResultsPage() {
         invoiceNumber,
         aadhaarFileUrl: effectiveAadhaarUrl,
         aadhaarFileName: effectiveAadhaarName,
+        userPhotoUrl: effectiveUserPhotoUrl,
+        userPhotoFileName: effectiveUserPhotoName,
       });
 
       // 3. Dispatch a verification request to the Admin Panel's verification queue
       VerificationsService.addRequest({
-        userName: name.trim(),
-        email: email.trim(),
-        phone: phone.trim() || "+91 98765 43210",
+        userName: effectiveName,
+        email: effectiveEmail,
+        phone: effectivePhone || "+91 98765 43210",
         city: "Delhi NCR",
         method: effectiveAadhaarUrl ? "aadhaar_card_upload" : "digilocker_consent_offline",
         notes: `Precious Meets Membership (₹1,999 Razorpay Payment: ${result.paymentId}). Archetype: ${profile?.archetype?.title || "The Curious Flâneur"}${effectiveAadhaarName ? ` | Aadhaar Document: ${effectiveAadhaarName}` : ""}`,
         amountInr: 1999,
         memberId,
+        avatar: effectiveUserPhotoUrl,
         aadhaarFileUrl: effectiveAadhaarUrl,
         aadhaarFileName: effectiveAadhaarName,
+        userPhotoUrl: effectiveUserPhotoUrl,
+        userPhotoFileName: effectiveUserPhotoName,
       });
 
       // Await email delivery confirmation
@@ -661,6 +695,15 @@ export function QuizResultsPage() {
                           3. Once credentials arrive, sign in to unlock your matched secret tables.
                         </p>
                       </div>
+                      <Button
+                        type="button"
+                        onClick={() => window.print()}
+                        variant="outline"
+                        className="mt-4 w-full rounded-full border-ivory/20 bg-ivory/10 hover:bg-ivory/20 text-xs font-semibold text-ivory flex items-center justify-center gap-1.5 cursor-pointer py-4"
+                      >
+                        <Printer className="size-3.5 text-[#C6A568]" />
+                        <span>Print / Save Tax Receipt</span>
+                      </Button>
                     </div>
                   ) : (
                     <div>
@@ -823,13 +866,24 @@ export function QuizResultsPage() {
                 </div>
               </div>
 
-              <Button
-                onClick={() => setSuccessData(null)}
-                variant="outline"
-                className="w-full rounded-full py-5 font-semibold text-foreground border-border hover:bg-muted cursor-pointer"
-              >
-                Close
-              </Button>
+              <div className="flex gap-2 pt-1">
+                <Button
+                  type="button"
+                  onClick={() => window.print()}
+                  variant="outline"
+                  className="flex-1 rounded-full py-5 font-semibold text-foreground border-border hover:bg-muted cursor-pointer flex items-center justify-center gap-1.5 text-xs"
+                >
+                  <Printer className="size-3.5" />
+                  <span>Print Tax Invoice</span>
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => setSuccessData(null)}
+                  className="flex-1 rounded-full py-5 font-semibold text-ivory bg-burgundy hover:bg-burgundy/90 cursor-pointer text-xs"
+                >
+                  Close
+                </Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>

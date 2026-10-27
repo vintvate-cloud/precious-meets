@@ -33,21 +33,22 @@ export default defineConfig({
             req.on("end", async () => {
               try {
                 const body = JSON.parse(bodyStr || "{}");
+                const freshEnv = loadEnv(server.config.mode || "development", process.cwd(), "");
                 const apiKey =
-                  env.RESEND_API_KEY ||
-                  env.VITE_RESEND_API_KEY ||
+                  freshEnv.RESEND_API_KEY ||
+                  freshEnv.VITE_RESEND_API_KEY ||
                   process.env.RESEND_API_KEY ||
                   process.env.VITE_RESEND_API_KEY ||
                   "";
                 const from =
                   body.from ||
-                  env.RESEND_FROM_EMAIL ||
-                  env.VITE_RESEND_FROM_EMAIL ||
+                  freshEnv.RESEND_FROM_EMAIL ||
+                  freshEnv.VITE_RESEND_FROM_EMAIL ||
                   process.env.RESEND_FROM_EMAIL ||
                   process.env.VITE_RESEND_FROM_EMAIL ||
                   "Precious Meets <invitations@preciousmeets.com>";
 
-                const response = await fetch("https://api.resend.com/emails", {
+                let response = await fetch("https://api.resend.com/emails", {
                   method: "POST",
                   headers: {
                     Authorization: `Bearer ${apiKey.trim()}`,
@@ -61,7 +62,51 @@ export default defineConfig({
                   }),
                 });
 
-                const resData = await response.json();
+                let resData: any = await response.json();
+
+                // Fallback 1: If domain preciousmeets.com is not verified yet, fallback to onboarding@resend.dev
+                if (!response.ok && resData?.message?.includes("domain is not verified")) {
+                  console.warn("[resend-email-api-plugin] Domain preciousmeets.com unverified on Resend. Retrying with onboarding@resend.dev...");
+                  response = await fetch("https://api.resend.com/emails", {
+                    method: "POST",
+                    headers: {
+                      Authorization: `Bearer ${apiKey.trim()}`,
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      from: "Precious Meets <onboarding@resend.dev>",
+                      to: Array.isArray(body.to) ? body.to : [body.to],
+                      subject: body.subject,
+                      html: body.html,
+                    }),
+                  });
+                  resData = await response.json();
+                }
+
+                // Fallback 2: If Resend sandbox restricts delivery to account owner email
+                if (!response.ok && (resData?.message?.includes("testing emails to your own email address") || resData?.message?.includes("validation_error"))) {
+                  const match = resData?.message?.match(/to your own email address \(([^)]+)\)/);
+                  const fallbackOwnerEmail = (match && match[1]) ? match[1] : "preciousmeetsdeveloper@gmail.com";
+                  const targetTo = Array.isArray(body.to) ? body.to.join(", ") : body.to;
+                  console.warn(`[resend-email-api-plugin] Resend sandbox restriction: routing test email for ${targetTo} to verified sandbox address ${fallbackOwnerEmail}...`);
+                  response = await fetch("https://api.resend.com/emails", {
+                    method: "POST",
+                    headers: {
+                      Authorization: `Bearer ${apiKey.trim()}`,
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      from: "Precious Meets <onboarding@resend.dev>",
+                      to: [fallbackOwnerEmail],
+                      subject: `[For: ${targetTo}] ${body.subject}`,
+                      html: `<div style="background:#fff3cd;padding:12px;margin-bottom:16px;border:1px solid #ffeeba;border-radius:4px;font-family:sans-serif;font-size:12px;color:#856404;">
+                        <strong>⚠️ Resend Sandbox Delivery Note:</strong> This test email was originally addressed to <strong>${targetTo}</strong>. Because the custom domain <code>preciousmeets.com</code> is pending DNS verification on <a href="https://resend.com/domains" target="_blank">resend.com/domains</a>, Resend delivered it to the registered sandbox testing account (<strong>${fallbackOwnerEmail}</strong>). Once the domain is verified, emails will go directly to recipient inboxes.
+                      </div>${body.html}`,
+                    }),
+                  });
+                  resData = await response.json();
+                }
+
                 res.setHeader("Content-Type", "application/json");
                 res.statusCode = response.status;
                 res.end(JSON.stringify({ ok: response.ok, status: response.status, data: resData }));

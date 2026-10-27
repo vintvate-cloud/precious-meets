@@ -82,6 +82,8 @@ export interface MemberApplication {
   identityVerifiedAt?: string;
   aadhaarFileUrl?: string;
   aadhaarFileName?: string;
+  userPhotoUrl?: string;
+  userPhotoFileName?: string;
   aadhaarReuploadedAt?: string;
   aadhaarRejectionFeedback?: string;
 
@@ -185,7 +187,9 @@ export class ApplicationsService {
             applicantPhone: d.applicant_phone || localMatch?.applicantPhone || "",
             applicantCity: d.applicant_city || localMatch?.applicantCity || "Delhi NCR",
             applicantPincode: d.applicant_pincode || localMatch?.applicantPincode || undefined,
-            avatarUrl: d.avatar_url || localMatch?.avatarUrl || undefined,
+            avatarUrl: d.avatar_url || d.user_photo_url || d.scores?.user_photo_url || localMatch?.avatarUrl || localMatch?.userPhotoUrl || undefined,
+            userPhotoUrl: d.user_photo_url || d.scores?.user_photo_url || d.avatar_url || localMatch?.userPhotoUrl || localMatch?.avatarUrl || undefined,
+            userPhotoFileName: d.user_photo_name || d.scores?.user_photo_name || localMatch?.userPhotoFileName || undefined,
             archetypeTitle: d.archetype_title || localMatch?.archetypeTitle || "The Curious Flâneur",
             archetypeDescription: d.archetype_description || localMatch?.archetypeDescription || "",
             archetypeTraits: Array.isArray(d.archetype_traits) ? d.archetype_traits : (localMatch?.archetypeTraits || []),
@@ -286,6 +290,8 @@ export class ApplicationsService {
     memberId?: string;
     aadhaarFileUrl?: string;
     aadhaarFileName?: string;
+    userPhotoUrl?: string;
+    userPhotoFileName?: string;
   }): Promise<MemberApplication> {
     const apps = this.loadApplications();
     const cleanEmail = payload.email.trim().toLowerCase();
@@ -305,7 +311,9 @@ export class ApplicationsService {
       applicantPhone: payload.phone.trim(),
       applicantCity: "Delhi NCR",
       applicantPincode: payload.pincode,
-      avatarUrl: undefined,
+      avatarUrl: payload.userPhotoUrl || undefined,
+      userPhotoUrl: payload.userPhotoUrl || undefined,
+      userPhotoFileName: payload.userPhotoFileName || undefined,
       archetypeTitle: payload.archetypeTitle,
       archetypeDescription:
         payload.archetypeDescription ||
@@ -340,6 +348,8 @@ export class ApplicationsService {
       identityReference: `DL-${Math.floor(10000 + Math.random() * 90000)}`,
       aadhaarFileUrl: payload.aadhaarFileUrl,
       aadhaarFileName: payload.aadhaarFileName,
+      userPhotoUrl: payload.userPhotoUrl,
+      userPhotoFileName: payload.userPhotoFileName,
       createdAt: existingIndex >= 0 ? apps[existingIndex].createdAt : now,
       updatedAt: now,
     };
@@ -987,6 +997,8 @@ export class ApplicationsService {
           playfulness: app.playfulnessScore,
           curiosity: app.curiosityScore,
           adventure: app.adventureScore,
+          user_photo_url: app.userPhotoUrl || app.avatarUrl,
+          user_photo_name: app.userPhotoFileName,
         },
         quiz_answers: app.quizAnswers,
         dietary_preference: app.dietaryPreference,
@@ -1003,6 +1015,9 @@ export class ApplicationsService {
         identity_reference: app.identityReference,
         aadhaar_file_url: app.aadhaarFileUrl,
         aadhaar_file_name: app.aadhaarFileName,
+        user_photo_url: app.userPhotoUrl || app.avatarUrl,
+        user_photo_name: app.userPhotoFileName,
+        avatar_url: app.avatarUrl || app.userPhotoUrl,
         review_decision_notes: app.reviewDecisionNotes,
         rejection_reason: app.rejectionReason,
         reviewed_at: app.reviewedAt,
@@ -1012,14 +1027,34 @@ export class ApplicationsService {
         payload.id = app.id;
       }
 
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from("member_applications")
         .upsert(payload, { onConflict: "applicant_email" })
         .select()
         .single();
 
+      // Graceful fallback: If Supabase table schema hasn't executed migration for user_photo_url / user_photo_name,
+      // retry without those columns (they are safely preserved inside avatar_url and scores.user_photo_url)
+      if (error && (error.code === "PGRST204" || error.message?.includes("column"))) {
+        console.warn("[ApplicationsService] Supabase schema cache notice (missing user_photo columns). Retrying with schema-safe payload...");
+        const safePayload = { ...payload };
+        delete safePayload.user_photo_url;
+        delete safePayload.user_photo_name;
+
+        const retryRes = await supabase
+          .from("member_applications")
+          .upsert(safePayload, { onConflict: "applicant_email" })
+          .select()
+          .single();
+
+        data = retryRes.data;
+        error = retryRes.error;
+      }
+
       if (error) {
-        console.warn("[ApplicationsService] Supabase member_applications upsert error:", error.message);
+        console.warn("[ApplicationsService] Supabase member_applications upsert warning:", error.message);
+      } else if (data) {
+        console.log("[ApplicationsService] Member application successfully saved to Supabase! ID:", data.id);
       }
       return data;
     } catch (err: any) {

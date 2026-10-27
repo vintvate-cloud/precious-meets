@@ -37,6 +37,7 @@ import {
   RefreshCw,
   FileUp,
   RotateCcw,
+  Camera,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -292,6 +293,7 @@ export function UserDossierModal({
             <div className="flex items-center gap-4">
               <img
                 src={
+                  application.userPhotoUrl ||
                   application.avatarUrl ||
                   "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80"
                 }
@@ -786,50 +788,143 @@ export function UserDossierModal({
                   </div>
                 </div>
 
-                {/* Uploaded Aadhaar Document Proof */}
-                {(() => {
-                  const effectiveUrl =
-                    application.aadhaarFileUrl ||
-                    (application.identityProvider === "aadhaar_card_upload" || application.aadhaarFileName
-                      ? getSampleAadhaarSvg(application.applicantName, application.applicationReference)
-                      : null);
-                  if (!effectiveUrl) return null;
-
-                  return (
-                    <div className="rounded-xl bg-ivory p-4 border border-burgundy/30 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 font-semibold text-burgundy text-xs">
-                          <FileText className="size-4" />
-                          <span>Uploaded Aadhaar Document ({application.aadhaarFileName || "UIDAI Aadhaar Copy"})</span>
-                        </div>
-                        <a
-                          href={effectiveUrl}
-                          download={application.aadhaarFileName || "aadhaar_card"}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-burgundy hover:underline cursor-pointer"
-                        >
-                          <ExternalLink className="size-3" /> Open Original
-                        </a>
-                      </div>
-                      {!effectiveUrl.startsWith("data:application/pdf") && !effectiveUrl.toLowerCase().includes(".pdf") ? (
-                        <div className="flex justify-center bg-card rounded-lg p-2 border border-border">
-                          <img
-                            src={effectiveUrl}
-                            alt="Aadhaar Card"
-                            className="max-h-64 object-contain rounded"
-                          />
-                        </div>
-                      ) : (
-                        <iframe
-                          src={effectiveUrl}
-                          title="Aadhaar PDF"
-                          className="w-full h-64 rounded border border-border"
-                        />
-                      )}
+                {/* Side-by-Side Face Match & Identity Verification Audit */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold text-xs text-foreground flex items-center gap-1.5">
+                        <ShieldCheck className="size-4 text-forest" />
+                        <span>Identity Verification & Face-Match Review</span>
+                      </h4>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                        Compare the facial features and identity on the Aadhaar document against the member&apos;s uploaded personal photo.
+                      </p>
                     </div>
-                  );
-                })()}
+                    <span className="rounded-full bg-forest/15 border border-forest/30 px-2.5 py-0.5 text-[10px] font-mono font-bold text-forest uppercase">
+                      Dual Proof Audit
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Card 1: Aadhaar Document */}
+                    {(() => {
+                      const effectiveAadhaar =
+                        application.aadhaarFileUrl ||
+                        (application.identityProvider === "aadhaar_card_upload" || application.aadhaarFileName
+                          ? getSampleAadhaarSvg(application.applicantName, application.applicationReference)
+                          : null);
+
+                      return (
+                        <div className="rounded-2xl bg-ivory p-4 border border-burgundy/30 space-y-3 flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center justify-between pb-2 border-b border-border/60">
+                              <div className="flex items-center gap-1.5 font-semibold text-burgundy text-xs">
+                                <FileText className="size-4" />
+                                <span className="truncate max-w-[170px] sm:max-w-[220px]">
+                                  Aadhaar Card ({application.aadhaarFileName || "UIDAI Document"})
+                                </span>
+                              </div>
+                              {effectiveAadhaar && (
+                                <a
+                                  href={effectiveAadhaar}
+                                  download={application.aadhaarFileName || "aadhaar_card"}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-burgundy hover:underline cursor-pointer shrink-0"
+                                >
+                                  <ExternalLink className="size-3" /> View Full
+                                </a>
+                              )}
+                            </div>
+
+                            <div className="mt-3 flex justify-center bg-card rounded-xl p-2 border border-border min-h-[220px] items-center overflow-hidden">
+                              {effectiveAadhaar ? (
+                                !effectiveAadhaar.startsWith("data:application/pdf") && !effectiveAadhaar.toLowerCase().includes(".pdf") ? (
+                                  <img
+                                    src={effectiveAadhaar}
+                                    alt="Aadhaar Card"
+                                    className="max-h-56 w-auto object-contain rounded-lg shadow-xs"
+                                  />
+                                ) : (
+                                  <iframe
+                                    src={effectiveAadhaar}
+                                    title="Aadhaar PDF"
+                                    className="w-full h-56 rounded border border-border"
+                                  />
+                                )
+                              ) : (
+                                <div className="text-center p-4 text-xs text-muted-foreground">
+                                  <FileText className="size-8 mx-auto text-muted-foreground/40 mb-1" />
+                                  <span>No Aadhaar document uploaded</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="pt-2 border-t border-border/50 flex items-center justify-between text-[11px] text-muted-foreground font-mono">
+                            <span>Proof 1: Government ID</span>
+                            <span className="text-forest font-semibold">
+                              {effectiveAadhaar ? "✓ Document Attached" : "Pending"}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Card 2: Applicant's Own Photo */}
+                    {(() => {
+                      const effectivePhoto = application.userPhotoUrl || application.avatarUrl;
+
+                      return (
+                        <div className="rounded-2xl bg-ivory p-4 border border-forest/30 space-y-3 flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center justify-between pb-2 border-b border-border/60">
+                              <div className="flex items-center gap-1.5 font-semibold text-forest text-xs">
+                                <Camera className="size-4" />
+                                <span className="truncate max-w-[170px] sm:max-w-[220px]">
+                                  Personal Photo ({application.userPhotoFileName || "Applicant Portrait"})
+                                </span>
+                              </div>
+                              {effectivePhoto && (
+                                <a
+                                  href={effectivePhoto}
+                                  download={application.userPhotoFileName || "applicant_photo.jpg"}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-forest hover:underline cursor-pointer shrink-0"
+                                >
+                                  <ExternalLink className="size-3" /> View Full
+                                </a>
+                              )}
+                            </div>
+
+                            <div className="mt-3 flex justify-center bg-card rounded-xl p-2 border border-border min-h-[220px] items-center overflow-hidden">
+                              {effectivePhoto ? (
+                                <img
+                                  src={effectivePhoto}
+                                  alt="Applicant Personal Photo"
+                                  className="max-h-56 w-auto object-contain rounded-lg shadow-xs"
+                                />
+                              ) : (
+                                <div className="text-center p-4 text-xs text-muted-foreground">
+                                  <Camera className="size-8 mx-auto text-muted-foreground/40 mb-1" />
+                                  <span>No personal photo uploaded yet</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="pt-2 border-t border-border/50 flex items-center justify-between text-[11px] text-muted-foreground font-mono">
+                            <span>Proof 2: Live Member Portrait</span>
+                            <span className="text-forest font-semibold">
+                              {effectivePhoto ? "✓ Photo Verified" : "Pending"}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
 
                 {/* Aadhaar Verification Decision Action Bar */}
                 <div className="rounded-xl bg-ivory p-4 border border-border flex flex-col sm:flex-row items-center justify-between gap-3">

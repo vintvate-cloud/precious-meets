@@ -19,6 +19,7 @@ import {
   Trash2,
   Image as ImageIcon,
   Loader2,
+  Camera,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -60,6 +61,12 @@ export function QuizPage() {
   const [isProcessingFile, setIsProcessingFile] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Applicant Own Photo Upload
+  const [userPhotoUrl, setUserPhotoUrl] = useState<string | null>(null);
+  const [userPhotoFileName, setUserPhotoFileName] = useState<string | null>(null);
+  const [isProcessingUserPhoto, setIsProcessingUserPhoto] = useState(false);
+  const userPhotoInputRef = useRef<HTMLInputElement>(null);
+
   // Always initialize quiz with clean empty fields for all users
   useEffect(() => {
     // Clear any previous answers and contact data so questions always start unselected
@@ -73,6 +80,8 @@ export function QuizPage() {
     setEmail("");
     setAadhaarFileUrl(null);
     setAadhaarFileName(null);
+    setUserPhotoUrl(null);
+    setUserPhotoFileName(null);
 
     // Set initial history state
     window.history.replaceState({ quizStep: 0 }, "");
@@ -229,6 +238,73 @@ export function QuizPage() {
     }
   };
 
+  const handleUserPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file (JPG, PNG, or WEBP) for your photo.");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("File size is too large. Please select a photo under 10MB.");
+      return;
+    }
+
+    setIsProcessingUserPhoto(true);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        // Compress using canvas to ensure it fits comfortably in localStorage (~40-70kb)
+        const MAX_DIM = 850;
+        let width = img.width;
+        let height = img.height;
+        if (width > MAX_DIM || height > MAX_DIM) {
+          if (width > height) {
+            height = Math.round((height * MAX_DIM) / width);
+            width = MAX_DIM;
+          } else {
+            width = Math.round((width * MAX_DIM) / height);
+            height = MAX_DIM;
+          }
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.72);
+          setUserPhotoUrl(compressedDataUrl);
+          setUserPhotoFileName(file.name);
+          toast.success("Your photo attached successfully!");
+        } else {
+          setUserPhotoUrl(event.target?.result as string);
+          setUserPhotoFileName(file.name);
+        }
+        setIsProcessingUserPhoto(false);
+      };
+      img.onerror = () => {
+        toast.error("Failed to process photo. Please try another image.");
+        setIsProcessingUserPhoto(false);
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveUserPhoto = () => {
+    setUserPhotoUrl(null);
+    setUserPhotoFileName(null);
+    if (userPhotoInputRef.current) {
+      userPhotoInputRef.current.value = "";
+    }
+  };
+
   const handleSubmit = async () => {
     if (!fullName.trim()) {
       toast.error("Please enter your full name.");
@@ -252,6 +328,10 @@ export function QuizPage() {
       toast.error("Please upload your Aadhaar Card document for identity verification.");
       return;
     }
+    if (!userPhotoUrl) {
+      toast.error("Please upload your own photo for identity verification and table curation.");
+      return;
+    }
 
     setSubmitting(true);
 
@@ -262,6 +342,8 @@ export function QuizPage() {
       email: email.trim(),
       aadhaarFileUrl,
       aadhaarFileName: aadhaarFileName || "aadhaar_card_upload",
+      userPhotoUrl,
+      userPhotoFileName: userPhotoFileName || "personal_photo",
     };
     localStorage.setItem(LOCAL_STORAGE_CONTACT_KEY, JSON.stringify(contactData));
 
@@ -280,6 +362,8 @@ export function QuizPage() {
       localStorage.removeItem(LOCAL_STORAGE_CONTACT_KEY);
       setAnswers({});
       setCurrentIndex(0);
+      setUserPhotoUrl(null);
+      setUserPhotoFileName(null);
       window.history.replaceState({ quizStep: 0 }, "");
     }
   };
@@ -558,106 +642,201 @@ export function QuizPage() {
                   </div>
                 </div>
 
-                {/* Aadhaar Card Upload Field */}
-                <div className="space-y-2 pt-2 border-t border-border/70">
-                  <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-foreground">
-                      <ShieldCheck className="size-4 text-forest" />
-                      <span>Upload Aadhaar Card (Front / Full)</span>
-                      <span className="text-burgundy text-xs font-bold">*</span>
-                    </label>
-                    <span className="text-[11px] font-mono text-muted-foreground">
-                      JPG, PNG, PDF (Max 10MB)
-                    </span>
+                  {/* Aadhaar Card Upload Field */}
+                  <div className="space-y-2 pt-2 border-t border-border/70">
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-foreground">
+                        <ShieldCheck className="size-4 text-forest" />
+                        <span>Upload Aadhaar Card (Front / Full)</span>
+                        <span className="text-burgundy text-xs font-bold">*</span>
+                      </label>
+                      <span className="text-[11px] font-mono text-muted-foreground">
+                        JPG, PNG, PDF (Max 10MB)
+                      </span>
+                    </div>
+
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*,application/pdf"
+                      onChange={handleAadhaarFileChange}
+                      className="hidden"
+                    />
+
+                    {!aadhaarFileUrl ? (
+                      <div
+                        onClick={() => !isProcessingFile && fileInputRef.current?.click()}
+                        className="group relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border/90 bg-muted/20 p-4 sm:p-5 text-center hover:border-burgundy/60 hover:bg-sage/10 transition-all duration-200 cursor-pointer"
+                      >
+                        {isProcessingFile ? (
+                          <div className="flex flex-col items-center gap-2 py-2">
+                            <Loader2 className="size-6 animate-spin text-burgundy" />
+                            <p className="text-xs sm:text-sm font-medium text-foreground">
+                              Processing & optimizing document...
+                            </p>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="size-10 rounded-full bg-sage/30 flex items-center justify-center text-forest group-hover:bg-burgundy/10 group-hover:text-burgundy transition-colors">
+                              <UploadCloud className="size-5" />
+                            </div>
+                            <p className="mt-2 text-xs sm:text-sm font-semibold text-foreground">
+                              Click to upload Aadhaar card
+                            </p>
+                            <p className="mt-0.5 text-[11px] text-muted-foreground">
+                              Required for 100% offline identity verification. Stored securely.
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="rounded-2xl border border-forest/30 bg-forest/5 p-3 sm:p-4 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          {aadhaarFileUrl.startsWith("data:image/") ? (
+                            <div className="relative size-12 shrink-0 rounded-xl overflow-hidden border border-border shadow-xs bg-card">
+                              <img
+                                src={aadhaarFileUrl}
+                                alt="Aadhaar Preview"
+                                className="size-full object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="size-12 shrink-0 rounded-xl bg-burgundy/10 flex items-center justify-center text-burgundy border border-burgundy/20">
+                              <FileText className="size-6" />
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <CheckCircle2 className="size-3.5 text-forest shrink-0" />
+                              <p className="text-xs sm:text-sm font-semibold text-foreground truncate">
+                                {aadhaarFileName || "Aadhaar_Document_Uploaded"}
+                              </p>
+                            </div>
+                            <p className="text-[11px] text-forest font-medium mt-0.5">
+                              ✓ Aadhaar attached for verification
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="h-8 px-2.5 text-xs text-foreground hover:bg-muted cursor-pointer"
+                          >
+                            Change
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleRemoveAadhaar}
+                            className="h-8 px-2 text-xs text-destructive hover:bg-destructive/10 cursor-pointer"
+                            title="Remove file"
+                          >
+                            <Trash2 className="size-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*,application/pdf"
-                    onChange={handleAadhaarFileChange}
-                    className="hidden"
-                  />
-
-                  {!aadhaarFileUrl ? (
-                    <div
-                      onClick={() => !isProcessingFile && fileInputRef.current?.click()}
-                      className="group relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border/90 bg-muted/20 p-4 sm:p-5 text-center hover:border-burgundy/60 hover:bg-sage/10 transition-all duration-200 cursor-pointer"
-                    >
-                      {isProcessingFile ? (
-                        <div className="flex flex-col items-center gap-2 py-2">
-                          <Loader2 className="size-6 animate-spin text-burgundy" />
-                          <p className="text-xs sm:text-sm font-medium text-foreground">
-                            Processing & optimizing document...
-                          </p>
-                        </div>
-                      ) : (
-                        <>
-                          <div className="size-10 rounded-full bg-sage/30 flex items-center justify-center text-forest group-hover:bg-burgundy/10 group-hover:text-burgundy transition-colors">
-                            <UploadCloud className="size-5" />
-                          </div>
-                          <p className="mt-2 text-xs sm:text-sm font-semibold text-foreground">
-                            Click to upload Aadhaar card
-                          </p>
-                          <p className="mt-0.5 text-[11px] text-muted-foreground">
-                            Required for 100% offline identity verification. Stored securely.
-                          </p>
-                        </>
-                      )}
+                  {/* Personal Photo Upload Field */}
+                  <div className="space-y-2 pt-2 border-t border-border/70">
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-foreground">
+                        <Camera className="size-4 text-burgundy" />
+                        <span>Upload Your Own Photo (Recent Portrait / Selfie)</span>
+                        <span className="text-burgundy text-xs font-bold">*</span>
+                      </label>
+                      <span className="text-[11px] font-mono text-muted-foreground">
+                        JPG, PNG (Max 10MB)
+                      </span>
                     </div>
-                  ) : (
-                    <div className="rounded-2xl border border-forest/30 bg-forest/5 p-3 sm:p-4 flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 min-w-0">
-                        {aadhaarFileUrl.startsWith("data:image/") ? (
+
+                    <input
+                      ref={userPhotoInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleUserPhotoChange}
+                      className="hidden"
+                    />
+
+                    {!userPhotoUrl ? (
+                      <div
+                        onClick={() => !isProcessingUserPhoto && userPhotoInputRef.current?.click()}
+                        className="group relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border/90 bg-muted/20 p-4 sm:p-5 text-center hover:border-burgundy/60 hover:bg-sage/10 transition-all duration-200 cursor-pointer"
+                      >
+                        {isProcessingUserPhoto ? (
+                          <div className="flex flex-col items-center gap-2 py-2">
+                            <Loader2 className="size-6 animate-spin text-burgundy" />
+                            <p className="text-xs sm:text-sm font-medium text-foreground">
+                              Processing & optimizing photo...
+                            </p>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="size-10 rounded-full bg-burgundy/10 flex items-center justify-center text-burgundy group-hover:bg-burgundy/20 transition-colors">
+                              <Camera className="size-5" />
+                            </div>
+                            <p className="mt-2 text-xs sm:text-sm font-semibold text-foreground">
+                              Click to upload your photo
+                            </p>
+                            <p className="mt-0.5 text-[11px] text-muted-foreground">
+                              Clear face photo used for Aadhaar cross-verification and curated table host matching.
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="rounded-2xl border border-burgundy/30 bg-burgundy/5 p-3 sm:p-4 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
                           <div className="relative size-12 shrink-0 rounded-xl overflow-hidden border border-border shadow-xs bg-card">
                             <img
-                              src={aadhaarFileUrl}
-                              alt="Aadhaar Preview"
+                              src={userPhotoUrl}
+                              alt="Your Photo Preview"
                               className="size-full object-cover"
                             />
                           </div>
-                        ) : (
-                          <div className="size-12 shrink-0 rounded-xl bg-burgundy/10 flex items-center justify-center text-burgundy border border-burgundy/20">
-                            <FileText className="size-6" />
-                          </div>
-                        )}
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <CheckCircle2 className="size-3.5 text-forest shrink-0" />
-                            <p className="text-xs sm:text-sm font-semibold text-foreground truncate">
-                              {aadhaarFileName || "Aadhaar_Document_Uploaded"}
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <CheckCircle2 className="size-3.5 text-forest shrink-0" />
+                              <p className="text-xs sm:text-sm font-semibold text-foreground truncate">
+                                {userPhotoFileName || "Your_Photo.jpg"}
+                              </p>
+                            </div>
+                            <p className="text-[11px] text-burgundy font-medium mt-0.5">
+                              ✓ Your personal photo attached
                             </p>
                           </div>
-                          <p className="text-[11px] text-forest font-medium mt-0.5">
-                            ✓ Aadhaar attached for verification
-                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => userPhotoInputRef.current?.click()}
+                            className="h-8 px-2.5 text-xs text-foreground hover:bg-muted cursor-pointer"
+                          >
+                            Change
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleRemoveUserPhoto}
+                            className="h-8 px-2 text-xs text-destructive hover:bg-destructive/10 cursor-pointer"
+                            title="Remove photo"
+                          >
+                            <Trash2 className="size-3.5" />
+                          </Button>
                         </div>
                       </div>
-
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => fileInputRef.current?.click()}
-                          className="h-8 px-2.5 text-xs text-foreground hover:bg-muted cursor-pointer"
-                        >
-                          Change
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleRemoveAadhaar}
-                          className="h-8 px-2 text-xs text-destructive hover:bg-destructive/10 cursor-pointer"
-                          title="Remove file"
-                        >
-                          <Trash2 className="size-3.5" />
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
 
                 {/* Safety Assurance */}
                 <div className="flex items-center justify-center gap-2 pt-1.5 text-xs sm:text-[13px] text-muted-foreground text-center">

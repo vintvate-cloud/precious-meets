@@ -28,6 +28,7 @@ import {
   FileText,
   Eye,
   Trash2,
+  Camera,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,21 +38,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import type { VerificationRecord } from "@/lib/verifications-service";
 
-export interface VerificationQueueItem {
-  id: string;
-  userName: string;
-  email: string;
-  phone?: string;
-  city?: string;
-  avatar?: string;
-  method: string;
-  status: "pending" | "manual_review" | "verified" | "failed";
-  requestedAt: string;
-  notes?: string;
-  aadhaarFileUrl?: string;
-  aadhaarFileName?: string;
-}
+export type VerificationQueueItem = VerificationRecord;
 
 export interface UnifiedVerifiedUser {
   id: string;
@@ -71,6 +60,8 @@ export interface UnifiedVerifiedUser {
   dietary?: string;
   aadhaarFileUrl?: string;
   aadhaarFileName?: string;
+  userPhotoUrl?: string;
+  userPhotoFileName?: string;
 }
 
 interface VerificationsSectionProps {
@@ -115,13 +106,15 @@ export function VerificationsSection({
   const [certModalOpen, setCertModalOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // Dedicated Aadhaar Document Viewer Modal state
+  // Dedicated Identity & Aadhaar Document Viewer Modal state
   const [viewingAadhaar, setViewingAadhaar] = useState<{
     name: string;
     email: string;
     phone?: string;
     fileUrl: string;
     fileName?: string;
+    userPhotoUrl?: string;
+    userPhotoFileName?: string;
     status?: string;
     recordId?: string;
   } | null>(null);
@@ -170,6 +163,7 @@ export function VerificationsSection({
           email: app.applicantEmail,
           phone: app.applicantPhone || "+91 98100 00000",
           avatar:
+            app.userPhotoUrl ||
             app.avatarUrl ||
             "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
           city: app.applicantCity || "Delhi NCR",
@@ -190,6 +184,8 @@ export function VerificationsSection({
           dietary: app.dietaryPreference,
           aadhaarFileUrl: app.aadhaarFileUrl,
           aadhaarFileName: app.aadhaarFileName,
+          userPhotoUrl: app.userPhotoUrl || app.avatarUrl,
+          userPhotoFileName: app.userPhotoFileName,
         });
       }
     });
@@ -204,6 +200,7 @@ export function VerificationsSection({
           email: q.email,
           phone: q.phone || "+91 98210 99881",
           avatar:
+            q.userPhotoUrl ||
             q.avatar ||
             "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80",
           city: q.city || "Delhi NCR",
@@ -216,6 +213,8 @@ export function VerificationsSection({
           source: "verification_queue",
           aadhaarFileUrl: q.aadhaarFileUrl,
           aadhaarFileName: q.aadhaarFileName,
+          userPhotoUrl: q.userPhotoUrl || q.avatar,
+          userPhotoFileName: q.userPhotoFileName,
         });
       }
     });
@@ -605,13 +604,15 @@ export function VerificationsSection({
                                 phone: u.phone,
                                 fileUrl: u.aadhaarFileUrl || getSampleAadhaarSvg(u.name, u.memberId),
                                 fileName: u.aadhaarFileName || "UIDAI_Aadhaar_Offline.xml",
+                                userPhotoUrl: u.userPhotoUrl || u.avatar,
+                                userPhotoFileName: u.userPhotoFileName,
                                 status: "verified",
                                 recordId: u.id,
                               })}
                               className="inline-flex items-center gap-1 mt-1 rounded bg-burgundy/10 hover:bg-burgundy/20 text-burgundy px-1.5 py-0.5 text-[10px] font-semibold transition-colors cursor-pointer"
                             >
                               <Eye className="size-3" />
-                              <span>View Aadhaar Proof</span>
+                              <span>View Documents</span>
                             </button>
                           </div>
                         </td>
@@ -654,14 +655,16 @@ export function VerificationsSection({
                                 phone: u.phone,
                                 fileUrl: u.aadhaarFileUrl || getSampleAadhaarSvg(u.name, u.memberId),
                                 fileName: u.aadhaarFileName || "UIDAI_Aadhaar_Document",
+                                userPhotoUrl: u.userPhotoUrl || u.avatar,
+                                userPhotoFileName: u.userPhotoFileName,
                                 status: "verified",
                                 recordId: u.id,
                               })}
                               className="text-[11px] h-7 px-2.5 text-burgundy hover:bg-burgundy hover:text-ivory border-burgundy/30 transition-all duration-200 gap-1 cursor-pointer"
-                              title="View uploaded Aadhaar document"
+                              title="View uploaded identity documents"
                             >
                               <FileText className="size-3" />
-                              <span>Aadhaar</span>
+                              <span>Inspect ID</span>
                             </Button>
                             <Button
                               variant="outline"
@@ -740,11 +743,24 @@ export function VerificationsSection({
                     queue.map((v) => (
                       <tr key={v.id} className="hover:bg-sage/10 transition-colors">
                         <td className="py-4 px-3">
-                          <p className="font-semibold text-foreground">{v.userName}</p>
-                          <p className="text-[11px] text-muted-foreground">{v.email}</p>
-                          {v.phone && (
-                            <p className="text-[10px] font-mono text-muted-foreground">{v.phone}</p>
-                          )}
+                          <div className="flex items-center gap-2.5">
+                            <img
+                              src={
+                                v.userPhotoUrl ||
+                                v.avatar ||
+                                "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80"
+                              }
+                              alt={v.userName}
+                              className="size-9 rounded-full object-cover border border-border shadow-xs shrink-0"
+                            />
+                            <div className="min-w-0">
+                              <p className="font-semibold text-foreground truncate">{v.userName}</p>
+                              <p className="text-[11px] text-muted-foreground truncate">{v.email}</p>
+                              {v.phone && (
+                                <p className="text-[10px] font-mono text-muted-foreground">{v.phone}</p>
+                              )}
+                            </div>
+                          </div>
                         </td>
                         <td className="py-4 px-3">
                           {(() => {
@@ -759,6 +775,8 @@ export function VerificationsSection({
                                   phone: v.phone,
                                   fileUrl,
                                   fileName,
+                                  userPhotoUrl: v.userPhotoUrl || v.avatar,
+                                  userPhotoFileName: v.userPhotoFileName,
                                   status: v.status,
                                   recordId: v.id,
                                 })}
@@ -777,10 +795,10 @@ export function VerificationsSection({
                                 )}
                                 <div className="min-w-0 pr-1">
                                   <span className="text-[11px] font-semibold text-burgundy block group-hover:underline">
-                                    View Aadhaar
+                                    Compare Docs
                                   </span>
                                   <span className="text-[9px] text-muted-foreground block truncate max-w-[100px]">
-                                    {fileName}
+                                    Aadhaar & Photo
                                   </span>
                                 </div>
                               </button>
@@ -943,57 +961,88 @@ export function VerificationsSection({
                 </div>
               </div>
 
-              {/* Uploaded Aadhaar Document Proof if present */}
-              {selectedUserForCert.aadhaarFileUrl && (
-                <div className="rounded-2xl border border-burgundy/30 bg-burgundy/5 p-4 text-xs space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-burgundy font-semibold">
-                      <FileText className="size-4" />
-                      <span>Uploaded Government Aadhaar Card Proof</span>
+              {/* Uploaded Identity Documents (Aadhaar & Photo) */}
+              {(selectedUserForCert.aadhaarFileUrl || selectedUserForCert.userPhotoUrl) && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  {/* Aadhaar Thumbnail */}
+                  {selectedUserForCert.aadhaarFileUrl && (
+                    <div className="rounded-2xl border border-burgundy/30 bg-burgundy/5 p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 text-burgundy font-semibold">
+                          <FileText className="size-3.5" />
+                          <span>Aadhaar Document</span>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setViewingAadhaar({
+                            name: selectedUserForCert.name,
+                            email: selectedUserForCert.email,
+                            phone: selectedUserForCert.phone,
+                            fileUrl: selectedUserForCert.aadhaarFileUrl!,
+                            fileName: selectedUserForCert.aadhaarFileName,
+                            userPhotoUrl: selectedUserForCert.userPhotoUrl || selectedUserForCert.avatar,
+                            userPhotoFileName: selectedUserForCert.userPhotoFileName,
+                            status: "verified",
+                            recordId: selectedUserForCert.id,
+                          })}
+                          className="text-[10px] h-6 px-2 text-burgundy hover:bg-burgundy/10 cursor-pointer"
+                        >
+                          View Full
+                        </Button>
+                      </div>
+                      <div className="flex items-center gap-2.5">
+                        {!selectedUserForCert.aadhaarFileUrl.startsWith("data:application/pdf") && !selectedUserForCert.aadhaarFileUrl.toLowerCase().includes(".pdf") ? (
+                          <div className="relative size-12 shrink-0 rounded-xl overflow-hidden border border-border shadow-xs bg-card">
+                            <img
+                              src={selectedUserForCert.aadhaarFileUrl}
+                              alt="Aadhaar Document"
+                              className="size-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="size-12 shrink-0 rounded-xl bg-burgundy/10 flex items-center justify-center text-burgundy border border-burgundy/20">
+                            <FileText className="size-5" />
+                          </div>
+                        )}
+                        <div className="min-w-0 text-xs">
+                          <p className="font-semibold text-foreground truncate">
+                            {selectedUserForCert.aadhaarFileName || "Aadhaar_Document"}
+                          </p>
+                          <p className="text-[10px] text-forest font-medium">✓ Government ID</p>
+                        </div>
+                      </div>
                     </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setViewingAadhaar({
-                        name: selectedUserForCert.name,
-                        email: selectedUserForCert.email,
-                        phone: selectedUserForCert.phone,
-                        fileUrl: selectedUserForCert.aadhaarFileUrl!,
-                        fileName: selectedUserForCert.aadhaarFileName,
-                        status: "verified",
-                        recordId: selectedUserForCert.id,
-                      })}
-                      className="text-[11px] h-7 px-2.5 text-burgundy hover:bg-burgundy/10 cursor-pointer gap-1"
-                    >
-                      <Eye className="size-3" />
-                      <span>View Full Document</span>
-                    </Button>
-                  </div>
+                  )}
 
-                  <div className="flex items-center gap-3">
-                    {!selectedUserForCert.aadhaarFileUrl.startsWith("data:application/pdf") && !selectedUserForCert.aadhaarFileUrl.toLowerCase().includes(".pdf") ? (
-                      <div className="relative size-14 shrink-0 rounded-xl overflow-hidden border border-border shadow-xs bg-card">
-                        <img
-                          src={selectedUserForCert.aadhaarFileUrl}
-                          alt="Aadhaar Document"
-                          className="size-full object-cover"
-                        />
+                  {/* Personal Photo Thumbnail */}
+                  {selectedUserForCert.userPhotoUrl && (
+                    <div className="rounded-2xl border border-forest/30 bg-forest/5 p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 text-forest font-semibold">
+                          <Camera className="size-3.5" />
+                          <span>Member Photo</span>
+                        </div>
+                        <span className="text-[10px] text-forest font-mono">Portrait</span>
                       </div>
-                    ) : (
-                      <div className="size-14 shrink-0 rounded-xl bg-burgundy/10 flex items-center justify-center text-burgundy border border-burgundy/20">
-                        <FileText className="size-6" />
+                      <div className="flex items-center gap-2.5">
+                        <div className="relative size-12 shrink-0 rounded-xl overflow-hidden border border-border shadow-xs bg-card">
+                          <img
+                            src={selectedUserForCert.userPhotoUrl}
+                            alt="Member Photo"
+                            className="size-full object-cover"
+                          />
+                        </div>
+                        <div className="min-w-0 text-xs">
+                          <p className="font-semibold text-foreground truncate">
+                            {selectedUserForCert.userPhotoFileName || "Applicant_Photo.jpg"}
+                          </p>
+                          <p className="text-[10px] text-forest font-medium">✓ Personal Photo</p>
+                        </div>
                       </div>
-                    )}
-                    <div className="min-w-0 text-xs">
-                      <p className="font-semibold text-foreground truncate">
-                        {selectedUserForCert.aadhaarFileName || "Aadhaar_Document_Proof"}
-                      </p>
-                      <p className="text-[11px] text-forest font-medium mt-0.5">
-                        ✓ Uploaded during registration & verified
-                      </p>
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
 
@@ -1026,21 +1075,21 @@ export function VerificationsSection({
       )}
 
       {/* ========================================================================= */}
-      {/* 6. DEDICATED AADHAAR CARD DOCUMENT VIEWER MODAL                           */}
+      {/* 6. DUAL IDENTITY & FACE-MATCH AUDIT VIEWER MODAL                          */}
       {/* ========================================================================= */}
       {viewingAadhaar && (
         <Dialog open={!!viewingAadhaar} onOpenChange={(open) => !open && setViewingAadhaar(null)}>
-          <DialogContent className="max-w-3xl bg-ivory border-burgundy/20 p-0 overflow-hidden text-foreground">
+          <DialogContent className="max-w-4xl bg-ivory border-burgundy/20 p-0 overflow-hidden text-foreground">
             {/* Header */}
             <div className="bg-gradient-to-r from-burgundy via-burgundy/95 to-burgundy p-5 text-ivory">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <div className="flex items-center gap-1.5 text-xs text-ivory/80 uppercase tracking-widest font-mono">
                     <ShieldCheck className="size-4 text-forest" />
-                    <span>UIDAI Aadhaar Verification Record</span>
+                    <span>Identity Verification & Face-Match Review</span>
                   </div>
                   <h3 className="font-display mt-1 text-2xl font-bold">
-                    {viewingAadhaar.name}&apos;s Aadhaar Card
+                    {viewingAadhaar.name}&apos;s Verification Audit
                   </h3>
                   <p className="text-xs text-ivory/80 mt-0.5">
                     {viewingAadhaar.email} {viewingAadhaar.phone ? `• ${viewingAadhaar.phone}` : ""}
@@ -1056,28 +1105,101 @@ export function VerificationsSection({
                     className="inline-flex items-center gap-1.5 rounded-full bg-ivory/15 hover:bg-ivory/25 px-3.5 py-1.5 text-xs font-semibold text-ivory transition-colors cursor-pointer"
                   >
                     <ExternalLink className="size-3.5" />
-                    <span>Open Original</span>
+                    <span>Open Aadhaar</span>
                   </a>
+                  {viewingAadhaar.userPhotoUrl && (
+                    <a
+                      href={viewingAadhaar.userPhotoUrl}
+                      download={viewingAadhaar.userPhotoFileName || "member_photo.jpg"}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-full bg-ivory/15 hover:bg-ivory/25 px-3.5 py-1.5 text-xs font-semibold text-ivory transition-colors cursor-pointer"
+                    >
+                      <Camera className="size-3.5" />
+                      <span>Open Photo</span>
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Document Body & Preview */}
+            {/* Document Body & Dual Previews */}
             <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
-              <div className="rounded-2xl border border-border/80 bg-card p-3 flex flex-col items-center justify-center min-h-[340px] shadow-inner">
-                {viewingAadhaar.fileUrl.startsWith("data:image/") ? (
-                  <img
-                    src={viewingAadhaar.fileUrl}
-                    alt={`${viewingAadhaar.name}'s Aadhaar`}
-                    className="max-h-[520px] w-auto max-w-full rounded-xl object-contain shadow-md"
-                  />
-                ) : (
-                  <iframe
-                    src={viewingAadhaar.fileUrl}
-                    title="Aadhaar Document PDF"
-                    className="w-full h-[520px] rounded-xl border border-border/80"
-                  />
-                )}
+              <div className="rounded-xl bg-sage/20 border border-forest/30 p-3 text-xs flex items-center gap-2.5 text-forest">
+                <CheckCircle2 className="size-4 shrink-0" />
+                <span>
+                  <strong>Face-Match Protocol:</strong> Compare the facial features and name on the Aadhaar document (Left) against the applicant&apos;s personal photo (Right).
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Column 1: Aadhaar Document */}
+                <div className="rounded-2xl border border-burgundy/30 bg-card p-4 space-y-3 flex flex-col justify-between shadow-xs">
+                  <div>
+                    <div className="flex items-center justify-between pb-2 border-b border-border/60">
+                      <div className="flex items-center gap-1.5 font-semibold text-burgundy text-xs">
+                        <FileText className="size-4" />
+                        <span>Aadhaar Document ({viewingAadhaar.fileName || "Aadhaar Card"})</span>
+                      </div>
+                      <span className="font-mono text-[10px] uppercase text-muted-foreground">Proof 1</span>
+                    </div>
+
+                    <div className="mt-3 flex justify-center bg-background rounded-xl p-2 border border-border min-h-[300px] items-center overflow-hidden">
+                      {viewingAadhaar.fileUrl.startsWith("data:image/") ? (
+                        <img
+                          src={viewingAadhaar.fileUrl}
+                          alt={`${viewingAadhaar.name}'s Aadhaar`}
+                          className="max-h-[340px] w-auto max-w-full rounded-lg object-contain shadow-xs"
+                        />
+                      ) : (
+                        <iframe
+                          src={viewingAadhaar.fileUrl}
+                          title="Aadhaar Document PDF"
+                          className="w-full h-[340px] rounded-lg border border-border/80"
+                        />
+                      )}
+                    </div>
+                  </div>
+                  <div className="pt-2 border-t border-border/50 text-[11px] text-muted-foreground font-mono flex items-center justify-between">
+                    <span>UIDAI Government Document</span>
+                    <span className="text-forest font-semibold">✓ Attached</span>
+                  </div>
+                </div>
+
+                {/* Column 2: Personal Photo */}
+                <div className="rounded-2xl border border-forest/30 bg-card p-4 space-y-3 flex flex-col justify-between shadow-xs">
+                  <div>
+                    <div className="flex items-center justify-between pb-2 border-b border-border/60">
+                      <div className="flex items-center gap-1.5 font-semibold text-forest text-xs">
+                        <Camera className="size-4" />
+                        <span>Personal Photo ({viewingAadhaar.userPhotoFileName || "Applicant Portrait"})</span>
+                      </div>
+                      <span className="font-mono text-[10px] uppercase text-muted-foreground">Proof 2</span>
+                    </div>
+
+                    <div className="mt-3 flex justify-center bg-background rounded-xl p-2 border border-border min-h-[300px] items-center overflow-hidden">
+                      {viewingAadhaar.userPhotoUrl ? (
+                        <img
+                          src={viewingAadhaar.userPhotoUrl}
+                          alt={`${viewingAadhaar.name}'s Photo`}
+                          className="max-h-[340px] w-auto max-w-full rounded-lg object-contain shadow-xs"
+                        />
+                      ) : (
+                        <div className="text-center p-6 text-xs text-muted-foreground flex flex-col items-center justify-center">
+                          <Camera className="size-10 text-muted-foreground/30 mb-2" />
+                          <p className="font-medium text-foreground">No personal photo uploaded yet</p>
+                          <p className="text-[11px] mt-1 text-muted-foreground">Using account avatar or default placeholder</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="pt-2 border-t border-border/50 text-[11px] text-muted-foreground font-mono flex items-center justify-between">
+                    <span>Live Member Photo</span>
+                    <span className={viewingAadhaar.userPhotoUrl ? "text-forest font-semibold" : "text-amber-600 font-semibold"}>
+                      {viewingAadhaar.userPhotoUrl ? "✓ Attached" : "Pending"}
+                    </span>
+                  </div>
+                </div>
               </div>
 
               {/* Status and Action bar */}
