@@ -695,15 +695,6 @@ export function QuizResultsPage() {
                           3. Once credentials arrive, sign in to unlock your matched secret tables.
                         </p>
                       </div>
-                      <Button
-                        type="button"
-                        onClick={() => window.print()}
-                        variant="outline"
-                        className="mt-4 w-full rounded-full border-ivory/20 bg-ivory/10 hover:bg-ivory/20 text-xs font-semibold text-ivory flex items-center justify-center gap-1.5 cursor-pointer py-4"
-                      >
-                        <Printer className="size-3.5 text-[#C6A568]" />
-                        <span>Print / Save Tax Receipt</span>
-                      </Button>
                     </div>
                   ) : (
                     <div>
@@ -866,20 +857,11 @@ export function QuizResultsPage() {
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-1">
-                <Button
-                  type="button"
-                  onClick={() => window.print()}
-                  variant="outline"
-                  className="flex-1 rounded-full py-5 font-semibold text-foreground border-border hover:bg-muted cursor-pointer flex items-center justify-center gap-1.5 text-xs"
-                >
-                  <Printer className="size-3.5" />
-                  <span>Print Tax Invoice</span>
-                </Button>
+              <div className="flex pt-1">
                 <Button
                   type="button"
                   onClick={() => setSuccessData(null)}
-                  className="flex-1 rounded-full py-5 font-semibold text-ivory bg-burgundy hover:bg-burgundy/90 cursor-pointer text-xs"
+                  className="w-full rounded-full py-5 font-semibold text-ivory bg-burgundy hover:bg-burgundy/90 cursor-pointer text-xs"
                 >
                   Close
                 </Button>
