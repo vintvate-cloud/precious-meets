@@ -21,6 +21,8 @@ import {
   AlertCircle,
   KeyRound,
   Trash2,
+  Instagram,
+  Linkedin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -110,6 +112,8 @@ export function UsersArchiveSection() {
     return (
       (app.applicantName?.toLowerCase() || "").includes(query) ||
       (app.applicantEmail?.toLowerCase() || "").includes(query) ||
+      (app.applicantInstagram?.toLowerCase() || "").includes(query) ||
+      (app.applicantLinkedin?.toLowerCase() || "").includes(query) ||
       (app.applicationReference?.toLowerCase() || "").includes(query) ||
       (app.archetypeTitle?.toLowerCase() || "").includes(query) ||
       (app.applicantCity?.toLowerCase() || "").includes(query)
@@ -364,6 +368,26 @@ export function UsersArchiveSection() {
                       <p className="text-[11px] text-muted-foreground">
                         {app.applicantCity} · {app.applicantPhone}
                       </p>
+                      {(app.applicantInstagram || app.applicantLinkedin) && (
+                        <div className="flex items-center gap-1.5 mt-1">
+                          {app.applicantInstagram && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-medium text-pink-700 bg-pink-500/10 px-1.5 py-0.5 rounded-md">
+                              <Instagram className="size-2.5" />
+                              <span className="truncate max-w-[120px]">
+                                {app.applicantInstagram.startsWith("@")
+                                  ? app.applicantInstagram
+                                  : `@${app.applicantInstagram.replace(/.*instagram\.com\//, "")}`}
+                              </span>
+                            </span>
+                          )}
+                          {app.applicantLinkedin && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-medium text-blue-700 bg-blue-500/10 px-1.5 py-0.5 rounded-md">
+                              <Linkedin className="size-2.5" />
+                              <span>LinkedIn</span>
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
 

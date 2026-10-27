@@ -65,6 +65,8 @@ export function QuizResultsPage() {
   const [aadhaarFileName, setAadhaarFileName] = useState<string | undefined>(undefined);
   const [userPhotoUrl, setUserPhotoUrl] = useState<string | undefined>(undefined);
   const [userPhotoFileName, setUserPhotoFileName] = useState<string | undefined>(undefined);
+  const [instagram, setInstagram] = useState<string | undefined>(undefined);
+  const [linkedin, setLinkedin] = useState<string | undefined>(undefined);
   const [paying, setPaying] = useState(false);
   const [paidDossier, setPaidDossier] = useState<{ memberId: string; paymentId: string; invoiceNumber: string } | null>(null);
 
@@ -179,6 +181,8 @@ export function QuizResultsPage() {
         if (c.aadhaarFileName) setAadhaarFileName(c.aadhaarFileName);
         if (c.userPhotoUrl) setUserPhotoUrl(c.userPhotoUrl);
         if (c.userPhotoFileName) setUserPhotoFileName(c.userPhotoFileName);
+        if (c.instagram) setInstagram(c.instagram);
+        if (c.linkedin) setLinkedin(c.linkedin);
         return;
       } catch (e) {
         // Ignore
@@ -255,6 +259,8 @@ export function QuizResultsPage() {
       let effectiveAadhaarName = aadhaarFileName;
       let effectiveUserPhotoUrl = userPhotoUrl;
       let effectiveUserPhotoName = userPhotoFileName;
+      let effectiveInstagram = instagram;
+      let effectiveLinkedin = linkedin;
 
       if (typeof window !== "undefined") {
         try {
@@ -264,6 +270,8 @@ export function QuizResultsPage() {
             if (!effectiveEmail && parsed.email) effectiveEmail = parsed.email.trim();
             if (!effectiveName && parsed.fullName) effectiveName = parsed.fullName.trim();
             if (!effectivePhone && parsed.phone) effectivePhone = ("+91 " + parsed.phone).trim();
+            if (!effectiveInstagram && parsed.instagram) effectiveInstagram = parsed.instagram.trim();
+            if (!effectiveLinkedin && parsed.linkedin) effectiveLinkedin = parsed.linkedin.trim();
             if (!effectiveAadhaarUrl && parsed.aadhaarFileUrl) effectiveAadhaarUrl = parsed.aadhaarFileUrl;
             if (!effectiveAadhaarName && parsed.aadhaarFileName) effectiveAadhaarName = parsed.aadhaarFileName;
             if (!effectiveUserPhotoUrl && parsed.userPhotoUrl) effectiveUserPhotoUrl = parsed.userPhotoUrl;
@@ -331,6 +339,8 @@ export function QuizResultsPage() {
         aadhaarFileName: effectiveAadhaarName,
         userPhotoUrl: effectiveUserPhotoUrl,
         userPhotoFileName: effectiveUserPhotoName,
+        applicantInstagram: effectiveInstagram,
+        applicantLinkedin: effectiveLinkedin,
       });
 
       // 3. Dispatch a verification request to the Admin Panel's verification queue
@@ -339,6 +349,8 @@ export function QuizResultsPage() {
         email: effectiveEmail,
         phone: effectivePhone || "+91 98765 43210",
         city: "Delhi NCR",
+        instagram: effectiveInstagram,
+        linkedin: effectiveLinkedin,
         method: effectiveAadhaarUrl ? "aadhaar_card_upload" : "digilocker_consent_offline",
         notes: `Precious Meets Membership (₹1,999 Razorpay Payment: ${result.paymentId}). Archetype: ${profile?.archetype?.title || "The Curious Flâneur"}${effectiveAadhaarName ? ` | Aadhaar Document: ${effectiveAadhaarName}` : ""}`,
         amountInr: 1999,

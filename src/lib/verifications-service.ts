@@ -18,6 +18,8 @@ export interface VerificationRecord {
   aadhaarFileName?: string | undefined;
   userPhotoUrl?: string | undefined;
   userPhotoFileName?: string | undefined;
+  instagram?: string | undefined;
+  linkedin?: string | undefined;
 }
 
 const STORAGE_KEY = "precious_meets_verification_queue_v1";
@@ -121,6 +123,8 @@ export class VerificationsService {
             aadhaarFileName: app.aadhaarFileName,
             userPhotoUrl: app.userPhotoUrl || app.avatarUrl,
             userPhotoFileName: app.userPhotoFileName,
+            instagram: app.applicantInstagram,
+            linkedin: app.applicantLinkedin,
           });
         } else {
           // If already in queue, update with newly re-uploaded Aadhaar file
@@ -136,6 +140,8 @@ export class VerificationsService {
               existing.userPhotoFileName = app.userPhotoFileName;
               existing.avatar = app.userPhotoUrl || app.avatarUrl;
             }
+            if (app.applicantInstagram) existing.instagram = app.applicantInstagram;
+            if (app.applicantLinkedin) existing.linkedin = app.applicantLinkedin;
             if (app.identityStatus === "reuploaded") {
               existing.status = "manual_review";
               existing.notes = `★ RE-UPLOADED: Member uploaded revised document (${app.aadhaarFileName || "Document"})`;
@@ -171,6 +177,8 @@ export class VerificationsService {
     aadhaarFileName?: string | undefined;
     userPhotoUrl?: string | undefined;
     userPhotoFileName?: string | undefined;
+    instagram?: string | undefined;
+    linkedin?: string | undefined;
   }): VerificationRecord {
     const queue = this.getQueue();
     const now = new Date();
@@ -199,6 +207,8 @@ export class VerificationsService {
       aadhaarFileName: data.aadhaarFileName,
       userPhotoUrl: data.userPhotoUrl,
       userPhotoFileName: data.userPhotoFileName,
+      instagram: data.instagram,
+      linkedin: data.linkedin,
     };
 
     // Prepend to avoid duplicates

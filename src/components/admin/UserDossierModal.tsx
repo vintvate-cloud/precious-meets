@@ -38,6 +38,8 @@ import {
   FileUp,
   RotateCcw,
   Camera,
+  Instagram,
+  Linkedin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -317,6 +319,43 @@ export function UserDossierModal({
                     <MapPin className="size-3" />
                     {application.applicantCity}
                   </span>
+                  {application.applicantInstagram ? (
+                    <a
+                      href={
+                        application.applicantInstagram.startsWith("http")
+                          ? application.applicantInstagram
+                          : application.applicantInstagram.startsWith("instagram.com")
+                          ? `https://${application.applicantInstagram}`
+                          : `https://instagram.com/${application.applicantInstagram.replace("@", "")}`
+                      }
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 text-pink-700 bg-pink-500/15 border border-pink-500/30 font-semibold hover:underline px-2.5 py-0.5 rounded-full"
+                    >
+                      <Instagram className="size-3 text-pink-600" />
+                      <span>{application.applicantInstagram.startsWith("@") ? application.applicantInstagram : `@${application.applicantInstagram.replace(/.*instagram\.com\//, "")}`}</span>
+                    </a>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-muted-foreground/80 bg-muted/60 border border-border px-2 py-0.5 rounded-full text-[11px]">
+                      <Instagram className="size-3 text-muted-foreground/60" />
+                      <span>No Instagram</span>
+                    </span>
+                  )}
+                  {application.applicantLinkedin && (
+                    <a
+                      href={
+                        application.applicantLinkedin.startsWith("http")
+                          ? application.applicantLinkedin
+                          : `https://${application.applicantLinkedin.replace(/^https?:\/\//, "")}`
+                      }
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 text-blue-700 bg-blue-500/15 border border-blue-500/30 font-semibold hover:underline px-2.5 py-0.5 rounded-full"
+                    >
+                      <Linkedin className="size-3 text-blue-600" />
+                      <span>LinkedIn Profile</span>
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
@@ -449,6 +488,89 @@ export function UserDossierModal({
                       {trait}
                     </span>
                   ))}
+                </div>
+              </div>
+
+              {/* Applicant Profiles & Social Verification */}
+              <div className="rounded-2xl border border-border/80 bg-card p-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-mono text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5">
+                    <Sparkles className="size-3.5 text-burgundy" />
+                    <span>Social Identity & Profiles</span>
+                  </h4>
+                  <span className="text-[10px] font-mono text-forest bg-forest/10 border border-forest/20 px-2 py-0.5 rounded-full font-semibold">
+                    Submitted with Application
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  {/* Instagram */}
+                  <div className="flex items-center justify-between rounded-xl bg-pink-500/5 border border-pink-500/20 p-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="size-8 rounded-lg bg-pink-500/10 flex items-center justify-center shrink-0 text-pink-600">
+                        <Instagram className="size-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                          Instagram Handle (Mandatory)
+                        </div>
+                        <div className="text-xs font-semibold text-foreground truncate">
+                          {application.applicantInstagram || "Not provided"}
+                        </div>
+                      </div>
+                    </div>
+                    {application.applicantInstagram ? (
+                      <a
+                        href={
+                          application.applicantInstagram.startsWith("http")
+                            ? application.applicantInstagram
+                            : application.applicantInstagram.startsWith("instagram.com")
+                            ? `https://${application.applicantInstagram}`
+                            : `https://instagram.com/${application.applicantInstagram.replace("@", "")}`
+                        }
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-pink-700 hover:underline shrink-0 ml-2"
+                      >
+                        Open <ExternalLink className="size-3" />
+                      </a>
+                    ) : (
+                      <span className="text-[10px] text-muted-foreground font-mono">Missing</span>
+                    )}
+                  </div>
+
+                  {/* LinkedIn */}
+                  <div className="flex items-center justify-between rounded-xl bg-blue-500/5 border border-blue-500/20 p-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="size-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0 text-blue-600">
+                        <Linkedin className="size-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                          LinkedIn Profile (Optional)
+                        </div>
+                        <div className="text-xs font-semibold text-foreground truncate">
+                          {application.applicantLinkedin || "Not provided"}
+                        </div>
+                      </div>
+                    </div>
+                    {application.applicantLinkedin ? (
+                      <a
+                        href={
+                          application.applicantLinkedin.startsWith("http")
+                            ? application.applicantLinkedin
+                            : `https://${application.applicantLinkedin.replace(/^https?:\/\//, "")}`
+                        }
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-700 hover:underline shrink-0 ml-2"
+                      >
+                        Open <ExternalLink className="size-3" />
+                      </a>
+                    ) : (
+                      <span className="text-[10px] text-muted-foreground font-mono">None</span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -784,6 +906,54 @@ export function UserDossierModal({
                             application.identityVerifiedAt,
                           ).toLocaleString()
                         : "Not yet completed"}
+                    </div>
+                  </div>
+
+                  {/* Social Profile Audit */}
+                  <div className="rounded-xl bg-ivory p-3 border border-border sm:col-span-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <span className="font-mono text-[10px] uppercase text-muted-foreground block">
+                        Applicant Social Identity (Cross-check with Photo)
+                      </span>
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        {application.applicantInstagram ? (
+                          <a
+                            href={
+                              application.applicantInstagram.startsWith("http")
+                                ? application.applicantInstagram
+                                : application.applicantInstagram.startsWith("instagram.com")
+                                ? `https://${application.applicantInstagram}`
+                                : `https://instagram.com/${application.applicantInstagram.replace("@", "")}`
+                            }
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1.5 text-pink-700 bg-pink-500/15 border border-pink-500/30 text-xs font-semibold hover:underline px-2.5 py-1 rounded-lg"
+                          >
+                            <Instagram className="size-3.5 text-pink-600" />
+                            <span>{application.applicantInstagram.startsWith("@") ? application.applicantInstagram : `@${application.applicantInstagram.replace(/.*instagram\.com\//, "")}`}</span>
+                            <ExternalLink className="size-3" />
+                          </a>
+                        ) : (
+                          <span className="text-xs text-muted-foreground italic">No Instagram provided</span>
+                        )}
+
+                        {application.applicantLinkedin && (
+                          <a
+                            href={
+                              application.applicantLinkedin.startsWith("http")
+                                ? application.applicantLinkedin
+                                : `https://${application.applicantLinkedin.replace(/^https?:\/\//, "")}`
+                            }
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1.5 text-blue-700 bg-blue-500/15 border border-blue-500/30 text-xs font-semibold hover:underline px-2.5 py-1 rounded-lg"
+                          >
+                            <Linkedin className="size-3.5 text-blue-600" />
+                            <span>LinkedIn Profile</span>
+                            <ExternalLink className="size-3" />
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

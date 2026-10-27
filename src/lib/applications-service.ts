@@ -48,6 +48,8 @@ export interface MemberApplication {
   applicantPhone: string;
   applicantCity: string;
   applicantPincode?: string;
+  applicantInstagram?: string;
+  applicantLinkedin?: string;
   avatarUrl?: string;
 
   // Quiz Snapshot
@@ -219,6 +221,8 @@ export class ApplicationsService {
             applicantPhone: d.applicant_phone || localMatch?.applicantPhone || "",
             applicantCity: d.applicant_city || localMatch?.applicantCity || "Delhi NCR",
             applicantPincode: d.applicant_pincode || localMatch?.applicantPincode || undefined,
+            applicantInstagram: d.instagram_handle || d.instagram || d.scores?.instagram || localMatch?.applicantInstagram || undefined,
+            applicantLinkedin: d.linkedin_url || d.linkedin || d.scores?.linkedin || localMatch?.applicantLinkedin || undefined,
             avatarUrl: d.avatar_url || d.user_photo_url || d.scores?.user_photo_url || localMatch?.avatarUrl || localMatch?.userPhotoUrl || undefined,
             userPhotoUrl: d.user_photo_url || d.scores?.user_photo_url || d.avatar_url || localMatch?.userPhotoUrl || localMatch?.avatarUrl || undefined,
             userPhotoFileName: d.user_photo_name || d.scores?.user_photo_name || localMatch?.userPhotoFileName || undefined,
@@ -297,35 +301,37 @@ export class ApplicationsService {
    * Records a member application when a user completes their quiz and payment directly into Supabase.
    */
   static async createOrUpdateFromCheckout(payload: {
-    userId?: string;
+    userId?: string | undefined;
     name: string;
     email: string;
     phone: string;
-    pincode?: string;
+    pincode?: string | undefined;
     archetypeTitle: string;
-    archetypeDescription?: string;
-    archetypeTraits?: string[];
+    archetypeDescription?: string | undefined;
+    archetypeTraits?: string[] | undefined;
     scores?: {
-      socialEnergy?: number;
-      conversationDepth?: number;
-      playfulness?: number;
-      curiosity?: number;
-      adventure?: number;
+      socialEnergy?: number | undefined;
+      conversationDepth?: number | undefined;
+      playfulness?: number | undefined;
+      curiosity?: number | undefined;
+      adventure?: number | undefined;
     } | undefined;
-    dietary?: string;
-    allergies?: string[];
-    boundaries?: string[];
-    sharedInterests?: string[];
-    quizAnswers?: QuizAnswerRecord[];
+    dietary?: string | undefined;
+    allergies?: string[] | undefined;
+    boundaries?: string[] | undefined;
+    sharedInterests?: string[] | undefined;
+    quizAnswers?: QuizAnswerRecord[] | undefined;
     paymentId: string;
-    orderId?: string;
-    invoiceNumber?: string;
+    orderId?: string | undefined;
+    invoiceNumber?: string | undefined;
     amountInr: number;
-    memberId?: string;
-    aadhaarFileUrl?: string;
-    aadhaarFileName?: string;
-    userPhotoUrl?: string;
-    userPhotoFileName?: string;
+    memberId?: string | undefined;
+    aadhaarFileUrl?: string | undefined;
+    aadhaarFileName?: string | undefined;
+    userPhotoUrl?: string | undefined;
+    userPhotoFileName?: string | undefined;
+    applicantInstagram?: string | undefined;
+    applicantLinkedin?: string | undefined;
   }): Promise<MemberApplication> {
     const apps = this.loadApplications();
     const cleanEmail = payload.email.trim().toLowerCase();
@@ -345,6 +351,8 @@ export class ApplicationsService {
       applicantPhone: payload.phone.trim(),
       applicantCity: "Delhi NCR",
       applicantPincode: payload.pincode,
+      applicantInstagram: payload.applicantInstagram,
+      applicantLinkedin: payload.applicantLinkedin,
       avatarUrl: payload.userPhotoUrl || undefined,
       userPhotoUrl: payload.userPhotoUrl || undefined,
       userPhotoFileName: payload.userPhotoFileName || undefined,
@@ -1089,6 +1097,8 @@ export class ApplicationsService {
         applicant_phone: app.applicantPhone,
         applicant_city: app.applicantCity,
         applicant_pincode: app.applicantPincode,
+        instagram_handle: app.applicantInstagram || null,
+        linkedin_url: app.applicantLinkedin || null,
         archetype_title: app.archetypeTitle,
         archetype_description: app.archetypeDescription,
         archetype_traits: app.archetypeTraits,
@@ -1100,6 +1110,8 @@ export class ApplicationsService {
           adventure: app.adventureScore,
           user_photo_url: app.userPhotoUrl || app.avatarUrl,
           user_photo_name: app.userPhotoFileName,
+          instagram: app.applicantInstagram,
+          linkedin: app.applicantLinkedin,
         },
         quiz_answers: app.quizAnswers,
         dietary_preference: app.dietaryPreference,
@@ -1137,10 +1149,12 @@ export class ApplicationsService {
       // Graceful fallback: If Supabase table schema hasn't executed migration for user_photo_url / user_photo_name,
       // retry without those columns (they are safely preserved inside avatar_url and scores.user_photo_url)
       if (error && (error.code === "PGRST204" || error.message?.includes("column"))) {
-        console.warn("[ApplicationsService] Supabase schema cache notice (missing user_photo columns). Retrying with schema-safe payload...");
+        console.warn("[ApplicationsService] Supabase schema cache notice (missing optional columns). Retrying with schema-safe payload...");
         const safePayload = { ...payload };
         delete safePayload.user_photo_url;
         delete safePayload.user_photo_name;
+        delete safePayload.instagram_handle;
+        delete safePayload.linkedin_url;
 
         const retryRes = await supabase
           .from("member_applications")

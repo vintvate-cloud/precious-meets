@@ -29,6 +29,8 @@ import {
   Eye,
   Trash2,
   Camera,
+  Instagram,
+  Linkedin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -62,6 +64,8 @@ export interface UnifiedVerifiedUser {
   aadhaarFileName?: string;
   userPhotoUrl?: string;
   userPhotoFileName?: string;
+  instagram?: string;
+  linkedin?: string;
 }
 
 interface VerificationsSectionProps {
@@ -186,6 +190,8 @@ export function VerificationsSection({
           aadhaarFileName: app.aadhaarFileName,
           userPhotoUrl: app.userPhotoUrl || app.avatarUrl,
           userPhotoFileName: app.userPhotoFileName,
+          instagram: app.applicantInstagram,
+          linkedin: app.applicantLinkedin,
         });
       }
     });
@@ -215,6 +221,8 @@ export function VerificationsSection({
           aadhaarFileName: q.aadhaarFileName,
           userPhotoUrl: q.userPhotoUrl || q.avatar,
           userPhotoFileName: q.userPhotoFileName,
+          instagram: q.instagram,
+          linkedin: q.linkedin,
         });
       }
     });
@@ -545,6 +553,22 @@ export function VerificationsSection({
                               <p className="text-[10px] font-mono text-muted-foreground/80">
                                 {u.phone}
                               </p>
+                              {(u.instagram || u.linkedin) && (
+                                <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+                                  {u.instagram && (
+                                    <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-pink-700 bg-pink-500/10 px-1.5 py-0.2 rounded">
+                                      <Instagram className="size-2.5" />
+                                      <span>{u.instagram.startsWith("@") ? u.instagram : `@${u.instagram.replace(/.*instagram\.com\//, "")}`}</span>
+                                    </span>
+                                  )}
+                                  {u.linkedin && (
+                                    <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-blue-700 bg-blue-500/10 px-1.5 py-0.2 rounded">
+                                      <Linkedin className="size-2.5" />
+                                      <span>LinkedIn</span>
+                                    </span>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           </div>
                         </td>
@@ -759,6 +783,46 @@ export function VerificationsSection({
                               {v.phone && (
                                 <p className="text-[10px] font-mono text-muted-foreground">{v.phone}</p>
                               )}
+                              {(v.instagram || v.linkedin) && (
+                                <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                                  {v.instagram && (
+                                    <a
+                                      href={
+                                        v.instagram.startsWith("http")
+                                          ? v.instagram
+                                          : v.instagram.startsWith("instagram.com")
+                                          ? `https://${v.instagram}`
+                                          : `https://instagram.com/${v.instagram.replace("@", "")}`
+                                      }
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="inline-flex items-center gap-1 text-[10px] font-medium text-pink-700 bg-pink-500/10 px-1.5 py-0.5 rounded hover:underline cursor-pointer"
+                                      title="Open Instagram"
+                                    >
+                                      <Instagram className="size-2.5" />
+                                      <span className="truncate max-w-[110px]">
+                                        {v.instagram.startsWith("@") ? v.instagram : `@${v.instagram.replace(/.*instagram\.com\//, "")}`}
+                                      </span>
+                                    </a>
+                                  )}
+                                  {v.linkedin && (
+                                    <a
+                                      href={
+                                        v.linkedin.startsWith("http")
+                                          ? v.linkedin
+                                          : `https://${v.linkedin.replace(/^https?:\/\//, "")}`
+                                      }
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="inline-flex items-center gap-1 text-[10px] font-medium text-blue-700 bg-blue-500/10 px-1.5 py-0.5 rounded hover:underline cursor-pointer"
+                                      title="Open LinkedIn"
+                                    >
+                                      <Linkedin className="size-2.5" />
+                                      <span>LinkedIn</span>
+                                    </a>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           </div>
                         </td>
@@ -919,6 +983,42 @@ export function VerificationsSection({
                   <p className="text-[11px] font-mono text-muted-foreground mt-0.5">
                     {selectedUserForCert.phone}
                   </p>
+                  {(selectedUserForCert.instagram || selectedUserForCert.linkedin) && (
+                    <div className="flex items-center gap-2 mt-1.5">
+                      {selectedUserForCert.instagram && (
+                        <a
+                          href={
+                            selectedUserForCert.instagram.startsWith("http")
+                              ? selectedUserForCert.instagram
+                              : selectedUserForCert.instagram.startsWith("instagram.com")
+                              ? `https://${selectedUserForCert.instagram}`
+                              : `https://instagram.com/${selectedUserForCert.instagram.replace("@", "")}`
+                          }
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 text-[11px] font-medium text-pink-700 bg-pink-500/10 px-2 py-0.5 rounded-full hover:underline"
+                        >
+                          <Instagram className="size-3" />
+                          <span>{selectedUserForCert.instagram.startsWith("@") ? selectedUserForCert.instagram : `@${selectedUserForCert.instagram.replace(/.*instagram\.com\//, "")}`}</span>
+                        </a>
+                      )}
+                      {selectedUserForCert.linkedin && (
+                        <a
+                          href={
+                            selectedUserForCert.linkedin.startsWith("http")
+                              ? selectedUserForCert.linkedin
+                              : `https://${selectedUserForCert.linkedin.replace(/^https?:\/\//, "")}`
+                          }
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 text-[11px] font-medium text-blue-700 bg-blue-500/10 px-2 py-0.5 rounded-full hover:underline"
+                        >
+                          <Linkedin className="size-3" />
+                          <span>LinkedIn</span>
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 

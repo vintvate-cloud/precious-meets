@@ -20,6 +20,8 @@ import {
   Image as ImageIcon,
   Loader2,
   Camera,
+  Instagram,
+  Linkedin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -67,6 +69,10 @@ export function QuizPage() {
   const [isProcessingUserPhoto, setIsProcessingUserPhoto] = useState(false);
   const userPhotoInputRef = useRef<HTMLInputElement>(null);
 
+  // Social Links
+  const [instagram, setInstagram] = useState("");
+  const [linkedin, setLinkedin] = useState("");
+
   // Always initialize quiz with clean empty fields for all users
   useEffect(() => {
     // Clear any previous answers and contact data so questions always start unselected
@@ -78,6 +84,8 @@ export function QuizPage() {
     setPhone("");
     setPincode("");
     setEmail("");
+    setInstagram("");
+    setLinkedin("");
     setAadhaarFileUrl(null);
     setAadhaarFileName(null);
     setUserPhotoUrl(null);
@@ -324,6 +332,10 @@ export function QuizPage() {
       toast.error("Please enter a valid email address.");
       return;
     }
+    if (!instagram.trim()) {
+      toast.error("Please enter your Instagram handle or profile URL.");
+      return;
+    }
     if (!aadhaarFileUrl) {
       toast.error("Please upload your Aadhaar Card document for identity verification.");
       return;
@@ -340,6 +352,8 @@ export function QuizPage() {
       phone: cleanPhone,
       pincode: cleanPin,
       email: email.trim(),
+      instagram: instagram.trim(),
+      linkedin: linkedin.trim(),
       aadhaarFileUrl,
       aadhaarFileName: aadhaarFileName || "aadhaar_card_upload",
       userPhotoUrl,
@@ -637,6 +651,39 @@ export function QuizPage() {
                       placeholder="you@domain.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      className="mt-1.5 w-full rounded-xl border border-input bg-background py-3 px-3.5 text-sm sm:text-base text-foreground focus:border-burgundy focus:outline-none focus:ring-1 focus:ring-burgundy"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {/* Instagram (Mandatory) */}
+                  <div>
+                    <label className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-foreground">
+                      <Instagram className="size-4 text-pink-500" />
+                      <span>Instagram Handle / Profile</span>
+                      <span className="text-burgundy text-xs font-bold">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="@handle or instagram.com/..."
+                      value={instagram}
+                      onChange={(e) => setInstagram(e.target.value)}
+                      className="mt-1.5 w-full rounded-xl border border-input bg-background py-3 px-3.5 text-sm sm:text-base text-foreground focus:border-burgundy focus:outline-none focus:ring-1 focus:ring-burgundy"
+                    />
+                  </div>
+
+                  {/* LinkedIn (Optional) */}
+                  <div>
+                    <label className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-foreground">
+                      <Linkedin className="size-4 text-blue-600" />
+                      <span>LinkedIn Profile</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="linkedin.com/in/..."
+                      value={linkedin}
+                      onChange={(e) => setLinkedin(e.target.value)}
                       className="mt-1.5 w-full rounded-xl border border-input bg-background py-3 px-3.5 text-sm sm:text-base text-foreground focus:border-burgundy focus:outline-none focus:ring-1 focus:ring-burgundy"
                     />
                   </div>
