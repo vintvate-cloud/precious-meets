@@ -204,7 +204,7 @@ export function SummitAttendees({ isNight = true, onStageChange }: SummitAttende
       const s = sc;
       const x = p.x;
       // Gently floats upwards from head
-      const y = p.y - (26 + t * 14) * s;
+      const y = p.y - (29 + t * 14) * s;
 
       ctx.save();
       ctx.globalAlpha = alpha;
@@ -413,8 +413,8 @@ export function SummitAttendees({ isNight = true, onStageChange }: SummitAttende
               ctx.strokeStyle = p.c;
               ctx.globalAlpha = Math.min(0.85, baseAlpha * groupBonus * verifiedFactor * linePhase);
               ctx.beginPath();
-              ctx.moveTo(p.x, p.y - 6 * sc);
-              ctx.lineTo(q.x, q.y - 6 * sc);
+              ctx.moveTo(p.x, p.y - 7.5 * sc);
+              ctx.lineTo(q.x, q.y - 7.5 * sc);
               ctx.stroke();
             }
           }
@@ -423,8 +423,8 @@ export function SummitAttendees({ isNight = true, onStageChange }: SummitAttende
 
       ctx.globalAlpha = 1;
 
-      // Render People
-      const r = 6.6 * sc;
+      // Render People (SVG attendee avatars)
+      const r = 8.2 * sc;
       const sortedP = [...P].sort((a, b) => a.y - b.y);
 
       for (const p of sortedP) {
@@ -432,7 +432,7 @@ export function SummitAttendees({ isNight = true, onStageChange }: SummitAttende
 
         // Soft ground contact shadow under each figure on the promenade walkway
         ctx.beginPath();
-        ctx.ellipse(p.x, p.y + bob + r * 1.6, r * 1.25, r * 0.38, 0, 0, Math.PI * 2);
+        ctx.ellipse(p.x, p.y + bob + r * 1.5, r * 1.25, r * 0.38, 0, 0, Math.PI * 2);
         ctx.fillStyle = isNight ? "rgba(0, 0, 0, 0.45)" : "rgba(0, 0, 0, 0.22)";
         ctx.fill();
 
@@ -454,7 +454,7 @@ export function SummitAttendees({ isNight = true, onStageChange }: SummitAttende
           if (availableP) {
             fx.push({
               x: availableP.x,
-              y: availableP.y - 22 * sc,
+              y: availableP.y - 25 * sc,
               t: now,
               w: WORDS[Math.floor(Math.random() * WORDS.length)],
               personIndex: availableP.i,
@@ -472,7 +472,7 @@ export function SummitAttendees({ isNight = true, onStageChange }: SummitAttende
         const t = (now - e.t) / 1800;
         const person = P.find((p) => p.i === e.personIndex);
         const curX = person ? person.x : e.x;
-        const curY = (person ? person.y - 22 * sc : e.y) - t * 20 * sc;
+        const curY = (person ? person.y - 25 * sc : e.y) - t * 20 * sc;
 
         // Gentle ripple ring below bubble
         ctx.globalAlpha = (1 - t) * 0.5;
