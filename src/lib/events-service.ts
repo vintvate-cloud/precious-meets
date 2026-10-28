@@ -1,6 +1,7 @@
 import { EmailService } from "@/lib/email-service";
 import { ApplicationsService } from "./applications-service";
 import { supabase } from "@/lib/supabase";
+import { isDeletedUser, recordDeletedUser } from "@/lib/deleted-users";
 
 export interface AdminAttendee {
   id: string;
@@ -241,52 +242,48 @@ export class EventsService {
   static getAttendees(): AdminAttendee[] {
     if (typeof window === "undefined") return INITIAL_ATTENDEES;
     try {
-      const stored = localStorage.getItem(STORAGE_ATTENDEES_KEY);
-      let manualAttendees: AdminAttendee[] = [];
-      if (stored) {
-        const parsed: AdminAttendee[] = JSON.parse(stored);
-        // Purge mock attendees with IDs att_01..att_08 or @example.com
-        manualAttendees = parsed.filter(
-          (a) => !a.id.startsWith("att_0") && !a.email?.endsWith("@example.com")
-        );
-      }
-
-      // Convert real member applications into attendees eligible for seating
+      // Single Source of Truth: Real member applications from ApplicationsService
+      // STRICT: Only approved verified members (exactly matching the "Verified Members" tab in Dossiers)
       const realApplications = ApplicationsService.getApplications();
-      const mappedFromApps: AdminAttendee[] = realApplications.map((app) => ({
-        id: app.id,
-        name: app.applicantName,
-        email: app.applicantEmail,
-        phone: app.applicantPhone || "+91 98765 43210",
-        avatar:
-          app.avatarUrl ||
-          "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
-        city: (app.applicantCity as any) || "Delhi NCR",
-        gender: "female",
-        archetype: {
-          title: app.archetypeTitle || "Curated Member",
-          description: app.archetypeDescription || "Verified table guest",
-          dimensions: {
-            socialEnergy: app.socialEnergyScore || 70,
-            conversationDepth: app.conversationDepthScore || 85,
-            curiosity: app.curiosityScore || 80,
-            adventure: app.adventureScore || 65,
+      const mappedFromApps: AdminAttendee[] = realApplications
+        .filter(
+          (app) =>
+            !isDeletedUser(app.applicantEmail, app.id) &&
+            app.status === "approved"
+        )
+        .map((app) => ({
+          id: app.id,
+          name: app.applicantName,
+          email: app.applicantEmail,
+          phone: app.applicantPhone || "+91 98765 43210",
+          avatar:
+            app.avatarUrl ||
+            app.userPhotoUrl ||
+            "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+          city: (app.applicantCity as any) || "Delhi NCR",
+          gender: "female",
+          archetype: {
+            title: app.archetypeTitle || "Curated Member",
+            description: app.archetypeDescription || "Verified table guest",
+            dimensions: {
+              socialEnergy: app.socialEnergyScore || 70,
+              conversationDepth: app.conversationDepthScore || 85,
+              curiosity: app.curiosityScore || 80,
+              adventure: app.adventureScore || 65,
+            },
           },
-        },
-        dietary: app.dietaryPreference || "Vegetarian",
-        allergies: app.allergies || [],
-        identityVerified: app.identityStatus === "verified",
-        memberTier:
-          app.membershipStatus === "active"
-            ? "Private Circle Member"
-            : "Applicant",
-        memberId: app.applicationReference,
-      }));
+          dietary: app.dietaryPreference || "Vegetarian",
+          allergies: app.allergies || [],
+          identityVerified: true,
+          memberTier: "Private Circle Member",
+          memberId: app.applicationReference,
+        }));
 
-      // Combine by unique ID or email
+      // Deduplicate by email / ID
       const seen = new Set<string>();
       const combined: AdminAttendee[] = [];
-      for (const att of [...mappedFromApps, ...manualAttendees]) {
+      for (const att of mappedFromApps) {
+        if (isDeletedUser(att.email, att.id)) continue;
         const key = (att.email || att.id).toLowerCase();
         if (!seen.has(key)) {
           seen.add(key);
@@ -294,12 +291,88 @@ export class EventsService {
         }
       }
 
+      // Overwrite cache so stale mock/unverified attendees are purged immediately
       localStorage.setItem(STORAGE_ATTENDEES_KEY, JSON.stringify(combined));
       return combined;
     } catch (e) {
       console.error("[EventsService] Failed to load attendees:", e);
       return INITIAL_ATTENDEES;
     }
+  }
+
+  // 7b. Permanently delete attendee and unseat them from all events
+  static deleteAttendee(idOrEmail: string, email?: string): AdminAttendee[] {
+    const clean = idOrEmail.trim().toLowerCase();
+    const rawId = clean.replace(/^ver_/, "");
+    const cleanEmail = email?.trim().toLowerCase();
+
+    recordDeletedUser(cleanEmail, clean);
+
+    const stored = localStorage.getItem(STORAGE_ATTENDEES_KEY);
+    let list: AdminAttendee[] = [];
+    if (stored) {
+      try {
+        const parsed: AdminAttendee[] = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          list = parsed.filter((att) => {
+            const attId = att.id.toLowerCase();
+            const attEmail = att.email?.toLowerCase();
+            if (attId === clean || attId === rawId) return false;
+            if (cleanEmail && attEmail === cleanEmail) return false;
+            if (attEmail === clean) return false;
+            if (isDeletedUser(att.email, att.id)) return false;
+            return true;
+          });
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    localStorage.setItem(STORAGE_ATTENDEES_KEY, JSON.stringify(list));
+
+    // Sweep all events and free up seats occupied by this attendee
+    try {
+      const events = this.getEvents();
+      let changed = false;
+      const updatedEvents = events.map((evt) => {
+        let seatChanged = false;
+        const newSeats = (evt.seats || []).map((seatId) => {
+          if (!seatId) return null;
+          const s = seatId.toLowerCase();
+          if (s === clean || s === rawId || (cleanEmail && s === cleanEmail)) {
+            seatChanged = true;
+            changed = true;
+            return null;
+          }
+          return seatId;
+        });
+
+        const newAcceptances = { ...(evt.seatAcceptances || {}) };
+        for (const k of Object.keys(newAcceptances)) {
+          const lk = k.toLowerCase();
+          if (lk === clean || lk === rawId || (cleanEmail && lk === cleanEmail)) {
+            delete newAcceptances[k];
+            seatChanged = true;
+            changed = true;
+          }
+        }
+
+        return seatChanged ? { ...evt, seats: newSeats, seatAcceptances: newAcceptances } : evt;
+      });
+
+      if (changed) {
+        this.saveEvents(updatedEvents);
+      }
+    } catch (e) {
+      console.warn("[EventsService] Failed to unseat deleted attendee from events:", e);
+    }
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(new CustomEvent("precious_meets_attendees_updated"));
+    }
+
+    return this.getAttendees();
   }
 
   // 8. Assign attendee to a seat index (0..5)

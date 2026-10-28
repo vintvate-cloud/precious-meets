@@ -3,6 +3,7 @@ import { EventsService, AdminAttendee } from "@/lib/events-service";
 import { ApplicationsService, MemberApplication } from "@/lib/applications-service";
 import { VerificationsService } from "@/lib/verifications-service";
 import { getSampleAadhaarSvg } from "@/lib/aadhaar-utils";
+import { isDeletedUser } from "@/lib/deleted-users";
 import {
   ShieldCheck,
   CheckCircle2,
@@ -71,7 +72,7 @@ export interface UnifiedVerifiedUser {
 interface VerificationsSectionProps {
   queue: VerificationQueueItem[];
   onUpdateQueueStatus: (id: string, status: "verified" | "failed") => void;
-  onDeleteQueueItem?: (id: string, email?: string) => void;
+  onDeleteQueueItem?: (id: string, email?: string) => void | Promise<void>;
 }
 
 export function VerificationsSection({
@@ -80,22 +81,27 @@ export function VerificationsSection({
   onDeleteQueueItem,
 }: VerificationsSectionProps) {
   // Main view toggle: "verified_users" (All verified users in the site) vs "pending_queue"
-  // Default to pending_queue if there are pending member accounts awaiting verification!
+  const activeQueue = useMemo(() => {
+    return (queue || []).filter((v) => !isDeletedUser(v.email, v.id));
+  }, [queue]);
+
   const [viewMode, setViewMode] = useState<"verified_users" | "pending_queue">(() => {
-    return queue.some((q) => q.status === "pending" || q.status === "manual_review")
+    return (queue || []).some(
+      (q) => !isDeletedUser(q.email, q.id) && (q.status === "pending" || q.status === "manual_review")
+    )
       ? "pending_queue"
       : "verified_users";
   });
 
-  const handleDelete = (id: string, email?: string, name?: string) => {
+  const handleDelete = async (id: string, email?: string, name?: string) => {
     const displayName = name || email || "this applicant";
     if (
       window.confirm(
-        `Are you sure you want to permanently delete the application for "${displayName}"?\n\nThis will remove their verification request and member application completely.`
+        `Are you sure you want to permanently delete "${displayName}"?\n\nThis will remove their file permanently across verifications, user dossiers, and meets seating.`
       )
     ) {
       if (onDeleteQueueItem) {
-        onDeleteQueueItem(id, email);
+        await onDeleteQueueItem(id, email);
       } else {
         VerificationsService.deleteRecord(id, email);
         toast.success(`Application for "${displayName}" deleted.`);
@@ -131,7 +137,11 @@ export function VerificationsSection({
     // Source A: Attendees Pool in EventsService
     const attendees = EventsService.getAttendees();
     attendees.forEach((att) => {
-      if (att.identityVerified && !seenEmails.has(att.email.toLowerCase())) {
+      if (
+        att.identityVerified &&
+        !isDeletedUser(att.email, att.id) &&
+        !seenEmails.has(att.email.toLowerCase())
+      ) {
         seenEmails.add(att.email.toLowerCase());
         list.push({
           id: att.id,
@@ -158,6 +168,7 @@ export function VerificationsSection({
     applications.forEach((app) => {
       if (
         (app.identityStatus === "verified" || app.status === "approved") &&
+        !isDeletedUser(app.applicantEmail, app.id) &&
         !seenEmails.has(app.applicantEmail.toLowerCase())
       ) {
         seenEmails.add(app.applicantEmail.toLowerCase());
@@ -751,7 +762,7 @@ export function VerificationsSection({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/60">
-                  {queue.length === 0 ? (
+                  {activeQueue.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="py-12 text-center text-muted-foreground">
                         <ShieldCheck className="size-10 mx-auto text-forest/40 mb-2" />
@@ -764,7 +775,7 @@ export function VerificationsSection({
                       </td>
                     </tr>
                   ) : (
-                    queue.map((v) => (
+                    activeQueue.map((v) => (
                       <tr key={v.id} className="hover:bg-sage/10 transition-colors">
                         <td className="py-4 px-3">
                           <div className="flex items-center gap-2.5">
@@ -872,7 +883,21 @@ export function VerificationsSection({
                         <td className="py-4 px-3 font-mono text-[11px] text-muted-foreground">
                           {v.method}
                         </td>
-                        <td className="py-4 px-3 text-muted-foreground">{v.requestedAt}</td>
+                        <td className="py-4 px-3">
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-xs font-medium text-foreground whitespace-nowrap">
+                              {v.requestedAt}
+                            </span>
+                            {v.requestedAtExact && (
+                              <span
+                                className="text-[10px] text-muted-foreground/80 font-mono tracking-tight whitespace-nowrap"
+                                title={`Application submitted: ${v.requestedAtExact}`}
+                              >
+                                {v.requestedAtExact}
+                              </span>
+                            )}
+                          </div>
+                        </td>
                         <td className="py-4 px-3">
                           <span
                             className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
@@ -890,28 +915,6 @@ export function VerificationsSection({
                         </td>
                         <td className="py-4 px-3 text-right">
                           <div className="flex items-center justify-end gap-1.5">
-                            {v.status !== "verified" ? (
-                              <>
-                                <Button
-                                  variant="outline"
-                                  onClick={() => onUpdateQueueStatus(v.id, "verified")}
-                                  className="text-[11px] h-7 px-3 text-forest border-forest/30 hover:bg-forest hover:text-ivory cursor-pointer font-medium"
-                                >
-                                  Approve
-                                </Button>
-                                <Button
-                                  variant="destructive"
-                                  onClick={() => onUpdateQueueStatus(v.id, "failed")}
-                                  className="text-[11px] h-7 px-3 cursor-pointer"
-                                >
-                                  Reject
-                                </Button>
-                              </>
-                            ) : (
-                              <span className="text-[11px] text-forest font-semibold flex items-center gap-1 mr-1">
-                                <CheckCircle2 className="size-3.5" /> Approved
-                              </span>
-                            )}
                             <Button
                               variant="ghost"
                               size="sm"

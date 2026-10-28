@@ -5,6 +5,41 @@ import { EmailService } from "@/lib/email-service";
 const MOCK_EVENTS_KEY = "precious_meets_admin_events_v2";
 const MOCK_ATTENDEES_KEY = "precious_meets_admin_attendees_v2";
 const MOCK_INVITATIONS_KEY = "precious_meets_user_invitations_v1";
+const MOCK_DOSSIERS_KEY = "precious_meets_member_applications_dossiers";
+
+const mockApplication = {
+  id: "att-test-999",
+  applicationReference: "PM-TEST-999",
+  status: "approved",
+  membershipStatus: "active",
+  applicantName: "Rajat Jha",
+  applicantEmail: "jhaderajat@gmail.com",
+  applicantPhone: "+91 98765 43210",
+  applicantCity: "Delhi NCR",
+  archetypeTitle: "The Cultured Connoisseur",
+  archetypeDescription: "Deep thinker and conversationalist",
+  archetypeTraits: ["Curious", "Cultured"],
+  socialEnergyScore: 80,
+  conversationDepthScore: 90,
+  playfulnessScore: 70,
+  curiosityScore: 85,
+  adventureScore: 75,
+  dietaryPreference: "Vegetarian",
+  allergies: [],
+  personalBoundaries: [],
+  sharedInterests: [],
+  quizAnswers: [],
+  quizCompletedAt: "2026-10-25T09:30:00Z",
+  paymentStatus: "paid",
+  paymentAmountInr: 1999,
+  paymentPlanTitle: "Membership",
+  paidAt: "2026-10-25T10:00:00Z",
+  identityStatus: "verified",
+  identityProvider: "aadhaar_card_upload",
+  credentialsSent: true,
+  createdAt: "2026-10-25T09:30:00Z",
+  updatedAt: "2026-10-25T10:00:00Z",
+};
 
 const mockAttendee: AdminAttendee = {
   id: "att-test-999",
@@ -49,13 +84,13 @@ const mockEvent: AdminEvent = {
   seats: [null, null, null, null, null, null],
   status: "published",
   theme: "Intimate conversation under starlit glass canopy",
-  curatorNotes: "Curated for guests with a passion for art and philosophy",
   seatAcceptances: {},
 };
 
 describe("Seat Invitations Lifecycle & Cross-Device Sync", () => {
   beforeEach(() => {
     localStorage.clear();
+    localStorage.setItem(MOCK_DOSSIERS_KEY, JSON.stringify([mockApplication]));
     localStorage.setItem(MOCK_EVENTS_KEY, JSON.stringify([mockEvent]));
     localStorage.setItem(MOCK_ATTENDEES_KEY, JSON.stringify([mockAttendee]));
     localStorage.setItem(MOCK_INVITATIONS_KEY, JSON.stringify([]));
@@ -72,10 +107,10 @@ describe("Seat Invitations Lifecycle & Cross-Device Sync", () => {
 
     const userInvitations = EventsService.getUserInvitations(mockAttendee.email);
     expect(userInvitations.length).toBe(1);
-    expect(userInvitations[0].eventId).toBe(mockEvent.id);
-    expect(userInvitations[0].attendeeEmail).toBe(mockAttendee.email);
-    expect(userInvitations[0].seatNumber).toBe(1);
-    expect(userInvitations[0].status).toBe("pending");
+    expect(userInvitations[0]?.eventId).toBe(mockEvent.id);
+    expect(userInvitations[0]?.attendeeEmail).toBe(mockAttendee.email);
+    expect(userInvitations[0]?.seatNumber).toBe(1);
+    expect(userInvitations[0]?.status).toBe("pending");
   });
 
   it("dispatches pass emails and sets emailSent=true with direct dashboard link", async () => {
@@ -104,7 +139,7 @@ describe("Seat Invitations Lifecycle & Cross-Device Sync", () => {
   it("allows the member to accept the seat invitation and reveals Door PIN", () => {
     EventsService.assignSeat(mockEvent.id, 0, mockAttendee.id);
     const invitations = EventsService.getUserInvitations(mockAttendee.email);
-    const inv = invitations[0];
+    const inv = invitations[0]!;
 
     const accepted = EventsService.respondToInvitation(inv.id, "accepted");
     expect(accepted.status).toBe("accepted");
@@ -122,7 +157,7 @@ describe("Seat Invitations Lifecycle & Cross-Device Sync", () => {
   it("allows the member to decline the seat invitation with reason", () => {
     EventsService.assignSeat(mockEvent.id, 0, mockAttendee.id);
     const invitations = EventsService.getUserInvitations(mockAttendee.email);
-    const inv = invitations[0];
+    const inv = invitations[0]!;
 
     const declined = EventsService.respondToInvitation(inv.id, "declined", "Traveling out of town");
     expect(declined.status).toBe("declined");

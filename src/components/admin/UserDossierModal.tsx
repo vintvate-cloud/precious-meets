@@ -4,6 +4,7 @@ import {
   ApplicationsService,
 } from "@/lib/applications-service";
 import { VerificationsService } from "@/lib/verifications-service";
+import { EventsService } from "@/lib/events-service";
 import { getSampleAadhaarSvg } from "@/lib/aadhaar-utils";
 import {
   Dialog,
@@ -178,7 +179,17 @@ export function UserDossierModal({
     }
   };
 
+  const isAadhaarVerified = application.identityStatus === "verified";
+
   const handleApprove = async () => {
+    if (!isAadhaarVerified) {
+      toast.warning("Please verify the applicant's Aadhaar first before approving this application.", {
+        description: "Review the uploaded Aadhaar document in the '3. AADHAAR VERIFICATION' tab and click 'Approve Aadhaar'.",
+      });
+      setActiveSheet("identity");
+      return;
+    }
+
     setProcessing(true);
     try {
       const res = await ApplicationsService.approveApplication(
@@ -228,13 +239,14 @@ export function UserDossierModal({
     if (!application) return;
     if (
       window.confirm(
-        `Are you sure you want to permanently delete the application for "${application.applicantName}" (${application.applicantEmail})?\n\nThis will remove their file from both dossiers and verifications.`
+        `Are you sure you want to permanently delete "${application.applicantName}" (${application.applicantEmail})?\n\nThis will remove their file permanently across user dossiers, verifications, and meets seating.`
       )
     ) {
       setProcessing(true);
       try {
-        await ApplicationsService.deleteApplication(application.id);
+        await ApplicationsService.deleteApplication(application.id, application.applicantEmail);
         VerificationsService.deleteRecord(application.id, application.applicantEmail);
+        EventsService.deleteAttendee(application.id, application.applicantEmail);
         toast.success(`Application for "${application.applicantName}" permanently deleted.`);
         onOpenChange(false);
       } catch (e: any) {
@@ -1109,20 +1121,22 @@ export function UserDossierModal({
                     </p>
                   </div>
                   <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setAadhaarDecisionTab("reupload");
-                        setAadhaarDecisionModalOpen(true);
-                      }}
-                      disabled={processingAadhaar}
-                      className="rounded-full border-amber-600/40 text-amber-700 hover:bg-amber-50 text-xs font-semibold px-3.5 h-8.5 cursor-pointer"
-                    >
-                      <AlertTriangle className="size-3.5 mr-1 text-amber-600" />
-                      Reject / Re-verify
-                    </Button>
+                    {application.identityStatus !== "verified" && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setAadhaarDecisionTab("reupload");
+                          setAadhaarDecisionModalOpen(true);
+                        }}
+                        disabled={processingAadhaar}
+                        className="rounded-full border-amber-600/40 text-amber-700 hover:bg-amber-50 text-xs font-semibold px-3.5 h-8.5 cursor-pointer"
+                      >
+                        <AlertTriangle className="size-3.5 mr-1 text-amber-600" />
+                        Reject / Re-verify
+                      </Button>
+                    )}
 
                     <Button
                       type="button"
@@ -1398,14 +1412,27 @@ export function UserDossierModal({
                   size="sm"
                   onClick={handleApprove}
                   disabled={processing}
-                  className="rounded-full bg-forest text-ivory hover:bg-forest/90 text-xs font-semibold px-4.5 py-1.5 h-9 shadow-xs cursor-pointer flex items-center gap-1.5 shrink-0"
+                  title={
+                    !isAadhaarVerified
+                      ? "Aadhaar must be verified first before approving this application."
+                      : "Approve application and induct member."
+                  }
+                  className={`rounded-full text-xs font-semibold px-4.5 py-1.5 h-9 shadow-xs flex items-center gap-1.5 shrink-0 transition-all ${
+                    !isAadhaarVerified
+                      ? "bg-forest/40 text-ivory/80 cursor-pointer hover:bg-forest/50"
+                      : "bg-forest text-ivory hover:bg-forest/90 cursor-pointer"
+                  }`}
                 >
                   {processing ? (
                     <Loader2 className="size-3.5 animate-spin" />
+                  ) : !isAadhaarVerified ? (
+                    <AlertTriangle className="size-3.5 text-amber-300" />
                   ) : (
                     <UserCheck className="size-3.5" />
                   )}
-                  <span>Approve Application</span>
+                  <span>
+                    {!isAadhaarVerified ? "Approve Application (Verify Aadhaar First)" : "Approve Application"}
+                  </span>
                 </Button>
               </>
             ) : isApproved ? (
@@ -1423,7 +1450,14 @@ export function UserDossierModal({
                   variant="outline"
                   size="sm"
                   onClick={handleApprove}
-                  className="rounded-full border-forest/40 text-forest hover:bg-forest/10 text-xs font-semibold h-9 px-3.5 cursor-pointer shrink-0"
+                  title={
+                    !isAadhaarVerified
+                      ? "Aadhaar must be verified first before approving this application."
+                      : "Re-evaluate and approve application"
+                  }
+                  className={`rounded-full border-forest/40 text-forest hover:bg-forest/10 text-xs font-semibold h-9 px-3.5 cursor-pointer shrink-0 ${
+                    !isAadhaarVerified ? "opacity-60" : ""
+                  }`}
                 >
                   Re-evaluate & Approve
                 </Button>

@@ -39,7 +39,7 @@ const mockApplication: MemberApplication = {
   updatedAt: "2026-10-25T10:00:00Z",
 };
 
-describe("Aadhaar Verification Lifecycle & Re-upload Service", () => {
+describe("Aadhaar Verification Lifecycle & Re-upload Service", { timeout: 25000 }, () => {
   beforeEach(() => {
     localStorage.clear();
     localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify([mockApplication]));

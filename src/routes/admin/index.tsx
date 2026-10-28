@@ -20,6 +20,7 @@ import {
   VerificationQueueItem,
 } from "@/components/admin/VerificationsSection";
 import { VerificationsService } from "@/lib/verifications-service";
+import { isDeletedUser } from "@/lib/deleted-users";
 import {
   ShieldAlert,
   ShieldCheck,
@@ -137,6 +138,7 @@ function AdminConsolePage() {
         if (dbApps && dbApps.length > 0) {
           setApplications(dbApps);
           setVerifications(VerificationsService.getQueue());
+          setAttendees(EventsService.getAttendees());
         }
       });
     };
@@ -158,11 +160,13 @@ function AdminConsolePage() {
     window.addEventListener("storage", refreshData);
     window.addEventListener("precious_meets_applications_updated", refreshData);
     window.addEventListener("precious_meets_verification_updated", refreshData);
+    window.addEventListener("precious_meets_attendees_updated", refreshData);
     return () => {
       supabase.removeChannel(channel);
       window.removeEventListener("storage", refreshData);
       window.removeEventListener("precious_meets_applications_updated", refreshData);
       window.removeEventListener("precious_meets_verification_updated", refreshData);
+      window.removeEventListener("precious_meets_attendees_updated", refreshData);
     };
   }, [selectedEventId]);
 
@@ -286,11 +290,15 @@ function AdminConsolePage() {
     toast.success(`Verification status updated to ${status}.`);
   };
 
-  const handleDeleteVerification = (id: string, email?: string) => {
+  const handleDeleteVerification = async (id: string, email?: string) => {
     const updated = VerificationsService.deleteRecord(id, email);
+    await ApplicationsService.deleteApplication(id, email);
+    EventsService.deleteAttendee(id, email);
     setVerifications(updated);
     setApplications(ApplicationsService.getApplications());
-    toast.success("Record deleted.");
+    setAttendees(EventsService.getAttendees());
+    setEvents(EventsService.getEvents());
+    toast.success("Applicant permanently deleted across dossiers and seating.");
   };
 
   const handleSignOut = async () => {
@@ -302,11 +310,13 @@ function AdminConsolePage() {
     }
   };
 
-  // Nav counts
-  const pendingApplicationsCount = applications.filter((a) => a.status === "pending_review").length;
+  // Nav counts (strictly excluding blacklisted deleted users)
+  const pendingApplicationsCount = applications.filter(
+    (a) => !isDeletedUser(a.applicantEmail, a.id) && a.status === "pending_review"
+  ).length;
   const upcomingEventsCount = events.filter((e) => e.status !== "completed").length;
   const pendingVerificationsCount = verifications.filter(
-    (v) => v.status === "pending" || v.status === "manual_review"
+    (v) => !isDeletedUser(v.email, v.id) && (v.status === "pending" || v.status === "manual_review")
   ).length;
   const activeIncidentsCount = incidents.filter((i) => i.status !== "resolved").length;
 

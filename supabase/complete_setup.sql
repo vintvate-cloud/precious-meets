@@ -227,6 +227,12 @@ TO public
 USING (true)
 WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Allow delete member application" ON public.member_applications;
+CREATE POLICY "Allow delete member application" 
+ON public.member_applications FOR DELETE 
+TO public 
+USING (true);
+
 -- Profiles:
 DROP POLICY IF EXISTS "Profiles read policy" ON public.profiles;
 CREATE POLICY "Profiles read policy" 

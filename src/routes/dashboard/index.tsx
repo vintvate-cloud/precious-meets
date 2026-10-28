@@ -30,10 +30,6 @@ import {
 } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard/")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    tab: typeof search["tab"] === "string" ? (search["tab"] as DashboardTab) : undefined,
-    invite: typeof search["invite"] === "string" ? (search["invite"] as string) : undefined,
-  }),
   head: () => ({
     meta: [
       { title: "Member Dashboard — Precious Meets" },
@@ -106,10 +102,16 @@ export function DashboardPage() {
     }
   };
 
-  const search = Route.useSearch();
-  const searchTab = search?.tab;
+  const getUrlTab = (): DashboardTab | null => {
+    if (typeof window === "undefined") return null;
+    const tabParam = new URLSearchParams(window.location.search).get("tab") as DashboardTab;
+    if (tabParam && ["overview", "meets", "requests", "profile", "questions", "invoice"].includes(tabParam)) {
+      return tabParam;
+    }
+    return null;
+  };
 
-  const [activeTab, setActiveTab] = useState<DashboardTab>(searchTab || "overview");
+  const [activeTab, setActiveTab] = useState<DashboardTab>(() => getUrlTab() || "overview");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [events, setEvents] = useState<AdminEvent[]>([]);
   const [invitations, setInvitations] = useState<UserSeatInvitation[]>([]);
@@ -117,10 +119,11 @@ export function DashboardPage() {
 
   // Sync tab from URL query if user clicks a direct invitation link (?tab=requests)
   useEffect(() => {
-    if (searchTab && ["overview", "meets", "requests", "profile", "questions", "invoice"].includes(searchTab)) {
-      setActiveTab(searchTab);
+    const urlTab = getUrlTab();
+    if (urlTab) {
+      setActiveTab(urlTab);
     }
-  }, [searchTab]);
+  }, []);
 
   // Load initial data from EventsService & LocalStorage & Supabase
   const loadDashboardData = () => {

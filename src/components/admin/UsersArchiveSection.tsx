@@ -4,6 +4,8 @@ import {
   ApplicationsService,
 } from "@/lib/applications-service";
 import { VerificationsService } from "@/lib/verifications-service";
+import { EventsService } from "@/lib/events-service";
+import { isDeletedUser } from "@/lib/deleted-users";
 import { UserDossierModal } from "./UserDossierModal";
 import {
   Search,
@@ -87,34 +89,52 @@ export function UsersArchiveSection() {
   const handleDeleteCard = async (app: MemberApplication) => {
     if (
       window.confirm(
-        `Are you sure you want to permanently delete the application for "${app.applicantName}" (${app.applicantEmail})?`
+        `Are you sure you want to permanently delete "${app.applicantName}" (${app.applicantEmail})?\n\nThis will remove their file permanently across user dossiers, verifications, and meets seating.`
       )
     ) {
-      const remaining = await ApplicationsService.deleteApplication(app.id);
+      const remaining = await ApplicationsService.deleteApplication(app.id, app.applicantEmail);
       VerificationsService.deleteRecord(app.id, app.applicantEmail);
+      EventsService.deleteAttendee(app.id, app.applicantEmail);
       setApplications(remaining);
-      toast.success(`Application for "${app.applicantName}" deleted.`);
+      toast.success(`Application for "${app.applicantName}" permanently deleted.`);
     }
   };
 
+  // Active Applications (strictly excluding any deleted users)
+  const activeApplications = applications.filter(
+    (app) => !isDeletedUser(app.applicantEmail, app.id)
+  );
+
   // Metrics
-  const totalCount = applications.length;
-  const pendingCount = applications.filter(
-    (a) => a.status === "pending_review",
+  const totalCount = activeApplications.length;
+  // Awaiting Action: includes pending_review applications, reuploaded applications, and any not yet approved or rejected
+  const pendingCount = activeApplications.filter(
+    (a) =>
+      a.status === "pending_review" ||
+      a.identityStatus === "reuploaded" ||
+      a.identityStatus === "manual_review" ||
+      (a.status !== "approved" && a.status !== "rejected")
   ).length;
-  const approvedCount = applications.filter(
+  const approvedCount = activeApplications.filter(
     (a) => a.status === "approved",
   ).length;
-  const rejectedCount = applications.filter(
+  const rejectedCount = activeApplications.filter(
     (a) => a.status === "rejected",
   ).length;
-  const reuploadedCount = applications.filter(
+  const reuploadedCount = activeApplications.filter(
     (a) => a.identityStatus === "reuploaded",
   ).length;
 
   // Filtered List
-  const filteredApplications = applications.filter((app) => {
-    if (filter === "reuploaded") {
+  const filteredApplications = activeApplications.filter((app) => {
+    if (filter === "pending_review") {
+      const isAwaitingAction =
+        app.status === "pending_review" ||
+        app.identityStatus === "reuploaded" ||
+        app.identityStatus === "manual_review" ||
+        (app.status !== "approved" && app.status !== "rejected");
+      if (!isAwaitingAction) return false;
+    } else if (filter === "reuploaded") {
       if (app.identityStatus !== "reuploaded") return false;
     } else if (filter !== "all" && app.status !== filter) {
       return false;
