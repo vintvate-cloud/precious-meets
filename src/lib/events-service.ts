@@ -1,5 +1,6 @@
 import { EmailService } from "@/lib/email-service";
 import { ApplicationsService } from "./applications-service";
+import { supabase } from "@/lib/supabase";
 
 export interface AdminAttendee {
   id: string;
@@ -372,6 +373,9 @@ export class EventsService {
         invitations.unshift(invData);
       }
       this.saveUserInvitations(invitations);
+      this.syncInvitationToDatabase(attendee.email, invData).catch((e) =>
+        console.warn("[EventsService] Supabase invitation assign sync notice:", e)
+      );
     }
 
     const updated = this.updateEvent(eventId, { seats: newSeats, seatAcceptances });
@@ -400,6 +404,9 @@ export class EventsService {
         (inv) => !(inv.eventId === eventId && (inv.attendeeId === previousAttendeeId || inv.seatNumber === seatIndex + 1))
       );
       this.saveUserInvitations(invitations);
+      this.removeInvitationFromDatabase(previousAttendeeId, eventId).catch((e) =>
+        console.warn("[EventsService] Supabase invitation remove notice:", e)
+      );
     }
 
     const updated = this.updateEvent(eventId, { seats: newSeats, seatAcceptances });
@@ -533,8 +540,8 @@ export class EventsService {
     const seatAcceptances: Record<string, SeatAcceptance> = { ...(event.seatAcceptances || {}) };
 
     const dashboardUrl = typeof window !== "undefined"
-      ? `${window.location.origin}/dashboard`
-      : "http://localhost:8080/dashboard";
+      ? `${window.location.origin}/dashboard?tab=requests`
+      : "http://localhost:8080/dashboard?tab=requests";
 
     let sentCount = 0;
     let alreadySentCount = 0;
@@ -618,6 +625,11 @@ export class EventsService {
       } else {
         updatedInvitations.unshift(invData);
       }
+
+      // Sync live to Supabase member_applications so member immediately sees invitation on any device
+      this.syncInvitationToDatabase(attendee.email, invData).catch((e) =>
+        console.warn("[EventsService] Supabase invitation dispatch sync notice:", e)
+      );
     }
 
     this.saveUserInvitations(updatedInvitations);
@@ -666,13 +678,12 @@ export class EventsService {
           localStorage.setItem(STORAGE_USER_INVITATIONS_KEY, JSON.stringify(cleaned));
         }
 
-        // If userEmail is provided and has matches, return matched invitations
+        // If userEmail is provided, return only matched invitations for this user
         if (userEmail && userEmail.trim()) {
           const lower = userEmail.trim().toLowerCase();
-          const userSpecific = cleaned.filter(
-            (inv) => inv && (!inv.attendeeEmail || inv.attendeeEmail.toLowerCase() === lower)
+          return cleaned.filter(
+            (inv) => inv && inv.attendeeEmail && inv.attendeeEmail.toLowerCase() === lower
           );
-          if (userSpecific.length > 0) return userSpecific;
         }
 
         return cleaned;
@@ -682,6 +693,136 @@ export class EventsService {
     } catch (e) {
       console.error("[EventsService] Failed to load user invitations:", e);
       return INITIAL_USER_INVITATIONS;
+    }
+  }
+
+  /**
+   * Fetches the member's invitations live from Supabase member_applications table.
+   * Merges with localStorage so invitations are available on all devices/browsers.
+   */
+  static async fetchUserInvitations(userEmail?: string): Promise<UserSeatInvitation[]> {
+    if (!userEmail || !userEmail.trim()) {
+      return this.getUserInvitations();
+    }
+    const cleanEmail = userEmail.trim().toLowerCase();
+
+    try {
+      const { data, error } = await supabase
+        .from("member_applications")
+        .select("id, scores")
+        .ilike("applicant_email", cleanEmail)
+        .maybeSingle();
+
+      if (!error && data && data.scores && Array.isArray(data.scores.invitations)) {
+        const dbInvitations: UserSeatInvitation[] = data.scores.invitations;
+        const currentLocal = this.getUserInvitations();
+        const merged = [...currentLocal];
+
+        for (const dbInv of dbInvitations) {
+          const idx = merged.findIndex(
+            (l) => l.id === dbInv.id || (l.eventId === dbInv.eventId && l.attendeeEmail?.toLowerCase() === cleanEmail)
+          );
+          if (idx !== -1) {
+            merged[idx] = { ...merged[idx], ...dbInv };
+          } else {
+            merged.unshift(dbInv);
+          }
+        }
+
+        this.saveUserInvitations(merged);
+        return this.getUserInvitations(cleanEmail);
+      }
+    } catch (e) {
+      console.warn("[EventsService] Failed to load invitations from Supabase:", e);
+    }
+
+    return this.getUserInvitations(cleanEmail);
+  }
+
+  /**
+   * Syncs a seat invitation into the member's application record in Supabase.
+   */
+  static async syncInvitationToDatabase(userEmail: string, invitation: UserSeatInvitation): Promise<void> {
+    if (!userEmail || !userEmail.trim()) return;
+    const cleanEmail = userEmail.trim().toLowerCase();
+
+    try {
+      const { data, error } = await supabase
+        .from("member_applications")
+        .select("id, scores")
+        .or(`applicant_email.ilike.${cleanEmail},id.eq.${invitation.attendeeId}`)
+        .maybeSingle();
+
+      if (error || !data) {
+        console.warn("[EventsService] Member record not found in Supabase for email:", cleanEmail);
+        return;
+      }
+
+      const existingScores = data.scores || {};
+      const existingInvList: UserSeatInvitation[] = Array.isArray(existingScores.invitations)
+        ? existingScores.invitations
+        : [];
+
+      const idx = existingInvList.findIndex(
+        (i) => i.id === invitation.id || (i.eventId === invitation.eventId && i.attendeeEmail?.toLowerCase() === cleanEmail)
+      );
+
+      if (idx !== -1) {
+        existingInvList[idx] = { ...existingInvList[idx], ...invitation };
+      } else {
+        existingInvList.unshift(invitation);
+      }
+
+      await supabase
+        .from("member_applications")
+        .update({
+          scores: {
+            ...existingScores,
+            invitations: existingInvList,
+          },
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", data.id);
+    } catch (e) {
+      console.warn("[EventsService] Failed to sync invitation to Supabase:", e);
+    }
+  }
+
+  /**
+   * Removes an invitation from Supabase when a member is unseated.
+   */
+  static async removeInvitationFromDatabase(attendeeIdOrEmail: string, eventId: string): Promise<void> {
+    if (!attendeeIdOrEmail) return;
+    const clean = attendeeIdOrEmail.trim().toLowerCase();
+
+    try {
+      const { data } = await supabase
+        .from("member_applications")
+        .select("id, scores")
+        .or(`applicant_email.ilike.${clean},id.eq.${attendeeIdOrEmail}`)
+        .maybeSingle();
+
+      if (!data) return;
+
+      const existingScores = data.scores || {};
+      if (!Array.isArray(existingScores.invitations)) return;
+
+      const filtered = existingScores.invitations.filter(
+        (i: UserSeatInvitation) => i.eventId !== eventId
+      );
+
+      await supabase
+        .from("member_applications")
+        .update({
+          scores: {
+            ...existingScores,
+            invitations: filtered,
+          },
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", data.id);
+    } catch (e) {
+      console.warn("[EventsService] Failed to remove invitation from Supabase:", e);
     }
   }
 
@@ -756,6 +897,11 @@ export class EventsService {
         }
       }
     }
+
+    // Sync acceptance or decline to Supabase member_applications
+    this.syncInvitationToDatabase(updatedInvitation.attendeeEmail, updatedInvitation).catch((e) =>
+      console.warn("[EventsService] Failed to sync invitation response to Supabase:", e)
+    );
 
     // If accepted, ensure the event reservation is recorded in member's active RSVPs
     if (typeof window !== "undefined") {

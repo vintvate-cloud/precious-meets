@@ -24,10 +24,12 @@ import {
   Linkedin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 
 export function UsersArchiveSection() {
   const [applications, setApplications] = useState<MemberApplication[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<
     "all" | "pending_review" | "reuploaded" | "approved" | "rejected"
   >("all");
@@ -37,13 +39,24 @@ export function UsersArchiveSection() {
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
-    const refreshData = () => {
-      setApplications(ApplicationsService.getApplications());
-      ApplicationsService.fetchApplicationsFromDb().then((realApps) => {
-        if (realApps && realApps.length > 0) {
+    let mounted = true;
+    const initialCached = ApplicationsService.getApplications();
+    if (initialCached && initialCached.length > 0) {
+      setApplications(initialCached);
+      setIsLoading(false);
+    }
+
+    const refreshData = async () => {
+      try {
+        const realApps = await ApplicationsService.fetchApplicationsFromDb();
+        if (mounted && realApps && realApps.length > 0) {
           setApplications(realApps);
         }
-      });
+      } catch (e) {
+        console.warn("Failed to load applications from DB:", e);
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
     };
 
     refreshData();
@@ -51,6 +64,7 @@ export function UsersArchiveSection() {
     window.addEventListener("storage", refreshData);
 
     return () => {
+      mounted = false;
       window.removeEventListener("precious_meets_applications_updated", refreshData);
       window.removeEventListener("storage", refreshData);
     };
@@ -290,9 +304,62 @@ export function UsersArchiveSection() {
       </div>
 
       {/* ========================================================================= */}
-      {/* 3. PHYSICAL DOSSIER / FILE GRID                                            */}
+      {/* 3. PHYSICAL DOSSIER / FILE GRID (WITH INSTANT SKELETON LOADING)             */}
       {/* ========================================================================= */}
-      {filteredApplications.length === 0 ? (
+      {isLoading && applications.length === 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div
+              key={i}
+              className="flex flex-col justify-between rounded-3xl border border-border/70 bg-card p-5 shadow-xs space-y-4 animate-in fade-in duration-300"
+            >
+              {/* Folder tab */}
+              <div className="flex items-center justify-between pb-3 border-b border-border/60">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-5 w-24 rounded-md" />
+                  <Skeleton className="h-3 w-16 rounded" />
+                </div>
+                <Skeleton className="h-4.5 w-16 rounded-full" />
+              </div>
+
+              {/* Avatar + Member Details */}
+              <div className="py-2 space-y-3">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="size-12 rounded-2xl shrink-0" />
+                  <div className="space-y-1.5 flex-1 min-w-0">
+                    <Skeleton className="h-5 w-32 rounded" />
+                    <Skeleton className="h-3.5 w-44 rounded" />
+                    <Skeleton className="h-3 w-28 rounded" />
+                  </div>
+                </div>
+
+                {/* Archetype banner */}
+                <div className="rounded-xl border border-border/60 p-2.5 space-y-1.5 bg-ivory/60">
+                  <div className="flex justify-between items-center">
+                    <Skeleton className="h-2.5 w-20 rounded" />
+                    <Skeleton className="h-2.5 w-16 rounded" />
+                  </div>
+                  <Skeleton className="h-4 w-36 rounded" />
+                </div>
+
+                {/* 4 status pills */}
+                <div className="grid grid-cols-4 gap-1 pt-1">
+                  <Skeleton className="h-5 rounded-lg" />
+                  <Skeleton className="h-5 rounded-lg" />
+                  <Skeleton className="h-5 rounded-lg" />
+                  <Skeleton className="h-5 rounded-lg" />
+                </div>
+              </div>
+
+              {/* Card action footer */}
+              <div className="pt-3 border-t border-border/60 flex items-center justify-between">
+                <Skeleton className="h-3 w-36 rounded" />
+                <Skeleton className="h-3 w-16 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : filteredApplications.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-border/80 bg-card/50 p-12 text-center">
           <Inbox className="size-10 mx-auto text-muted-foreground/50 mb-3" />
           <h4 className="font-display text-xl text-foreground">

@@ -13,6 +13,8 @@ import {
   UniversalMemberPassModal,
   SeatedEvent,
 } from "@/components/dashboard/UniversalMemberPassModal";
+import { UserSeatInvitation } from "@/lib/events-service";
+import { CheckCircle2, XCircle } from "lucide-react";
 
 interface MemberPassCardProps {
   displayName: string;
@@ -29,6 +31,9 @@ interface MemberPassCardProps {
   onExploreMeets: () => void;
   onViewInvitations: () => void;
   pendingInvitationsCount: number;
+  pendingInvitations?: UserSeatInvitation[];
+  onAcceptInvitation?: (inv: UserSeatInvitation) => void;
+  onDeclineInvitation?: (inv: UserSeatInvitation) => void;
   seatedEvents: SeatedEvent[];
 }
 
@@ -41,6 +46,9 @@ export function MemberPassCard({
   onExploreMeets,
   onViewInvitations,
   pendingInvitationsCount,
+  pendingInvitations,
+  onAcceptInvitation,
+  onDeclineInvitation,
   seatedEvents,
 }: MemberPassCardProps) {
   const [showQrModal, setShowQrModal] = useState(false);
@@ -184,31 +192,61 @@ export function MemberPassCard({
           </div>
         </div>
 
-        {/* Live Invitation Notification Alert (if admin sent requests) */}
+        {/* Live Invitation Notification Alert & Direct Accept/Decline (if admin sent requests) */}
         {pendingInvitationsCount > 0 && (
-          <div className="relative z-10 mt-6 flex items-center justify-between rounded-2xl bg-gradient-to-r from-ochre/25 via-burgundy/40 to-ochre/15 p-4 border border-ochre/40 backdrop-blur-md">
-            <div className="flex items-center gap-3">
-              <span className="relative flex size-3">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-ochre opacity-75" />
-                <span className="relative inline-flex size-3 rounded-full bg-ochre" />
-              </span>
-              <div>
-                <p className="text-xs font-semibold text-ivory">
-                  You have {pendingInvitationsCount} personal seat invitation from our curators!
-                </p>
-                <p className="text-[11px] text-white/70">
-                  A curated 6-person table is waiting for your confirmation.
-                </p>
+          <div className="relative z-10 mt-6 rounded-2xl bg-gradient-to-r from-ochre/25 via-burgundy/40 to-ochre/15 p-4 sm:p-5 border border-ochre/40 backdrop-blur-md space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-start sm:items-center gap-3">
+                <span className="relative flex size-3 mt-1 sm:mt-0 shrink-0">
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-ochre opacity-75" />
+                  <span className="relative inline-flex size-3 rounded-full bg-ochre" />
+                </span>
+                <div>
+                  <p className="text-xs sm:text-sm font-semibold text-ivory flex items-center gap-2">
+                    <span>Curated Table Invitation Waiting</span>
+                    <span className="bg-ochre/30 text-ochre text-[10px] font-mono px-2 py-0.5 rounded-full font-bold">
+                      {pendingInvitationsCount} Pending
+                    </span>
+                  </p>
+                  <p className="text-[11px] sm:text-xs text-white/80 mt-0.5">
+                    {pendingInvitations && pendingInvitations.length > 0
+                      ? `"${pendingInvitations[0].eventTitle}" · ${pendingInvitations[0].dateDisplay} (${pendingInvitations[0].neighborhood})`
+                      : "A curated 6-person table is waiting for your confirmation."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 self-end sm:self-auto shrink-0">
+                {pendingInvitations && pendingInvitations[0] && onAcceptInvitation && (
+                  <Button
+                    size="sm"
+                    onClick={() => onAcceptInvitation(pendingInvitations[0])}
+                    className="rounded-full bg-forest text-ivory font-semibold text-xs hover:bg-forest/90 shrink-0 shadow-md cursor-pointer flex items-center gap-1.5 px-4"
+                  >
+                    <CheckCircle2 className="size-3.5" />
+                    <span>Accept Seat</span>
+                  </Button>
+                )}
+                {pendingInvitations && pendingInvitations[0] && onDeclineInvitation && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onDeclineInvitation(pendingInvitations[0])}
+                    className="rounded-full border-white/20 text-white/80 hover:text-white hover:bg-white/10 text-xs shrink-0 cursor-pointer"
+                  >
+                    Decline
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onViewInvitations}
+                  className="rounded-full text-ochre hover:text-ochre hover:bg-white/10 text-xs font-semibold shrink-0 cursor-pointer"
+                >
+                  View Details &rarr;
+                </Button>
               </div>
             </div>
-
-            <Button
-              size="sm"
-              onClick={onViewInvitations}
-              className="rounded-full bg-ochre text-ink font-semibold text-xs hover:bg-ochre/90 shrink-0 shadow-md cursor-pointer"
-            >
-              Review Seat Invite
-            </Button>
           </div>
         )}
       </div>

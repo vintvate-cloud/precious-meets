@@ -1,6 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 import {
   EventsService,
   AdminEvent,
@@ -28,6 +30,10 @@ import {
 } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard/")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    tab: typeof search["tab"] === "string" ? (search["tab"] as DashboardTab) : undefined,
+    invite: typeof search["invite"] === "string" ? (search["invite"] as string) : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Member Dashboard — Precious Meets" },
@@ -100,19 +106,38 @@ export function DashboardPage() {
     }
   };
 
-  const [activeTab, setActiveTab] = useState<DashboardTab>("overview");
+  const search = Route.useSearch();
+  const searchTab = search?.tab;
+
+  const [activeTab, setActiveTab] = useState<DashboardTab>(searchTab || "overview");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [events, setEvents] = useState<AdminEvent[]>([]);
   const [invitations, setInvitations] = useState<UserSeatInvitation[]>([]);
   const [, setReservedEventIds] = useState<string[]>([]);
 
-  // Load initial data from EventsService & LocalStorage
+  // Sync tab from URL query if user clicks a direct invitation link (?tab=requests)
+  useEffect(() => {
+    if (searchTab && ["overview", "meets", "requests", "profile", "questions", "invoice"].includes(searchTab)) {
+      setActiveTab(searchTab);
+    }
+  }, [searchTab]);
+
+  // Load initial data from EventsService & LocalStorage & Supabase
   const loadDashboardData = () => {
     const loadedEvents = EventsService.getEvents();
     setEvents(loadedEvents);
 
     const loadedInvitations = EventsService.getUserInvitations(user?.email || undefined);
     setInvitations(loadedInvitations);
+
+    // Fetch live invitations from Supabase so user on any browser/device immediately sees their invite
+    if (user?.email) {
+      EventsService.fetchUserInvitations(user.email).then((dbInv) => {
+        if (dbInv && dbInv.length > 0) {
+          setInvitations(dbInv);
+        }
+      });
+    }
 
     const savedRsvps = localStorage.getItem(LOCAL_STORAGE_RESERVATIONS_KEY);
     if (savedRsvps) {
@@ -130,9 +155,24 @@ export function DashboardPage() {
     loadDashboardData();
     window.addEventListener("precious_meets_events_updated", loadDashboardData);
     window.addEventListener("storage", loadDashboardData);
+
+    // Realtime Supabase channel for live invitations
+    const cleanEmail = user?.email ? user.email.replace(/[^a-zA-Z0-9]/g, "_") : "anon";
+    const channel = supabase
+      .channel(`member_apps_invites_${cleanEmail}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "member_applications" },
+        () => {
+          loadDashboardData();
+        }
+      )
+      .subscribe();
+
     return () => {
       window.removeEventListener("precious_meets_events_updated", loadDashboardData);
       window.removeEventListener("storage", loadDashboardData);
+      channel.unsubscribe();
     };
   }, [user?.email]);
 
@@ -435,6 +475,27 @@ export function DashboardPage() {
                 onExploreMeets={() => setActiveTab("meets")}
                 onViewInvitations={() => setActiveTab("requests")}
                 pendingInvitationsCount={pendingInvitationsCount}
+                pendingInvitations={(invitations || []).filter((i) => i && i.status === "pending")}
+                onAcceptInvitation={(inv) => {
+                  try {
+                    EventsService.respondToInvitation(inv.id, "accepted");
+                    toast.success(
+                      `Seat #${inv.seatNumber} confirmed for "${inv.eventTitle}"! Door PIN unlocked.`
+                    );
+                    loadDashboardData();
+                  } catch (err: any) {
+                    toast.error(err.message || "Failed to accept");
+                  }
+                }}
+                onDeclineInvitation={(inv) => {
+                  try {
+                    EventsService.respondToInvitation(inv.id, "declined", "Passed from overview");
+                    toast.info(`Invitation for "${inv.eventTitle}" politely passed.`);
+                    loadDashboardData();
+                  } catch (err: any) {
+                    toast.error(err.message || "Failed to decline");
+                  }
+                }}
                 seatedEvents={seatedEvents}
               />
             </div>
