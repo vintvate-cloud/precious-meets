@@ -1,7 +1,7 @@
 -- ==============================================================================
 -- PRECIOUS MEETS - CONSOLIDATED PRODUCTION DATABASE SCHEMA
 -- Run this script in: Supabase Dashboard -> SQL Editor -> New Query
--- URL: https://supabase.com/dashboard/project/vdupycmvzsiepdrqdkrb/sql/new
+-- URL: https://supabase.com/dashboard/project/vwnzblezshaeydtjkdex/sql/new
 -- ==============================================================================
 
 -- 1. Enable Required Extensions
