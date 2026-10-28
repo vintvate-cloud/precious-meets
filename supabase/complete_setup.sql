@@ -82,6 +82,8 @@ CREATE TABLE IF NOT EXISTS public.member_applications (
     applicant_city TEXT DEFAULT 'Delhi NCR',
     applicant_pincode TEXT,
     avatar_url TEXT,
+    instagram_handle TEXT,
+    linkedin_url TEXT,
     
     -- Quiz Dossier
     archetype_title TEXT NOT NULL,
@@ -109,12 +111,13 @@ CREATE TABLE IF NOT EXISTS public.member_applications (
     
     -- Identity Verification
     identity_status TEXT NOT NULL DEFAULT 'unverified' 
-        CHECK (identity_status IN ('unverified', 'pending', 'verified', 'failed', 'manual_review')),
+        CHECK (identity_status IN ('unverified', 'pending', 'verified', 'failed', 'manual_review', 'reuploaded', 'reupload_requested')),
     identity_provider TEXT DEFAULT 'digilocker_consent_offline',
     identity_reference TEXT,
     identity_verified_at TIMESTAMPTZ,
     aadhaar_file_url TEXT,
     aadhaar_file_name TEXT,
+    aadhaar_reuploaded_at TIMESTAMPTZ,
     user_photo_url TEXT,
     user_photo_name TEXT,
     
@@ -132,6 +135,23 @@ CREATE TABLE IF NOT EXISTS public.member_applications (
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
+
+-- Safe migrations if tables already existed
+ALTER TABLE public.member_applications ADD COLUMN IF NOT EXISTS instagram_handle TEXT;
+ALTER TABLE public.member_applications ADD COLUMN IF NOT EXISTS linkedin_url TEXT;
+ALTER TABLE public.member_applications ADD COLUMN IF NOT EXISTS user_photo_url TEXT;
+ALTER TABLE public.member_applications ADD COLUMN IF NOT EXISTS user_photo_name TEXT;
+ALTER TABLE public.member_applications ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+ALTER TABLE public.member_applications ADD COLUMN IF NOT EXISTS aadhaar_reuploaded_at TIMESTAMPTZ;
+
+-- Ensure constraint allows reuploaded and reupload_requested
+DO $$
+BEGIN
+    ALTER TABLE public.member_applications DROP CONSTRAINT IF EXISTS member_applications_identity_status_check;
+    ALTER TABLE public.member_applications ADD CONSTRAINT member_applications_identity_status_check 
+        CHECK (identity_status IN ('unverified', 'pending', 'verified', 'failed', 'manual_review', 'reuploaded', 'reupload_requested'));
+EXCEPTION WHEN OTHERS THEN NULL;
+END $$;
 
 -- ------------------------------------------------------------------------------
 -- 6. EVENTS / MEETS TABLE
@@ -280,3 +300,22 @@ CREATE POLICY "Admins can view admin users"
 ON public.admin_users FOR SELECT 
 TO public 
 USING (true);
+
+-- ------------------------------------------------------------------------------
+-- 10. REALTIME PUBLICATION SETUP
+-- ------------------------------------------------------------------------------
+DO $$
+BEGIN
+    BEGIN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.member_applications;
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END;
+    BEGIN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.events;
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END;
+    BEGIN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.user_seat_invitations;
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END;
+END $$;
