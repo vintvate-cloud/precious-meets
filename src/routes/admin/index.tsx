@@ -139,7 +139,14 @@ function AdminConsolePage() {
 
     loadFromSupabase();
 
-    // Debounced subscription to realtime database changes on member_applications table
+    // Fetch live events from Supabase database
+    EventsService.fetchEventsFromDb().then((dbEvents) => {
+      if (dbEvents && dbEvents.length > 0) {
+        setEvents(dbEvents);
+      }
+    });
+
+    // Debounced subscription to realtime database changes on member_applications & events tables
     let debounceTimer: any = null;
     const channel = supabase
       .channel("admin_member_applications_realtime")
@@ -153,10 +160,22 @@ function AdminConsolePage() {
           }, 2000);
         }
       )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "events" },
+        () => {
+          EventsService.fetchEventsFromDb().then((dbEvents) => {
+            if (dbEvents && dbEvents.length > 0) {
+              setEvents(dbEvents);
+            }
+          });
+        }
+      )
       .subscribe();
 
     window.addEventListener("storage", refreshData);
     window.addEventListener("precious_meets_applications_updated", refreshData);
+    window.addEventListener("precious_meets_events_updated", refreshData);
     window.addEventListener("precious_meets_verification_updated", refreshData);
     window.addEventListener("precious_meets_attendees_updated", refreshData);
     return () => {
@@ -164,6 +183,7 @@ function AdminConsolePage() {
       supabase.removeChannel(channel);
       window.removeEventListener("storage", refreshData);
       window.removeEventListener("precious_meets_applications_updated", refreshData);
+      window.removeEventListener("precious_meets_events_updated", refreshData);
       window.removeEventListener("precious_meets_verification_updated", refreshData);
       window.removeEventListener("precious_meets_attendees_updated", refreshData);
     };

@@ -34,9 +34,27 @@ function DashboardBookingsPage() {
   }, [user, loading, navigate]);
 
   useEffect(() => {
-    const allInvitations = EventsService.getUserInvitations(user?.email || undefined);
-    // Show accepted seat reservations or pending passes
-    setInvitations(allInvitations.filter((inv) => inv.status === "accepted" || inv.status === "pending"));
+    const refresh = () => {
+      const allInvitations = EventsService.getUserInvitations(user?.email || undefined);
+      setInvitations(allInvitations.filter((inv) => inv.status === "accepted" || inv.status === "pending"));
+
+      if (user?.email) {
+        EventsService.fetchUserInvitations(user.email).then((dbInv) => {
+          if (dbInv && dbInv.length > 0) {
+            setInvitations(dbInv.filter((inv) => inv.status === "accepted" || inv.status === "pending"));
+          }
+        });
+      }
+    };
+
+    refresh();
+    window.addEventListener("precious_meets_events_updated", refresh);
+    window.addEventListener("storage", refresh);
+
+    return () => {
+      window.removeEventListener("precious_meets_events_updated", refresh);
+      window.removeEventListener("storage", refresh);
+    };
   }, [user?.email]);
 
   if (loading || !user) {

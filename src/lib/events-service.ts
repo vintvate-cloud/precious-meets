@@ -194,7 +194,22 @@ export class EventsService {
     return events.find((e) => e.id === id);
   }
 
-  // 3. Save / overwrite events list
+  private static generateUUID(): string {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+      try {
+        return crypto.randomUUID();
+      } catch {
+        // fallback
+      }
+    }
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === "x" ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
+
+  // 3. Save / overwrite events list in local storage cache
   static saveEvents(events: AdminEvent[]): void {
     if (typeof window === "undefined") return;
     try {
@@ -204,21 +219,140 @@ export class EventsService {
     }
   }
 
-  // 4. Create new event
+  // 3b. Sync single event record to Supabase public.events table
+  static async syncEventToDatabase(event: AdminEvent): Promise<boolean> {
+    try {
+      const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      const validId = UUID_REGEX.test(event.id) ? event.id : this.generateUUID();
+
+      const payload: any = {
+        id: validId,
+        slug: event.slug || "meet-" + validId.slice(0, 8),
+        title: event.title,
+        city: event.city || "Delhi NCR",
+        neighborhood: event.neighborhood || "Delhi",
+        venue_name: event.venueName,
+        venue_address: event.venueAddress,
+        secret_access_code: event.secretAccessCode || "GATE-402",
+        starts_at: event.startsAt,
+        ends_at: event.endsAt,
+        date_display: event.dateDisplay,
+        price_inr: event.priceInr || 1999,
+        category: event.category || "supper_club",
+        host_name: event.hostName,
+        host_role: event.hostRole,
+        host_avatar: event.hostAvatar || null,
+        cover_image: event.coverImage || null,
+        theme: event.theme || null,
+        menu_preview: event.menuPreview || [],
+        dietary_options: event.dietaryOptions || [],
+        status: event.status || "published",
+        seats: event.seats || [null, null, null, null, null, null],
+      };
+
+      const { error } = await supabase.from("events").upsert(payload, { onConflict: "id" });
+      if (error) {
+        console.error("[EventsService] Supabase event upsert error:", error.message);
+        return false;
+      }
+      return true;
+    } catch (e) {
+      console.warn("[EventsService] Supabase event sync notice:", e);
+      return false;
+    }
+  }
+
+  // 3c. Delete event record from Supabase public.events table
+  static async deleteEventFromDatabase(id: string): Promise<boolean> {
+    try {
+      const { error } = await supabase.from("events").delete().eq("id", id);
+      if (error) {
+        console.error("[EventsService] Supabase event delete error:", error.message);
+        return false;
+      }
+      return true;
+    } catch (e) {
+      console.warn("[EventsService] Supabase event delete notice:", e);
+      return false;
+    }
+  }
+
+  // 3d. Fetch all live events directly from Supabase public.events table
+  static async fetchEventsFromDb(): Promise<AdminEvent[]> {
+    try {
+      const { data, error } = await supabase
+        .from("events")
+        .select("*")
+        .order("starts_at", { ascending: true });
+
+      if (error) {
+        console.warn("[EventsService] Supabase events fetch notice:", error.message);
+        return this.getEvents();
+      }
+
+      if (data && Array.isArray(data)) {
+        const mapped: AdminEvent[] = data.map((d: any) => ({
+          id: d.id,
+          slug: d.slug,
+          title: d.title,
+          city: d.city || "Delhi NCR",
+          neighborhood: d.neighborhood,
+          venueName: d.venue_name,
+          venueAddress: d.venue_address,
+          secretAccessCode: d.secret_access_code,
+          startsAt: d.starts_at,
+          endsAt: d.ends_at,
+          dateDisplay: d.date_display,
+          priceInr: d.price_inr || 1999,
+          category: d.category || "supper_club",
+          hostName: d.host_name,
+          hostRole: d.host_role,
+          hostAvatar: d.host_avatar || undefined,
+          coverImage: d.cover_image,
+          theme: d.theme || "",
+          menuPreview: Array.isArray(d.menu_preview) ? d.menu_preview : [],
+          dietaryOptions: Array.isArray(d.dietary_options) ? d.dietary_options : [],
+          status: d.status || "published",
+          seats: Array.isArray(d.seats) ? d.seats : [null, null, null, null, null, null],
+          emailsSentAt: d.emails_sent_at || null,
+        }));
+
+        const currentLocal = this.getEvents();
+        const dbIds = new Set(mapped.map((m) => m.id));
+        const unsyncedLocal = currentLocal.filter((l) => !dbIds.has(l.id));
+        const combined = [...mapped, ...unsyncedLocal];
+
+        this.saveEvents(combined);
+        return combined;
+      }
+    } catch (e) {
+      console.warn("[EventsService] Supabase fetchEventsFromDb notice:", e);
+    }
+    return this.getEvents();
+  }
+
+  // 4. Create new event (Saves locally + syncs to Supabase public.events)
   static createEvent(eventData: Omit<AdminEvent, "id" | "seats">): AdminEvent {
     const events = this.getEvents();
     const newEvent: AdminEvent = {
       ...eventData,
-      id: "evt_" + Math.random().toString(36).substring(2, 9),
+      id: this.generateUUID(),
       seats: [null, null, null, null, null, null],
       emailsSentAt: null,
     };
     const updated = [newEvent, ...events];
     this.saveEvents(updated);
+    this.syncEventToDatabase(newEvent).catch((e) =>
+      console.warn("[EventsService] Failed to sync new event to Supabase:", e)
+    );
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("precious_meets_events_updated", { detail: { eventId: newEvent.id } }));
+      window.dispatchEvent(new Event("storage"));
+    }
     return newEvent;
   }
 
-  // 5. Update existing event
+  // 5. Update existing event (Updates locally + syncs to Supabase public.events)
   static updateEvent(id: string, updates: Partial<AdminEvent>): AdminEvent {
     const events = this.getEvents();
     const index = events.findIndex((e) => e.id === id);
@@ -227,14 +361,28 @@ export class EventsService {
     const updatedEvent = { ...events[index], ...updates };
     events[index] = updatedEvent;
     this.saveEvents(events);
+    this.syncEventToDatabase(updatedEvent).catch((e) =>
+      console.warn("[EventsService] Failed to sync updated event to Supabase:", e)
+    );
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("precious_meets_events_updated", { detail: { eventId: id } }));
+      window.dispatchEvent(new Event("storage"));
+    }
     return updatedEvent;
   }
 
-  // 6. Delete event
+  // 6. Delete event (Removes locally + deletes from Supabase public.events)
   static deleteEvent(id: string): boolean {
     const events = this.getEvents();
     const filtered = events.filter((e) => e.id !== id);
     this.saveEvents(filtered);
+    this.deleteEventFromDatabase(id).catch((e) =>
+      console.warn("[EventsService] Failed to delete event from Supabase:", e)
+    );
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("precious_meets_events_updated", { detail: { eventId: id } }));
+      window.dispatchEvent(new Event("storage"));
+    }
     return true;
   }
 

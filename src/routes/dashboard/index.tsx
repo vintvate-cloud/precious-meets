@@ -130,6 +130,13 @@ export function DashboardPage() {
     const loadedEvents = EventsService.getEvents();
     setEvents(loadedEvents);
 
+    // Fetch live events from Supabase public.events
+    EventsService.fetchEventsFromDb().then((dbEvents) => {
+      if (dbEvents && dbEvents.length > 0) {
+        setEvents(dbEvents);
+      }
+    });
+
     const loadedInvitations = EventsService.getUserInvitations(user?.email || undefined);
     setInvitations(loadedInvitations);
 
