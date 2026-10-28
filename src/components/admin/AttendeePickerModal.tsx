@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { AdminAttendee, SeatAcceptance } from "@/lib/events-service";
+import { ApplicationsService } from "@/lib/applications-service";
 import { isDeletedUser } from "@/lib/deleted-users";
 import {
   Dialog,
@@ -51,9 +52,33 @@ export function AttendeePickerModal({
   const [search, setSearch] = useState("");
   const [filterGender, setFilterGender] = useState<"all" | "female" | "male">("all");
 
+  // Verified members whitelist: ApplicationsService dossiers where status === "approved"
+  // (strictly matches the "Verified Members" tab in Dossiers)
+  const verifiedMembersSet = useMemo(() => {
+    const set = new Set<string>();
+    const apps = ApplicationsService.getApplications();
+    for (const app of apps) {
+      if (isDeletedUser(app.applicantEmail, app.id)) continue;
+      if (app.status === "approved") {
+        if (app.id) set.add(app.id.toLowerCase());
+        if (app.applicantEmail) set.add(app.applicantEmail.toLowerCase());
+      }
+    }
+    return set;
+  }, [open, attendees]);
+
   const filteredAttendees = useMemo(() => {
     return (attendees || []).filter((a) => {
       if (isDeletedUser(a.email, a.id)) return false;
+      // Only verified members from the Verified Members pool are eligible to be curated into table seats
+      if (!a.identityVerified) return false;
+
+      // If approved verified dossiers exist in the system, strictly match against them
+      if (verifiedMembersSet.size > 0) {
+        const idMatch = a.id && verifiedMembersSet.has(a.id.toLowerCase());
+        const emailMatch = a.email && verifiedMembersSet.has(a.email.toLowerCase());
+        if (!idMatch && !emailMatch) return false;
+      }
 
       const matchSearch =
         (a.name?.toLowerCase() || "").includes(search.toLowerCase()) ||
@@ -64,7 +89,7 @@ export function AttendeePickerModal({
 
       return matchSearch && matchGender;
     });
-  }, [attendees, search, filterGender]);
+  }, [attendees, search, filterGender, verifiedMembersSet]);
 
   const currentAttendee = attendees?.find((a) => a.id === currentAttendeeId);
   const isAccepted = seatAcceptance?.status === "accepted";
@@ -250,25 +275,45 @@ export function AttendeePickerModal({
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div
-                      className={`size-11 rounded-full flex items-center justify-center font-display text-sm font-semibold border shadow-xs shrink-0 transition-transform duration-200 group-hover:scale-105 select-none ${
-                        attendee.gender === "female"
-                          ? "bg-forest/15 text-forest border-forest/30 group-hover:bg-forest group-hover:text-ivory"
-                          : "bg-burgundy/15 text-burgundy border-burgundy/30 group-hover:bg-burgundy group-hover:text-ivory"
-                      }`}
-                    >
-                      {attendee.name
-                        .trim()
-                        .split(/\s+/)
-                        .filter(Boolean)
-                        .map((n) => n[0])
-                        .slice(0, 2)
-                        .join("")
-                        .toUpperCase()}
+                    {/* User Profile Avatar */}
+                    <div className="relative size-12 rounded-full overflow-hidden border border-border shadow-xs shrink-0 transition-transform duration-200 group-hover:scale-105 bg-muted">
+                      {attendee.avatar ? (
+                        <img
+                          src={attendee.avatar}
+                          alt={attendee.name}
+                          className="size-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = "none";
+                            const fallback = (e.target as HTMLElement).nextElementSibling;
+                            if (fallback) (fallback as HTMLElement).classList.remove("hidden");
+                          }}
+                        />
+                      ) : null}
+                      <div
+                        className={`${attendee.avatar ? "hidden" : "flex"} size-full items-center justify-center font-display text-sm font-semibold select-none ${
+                          attendee.gender === "female"
+                            ? "bg-forest/15 text-forest"
+                            : "bg-burgundy/15 text-burgundy"
+                        }`}
+                      >
+                        {attendee.name
+                          .trim()
+                          .split(/\s+/)
+                          .filter(Boolean)
+                          .map((n) => n[0])
+                          .slice(0, 2)
+                          .join("")
+                          .toUpperCase()}
+                      </div>
                     </div>
 
                     <div>
                       <div className="flex items-center gap-2">
+                        {attendee.memberId && (
+                          <span className="font-mono text-[9px] font-bold text-muted-foreground bg-black/5 dark:bg-white/5 border border-border px-1.5 py-0.5 rounded">
+                            {attendee.memberId}
+                          </span>
+                        )}
                         <span className="font-medium text-sm text-foreground">
                           {attendee.name}
                         </span>
@@ -280,15 +325,6 @@ export function AttendeePickerModal({
                             <ShieldCheck className="size-3" /> Verified
                           </span>
                         )}
-                        <span
-                          className={`text-[10px] px-2 py-0.2 rounded-full font-mono uppercase ${
-                            attendee.gender === "female"
-                              ? "bg-forest/15 text-forest"
-                              : "bg-burgundy/15 text-burgundy"
-                          }`}
-                        >
-                          {attendee.gender}
-                        </span>
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground mt-0.5">

@@ -138,6 +138,7 @@ function AdminConsolePage() {
         if (dbApps && dbApps.length > 0) {
           setApplications(dbApps);
           setVerifications(VerificationsService.getQueue());
+          setAttendees(EventsService.getAttendees());
         }
       });
     };

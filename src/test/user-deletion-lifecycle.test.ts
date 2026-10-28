@@ -22,8 +22,8 @@ vi.spyOn(supabase, "from").mockReturnValue({
 const testApp: MemberApplication = {
   id: "test-user-uuid-1234",
   applicationReference: "PM-8411",
-  status: "pending_review",
-  membershipStatus: "paid_pending_credentials",
+  status: "approved",
+  membershipStatus: "active",
   applicantName: "Charvi Madan",
   applicantEmail: "charvimadan2001@gmail.com",
   applicantPhone: "+91 9953904222",
@@ -46,8 +46,8 @@ const testApp: MemberApplication = {
   paymentAmountInr: 1999,
   paymentPlanTitle: "Precious Meets Membership",
   paidAt: "2026-10-27T08:30:00Z",
-  identityStatus: "pending",
-  credentialsSent: false,
+  identityStatus: "verified",
+  credentialsSent: true,
   createdAt: "2026-10-27T08:00:00Z",
   updatedAt: "2026-10-27T08:30:00Z",
 };
@@ -174,4 +174,58 @@ describe("Permanent User Deletion Lifecycle", () => {
     expect(VerificationsService.getQueue().some((q) => q.email === testApp.applicantEmail)).toBe(false);
     expect(EventsService.getAttendees().some((att) => att.email === testApp.applicantEmail)).toBe(false);
   });
+
+  it("only includes verified/approved members in EventsService.getAttendees() and excludes pending/unverified applicants", () => {
+    const unverifiedApp: MemberApplication = {
+      id: "unverified-user-123",
+      applicationReference: "PM-9999",
+      status: "pending_review",
+      membershipStatus: "paid_pending_credentials",
+      applicantName: "Himanshi Chouhan",
+      applicantEmail: "c@gmail.com",
+      applicantPhone: "+91 99999 88888",
+      applicantCity: "Delhi NCR",
+      socialEnergyScore: 60,
+      conversationDepthScore: 50,
+      playfulnessScore: 40,
+      curiosityScore: 50,
+      adventureScore: 30,
+      dietaryPreference: "Jain",
+      allergies: [],
+      personalBoundaries: [],
+      sharedInterests: [],
+      quizAnswers: [],
+      quizCompletedAt: "2026-10-27T08:00:00Z",
+      paymentStatus: "paid",
+      paymentAmountInr: 1999,
+      paymentPlanTitle: "Membership",
+      identityStatus: "pending",
+      credentialsSent: false,
+      createdAt: "2026-10-27T08:00:00Z",
+      updatedAt: "2026-10-27T08:00:00Z",
+    };
+
+    const verifiedApp: MemberApplication = {
+      ...unverifiedApp,
+      id: "verified-user-456",
+      applicantName: "Vedant Cikka",
+      applicantEmail: "cikkavedant@gmail.com",
+      status: "approved",
+      identityStatus: "verified",
+    };
+
+    localStorage.setItem(
+      "precious_meets_member_applications_dossiers",
+      JSON.stringify([unverifiedApp, verifiedApp])
+    );
+
+    const attendees = EventsService.getAttendees();
+    // Unverified user like Himanshi Chouhan must NOT be in attendees pool
+    expect(attendees.some((a) => a.email === "c@gmail.com")).toBe(false);
+    // Verified user like Vedant Cikka MUST be in attendees pool with identityVerified: true
+    const found = attendees.find((a) => a.email === "cikkavedant@gmail.com");
+    expect(found).toBeDefined();
+    expect(found?.identityVerified).toBe(true);
+  });
 });
+

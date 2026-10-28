@@ -241,23 +241,15 @@ export class EventsService {
   static getAttendees(): AdminAttendee[] {
     if (typeof window === "undefined") return INITIAL_ATTENDEES;
     try {
-      const stored = localStorage.getItem(STORAGE_ATTENDEES_KEY);
-      let manualAttendees: AdminAttendee[] = [];
-      if (stored) {
-        const parsed: AdminAttendee[] = JSON.parse(stored);
-        // Purge mock attendees with IDs att_01..att_08 or @example.com, and blacklisted deleted users
-        manualAttendees = parsed.filter(
-          (a) =>
-            !a.id.startsWith("att_0") &&
-            !a.email?.endsWith("@example.com") &&
-            !isDeletedUser(a.email, a.id)
-        );
-      }
-
-      // Convert real member applications into attendees eligible for seating
+      // Single Source of Truth: Real member applications from ApplicationsService
+      // STRICT: Only approved verified members (exactly matching the "Verified Members" tab in Dossiers)
       const realApplications = ApplicationsService.getApplications();
       const mappedFromApps: AdminAttendee[] = realApplications
-        .filter((app) => !isDeletedUser(app.applicantEmail, app.id))
+        .filter(
+          (app) =>
+            !isDeletedUser(app.applicantEmail, app.id) &&
+            app.status === "approved"
+        )
         .map((app) => ({
           id: app.id,
           name: app.applicantName,
@@ -265,6 +257,7 @@ export class EventsService {
           phone: app.applicantPhone || "+91 98765 43210",
           avatar:
             app.avatarUrl ||
+            app.userPhotoUrl ||
             "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
           city: (app.applicantCity as any) || "Delhi NCR",
           gender: "female",
@@ -280,18 +273,15 @@ export class EventsService {
           },
           dietary: app.dietaryPreference || "Vegetarian",
           allergies: app.allergies || [],
-          identityVerified: app.identityStatus === "verified",
-          memberTier:
-            app.membershipStatus === "active"
-              ? "Private Circle Member"
-              : "Applicant",
+          identityVerified: true,
+          memberTier: "Private Circle Member",
           memberId: app.applicationReference,
         }));
 
-      // Combine by unique ID or email
+      // Deduplicate by email / ID
       const seen = new Set<string>();
       const combined: AdminAttendee[] = [];
-      for (const att of [...mappedFromApps, ...manualAttendees]) {
+      for (const att of mappedFromApps) {
         if (isDeletedUser(att.email, att.id)) continue;
         const key = (att.email || att.id).toLowerCase();
         if (!seen.has(key)) {
@@ -300,6 +290,7 @@ export class EventsService {
         }
       }
 
+      // Overwrite cache so stale mock/unverified attendees are purged immediately
       localStorage.setItem(STORAGE_ATTENDEES_KEY, JSON.stringify(combined));
       return combined;
     } catch (e) {

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AdminEvent, AdminAttendee, EventsService } from "@/lib/events-service";
+import { ApplicationsService } from "@/lib/applications-service";
 import { AttendeePickerModal } from "@/components/admin/AttendeePickerModal";
 import { EventQrScannerModal } from "@/components/admin/EventQrScannerModal";
 import {
@@ -405,31 +406,64 @@ export function InteractiveTable({
                       .join("")
                       .toUpperCase();
 
+                    const appMatch = ApplicationsService.getApplications().find(
+                      (app) => app.id === attendee.id || app.applicantEmail?.toLowerCase() === attendee.email?.toLowerCase()
+                    );
+                    const avatarUrl = attendee.avatar || appMatch?.avatarUrl || appMatch?.userPhotoUrl;
+
                     return (
                       <div
                         onClick={() => setActiveSeatIndex(seat.id)}
                         className="group relative flex flex-col items-center cursor-pointer transition-all duration-300 hover:-translate-y-1"
                       >
                         <div className="relative">
-                          {/* Initials Monogram Crest (No mock photos) */}
+                          {/* Profile Picture with Initials Monogram Fallback */}
                           <div
-                            className={`size-12 sm:size-14 rounded-full flex items-center justify-center border-2 shadow-md transition-all duration-300 group-hover:scale-110 select-none ${
+                            className={`relative size-12 sm:size-14 rounded-full overflow-hidden border-2 shadow-md transition-all duration-300 group-hover:scale-110 ${
                               isCheckedIn
-                                ? "bg-forest text-ivory border-forest ring-2 ring-forest/60"
+                                ? "border-forest ring-2 ring-forest/60"
                                 : isAccepted
-                                ? "bg-emerald-800 text-ivory border-emerald-500 ring-2 ring-emerald-500/60 shadow-[0_0_15px_rgba(16,185,129,0.35)]"
+                                ? "border-emerald-500 ring-2 ring-emerald-500/60 shadow-[0_0_15px_rgba(16,185,129,0.35)]"
                                 : isPending
-                                ? "bg-[#2D2218] text-amber-200 border-ochre ring-2 ring-ochre/40"
+                                ? "border-ochre ring-2 ring-ochre/40"
                                 : isUnsent
-                                ? "bg-[#1E2638] text-blue-200 border-blue-400 ring-2 ring-blue-400/30"
+                                ? "border-blue-400 ring-2 ring-blue-400/30"
                                 : attendee.gender === "female"
-                                ? "bg-forest/90 text-ivory border-forest ring-2 ring-forest/30"
-                                : "bg-burgundy/90 text-ivory border-burgundy ring-2 ring-burgundy/30"
+                                ? "border-forest ring-2 ring-forest/30"
+                                : "border-burgundy ring-2 ring-burgundy/30"
                             }`}
                           >
-                            <span className="font-display text-sm sm:text-base font-semibold tracking-wider">
-                              {initials}
-                            </span>
+                            {avatarUrl ? (
+                              <img
+                                src={avatarUrl}
+                                alt={attendee.name}
+                                className="size-full object-cover"
+                                onError={(e) => {
+                                  (e.target as HTMLElement).style.display = "none";
+                                  const fallback = (e.target as HTMLElement).nextElementSibling;
+                                  if (fallback) (fallback as HTMLElement).classList.remove("hidden");
+                                }}
+                              />
+                            ) : null}
+                            <div
+                              className={`${avatarUrl ? "hidden" : "flex"} size-full items-center justify-center select-none ${
+                                isCheckedIn
+                                  ? "bg-forest text-ivory"
+                                  : isAccepted
+                                  ? "bg-emerald-800 text-ivory"
+                                  : isPending
+                                  ? "bg-[#2D2218] text-amber-200"
+                                  : isUnsent
+                                  ? "bg-[#1E2638] text-blue-200"
+                                  : attendee.gender === "female"
+                                  ? "bg-forest/90 text-ivory"
+                                  : "bg-burgundy/90 text-ivory"
+                              }`}
+                            >
+                              <span className="font-display text-sm sm:text-base font-semibold tracking-wider">
+                                {initials}
+                              </span>
+                            </div>
                           </div>
 
                           <span
