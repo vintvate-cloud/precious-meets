@@ -8,13 +8,14 @@ import {
   Calendar,
   Compass,
   Mail,
+  CheckCircle2,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   UniversalMemberPassModal,
   SeatedEvent,
 } from "@/components/dashboard/UniversalMemberPassModal";
 import { UserSeatInvitation } from "@/lib/events-service";
-import { CheckCircle2, XCircle } from "lucide-react";
 
 interface MemberPassCardProps {
   displayName: string;

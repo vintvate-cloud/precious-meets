@@ -159,23 +159,41 @@ export function DashboardPage() {
     window.addEventListener("precious_meets_events_updated", loadDashboardData);
     window.addEventListener("storage", loadDashboardData);
 
-    // Realtime Supabase channel for live invitations
-    const cleanEmail = user?.email ? user.email.replace(/[^a-zA-Z0-9]/g, "_") : "anon";
-    const channel = supabase
-      .channel(`member_apps_invites_${cleanEmail}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "member_applications" },
-        () => {
-          loadDashboardData();
-        }
-      )
-      .subscribe();
+    // Realtime Supabase channel scoped STRICTLY to this user's email to avoid global broadcast egress
+    let channel: any = null;
+    let debounceTimer: any = null;
+
+    if (user?.email) {
+      const cleanEmail = user.email.trim().toLowerCase();
+      const channelId = `member_invites_${cleanEmail.replace(/[^a-zA-Z0-9]/g, "_")}`;
+
+      channel = supabase
+        .channel(channelId)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "member_applications",
+            filter: `applicant_email=eq.${cleanEmail}`,
+          },
+          () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+              loadDashboardData();
+            }, 1000);
+          }
+        )
+        .subscribe();
+    }
 
     return () => {
+      clearTimeout(debounceTimer);
       window.removeEventListener("precious_meets_events_updated", loadDashboardData);
       window.removeEventListener("storage", loadDashboardData);
-      channel.unsubscribe();
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
     };
   }, [user?.email]);
 

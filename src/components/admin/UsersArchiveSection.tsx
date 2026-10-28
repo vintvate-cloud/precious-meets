@@ -48,6 +48,13 @@ export function UsersArchiveSection() {
       setIsLoading(false);
     }
 
+    const refreshFromLocal = () => {
+      const cached = ApplicationsService.getApplications();
+      if (mounted && cached && cached.length > 0) {
+        setApplications(cached);
+      }
+    };
+
     const refreshData = async () => {
       try {
         const realApps = await ApplicationsService.fetchApplicationsFromDb();
@@ -62,13 +69,13 @@ export function UsersArchiveSection() {
     };
 
     refreshData();
-    window.addEventListener("precious_meets_applications_updated", refreshData);
-    window.addEventListener("storage", refreshData);
+    window.addEventListener("precious_meets_applications_updated", refreshFromLocal);
+    window.addEventListener("storage", refreshFromLocal);
 
     return () => {
       mounted = false;
-      window.removeEventListener("precious_meets_applications_updated", refreshData);
-      window.removeEventListener("storage", refreshData);
+      window.removeEventListener("precious_meets_applications_updated", refreshFromLocal);
+      window.removeEventListener("storage", refreshFromLocal);
     };
   }, []);
 

@@ -113,6 +113,20 @@ export interface MemberApplication {
 const STORAGE_KEY = "precious_meets_member_applications_dossiers";
 
 export class ApplicationsService {
+  private static inFlightDbFetch: Promise<MemberApplication[]> | null = null;
+  private static lastDbFetchTimestamp = 0;
+  private static cachedDbResult: MemberApplication[] | null = null;
+  private static readonly DB_CACHE_TTL_MS = 15000; // 15s cache throttle to conserve Supabase egress
+
+  /**
+   * Clears the in-memory cache so next read fetches fresh data from DB
+   */
+  static invalidateDbCache(): void {
+    this.lastDbFetchTimestamp = 0;
+    this.cachedDbResult = null;
+    this.inFlightDbFetch = null;
+  }
+
   /**
    * Loads applications from local cache for instant UI rendering.
    */
@@ -135,6 +149,7 @@ export class ApplicationsService {
   }
 
   private static saveApplications(apps: MemberApplication[]): void {
+    this.invalidateDbCache();
     if (typeof window === "undefined") return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(apps));
@@ -159,13 +174,24 @@ export class ApplicationsService {
 
   /**
    * Asynchronously fetches all member applications directly from Supabase database (member_applications table).
+   * Includes request deduplication and 15s TTL to prevent unnecessary egress drain.
    */
-  static async fetchApplicationsFromDb(): Promise<MemberApplication[]> {
-    try {
-      const { data, error } = await supabase
-        .from("member_applications")
-        .select("*")
-        .order("created_at", { ascending: false });
+  static async fetchApplicationsFromDb(force = false): Promise<MemberApplication[]> {
+    const now = Date.now();
+    if (!force && this.cachedDbResult && now - this.lastDbFetchTimestamp < this.DB_CACHE_TTL_MS) {
+      return this.cachedDbResult;
+    }
+
+    if (!force && this.inFlightDbFetch) {
+      return this.inFlightDbFetch;
+    }
+
+    this.inFlightDbFetch = (async () => {
+      try {
+        const { data, error } = await supabase
+          .from("member_applications")
+          .select("*")
+          .order("created_at", { ascending: false });
 
       if (error) {
         console.warn("[ApplicationsService] Supabase fetch error:", error.message);
@@ -288,17 +314,25 @@ export class ApplicationsService {
         const combined = [...mapped, ...unsyncedLocal];
 
         this.saveApplications(combined);
+        this.cachedDbResult = combined;
+        this.lastDbFetchTimestamp = Date.now();
         if (typeof window !== "undefined") {
           window.dispatchEvent(new Event("storage"));
           window.dispatchEvent(new CustomEvent("precious_meets_applications_updated"));
         }
         return combined;
       }
+      return this.loadApplications();
     } catch (e) {
       console.warn("[ApplicationsService] Supabase fetch fallback to local cache:", e);
+      return this.loadApplications();
+    } finally {
+      this.inFlightDbFetch = null;
     }
-    return this.loadApplications();
-  }
+  })();
+
+  return this.inFlightDbFetch;
+}
 
   /**
    * Retrieve a single member application by ID or reference code.

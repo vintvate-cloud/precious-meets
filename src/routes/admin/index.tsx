@@ -122,17 +122,11 @@ function AdminConsolePage() {
       setAttendees(loadedAttendees);
       setApplications(loadedApps);
 
-      if (loadedEvents.length > 0 && !selectedEventId) {
-        const firstUpcoming = loadedEvents.find((e) => e.status !== "completed") || loadedEvents[0];
-        if (firstUpcoming) {
-          setSelectedEventId(firstUpcoming.id);
-        }
-      }
     };
 
     refreshData();
 
-    // Fetch live user applications from Supabase database
+    // Fetch live user applications from Supabase database (cached/deduplicated)
     const loadFromSupabase = () => {
       ApplicationsService.fetchApplicationsFromDb().then((dbApps) => {
         if (dbApps && dbApps.length > 0) {
@@ -145,14 +139,18 @@ function AdminConsolePage() {
 
     loadFromSupabase();
 
-    // Subscribe to realtime database changes on member_applications table
+    // Debounced subscription to realtime database changes on member_applications table
+    let debounceTimer: any = null;
     const channel = supabase
       .channel("admin_member_applications_realtime")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "member_applications" },
         () => {
-          loadFromSupabase();
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(() => {
+            loadFromSupabase();
+          }, 2000);
         }
       )
       .subscribe();
@@ -162,13 +160,24 @@ function AdminConsolePage() {
     window.addEventListener("precious_meets_verification_updated", refreshData);
     window.addEventListener("precious_meets_attendees_updated", refreshData);
     return () => {
+      clearTimeout(debounceTimer);
       supabase.removeChannel(channel);
       window.removeEventListener("storage", refreshData);
       window.removeEventListener("precious_meets_applications_updated", refreshData);
       window.removeEventListener("precious_meets_verification_updated", refreshData);
       window.removeEventListener("precious_meets_attendees_updated", refreshData);
     };
-  }, [selectedEventId]);
+  }, []);
+
+  // Sync default selected event once when events load
+  useEffect(() => {
+    if (events.length > 0 && !selectedEventId) {
+      const firstUpcoming = events.find((e) => e.status !== "completed") || events[0];
+      if (firstUpcoming) {
+        setSelectedEventId(firstUpcoming.id);
+      }
+    }
+  }, [events, selectedEventId]);
 
   const selectedEvent = events.find((e) => e.id === selectedEventId) || events[0];
 
