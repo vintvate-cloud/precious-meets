@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { AdminAttendee, SeatAcceptance } from "@/lib/events-service";
+import { isDeletedUser } from "@/lib/deleted-users";
 import {
   Dialog,
   DialogContent,
@@ -52,6 +53,8 @@ export function AttendeePickerModal({
 
   const filteredAttendees = useMemo(() => {
     return (attendees || []).filter((a) => {
+      if (isDeletedUser(a.email, a.id)) return false;
+
       const matchSearch =
         (a.name?.toLowerCase() || "").includes(search.toLowerCase()) ||
         (a.email?.toLowerCase() || "").includes(search.toLowerCase()) ||

@@ -1,6 +1,7 @@
 import { CryptoService } from "./crypto-service";
 import { supabase, getSupabaseAdmin } from "./supabase";
 import { EmailService } from "./email-service";
+import { isDeletedUser, recordDeletedUser } from "./deleted-users";
 
 export type ApplicationStatus =
   | "draft"
@@ -122,7 +123,9 @@ export class ApplicationsService {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
-          return parsed;
+          return parsed.filter(
+            (a: MemberApplication) => !isDeletedUser(a.applicantEmail, a.id)
+          );
         }
       }
     } catch (e) {
@@ -170,8 +173,16 @@ export class ApplicationsService {
       }
 
       if (data && Array.isArray(data)) {
+        const validDbRows = data.filter((d: any) => {
+          if (typeof d.review_decision_notes === "string" && d.review_decision_notes.includes("PERMANENTLY_DELETED")) {
+            return false;
+          }
+          if (d.scores?.is_deleted) return false;
+          if (isDeletedUser(d.applicant_email, d.id)) return false;
+          return true;
+        });
         const currentLocal = this.loadApplications();
-        const mapped: MemberApplication[] = data.map((d: any) => {
+        const mapped: MemberApplication[] = validDbRows.map((d: any) => {
           const localMatch = currentLocal.find(
             (l) => l.id === d.id || l.applicantEmail?.toLowerCase() === d.applicant_email?.toLowerCase()
           );
@@ -1048,36 +1059,102 @@ export class ApplicationsService {
   }
 
   /**
-   * Permanently deletes a member application dossier directly from Supabase database.
+   * Permanently deletes a member application dossier across cache, blacklists, and Supabase database.
    */
-  static async deleteApplication(idOrEmail: string): Promise<MemberApplication[]> {
+  static async deleteApplication(idOrEmail: string, optionalEmail?: string): Promise<MemberApplication[]> {
     const apps = this.loadApplications();
     const clean = idOrEmail.trim().toLowerCase();
-    const cleanId = clean.replace("ver_", "");
+    const rawId = clean.replace(/^ver_/, "");
 
+    // Locate target
+    const target = apps.find(
+      (a) =>
+        a.id.toLowerCase() === clean ||
+        a.id.toLowerCase() === rawId ||
+        a.applicantEmail.toLowerCase() === clean ||
+        (optionalEmail && a.applicantEmail.toLowerCase() === optionalEmail.toLowerCase())
+    );
+
+    const effectiveEmail =
+      optionalEmail?.trim().toLowerCase() ||
+      target?.applicantEmail?.trim().toLowerCase() ||
+      (clean.includes("@") ? clean : undefined);
+    const effectiveId = target?.id || (clean.includes("@") ? undefined : clean);
+    const effectiveMemberId = target?.applicationReference;
+
+    // 1. Record into deletion blacklist immediately
+    recordDeletedUser(effectiveEmail, effectiveId, effectiveMemberId);
+
+    // 2. Remove from local memory & storage
     const updated = apps.filter(
       (a) =>
         a.id.toLowerCase() !== clean &&
-        a.id.toLowerCase() !== cleanId &&
-        a.applicantEmail.toLowerCase() !== clean &&
-        a.applicationReference.toLowerCase() !== clean
+        a.id.toLowerCase() !== rawId &&
+        (!effectiveEmail || a.applicantEmail.toLowerCase() !== effectiveEmail) &&
+        (!effectiveId || a.id.toLowerCase() !== effectiveId.toLowerCase()) &&
+        a.applicationReference.toLowerCase() !== clean &&
+        !isDeletedUser(a.applicantEmail, a.id)
     );
 
     this.saveApplications(updated);
 
-    // Delete directly from Supabase member_applications table
+    // 3. Cascade to EventsService to unseat from tables and remove from attendees
     try {
-      await supabase
-        .from("member_applications")
-        .delete()
-        .or(`id.eq.${cleanId},applicant_email.eq.${clean}`);
+      const { EventsService } = await import("./events-service");
+      EventsService.deleteAttendee(effectiveId || clean, effectiveEmail);
     } catch (e) {
-      console.warn("[ApplicationsService] Supabase delete error:", e);
+      console.warn("[ApplicationsService] EventsService cascade notice:", e);
+    }
+
+    // 4. Delete directly from Supabase member_applications table
+    if (effectiveEmail) {
+      // Soft-delete marker (guaranteed to succeed via UPDATE policy even if DELETE policy is missing)
+      try {
+        await supabase
+          .from("member_applications")
+          .update({
+            status: "rejected",
+            review_decision_notes: "PERMANENTLY_DELETED",
+            scores: {
+              ...(target?.quizAnswers ? {} : {}),
+              is_deleted: true,
+              deleted_at: new Date().toISOString(),
+            },
+          })
+          .ilike("applicant_email", effectiveEmail);
+      } catch (e) {
+        console.warn("[ApplicationsService] Supabase soft-delete update notice:", e);
+      }
+
+      // Hard delete by email
+      try {
+        await supabase
+          .from("member_applications")
+          .delete()
+          .ilike("applicant_email", effectiveEmail);
+      } catch (e) {
+        console.warn("[ApplicationsService] Supabase email delete notice:", e);
+      }
+    }
+
+    // Hard delete by UUID if ID is a valid Postgres UUID
+    const cleanTargetId = (effectiveId || rawId);
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanTargetId);
+    if (isUuid) {
+      try {
+        await supabase
+          .from("member_applications")
+          .delete()
+          .eq("id", cleanTargetId);
+      } catch (e) {
+        console.warn("[ApplicationsService] Supabase uuid delete notice:", e);
+      }
     }
 
     if (typeof window !== "undefined") {
       window.dispatchEvent(new Event("storage"));
       window.dispatchEvent(new CustomEvent("precious_meets_applications_updated"));
+      window.dispatchEvent(new CustomEvent("precious_meets_attendees_updated"));
     }
 
     return updated;

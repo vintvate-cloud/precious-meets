@@ -360,6 +360,7 @@ export function QuizResultsPage() {
         aadhaarFileName: effectiveAadhaarName,
         userPhotoUrl: effectiveUserPhotoUrl,
         userPhotoFileName: effectiveUserPhotoName,
+        requestedAtIso: new Date().toISOString(),
       });
 
       // Await email delivery confirmation

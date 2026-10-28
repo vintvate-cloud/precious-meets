@@ -1,5 +1,7 @@
 import { ApplicationsService } from "./applications-service";
+import { EventsService } from "./events-service";
 import { supabase } from "./supabase";
+import { isDeletedUser, recordDeletedUser } from "./deleted-users";
 
 export interface VerificationRecord {
   id: string;
@@ -11,6 +13,8 @@ export interface VerificationRecord {
   method: string;
   status: "pending" | "manual_review" | "verified" | "failed";
   requestedAt: string;
+  requestedAtExact?: string | undefined;
+  requestedAtIso?: string | undefined;
   notes?: string | undefined;
   amountInr?: number | undefined;
   memberId?: string | undefined;
@@ -23,6 +27,77 @@ export interface VerificationRecord {
 }
 
 const STORAGE_KEY = "precious_meets_verification_queue_v1";
+
+/**
+ * Formats the real applicant submission / payment timestamp into a relative display
+ * ("Today, 5:53 pm", "Yesterday, 11:02 pm", "27 Oct, 1:14 am") along with exact date & time.
+ */
+export function formatRealRequestedTime(
+  timestampOrIso?: string | number | Date | null
+): { display: string; exact: string } {
+  if (!timestampOrIso) {
+    return { display: "Recently", exact: "Time not recorded" };
+  }
+
+  let date: Date;
+  if (timestampOrIso instanceof Date) {
+    date = timestampOrIso;
+  } else if (typeof timestampOrIso === "number") {
+    date = new Date(timestampOrIso);
+  } else {
+    const raw = String(timestampOrIso).trim();
+    const parsed = Date.parse(raw);
+    if (!isNaN(parsed)) {
+      date = new Date(parsed);
+    } else {
+      return { display: raw, exact: raw };
+    }
+  }
+
+  if (isNaN(date.getTime())) {
+    return { display: String(timestampOrIso), exact: "" };
+  }
+
+  const now = new Date();
+  const isToday =
+    date.getDate() === now.getDate() &&
+    date.getMonth() === now.getMonth() &&
+    date.getFullYear() === now.getFullYear();
+
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  const isYesterday =
+    date.getDate() === yesterday.getDate() &&
+    date.getMonth() === yesterday.getMonth() &&
+    date.getFullYear() === yesterday.getFullYear();
+
+  const timeStr = date.toLocaleTimeString("en-IN", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  let display: string;
+  if (isToday) {
+    display = `Today, ${timeStr}`;
+  } else if (isYesterday) {
+    display = `Yesterday, ${timeStr}`;
+  } else {
+    const day = date.getDate();
+    const month = date.toLocaleDateString("en-IN", { month: "short" });
+    const year = date.getFullYear() !== now.getFullYear() ? ` ${date.getFullYear()}` : "";
+    display = `${day} ${month}${year}, ${timeStr}`;
+  }
+
+  const exact =
+    date.toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }) + ` • ${timeStr}`;
+
+  return { display, exact };
+}
 
 export class VerificationsService {
   /**
@@ -51,12 +126,13 @@ export class VerificationsService {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
-          // Purge legacy mock records
+          // Purge legacy mock records and deleted users
           storedList = parsed.filter(
             (v: VerificationRecord) =>
               !v.id.startsWith("ver_01") &&
               !v.id.startsWith("ver_02") &&
-              !v.email?.endsWith("@example.com"),
+              !v.email?.endsWith("@example.com") &&
+              !isDeletedUser(v.email, v.id),
           );
         }
       }
@@ -71,6 +147,14 @@ export class VerificationsService {
     storedList.forEach((q) => {
       if (q.email && !seenEmails.has(q.email.toLowerCase())) {
         seenEmails.add(q.email.toLowerCase());
+        // If exact time wasn't formatted yet, try to derive from existing data
+        if (!q.requestedAtExact) {
+          const formatted = formatRealRequestedTime(q.requestedAtIso || q.requestedAt);
+          q.requestedAtExact = formatted.exact;
+          if (q.requestedAtIso) {
+            q.requestedAt = formatted.display;
+          }
+        }
         unified.push(q);
       }
     });
@@ -93,6 +177,17 @@ export class VerificationsService {
           ? "failed"
           : "pending";
 
+        // Determine real applicant request timestamp
+        const realTimestamp =
+          (isReuploaded ? app.aadhaarReuploadedAt : undefined) ||
+          app.paidAt ||
+          app.createdAt ||
+          app.quizCompletedAt ||
+          app.updatedAt;
+
+        const timeInfo = formatRealRequestedTime(realTimestamp);
+        const displayTime = isReuploaded ? `Re-uploaded • ${timeInfo.display}` : timeInfo.display;
+
         if (!seenEmails.has(cleanEmail)) {
           seenEmails.add(cleanEmail);
           unified.push({
@@ -107,13 +202,9 @@ export class VerificationsService {
               "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
             method: app.aadhaarFileUrl ? "aadhaar_card_upload" : "digilocker_consent_offline",
             status: queueStatus,
-            requestedAt: app.paidAt
-              ? `Today, ${new Date(app.paidAt).toLocaleTimeString("en-IN", {
-                  hour: "numeric",
-                  minute: "2-digit",
-                  hour12: true,
-                })}`
-              : "Recently",
+            requestedAt: displayTime,
+            requestedAtExact: timeInfo.exact,
+            requestedAtIso: realTimestamp,
             notes: isReuploaded
               ? `★ RE-UPLOADED: Member uploaded revised document (${app.aadhaarFileName || "Document"}). Archetype: ${app.archetypeTitle}`
               : `Precious Meets Membership (₹${app.paymentAmountInr || 1999} Razorpay Payment: ${app.razorpayPaymentId || "Paid"}). Archetype: ${app.archetypeTitle}${app.aadhaarFileName ? ` | Aadhaar Doc: ${app.aadhaarFileName}` : ""}`,
@@ -127,9 +218,15 @@ export class VerificationsService {
             linkedin: app.applicantLinkedin,
           });
         } else {
-          // If already in queue, update with newly re-uploaded Aadhaar file
+          // If already in queue, update with newly re-uploaded Aadhaar file and real time
           const existing = unified.find((u) => u.email.toLowerCase() === cleanEmail);
           if (existing) {
+            // Update real time from database application
+            if (realTimestamp) {
+              existing.requestedAtIso = realTimestamp;
+              existing.requestedAtExact = timeInfo.exact;
+              existing.requestedAt = displayTime;
+            }
             if (app.aadhaarFileUrl) {
               existing.aadhaarFileUrl = app.aadhaarFileUrl;
               existing.aadhaarFileName = app.aadhaarFileName;
@@ -157,7 +254,7 @@ export class VerificationsService {
       console.warn("[VerificationsService] Applications merge notice:", e);
     }
 
-    return unified;
+    return unified.filter((item) => !isDeletedUser(item.email, item.id));
   }
 
   /**
@@ -179,14 +276,11 @@ export class VerificationsService {
     userPhotoFileName?: string | undefined;
     instagram?: string | undefined;
     linkedin?: string | undefined;
+    requestedAtIso?: string | undefined;
   }): VerificationRecord {
     const queue = this.getQueue();
-    const now = new Date();
-    const formattedTime = now.toLocaleTimeString("en-IN", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
+    const isoTime = data.requestedAtIso || new Date().toISOString();
+    const timeInfo = formatRealRequestedTime(isoTime);
 
     const newRecord: VerificationRecord = {
       id: `ver_${Date.now()}`,
@@ -199,7 +293,9 @@ export class VerificationsService {
         "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
       method: data.method || "digilocker_consent_offline",
       status: "pending",
-      requestedAt: `Today, ${formattedTime}`,
+      requestedAt: timeInfo.display,
+      requestedAtExact: timeInfo.exact,
+      requestedAtIso: isoTime,
       notes: data.notes || "Precious Meets Membership (₹1,999 Razorpay Payment Received)",
       amountInr: data.amountInr || 1999,
       memberId: data.memberId || `PM-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -321,12 +417,26 @@ export class VerificationsService {
 
   /**
    * Permanently deletes a verification request and its associated member application dossier
-   * across local storage and remote Supabase database.
+   * across local storage, attendees pool, and remote Supabase database.
    */
   static deleteRecord(id: string, email?: string): VerificationRecord[] {
     const queue = this.getQueue();
     const cleanEmail = email?.trim().toLowerCase();
     const cleanId = id.trim().toLowerCase();
+    const rawId = cleanId.replace(/^ver_/, "");
+
+    // Find in queue if email was not supplied
+    const existing = queue.find(
+      (q) =>
+        q.id.toLowerCase() === cleanId ||
+        q.id.toLowerCase() === rawId ||
+        (cleanEmail && q.email?.toLowerCase() === cleanEmail)
+    );
+    const effectiveEmail = cleanEmail || existing?.email?.trim().toLowerCase();
+    const effectiveMemberId = existing?.memberId;
+
+    // 0. Register in deleted users blacklist immediately
+    recordDeletedUser(effectiveEmail, cleanId, effectiveMemberId);
 
     // 1. Remove from local storage queue
     try {
@@ -337,7 +447,9 @@ export class VerificationsService {
           const storedList = parsed.filter(
             (v: VerificationRecord) =>
               v.id.toLowerCase() !== cleanId &&
-              (!cleanEmail || v.email?.toLowerCase() !== cleanEmail)
+              v.id.toLowerCase() !== rawId &&
+              (!effectiveEmail || v.email?.toLowerCase() !== effectiveEmail) &&
+              !isDeletedUser(v.email, v.id)
           );
           localStorage.setItem(STORAGE_KEY, JSON.stringify(storedList));
         }
@@ -346,28 +458,35 @@ export class VerificationsService {
       console.warn("[VerificationsService] Local storage removal error:", e);
     }
 
-    // 2. Cascade delete to ApplicationsService (which deletes from Supabase)
+    // 2. Cascade delete to ApplicationsService (which deletes from Supabase & soft deletes)
     try {
-      if (cleanEmail) {
-        ApplicationsService.deleteApplication(cleanEmail);
-      }
-      ApplicationsService.deleteApplication(cleanId);
+      ApplicationsService.deleteApplication(cleanId, effectiveEmail);
     } catch (e) {
       console.warn("[VerificationsService] ApplicationsService cascade notice:", e);
     }
 
-    // 3. Update memory queue
+    // 3. Cascade delete to EventsService (removes from Attendees and unseats from all tables)
+    try {
+      EventsService.deleteAttendee(cleanId, effectiveEmail);
+    } catch (e) {
+      console.warn("[VerificationsService] EventsService cascade notice:", e);
+    }
+
+    // 4. Update memory queue
     const updated = queue.filter(
       (item) =>
         item.id.toLowerCase() !== cleanId &&
-        (!cleanEmail || item.email?.toLowerCase() !== cleanEmail)
+        item.id.toLowerCase() !== rawId &&
+        (!effectiveEmail || item.email?.toLowerCase() !== effectiveEmail) &&
+        !isDeletedUser(item.email, item.id)
     );
 
-    // 4. Notify all listeners
+    // 5. Notify all listeners
     if (typeof window !== "undefined") {
       window.dispatchEvent(new Event("storage"));
       window.dispatchEvent(new CustomEvent("precious_meets_verification_updated"));
       window.dispatchEvent(new CustomEvent("precious_meets_applications_updated"));
+      window.dispatchEvent(new CustomEvent("precious_meets_attendees_updated"));
     }
 
     return updated;
