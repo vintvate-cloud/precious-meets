@@ -319,7 +319,7 @@ export class EventsService {
 
         const currentLocal = this.getEvents();
         const dbIds = new Set(mapped.map((m) => m.id));
-        const unsyncedLocal = currentLocal.filter((l) => !dbIds.has(l.id));
+        const unsyncedLocal = currentLocal.filter((l) => l.status === "draft" && !dbIds.has(l.id));
         const combined = [...mapped, ...unsyncedLocal];
 
         this.saveEvents(combined);

@@ -23,6 +23,37 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
+/**
+ * Automatically purges stale local cache when switching Supabase databases
+ * to ensure no ghost records from a retired database bleed into the active one.
+ */
+function syncDatabaseCacheNamespace(currentUrl: string) {
+  if (typeof window === "undefined" || !window.localStorage) return;
+  try {
+    const DB_CACHE_VERSION_KEY = "precious_meets_db_cache_version";
+    const EXPECTED_VERSION = `v2_db_${currentUrl}`;
+    const storedVersion = localStorage.getItem(DB_CACHE_VERSION_KEY);
+
+    if (storedVersion !== EXPECTED_VERSION) {
+      const keysToPurge = [
+        "precious_meets_member_applications_dossiers",
+        "precious_meets_admin_events_v2",
+        "precious_meets_admin_attendees_v2",
+        "precious_meets_user_invitations_v1",
+        "precious_meets_verification_queue_v1",
+        "precious_meets_verification_queue",
+        "precious_meets_member_rsvps",
+      ];
+      keysToPurge.forEach((key) => localStorage.removeItem(key));
+      localStorage.setItem(DB_CACHE_VERSION_KEY, EXPECTED_VERSION);
+    }
+  } catch {
+    // Ignore storage quota or access issues
+  }
+}
+
+syncDatabaseCacheNamespace(supabaseUrl);
+
 // Server-side admin client (only initialize when secret is present)
 export const getSupabaseAdmin = () => {
   const serviceRoleKey =

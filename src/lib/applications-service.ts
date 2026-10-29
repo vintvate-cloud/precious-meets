@@ -305,11 +305,14 @@ export class ApplicationsService {
           };
         });
 
-        // Retain unsynced local applications
+        // Retain truly unsynced pending local drafts (not legacy database rows)
         const dbIds = new Set(data.map((d: any) => d.id));
         const dbEmails = new Set(data.map((d: any) => d.applicant_email?.toLowerCase()));
         const unsyncedLocal = currentLocal.filter(
-          (l) => !dbIds.has(l.id) && !dbEmails.has(l.applicantEmail?.toLowerCase())
+          (l) =>
+            (l.status === "draft" || l.status === "quiz_completed") &&
+            !dbIds.has(l.id) &&
+            !dbEmails.has(l.applicantEmail?.toLowerCase())
         );
         const combined = [...mapped, ...unsyncedLocal];
 

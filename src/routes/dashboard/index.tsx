@@ -132,7 +132,7 @@ export function DashboardPage() {
 
     // Fetch live events from Supabase public.events
     EventsService.fetchEventsFromDb().then((dbEvents) => {
-      if (dbEvents && dbEvents.length > 0) {
+      if (Array.isArray(dbEvents)) {
         setEvents(dbEvents);
       }
     });

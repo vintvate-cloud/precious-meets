@@ -129,7 +129,7 @@ function AdminConsolePage() {
     // Fetch live user applications from Supabase database (cached/deduplicated)
     const loadFromSupabase = () => {
       ApplicationsService.fetchApplicationsFromDb().then((dbApps) => {
-        if (dbApps && dbApps.length > 0) {
+        if (Array.isArray(dbApps)) {
           setApplications(dbApps);
           setVerifications(VerificationsService.getQueue());
           setAttendees(EventsService.getAttendees());
@@ -141,7 +141,7 @@ function AdminConsolePage() {
 
     // Fetch live events from Supabase database
     EventsService.fetchEventsFromDb().then((dbEvents) => {
-      if (dbEvents && dbEvents.length > 0) {
+      if (Array.isArray(dbEvents)) {
         setEvents(dbEvents);
       }
     });
