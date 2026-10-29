@@ -9,6 +9,7 @@ import {
   Compass,
   Mail,
   CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -230,12 +231,13 @@ export function MemberPassCard({
                 )}
                 {pendingInvitations && pendingInvitations[0] && onDeclineInvitation && (
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     size="sm"
                     onClick={() => onDeclineInvitation(pendingInvitations[0])}
-                    className="rounded-full border-white/20 text-white/80 hover:text-white hover:bg-white/10 text-xs shrink-0 cursor-pointer"
+                    className="rounded-full bg-white/15 hover:bg-rose-950/70 border border-white/25 hover:border-rose-400/60 text-rose-200 hover:text-white text-xs font-semibold shrink-0 cursor-pointer flex items-center gap-1.5 px-3.5 shadow-sm transition-all hover:scale-105 active:scale-95 backdrop-blur-sm"
                   >
-                    Decline
+                    <XCircle className="size-3.5 text-rose-300" />
+                    <span>Decline</span>
                   </Button>
                 )}
                 <Button
