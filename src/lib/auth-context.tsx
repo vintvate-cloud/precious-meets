@@ -77,7 +77,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Terminate expired session
   const terminateSession = async () => {
-    const wasLoggedIn = !!(user || (typeof window !== "undefined" && localStorage.getItem(LOCAL_STORAGE_MOCK_USER_KEY)));
     if (typeof window !== "undefined") {
       localStorage.removeItem(LOCAL_STORAGE_MOCK_USER_KEY);
       localStorage.removeItem(LOCAL_STORAGE_SESSION_TIMESTAMP_KEY);
@@ -85,9 +84,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut().catch(() => {});
     setUser(null);
     setProfile(null);
-    if (wasLoggedIn) {
-      toast.info("Session expired after 36 hours. Please sign in again.");
-    }
   };
 
   // Load existing subscription on mount

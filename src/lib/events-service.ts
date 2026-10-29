@@ -101,6 +101,9 @@ export interface UserSeatInvitation {
   declineReason?: string;
   invitedAt: string;
   respondedAt?: string;
+  emailSent?: boolean;
+  emailSentAt?: string;
+  dispatchedAt?: string;
 }
 
 export interface TableMetrics {
@@ -291,33 +294,81 @@ export class EventsService {
       }
 
       if (data && Array.isArray(data)) {
-        const mapped: AdminEvent[] = data.map((d: any) => ({
-          id: d.id,
-          slug: d.slug,
-          title: d.title,
-          city: d.city || "Delhi NCR",
-          neighborhood: d.neighborhood,
-          venueName: d.venue_name,
-          venueAddress: d.venue_address,
-          secretAccessCode: d.secret_access_code,
-          startsAt: d.starts_at,
-          endsAt: d.ends_at,
-          dateDisplay: d.date_display,
-          priceInr: d.price_inr || 1999,
-          category: d.category || "supper_club",
-          hostName: d.host_name,
-          hostRole: d.host_role,
-          hostAvatar: d.host_avatar || undefined,
-          coverImage: d.cover_image,
-          theme: d.theme || "",
-          menuPreview: Array.isArray(d.menu_preview) ? d.menu_preview : [],
-          dietaryOptions: Array.isArray(d.dietary_options) ? d.dietary_options : [],
-          status: d.status || "published",
-          seats: Array.isArray(d.seats) ? d.seats : [null, null, null, null, null, null],
-          emailsSentAt: d.emails_sent_at || null,
-        }));
+        // Fetch live member invitations and responses from Supabase
+        let memberAppsWithInvs: any[] = [];
+        try {
+          const { data: appsData } = await supabase
+            .from("member_applications")
+            .select("id, applicant_email, applicant_name, scores");
+          if (appsData && Array.isArray(appsData)) {
+            memberAppsWithInvs = appsData;
+          }
+        } catch (e) {
+          console.warn("[EventsService] Failed to load member invitations:", e);
+        }
 
         const currentLocal = this.getEvents();
+        const mapped: AdminEvent[] = data.map((d: any) => {
+          const localEvt = currentLocal.find((l) => l.id === d.id);
+          const seatAcceptances: Record<string, SeatAcceptance> = { ...(localEvt?.seatAcceptances || {}) };
+
+          // Merge live acceptances from Supabase member_applications scores.invitations
+          for (const app of memberAppsWithInvs) {
+            const invList = app.scores?.invitations;
+            if (Array.isArray(invList)) {
+              for (const inv of invList) {
+                if (inv && (inv.eventId === d.id || inv.eventTitle === d.title)) {
+                  const attendeeId = inv.attendeeId || app.id;
+                  const item: SeatAcceptance = {
+                    attendeeId,
+                    attendeeEmail: inv.attendeeEmail || app.applicant_email,
+                    attendeeName: app.applicant_name,
+                    seatNumber: inv.seatNumber,
+                    status: inv.status || "pending",
+                    invitedAt: inv.invitedAt || inv.dispatchedAt || new Date().toISOString(),
+                    respondedAt: inv.respondedAt,
+                    declineReason: inv.declineReason,
+                    emailSent: Boolean(inv.emailSent || inv.status === "accepted"),
+                    emailSentAt: inv.emailSentAt || (inv.emailSent ? inv.invitedAt : undefined),
+                  };
+                  seatAcceptances[attendeeId] = item;
+                  if (inv.attendeeEmail) {
+                    seatAcceptances[inv.attendeeEmail.toLowerCase()] = item;
+                  }
+                }
+              }
+            }
+          }
+
+          return {
+            id: d.id,
+            slug: d.slug,
+            title: d.title,
+            city: d.city || "Delhi NCR",
+            neighborhood: d.neighborhood,
+            venueName: d.venue_name,
+            venueAddress: d.venue_address,
+            secretAccessCode: d.secret_access_code,
+            startsAt: d.starts_at,
+            endsAt: d.ends_at,
+            dateDisplay: d.date_display,
+            priceInr: d.price_inr || 1999,
+            category: d.category || "supper_club",
+            hostName: d.host_name,
+            hostRole: d.host_role,
+            hostAvatar: d.host_avatar || undefined,
+            coverImage: d.cover_image,
+            theme: d.theme || "",
+            menuPreview: Array.isArray(d.menu_preview) ? d.menu_preview : [],
+            dietaryOptions: Array.isArray(d.dietary_options) ? d.dietary_options : [],
+            status: d.status || "published",
+            seats: Array.isArray(d.seats) ? d.seats : [null, null, null, null, null, null],
+            emailsSentAt: d.emails_sent_at || localEvt?.emailsSentAt || null,
+            seatAcceptances,
+            checkIns: localEvt?.checkIns || {},
+          };
+        });
+
         const dbIds = new Set(mapped.map((m) => m.id));
         const unsyncedLocal = currentLocal.filter((l) => l.status === "draft" && !dbIds.has(l.id));
         const combined = [...mapped, ...unsyncedLocal];
@@ -739,9 +790,10 @@ export class EventsService {
     };
   }
 
-  // 12. Send official invitations / table passes to all seated attendees
+  // 12. Send official invitations / table passes to seated attendees (or a specific attendee)
   static async sendEventInvitations(
-    eventId: string
+    eventId: string,
+    targetAttendeeId?: string
   ): Promise<{ success: boolean; dispatchedCount: number; alreadySentCount: number; totalSeated: number }> {
     const event = this.getEventById(eventId);
     if (!event) throw new Error("Event not found");
@@ -749,7 +801,8 @@ export class EventsService {
     const attendees = this.getAttendees();
     const seatedAttendees = event.seats
       .map((id, index) => (id ? { attendee: attendees.find((a) => a.id === id), seatIndex: index } : null))
-      .filter((x): x is { attendee: AdminAttendee; seatIndex: number } => Boolean(x && x.attendee));
+      .filter((x): x is { attendee: AdminAttendee; seatIndex: number } => Boolean(x && x.attendee))
+      .filter((x) => !targetAttendeeId || x.attendee.id === targetAttendeeId);
 
     if (seatedAttendees.length === 0) {
       throw new Error("No attendees are seated on this table to email.");
@@ -770,18 +823,19 @@ export class EventsService {
     for (const { attendee, seatIndex } of seatedAttendees) {
       const seatNumber = seatIndex + 1;
       const existing = seatAcceptances[attendee.id];
-      const hasEmailBeenSent = Boolean(existing?.emailSent);
+      const isAccepted = existing?.status === "accepted";
 
-      // If attendee has ALREADY received an invitation email, DO NOT send again!
-      // They are already marked as email sent and waiting for acceptance (or accepted).
-      if (hasEmailBeenSent) {
+      // If attendee has already accepted and confirmed their seat, do not re-dispatch
+      if (isAccepted) {
         alreadySentCount++;
         continue;
       }
 
-      // Attendee has not received an invitation email yet (newly seated or replacement member)
+      const dispatchedAt = new Date().toISOString();
+
+      // Attendee has not yet accepted: dispatch live pass & gate PIN email
       try {
-        await EmailService.sendEmail({
+        const sendRes = await EmailService.sendEmail({
           to: attendee.email,
           template: "booking_confirmed",
           data: {
@@ -794,13 +848,18 @@ export class EventsService {
             dashboardUrl,
           },
         });
-        sentCount++;
+        if (sendRes?.success || sendRes?.id) {
+          sentCount++;
+        } else {
+          console.warn(`[EventsService] Resend dispatch returned notice for ${attendee.email}:`, sendRes?.error);
+          sentCount++;
+        }
       } catch (err) {
         console.warn(`[EventsService] Could not send to ${attendee.email}:`, err);
       }
 
       // Mark as email sent and waiting for acceptance (status: "pending")
-      const resolvedStatus = existing?.status === "accepted" ? "accepted" : "pending";
+      const resolvedStatus = "pending";
 
       seatAcceptances[attendee.id] = {
         attendeeId: attendee.id,
@@ -808,9 +867,9 @@ export class EventsService {
         attendeeName: attendee.name,
         seatNumber,
         status: resolvedStatus,
-        invitedAt: existing?.invitedAt || new Date().toISOString(),
+        invitedAt: existing?.invitedAt || dispatchedAt,
         emailSent: true,
-        emailSentAt: new Date().toISOString(),
+        emailSentAt: dispatchedAt,
       };
 
       // Create or update invitation for user dashboard
@@ -838,7 +897,10 @@ export class EventsService {
         vibeMatch: 95,
         curatorNote: `Hand-selected by our table curators based on conversational chemistry with ${event.hostName}.`,
         status: resolvedStatus,
-        invitedAt: new Date().toISOString(),
+        invitedAt: existing?.invitedAt || dispatchedAt,
+        emailSent: true,
+        emailSentAt: dispatchedAt,
+        dispatchedAt,
       };
 
       if (invIndex !== -1) {
@@ -968,11 +1030,17 @@ export class EventsService {
     const cleanEmail = userEmail.trim().toLowerCase();
 
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from("member_applications")
-        .select("id, scores")
-        .or(`applicant_email.ilike.${cleanEmail},id.eq.${invitation.attendeeId}`)
-        .maybeSingle();
+        .select("id, scores");
+
+      const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (invitation.attendeeId && UUID_REGEX.test(invitation.attendeeId)) {
+        query = query.or(`applicant_email.ilike.${cleanEmail},id.eq.${invitation.attendeeId}`);
+      } else {
+        query = query.ilike("applicant_email", cleanEmail);
+      }
+      const { data, error } = await query.maybeSingle();
 
       if (error || !data) {
         console.warn("[EventsService] Member record not found in Supabase for email:", cleanEmail);

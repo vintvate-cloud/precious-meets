@@ -157,7 +157,12 @@ function AdminConsolePage() {
           clearTimeout(debounceTimer);
           debounceTimer = setTimeout(() => {
             loadFromSupabase();
-          }, 2000);
+            EventsService.fetchEventsFromDb().then((dbEvents) => {
+              if (Array.isArray(dbEvents)) {
+                setEvents(dbEvents);
+              }
+            });
+          }, 1000);
         }
       )
       .on(
@@ -165,7 +170,7 @@ function AdminConsolePage() {
         { event: "*", schema: "public", table: "events" },
         () => {
           EventsService.fetchEventsFromDb().then((dbEvents) => {
-            if (dbEvents && dbEvents.length > 0) {
+            if (Array.isArray(dbEvents)) {
               setEvents(dbEvents);
             }
           });

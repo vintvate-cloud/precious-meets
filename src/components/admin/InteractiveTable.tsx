@@ -20,6 +20,7 @@ import {
   RefreshCw,
   ScanLine,
   QrCode,
+  XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -66,17 +67,39 @@ export function InteractiveTable({
 
   // Seated guest acceptance & dispatch status calculation
   const seatedAttendeeIds = event.seats.filter(Boolean) as string[];
+
+  const getSeatAcceptance = (attId?: string | null): SeatAcceptance | undefined => {
+    if (!attId) return undefined;
+    if (seatAcceptances[attId]) return seatAcceptances[attId];
+    const att = attendees.find((a) => a.id === attId);
+    if (att) {
+      if (seatAcceptances[att.id]) return seatAcceptances[att.id];
+      if (att.email && seatAcceptances[att.email.toLowerCase()]) return seatAcceptances[att.email.toLowerCase()];
+      const match = Object.values(seatAcceptances).find(
+        (acc) => acc.attendeeEmail?.toLowerCase() === att.email.toLowerCase()
+      );
+      if (match) return match;
+    }
+    return undefined;
+  };
+
   const acceptedCount = seatedAttendeeIds.filter(
-    (id) => seatAcceptances[id]?.status === "accepted"
+    (id) => getSeatAcceptance(id)?.status === "accepted"
   ).length;
   const pendingCount = seatedAttendeeIds.filter(
-    (id) => seatAcceptances[id]?.emailSent && seatAcceptances[id]?.status === "pending"
+    (id) => {
+      const acc = getSeatAcceptance(id);
+      return acc?.emailSent && acc?.status === "pending";
+    }
   ).length;
   const unsentCount = seatedAttendeeIds.filter(
-    (id) => !seatAcceptances[id]?.emailSent
+    (id) => {
+      const acc = getSeatAcceptance(id);
+      return !acc?.emailSent && acc?.status !== "accepted" && acc?.status !== "declined";
+    }
   ).length;
   const declinedCount = seatedAttendeeIds.filter(
-    (id) => seatAcceptances[id]?.status === "declined"
+    (id) => getSeatAcceptance(id)?.status === "declined"
   ).length;
 
   const handleSeatSelect = (attendeeId: string) => {
@@ -115,15 +138,11 @@ export function InteractiveTable({
       
       if (res.dispatchedCount > 0) {
         toast.success(
-          `Secret table invitations & gate PINs emailed to ${res.dispatchedCount} new guest(s)!${
-            res.alreadySentCount > 0
-              ? ` (${res.alreadySentCount} guests previously received invitations and remain waiting for acceptance).`
-              : ""
-          }`
+          `Secret table invitations & gate PINs emailed to ${res.dispatchedCount} guest(s)!`
         );
       } else {
         toast.info(
-          `All ${res.alreadySentCount} seated guest(s) have already received invitations and are waiting for acceptance.`
+          `All ${res.alreadySentCount} seated guest(s) have already accepted and confirmed their passes.`
         );
       }
     } catch (err: any) {
@@ -210,18 +229,28 @@ export function InteractiveTable({
 
           <button
             type="button"
-            disabled={sendingEmails || metrics.seatedCount === 0}
+            disabled={sendingEmails || metrics.seatedCount === 0 || (unsentCount === 0 && pendingCount === 0)}
             onClick={handleSendEmails}
-            className="group flex items-center gap-2 rounded-full bg-burgundy px-4 sm:px-5 py-2.5 text-xs font-semibold text-ivory shadow-md transition-all duration-300 hover:bg-burgundy/90 hover:scale-105 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+            className={`group flex items-center gap-2 rounded-full px-4 sm:px-5 py-2.5 text-xs font-semibold text-ivory shadow-md transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer ${
+              unsentCount > 0
+                ? "bg-burgundy hover:bg-burgundy/90"
+                : pendingCount > 0
+                ? "bg-amber-700 hover:bg-amber-600"
+                : "bg-emerald-700 hover:bg-emerald-600"
+            }`}
           >
             {sendingEmails ? (
               <RefreshCw className="size-4 animate-spin text-ivory" />
-            ) : (
+            ) : unsentCount > 0 || pendingCount > 0 ? (
               <Send className="size-4 text-ivory transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            ) : (
+              <CheckCircle2 className="size-4 text-ivory" />
             )}
             <span>
               {unsentCount > 0
                 ? `Dispatch Passes (${unsentCount} pending)`
+                : pendingCount > 0
+                ? `Resend Passes (${pendingCount} awaiting)`
                 : `All Passes Dispatched (${metrics.seatedCount}/6)`}
             </span>
           </button>
@@ -391,12 +420,12 @@ export function InteractiveTable({
                   // OCCUPIED SEAT CARD
                   (() => {
                     const isCheckedIn = Boolean(checkIns[attendee.id]);
-                    const acceptance = seatAcceptances[attendee.id];
+                    const acceptance = getSeatAcceptance(attendee.id);
                     const isAccepted = acceptance?.status === "accepted";
                     const isEmailSent = Boolean(acceptance?.emailSent);
                     const isPending = isEmailSent && acceptance?.status === "pending";
-                    const isUnsent = !isEmailSent && acceptance?.status !== "accepted";
                     const isDeclined = acceptance?.status === "declined";
+                    const isUnsent = !isAccepted && !isDeclined && !isPending;
                     const initials = attendee.name
                       .trim()
                       .split(/\s+/)
@@ -424,6 +453,8 @@ export function InteractiveTable({
                                 ? "border-forest ring-2 ring-forest/60"
                                 : isAccepted
                                 ? "border-emerald-500 ring-2 ring-emerald-500/60 shadow-[0_0_15px_rgba(16,185,129,0.35)]"
+                                : isDeclined
+                                ? "border-destructive ring-2 ring-destructive/60 bg-destructive/10"
                                 : isPending
                                 ? "border-ochre ring-2 ring-ochre/40"
                                 : isUnsent
@@ -484,6 +515,16 @@ export function InteractiveTable({
                             </span>
                           )}
 
+                          {/* Declined badge */}
+                          {!isCheckedIn && isDeclined && (
+                            <span
+                              title={acceptance?.declineReason ? `Declined: ${acceptance.declineReason}` : "Member declined invitation"}
+                              className="absolute -top-1 -left-1 flex size-5 items-center justify-center rounded-full bg-destructive text-white shadow-sm ring-2 ring-background animate-in zoom-in"
+                            >
+                              <XCircle className="size-3.5" />
+                            </span>
+                          )}
+
                           {/* Accepted & Booked badge (if not checked in) */}
                           {!isCheckedIn && isAccepted && (
                             <span
@@ -505,7 +546,7 @@ export function InteractiveTable({
                           )}
 
                           {/* Unsent badge */}
-                          {!isCheckedIn && !isAccepted && isUnsent && (
+                          {!isCheckedIn && !isAccepted && !isDeclined && isUnsent && (
                             <span
                               title={`Assigned to table · Invitation not dispatched yet`}
                               className="absolute -top-1 -left-1 flex size-5 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm ring-2 ring-background animate-in zoom-in"
@@ -528,17 +569,82 @@ export function InteractiveTable({
                               <CheckCircle2 className="size-2.5 text-emerald-600" /> Accepted & Booked
                             </span>
                           ) : isPending ? (
-                            <span className="text-[9px] text-amber-800 dark:text-amber-300 font-semibold bg-amber-100 dark:bg-amber-950/60 border border-amber-300/60 px-1.5 py-0.5 rounded-full mt-0.5 flex items-center gap-0.5 whitespace-nowrap">
-                              <Mail className="size-2.5 text-amber-600" /> Email Sent · Waiting
-                            </span>
-                          ) : isUnsent ? (
-                            <span className="text-[9px] text-blue-700 dark:text-blue-300 font-semibold bg-blue-100 dark:bg-blue-950/60 border border-blue-300/60 px-1.5 py-0.5 rounded-full mt-0.5 flex items-center gap-0.5 whitespace-nowrap">
-                              <Send className="size-2.5 text-blue-600" /> Pass Not Sent
-                            </span>
+                            <div className="flex flex-col items-center mt-0.5 gap-1">
+                              <span className="text-[9px] text-amber-800 dark:text-amber-300 font-semibold bg-amber-100 dark:bg-amber-950/60 border border-amber-300/60 px-1.5 py-0.5 rounded-full flex items-center gap-0.5 whitespace-nowrap">
+                                <Mail className="size-2.5 text-amber-600" /> Email Sent · Waiting
+                              </span>
+                              <button
+                                type="button"
+                                title="Resend pass invitation email to this guest"
+                                disabled={sendingEmails}
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  setSendingEmails(true);
+                                  try {
+                                    const res = await EventsService.sendEventInvitations(event.id, attendee.id);
+                                    const updated = EventsService.getEventById(event.id);
+                                    if (updated) onEventUpdated(updated);
+                                    toast.success(`Pass re-dispatched to ${attendee.name} (${attendee.email})!`);
+                                  } catch (err: any) {
+                                    toast.error(err.message || "Failed to resend pass.");
+                                  } finally {
+                                    setSendingEmails(false);
+                                  }
+                                }}
+                                className="text-[9px] font-medium text-amber-900 bg-amber-200/90 hover:bg-amber-300 dark:text-amber-200 dark:bg-amber-900/60 px-2 py-0.5 rounded-full transition-transform hover:scale-105 active:scale-95 flex items-center gap-1 cursor-pointer whitespace-nowrap"
+                              >
+                                <RefreshCw className="size-2" /> Resend Pass
+                              </button>
+                            </div>
                           ) : isDeclined ? (
-                            <span className="text-[9px] text-destructive font-semibold bg-destructive/15 px-1.5 py-0.5 rounded-full mt-0.5">
-                              Declined
-                            </span>
+                            <div className="flex flex-col items-center mt-0.5 gap-1">
+                              <span
+                                className="text-[9px] text-destructive font-bold bg-destructive/15 border border-destructive/30 px-2 py-0.5 rounded-full flex items-center gap-1 shadow-xs whitespace-nowrap"
+                                title={acceptance?.declineReason ? `Reason: ${acceptance.declineReason}` : "Member declined invitation"}
+                              >
+                                <XCircle className="size-2.5 text-destructive" /> Declined
+                              </span>
+                              <button
+                                type="button"
+                                title="Seat replacement guest"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleUnseat(seat.id);
+                                  setActiveSeatIndex(seat.id);
+                                }}
+                                className="text-[9px] font-bold text-ivory bg-burgundy hover:bg-burgundy/90 px-2.5 py-0.5 rounded-full shadow-xs transition-transform hover:scale-105 active:scale-95 flex items-center gap-1 cursor-pointer whitespace-nowrap"
+                              >
+                                <UserPlus className="size-2.5" /> Invite Other
+                              </button>
+                            </div>
+                          ) : isUnsent ? (
+                            <div className="flex flex-col items-center mt-0.5 gap-1">
+                              <span className="text-[9px] text-blue-700 dark:text-blue-300 font-semibold bg-blue-100 dark:bg-blue-950/60 border border-blue-300/60 px-1.5 py-0.5 rounded-full flex items-center gap-0.5 whitespace-nowrap">
+                                <Send className="size-2.5 text-blue-600" /> Pass Not Sent
+                              </span>
+                              <button
+                                type="button"
+                                title="Dispatch pass to this guest"
+                                disabled={sendingEmails}
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  setSendingEmails(true);
+                                  try {
+                                    const res = await EventsService.sendEventInvitations(event.id, attendee.id);
+                                    const updated = EventsService.getEventById(event.id);
+                                    if (updated) onEventUpdated(updated);
+                                    toast.success(`Pass dispatched to ${attendee.name} (${attendee.email})!`);
+                                  } catch (err: any) {
+                                    toast.error(err.message || "Failed to dispatch pass.");
+                                  } finally {
+                                    setSendingEmails(false);
+                                  }
+                                }}
+                                className="text-[9px] font-bold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-0.5 rounded-full transition-transform hover:scale-105 active:scale-95 flex items-center gap-1 cursor-pointer whitespace-nowrap"
+                              >
+                                <Send className="size-2" /> Dispatch
+                              </button>
+                            </div>
                           ) : (
                             <span className="text-[10px] text-forest font-medium bg-forest/10 px-1.5 py-0.5 rounded-full mt-0.5">
                               {attendee.archetype.title.replace("The ", "")}
@@ -627,7 +733,7 @@ export function InteractiveTable({
           attendees={attendees || []}
           seatAcceptance={
             event.seats?.[activeSeatIndex]
-              ? event.seatAcceptances?.[event.seats[activeSeatIndex]!]
+              ? getSeatAcceptance(event.seats[activeSeatIndex])
               : undefined
           }
           onToggleAcceptance={(status) => {

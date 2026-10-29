@@ -93,6 +93,7 @@ export function AttendeePickerModal({
 
   const currentAttendee = attendees?.find((a) => a.id === currentAttendeeId);
   const isAccepted = seatAcceptance?.status === "accepted";
+  const isDeclined = seatAcceptance?.status === "declined";
   const isEmailSent = Boolean(seatAcceptance?.emailSent);
 
   return (
@@ -158,6 +159,13 @@ export function AttendeePickerModal({
                     {isAccepted ? (
                       <span className="inline-flex items-center gap-1 font-bold text-emerald-800 bg-emerald-100 dark:bg-emerald-950 dark:text-emerald-300 px-2 py-0.5 rounded-full text-[10px]">
                         <CheckCircle2 className="size-3 text-emerald-600" /> Member Accepted & Booked
+                      </span>
+                    ) : isDeclined ? (
+                      <span
+                        className="inline-flex items-center gap-1 font-semibold text-destructive bg-destructive/15 border border-destructive/30 px-2 py-0.5 rounded-full text-[10px]"
+                        title={seatAcceptance?.declineReason ? `Reason: ${seatAcceptance.declineReason}` : undefined}
+                      >
+                        <X className="size-3 text-destructive" /> Member Declined {seatAcceptance?.declineReason ? `(${seatAcceptance.declineReason})` : ""}
                       </span>
                     ) : isEmailSent ? (
                       <span className="inline-flex items-center gap-1 font-semibold text-amber-800 bg-amber-100 dark:bg-amber-950 dark:text-amber-300 border border-amber-300/60 px-2 py-0.5 rounded-full text-[10px]">
