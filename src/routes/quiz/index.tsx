@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { motion, AnimatePresence, useReducedMotion, type Variants } from "framer-motion";
 import { QUIZ_QUESTIONS, type QuizQuestion } from "@/lib/quiz-data";
 import { calculateSocialProfile } from "@/lib/scoring-engine";
 import {
@@ -46,12 +47,93 @@ const LOCAL_STORAGE_CONTACT_KEY = "precious_meets_user_contact";
 // Total steps = 9 quiz questions + 1 final contact page breaker step
 const TOTAL_STEPS = QUIZ_QUESTIONS.length + 1; // 10 steps
 
+// Options Stagger Animation Variants
+const optionsContainerVariants: Variants = {
+  enter: {},
+  center: {
+    transition: {
+      staggerChildren: 0.045,
+      delayChildren: 0.06,
+    },
+  },
+  exit: {},
+};
+
 export function QuizPage() {
   const navigate = useNavigate();
+  const shouldReduceMotion = useReducedMotion();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState<1 | -1>(1);
+  const currentIndexRef = useRef(currentIndex);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [submitting, setSubmitting] = useState(false);
   const [isAutoAdvancing, setIsAutoAdvancing] = useState(false);
+
+  // Keep ref up to date for popstate history listener
+  useEffect(() => {
+    currentIndexRef.current = currentIndex;
+  }, [currentIndex]);
+
+  // Motion variants with optical blur and spring physics
+  const questionMorphVariants: Variants = useMemo(
+    () => ({
+      enter: (dir: number) => ({
+        opacity: 0,
+        y: shouldReduceMotion ? 0 : dir > 0 ? 26 : -26,
+        scale: shouldReduceMotion ? 1 : 0.985,
+        filter: shouldReduceMotion ? "none" : "blur(8px)",
+      }),
+      center: {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        filter: "blur(0px)",
+        transition: {
+          y: { type: "spring" as const, stiffness: 300, damping: 28 },
+          scale: { type: "spring" as const, stiffness: 300, damping: 28 },
+          opacity: { duration: 0.34, ease: [0.16, 1, 0.3, 1] },
+          filter: { duration: 0.28, ease: "easeOut" as const },
+        },
+      },
+      exit: (dir: number) => ({
+        opacity: 0,
+        y: shouldReduceMotion ? 0 : dir > 0 ? -22 : 22,
+        scale: shouldReduceMotion ? 1 : 0.985,
+        filter: shouldReduceMotion ? "none" : "blur(6px)",
+        transition: {
+          duration: 0.22,
+          ease: [0.4, 0, 1, 1],
+        },
+      }),
+    }),
+    [shouldReduceMotion]
+  );
+
+  const optionItemVariants: Variants = useMemo(
+    () => ({
+      enter: {
+        opacity: 0,
+        y: shouldReduceMotion ? 0 : 12,
+        scale: shouldReduceMotion ? 1 : 0.985,
+      },
+      center: {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        transition: {
+          type: "spring" as const,
+          stiffness: 340,
+          damping: 26,
+        },
+      },
+      exit: {
+        opacity: 0,
+        y: shouldReduceMotion ? 0 : -6,
+        transition: { duration: 0.16 },
+      },
+    }),
+    [shouldReduceMotion]
+  );
 
   // Final Step: Basic Questions
   const [fullName, setFullName] = useState("");
@@ -97,7 +179,9 @@ export function QuizPage() {
     // Browser back button handling
     const handlePopState = (e: PopStateEvent) => {
       if (e.state && typeof e.state.quizStep === "number") {
-        setCurrentIndex(e.state.quizStep);
+        const nextStep = e.state.quizStep;
+        setDirection(nextStep >= currentIndexRef.current ? 1 : -1);
+        setCurrentIndex(nextStep);
       } else {
         navigate({ to: "/" });
       }
@@ -116,6 +200,7 @@ export function QuizPage() {
   };
 
   const goToStep = (nextIndex: number) => {
+    setDirection(nextIndex >= currentIndex ? 1 : -1);
     window.history.pushState({ quizStep: nextIndex }, "");
     setCurrentIndex(nextIndex);
   };
@@ -126,11 +211,11 @@ export function QuizPage() {
     saveAnswer(questionId, value);
     setIsAutoAdvancing(true);
 
-    // Brief highlight feedback before moving to next step
+    // Brief highlight feedback before smoothly morphing to next step
     setTimeout(() => {
       goToStep(currentIndex + 1);
       setIsAutoAdvancing(false);
-    }, 220);
+    }, 200);
   };
 
   const handleNext = () => {
@@ -161,6 +246,7 @@ export function QuizPage() {
     }
 
     const prev = currentIndex - 1;
+    setDirection(-1);
     window.history.back();
     setCurrentIndex(prev);
   };
@@ -375,6 +461,7 @@ export function QuizPage() {
       localStorage.removeItem(LOCAL_STORAGE_KEY);
       localStorage.removeItem(LOCAL_STORAGE_CONTACT_KEY);
       setAnswers({});
+      setDirection(-1);
       setCurrentIndex(0);
       setUserPhotoUrl(null);
       setUserPhotoFileName(null);
@@ -423,168 +510,241 @@ export function QuizPage() {
             </button>
           </div>
         </div>
-        <div className="mx-auto mt-2.5 h-1 w-full max-w-3xl overflow-hidden rounded-full bg-sage/60">
-          <div
-            className="h-full bg-burgundy transition-all duration-300 ease-out"
-            style={{ width: `${progressPercent}%` }}
+        <div className="mx-auto mt-2.5 h-1.5 w-full max-w-3xl overflow-hidden rounded-full bg-sage/60">
+          <motion.div
+            className="h-full bg-burgundy rounded-full shadow-xs"
+            initial={false}
+            animate={{ width: `${progressPercent}%` }}
+            transition={{ type: "spring", stiffness: 220, damping: 25 }}
           />
         </div>
       </header>
 
       {/* Main View Area (Non-scrollable container with vertically centered questions) */}
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-between px-4 sm:px-6 py-4 sm:py-6 overflow-hidden">
-        {/* Centered Question / Step Box */}
-        <div className="my-auto w-full max-h-[calc(100vh-140px)] overflow-y-auto no-scrollbar">
-          {/* ------------------------------------------------------------- */}
-          {/* CASE A: Standard Quiz Question (Questions 1 through 9) */}
-          {/* ------------------------------------------------------------- */}
-          {!isContactStep && currentQ && (
-            <div className="space-y-4 animate-in fade-in duration-300">
-              <div>
-                <span className="label-mono inline-block rounded-full bg-sage/60 px-3 py-0.5 text-[11px] font-semibold text-forest">
-                  {currentQ.category.replace("_", " ").toUpperCase()}
-                </span>
-                <h1 className="font-display mt-2 text-2xl sm:text-3xl lg:text-4xl leading-tight">
-                  {currentQ.title}
-                </h1>
-                {currentQ.subtitle && (
-                  <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-muted-foreground">
-                    {currentQ.subtitle}
-                  </p>
-                )}
-              </div>
-
-              {/* Options Rendering */}
-              <div className="pt-2">
-                {/* Single Select: clicking an option automatically highlights & advances */}
-                {currentQ.type === "single_select" && (
-                  <div
-                    className={
-                      currentQ.options.length > 4
-                        ? "grid gap-2 sm:grid-cols-2"
-                        : "grid gap-2.5"
-                    }
-                  >
-                    {currentQ.options.map((opt) => {
-                      const isSelected = currentVal === opt.value;
-                      return (
-                        <button
-                          key={opt.id}
-                          type="button"
-                          disabled={isAutoAdvancing}
-                          onClick={() => handleSingleSelect(currentQ.id, opt.value)}
-                          className={`flex items-start justify-between rounded-xl border p-3.5 sm:p-4 text-left transition-all cursor-pointer ${
-                            isSelected
-                              ? "border-burgundy bg-card shadow-sm ring-1 ring-burgundy"
-                              : "border-border/80 bg-card/70 hover:border-burgundy/40 hover:bg-card"
-                          }`}
-                        >
-                          <div className="pr-2">
-                            <p className="text-sm font-medium text-foreground">{opt.label}</p>
-                            {opt.sublabel && (
-                              <p className="mt-0.5 text-xs text-muted-foreground leading-snug">
-                                {opt.sublabel}
-                              </p>
-                            )}
-                          </div>
-                          <div
-                            className={`grid size-5 shrink-0 place-items-center rounded-full border transition-colors mt-0.5 ${
-                              isSelected
-                                ? "border-burgundy bg-burgundy text-ivory"
-                                : "border-border/80 bg-background"
-                            }`}
-                          >
-                            {isSelected && <Check className="size-3" />}
-                          </div>
-                        </button>
-                      );
-                    })}
+        {/* Centered Question / Step Box with Liquid Height Morphing */}
+        <motion.div
+          layout
+          transition={{ layout: { type: "spring", stiffness: 300, damping: 30 } }}
+          className="relative my-auto w-full max-h-[calc(100vh-140px)] overflow-y-auto no-scrollbar"
+        >
+          <AnimatePresence mode="popLayout" custom={direction} initial={false}>
+            <motion.div
+              key={isContactStep ? "step-contact" : currentQ?.id ?? `step-${currentIndex}`}
+              custom={direction}
+              variants={questionMorphVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              className="w-full"
+            >
+              {/* ------------------------------------------------------------- */}
+              {/* CASE A: Standard Quiz Question (Questions 1 through 9) */}
+              {/* ------------------------------------------------------------- */}
+              {!isContactStep && currentQ && (
+                <div className="space-y-4">
+                  <div>
+                    <motion.span
+                      layoutId="quiz-category-badge"
+                      transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                      className="label-mono inline-block rounded-full bg-sage/60 px-3 py-0.5 text-[11px] font-semibold text-forest shadow-xs"
+                    >
+                      {currentQ.category.replace("_", " ").toUpperCase()}
+                    </motion.span>
+                    <motion.h1
+                      initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
+                      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1], delay: 0.04 }}
+                      className="font-display mt-2 text-2xl sm:text-3xl lg:text-4xl leading-tight"
+                    >
+                      {currentQ.title}
+                    </motion.h1>
+                    {currentQ.subtitle && (
+                      <motion.p
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: 0.08 }}
+                        className="mt-1.5 text-xs sm:text-sm leading-relaxed text-muted-foreground"
+                      >
+                        {currentQ.subtitle}
+                      </motion.p>
+                    )}
                   </div>
-                )}
 
-                {/* Multi Select: users toggle options, Next button is provided below */}
-                {currentQ.type === "multi_select" && (
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {currentQ.options.map((opt) => {
-                      const arr = Array.isArray(currentVal) ? currentVal : [];
-                      const isSelected = arr.includes(opt.value);
-
-                      const toggle = () => {
-                        let updated = [...arr];
-                        if (isSelected) {
-                          updated = updated.filter((v) => v !== opt.value);
-                        } else {
-                          updated.push(opt.value);
+                  {/* Options Rendering */}
+                  <div className="pt-2">
+                    {/* Single Select: clicking an option automatically highlights & advances */}
+                    {currentQ.type === "single_select" && (
+                      <motion.div
+                        variants={optionsContainerVariants}
+                        initial="enter"
+                        animate="center"
+                        className={
+                          currentQ.options.length > 4
+                            ? "grid gap-2 sm:grid-cols-2"
+                            : "grid gap-2.5"
                         }
-                        saveAnswer(currentQ.id, updated);
-                      };
+                      >
+                        {currentQ.options.map((opt) => {
+                          const isSelected = currentVal === opt.value;
+                          return (
+                            <motion.button
+                              key={opt.id}
+                              type="button"
+                              variants={optionItemVariants}
+                              whileHover={{ scale: 1.012, y: -1 }}
+                              whileTap={{ scale: 0.985 }}
+                              disabled={isAutoAdvancing}
+                              onClick={() => handleSingleSelect(currentQ.id, opt.value)}
+                              className={`group flex items-start justify-between rounded-xl border p-3.5 sm:p-4 text-left transition-colors cursor-pointer ${
+                                isSelected
+                                  ? "border-burgundy bg-card shadow-sm ring-1 ring-burgundy"
+                                  : "border-border/80 bg-card/70 hover:border-burgundy/40 hover:bg-card"
+                              }`}
+                            >
+                              <div className="pr-2">
+                                <p className="text-sm font-medium text-foreground transition-colors group-hover:text-burgundy">
+                                  {opt.label}
+                                </p>
+                                {opt.sublabel && (
+                                  <p className="mt-0.5 text-xs text-muted-foreground leading-snug">
+                                    {opt.sublabel}
+                                  </p>
+                                )}
+                              </div>
+                              <motion.div
+                                animate={
+                                  isSelected
+                                    ? { scale: [0.85, 1.18, 1] }
+                                    : { scale: 1 }
+                                }
+                                transition={{ duration: 0.22 }}
+                                className={`grid size-5 shrink-0 place-items-center rounded-full border transition-colors mt-0.5 ${
+                                  isSelected
+                                    ? "border-burgundy bg-burgundy text-ivory shadow-xs"
+                                    : "border-border/80 bg-background"
+                                }`}
+                              >
+                                {isSelected && <Check className="size-3" />}
+                              </motion.div>
+                            </motion.button>
+                          );
+                        })}
+                      </motion.div>
+                    )}
 
-                      return (
-                        <button
-                          key={opt.id}
-                          type="button"
-                          onClick={toggle}
-                          className={`flex items-center justify-between rounded-xl border p-3 text-left text-sm transition-all cursor-pointer ${
-                            isSelected
-                              ? "border-burgundy bg-card font-medium text-foreground ring-1 ring-burgundy"
-                              : "border-border/80 bg-card/70 text-muted-foreground hover:border-burgundy/40 hover:bg-card"
-                          }`}
-                        >
-                          <span className="text-xs sm:text-sm">{opt.label}</span>
-                          <div
-                            className={`grid size-4 shrink-0 place-items-center rounded border transition-colors ${
-                              isSelected
-                                ? "border-burgundy bg-burgundy text-ivory"
-                                : "border-border/80 bg-background"
-                            }`}
-                          >
-                            {isSelected && <Check className="size-3" />}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
+                    {/* Multi Select: users toggle options, Next button is provided below */}
+                    {currentQ.type === "multi_select" && (
+                      <motion.div
+                        variants={optionsContainerVariants}
+                        initial="enter"
+                        animate="center"
+                        className="grid gap-2 sm:grid-cols-2"
+                      >
+                        {currentQ.options.map((opt) => {
+                          const arr = Array.isArray(currentVal) ? currentVal : [];
+                          const isSelected = arr.includes(opt.value);
 
-                {/* Slider (Pull): user pulls/drags slider, Next button is provided below */}
-                {currentQ.type === "slider" && (
-                  <div className="rounded-xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs">
-                    <div className="flex justify-between text-xs font-semibold text-muted-foreground">
-                      <span>{currentQ.sliderLabels?.left || "Low"}</span>
-                      <span>{currentQ.sliderLabels?.right || "High"}</span>
-                    </div>
-                    <div className="py-6">
-                      <Slider
-                        defaultValue={[typeof currentVal === "number" ? currentVal : 50]}
-                        value={[typeof currentVal === "number" ? currentVal : 50]}
-                        max={currentQ.sliderMax || 100}
-                        min={currentQ.sliderMin || 0}
-                        step={currentQ.sliderStep || 5}
-                        onValueChange={(val) => saveAnswer(currentQ.id, val[0])}
-                        className="accent-burgundy"
-                      />
-                    </div>
-                    <p className="text-center font-mono text-xs sm:text-sm font-semibold text-burgundy">
-                      Selected: {typeof currentVal === "number" ? currentVal : 50}%
-                    </p>
+                          const toggle = () => {
+                            let updated = [...arr];
+                            if (isSelected) {
+                              updated = updated.filter((v) => v !== opt.value);
+                            } else {
+                              updated.push(opt.value);
+                            }
+                            saveAnswer(currentQ.id, updated);
+                          };
+
+                          return (
+                            <motion.button
+                              key={opt.id}
+                              type="button"
+                              variants={optionItemVariants}
+                              whileHover={{ scale: 1.012, y: -1 }}
+                              whileTap={{ scale: 0.985 }}
+                              onClick={toggle}
+                              className={`flex items-center justify-between rounded-xl border p-3 text-left text-sm transition-colors cursor-pointer ${
+                                isSelected
+                                  ? "border-burgundy bg-card font-medium text-foreground ring-1 ring-burgundy shadow-xs"
+                                  : "border-border/80 bg-card/70 text-muted-foreground hover:border-burgundy/40 hover:bg-card hover:text-foreground"
+                              }`}
+                            >
+                              <span className="text-xs sm:text-sm">{opt.label}</span>
+                              <motion.div
+                                animate={
+                                  isSelected
+                                    ? { scale: [0.85, 1.15, 1] }
+                                    : { scale: 1 }
+                                }
+                                transition={{ duration: 0.2 }}
+                                className={`grid size-4 shrink-0 place-items-center rounded border transition-colors ${
+                                  isSelected
+                                    ? "border-burgundy bg-burgundy text-ivory shadow-xs"
+                                    : "border-border/80 bg-background"
+                                }`}
+                              >
+                                {isSelected && <Check className="size-3" />}
+                              </motion.div>
+                            </motion.button>
+                          );
+                        })}
+                      </motion.div>
+                    )}
+
+                    {/* Slider (Pull): user pulls/drags slider, Next button is provided below */}
+                    {currentQ.type === "slider" && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 14 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ type: "spring", stiffness: 320, damping: 28, delay: 0.06 }}
+                        className="rounded-xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs"
+                      >
+                        <div className="flex justify-between text-xs font-semibold text-muted-foreground">
+                          <span>{currentQ.sliderLabels?.left || "Low"}</span>
+                          <span>{currentQ.sliderLabels?.right || "High"}</span>
+                        </div>
+                        <div className="py-6">
+                          <Slider
+                            defaultValue={[typeof currentVal === "number" ? currentVal : 50]}
+                            value={[typeof currentVal === "number" ? currentVal : 50]}
+                            max={currentQ.sliderMax || 100}
+                            min={currentQ.sliderMin || 0}
+                            step={currentQ.sliderStep || 5}
+                            onValueChange={(val) => saveAnswer(currentQ.id, val[0])}
+                            className="accent-burgundy"
+                          />
+                        </div>
+                        <p className="text-center font-mono text-xs sm:text-sm font-semibold text-burgundy">
+                          Selected: {typeof currentVal === "number" ? currentVal : 50}%
+                        </p>
+                      </motion.div>
+                    )}
                   </div>
-                )}
-              </div>
-            </div>
-          )}
+                </div>
+              )}
 
           {/* ------------------------------------------------------------- */}
           {/* CASE B: FINAL STEP (Generous, slightly larger content)       */}
           {/* ------------------------------------------------------------- */}
           {isContactStep && (
-            <div className="w-full space-y-4 sm:space-y-5 animate-in fade-in duration-300">
+            <div className="w-full space-y-4 sm:space-y-5">
               <div className="text-center space-y-1.5">
-                <h1 className="font-display text-3xl sm:text-4xl text-foreground leading-tight">
+                <motion.h1
+                  initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
+                  className="font-display text-3xl sm:text-4xl text-foreground leading-tight"
+                >
                   Hold your seat at the <em className="italic text-burgundy">table</em>
-                </h1>
-                <p className="mx-auto max-w-lg text-sm sm:text-[15px] leading-relaxed text-muted-foreground">
+                </motion.h1>
+                <motion.p
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.32, delay: 0.06 }}
+                  className="mx-auto max-w-lg text-sm sm:text-[15px] leading-relaxed text-muted-foreground"
+                >
                   Basic details for curated table matching and 100% Offline Aadhaar verification via DigiLocker.
-                </p>
+                </motion.p>
               </div>
 
               {/* Generous Contact Form Card */}
@@ -893,7 +1053,9 @@ export function QuizPage() {
               </div>
             </div>
           )}
-        </div>
+            </motion.div>
+          </AnimatePresence>
+        </motion.div>
 
         {/* ------------------------------------------------------------- */}
         {/* Bottom Navigation: Back is always present; Next only when needed */}
