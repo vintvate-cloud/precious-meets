@@ -27,6 +27,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
+import { QuizTableAtmosphere } from "@/components/quiz/QuizTableAtmosphere";
 
 export const Route = createFileRoute("/quiz/")({
   head: () => ({
@@ -485,9 +486,13 @@ export function QuizPage() {
     currentQ?.type === "slider";
 
   return (
-    <div className="flex h-screen w-full flex-col justify-between overflow-hidden bg-ivory text-foreground selection:bg-burgundy/20">
+    <QuizTableAtmosphere
+      currentIndex={currentIndex}
+      totalSteps={TOTAL_STEPS}
+      direction={direction}
+    >
       {/* Top Bar with Progress */}
-      <header className="shrink-0 border-b border-border/80 bg-ivory/95 px-6 py-3 backdrop-blur-md">
+      <header className="shrink-0 border-b border-border/70 bg-ivory/80 px-6 py-3 backdrop-blur-md">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
           <button
             type="button"
@@ -497,8 +502,9 @@ export function QuizPage() {
             Precious<em className="text-burgundy not-italic font-normal">meets</em>
           </button>
           <div className="flex items-center gap-4">
-            <span className="label-mono text-xs text-muted-foreground">
-              {isContactStep ? "Final Step" : `${currentIndex + 1} of ${QUIZ_QUESTIONS.length}`}
+            <span className="label-mono text-xs text-muted-foreground flex items-center gap-1.5">
+              <span className="size-2 rounded-full bg-amber-500 animate-pulse inline-block shadow-xs" />
+              {isContactStep ? "Seat Ready • Final Step" : `${currentIndex + 1} of ${QUIZ_QUESTIONS.length}`}
             </span>
             <button
               type="button"
@@ -1100,6 +1106,6 @@ export function QuizPage() {
           )}
         </div>
       </main>
-    </div>
+    </QuizTableAtmosphere>
   );
 }
