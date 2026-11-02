@@ -30,6 +30,20 @@ html {
   pointer-events: none;
 }
 
+/* Optimize scrolling performance & eliminate composite repaint thrashing */
+[data-stories-bg],
+[data-stories-glow],
+[data-stories-vignette] {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+[data-postcard] {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
 /*
  * Precious Meets design system.
  * Fonts: display = Instrument Serif, body = Manrope, utility = JetBrains Mono.

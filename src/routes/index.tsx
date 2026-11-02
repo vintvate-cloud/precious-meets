@@ -245,8 +245,8 @@ const tableSeats = [
 
 function Geometry() {
   return (
-    <section data-geo className="relative h-[340vh] bg-[#FAF7F2] text-ink select-none">
-      <div className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden px-[4vw]">
+    <section data-geo className="relative h-[270vh] bg-[#FAF7F2] text-ink select-none will-change-transform">
+      <div className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden px-[4vw] transform-gpu">
         <div className="grid h-full w-full max-w-6xl grid-cols-1 items-center gap-8 lg:grid-cols-2">
           {/* Left Column: Architectural Dinner Table Diagram based on reference image */}
           <div className="relative flex flex-col items-center justify-center h-[52vh] lg:h-full w-full">
@@ -698,37 +698,37 @@ function Collage() {
         trigger: section,
         start: "top top",
         end: "bottom bottom",
-        scrub: 0.3,
+        scrub: 0.1,
       },
     });
 
-    // Phase 0: Slow, premium atmospheric transition into brand forest green (#5F7045)
-    // Runs across an unhurried 1.6s timeline interval so the user experiences a velvety, cinematic color wash
+    // Phase 0: Smooth, GPU-composited atmospheric transition into brand forest green
+    // Uses opacity of an absolute overlay layer to avoid full-screen DOM repaints
     tl.to(
-      [stage, section],
+      "[data-stories-bg]",
       {
-        backgroundColor: "#5F7045",
-        duration: 1.6,
-        ease: "sine.inOut",
+        opacity: 1,
+        duration: 1.0,
+        ease: "power2.inOut",
       },
       0,
     )
       .to(
         "[data-stories-glow]",
         {
-          opacity: 1,
-          scale: 1.15,
-          duration: 1.6,
-          ease: "sine.inOut",
+          opacity: 0.85,
+          scale: 1.08,
+          duration: 1.0,
+          ease: "power2.inOut",
         },
         0,
       )
       .to(
         "[data-stories-vignette]",
         {
-          opacity: 0.9,
-          duration: 1.6,
-          ease: "sine.inOut",
+          opacity: 0.8,
+          duration: 1.0,
+          ease: "power2.inOut",
         },
         0,
       )
@@ -736,36 +736,36 @@ function Collage() {
         "[data-stories-watermark-sub]",
         {
           color: "rgba(248, 242, 231, 0.65)",
-          duration: 1.4,
+          duration: 0.9,
           ease: "power2.inOut",
         },
-        0.1,
+        0.05,
       )
       .to(
         "[data-stories-watermark-title]",
         {
           color: "rgba(248, 242, 231, 0.32)",
-          duration: 1.4,
+          duration: 0.9,
           ease: "power2.inOut",
         },
-        0.1,
+        0.05,
       )
       .to(
         "[data-stories-watermark-em]",
         {
           color: "rgba(198, 165, 104, 0.7)",
-          duration: 1.4,
+          duration: 0.9,
           ease: "power2.inOut",
         },
-        0.1,
+        0.05,
       );
 
-    // Phase 0.5: Serene breath on the fully transformed forest green canvas
-    tl.to({}, { duration: 0.5 });
+    // Phase 0.5: Serene breath on the transformed forest green canvas
+    tl.to({}, { duration: 0.3 });
 
     // Step 1 to 6: Sequential two-beat choreography:
-    // Beat A: Picture slides down from the top into its postcard place on the board
-    // Beat B: Doodle pin strikes down into the card with paper impact rebound
+    // Beat A: Picture slides down from the top into its postcard place
+    // Beat B: Doodle pin strikes down into the card
     cards.forEach((card) => {
       const targetRotate = parseFloat(card.getAttribute("data-target-rotate") || "0");
       const pin = card.querySelector<HTMLElement>("[data-pin]");
@@ -778,10 +778,10 @@ function Collage() {
           opacity: 1,
           scale: 1,
           rotation: targetRotate,
-          duration: 0.85,
+          duration: 0.65,
           ease: "power2.out",
         },
-        "+=0.25",
+        "+=0.15",
       );
 
       // Beat B: Pin punctures into the card
@@ -793,37 +793,24 @@ function Collage() {
             opacity: 1,
             scale: 1,
             rotation: 0,
-            duration: 0.38,
-            ease: "back.out(2.4)",
+            duration: 0.28,
+            ease: "power2.out",
           },
-          "-=0.1",
-        );
-
-        // Tactile micro-impact shake of the card as the pin punches in
-        tl.to(
-          card,
-          {
-            y: "+=4",
-            duration: 0.08,
-            yoyo: true,
-            repeat: 1,
-            ease: "power1.inOut",
-          },
-          "<0.12",
+          "-=0.08",
         );
       }
     });
 
-    // Step 7: Comfortable pause so user can view all 6 pinned postcards on the green board
-    tl.to({}, { duration: 0.7 });
+    // Step 7: Comfortable pause so user can view all 6 pinned postcards
+    tl.to({}, { duration: 0.5 });
 
     // Step 8: Smooth cinematic transition from forest green back to cream white (#FAF7F2)
-    // so background matches the lower section seamlessly before scrolling down
+    // via overlay fade so background matches lower section seamlessly before scrolling down
     tl.to(
-      [stage, section],
+      "[data-stories-bg]",
       {
-        backgroundColor: "#FAF7F2",
-        duration: 1.4,
+        opacity: 0,
+        duration: 0.9,
         ease: "power2.inOut",
       },
     )
@@ -831,7 +818,7 @@ function Collage() {
         "[data-stories-glow]",
         {
           opacity: 0,
-          duration: 1.2,
+          duration: 0.8,
           ease: "power2.inOut",
         },
         "<",
@@ -840,7 +827,7 @@ function Collage() {
         "[data-stories-vignette]",
         {
           opacity: 0,
-          duration: 1.2,
+          duration: 0.8,
           ease: "power2.inOut",
         },
         "<",
@@ -849,7 +836,7 @@ function Collage() {
         "[data-stories-watermark-sub]",
         {
           color: "rgba(23, 21, 20, 0.4)",
-          duration: 1.2,
+          duration: 0.8,
           ease: "power2.inOut",
         },
         "<",
@@ -858,7 +845,7 @@ function Collage() {
         "[data-stories-watermark-title]",
         {
           color: "rgba(23, 21, 20, 0.2)",
-          duration: 1.2,
+          duration: 0.8,
           ease: "power2.inOut",
         },
         "<",
@@ -867,14 +854,14 @@ function Collage() {
         "[data-stories-watermark-em]",
         {
           color: "rgba(105, 28, 53, 0.25)",
-          duration: 1.2,
+          duration: 0.8,
           ease: "power2.inOut",
         },
         "<",
       );
 
     // Brief settling moment so right as it turns white, it immediately releases and moves down
-    tl.to({}, { duration: 0.2 });
+    tl.to({}, { duration: 0.15 });
 
     const onResize = () => ScrollTrigger.refresh();
     window.addEventListener("resize", onResize);
@@ -889,26 +876,32 @@ function Collage() {
     <section
       id="stories"
       ref={sectionRef}
-      className="relative h-[660vh] bg-[#FAF7F2] select-none -mt-px"
+      className="relative h-[340vh] bg-[#FAF7F2] select-none -mt-px will-change-transform"
     >
       {/* Sticky Fullscreen Pinboard Stage */}
       <div
         ref={stageRef}
-        className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-[#FAF7F2] px-3 sm:px-6"
+        className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-[#FAF7F2] px-3 sm:px-6 transform-gpu"
       >
+        {/* Fullscreen Forest Green Background Layer (GPU-composited opacity) */}
+        <div
+          data-stories-bg
+          className="pointer-events-none absolute inset-0 bg-[#5F7045] opacity-0 will-change-[opacity]"
+        />
+
         {/* Soft Vignette Overlay for rich photographic moodboard depth */}
         <div
           data-stories-vignette
-          className="pointer-events-none absolute inset-0 opacity-0 bg-[radial-gradient(circle_at_center,transparent_40%,rgba(15,22,12,0.45)_100%)]"
+          className="pointer-events-none absolute inset-0 opacity-0 bg-[radial-gradient(circle_at_center,transparent_40%,rgba(15,22,12,0.45)_100%)] will-change-[opacity]"
         />
 
-        {/* Atmospheric Candlelight Glow in Center */}
+        {/* Atmospheric Candlelight Glow in Center (Optimized blurs for 60fps performance) */}
         <div
           data-stories-glow
-          className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0"
+          className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 will-change-[opacity,transform]"
         >
-          <div className="w-[70vw] h-[70vw] max-w-[850px] max-h-[850px] rounded-full bg-[#C6A568]/20 blur-[160px] pointer-events-none" />
-          <div className="w-[45vw] h-[45vw] max-w-[550px] max-h-[550px] rounded-full bg-[#691C35]/16 blur-[140px] pointer-events-none" />
+          <div className="w-[60vw] h-[60vw] max-w-[650px] max-h-[650px] rounded-full bg-[#C6A568]/20 blur-[64px] pointer-events-none" />
+          <div className="w-[40vw] h-[40vw] max-w-[450px] max-h-[450px] rounded-full bg-[#691C35]/16 blur-[48px] pointer-events-none" />
         </div>
 
         {/* Ambient Pinboard Watermark Title (Visible on blank canvas before cards land) */}
@@ -948,7 +941,7 @@ function Collage() {
                   width: isMobile ? card.mobile.width : undefined,
                   willChange: "transform, opacity",
                 }}
-                className="absolute pointer-events-auto rounded-2xl bg-[#FCFAF7] p-3 sm:p-3.5 pb-6 sm:pb-7 shadow-[0_22px_50px_-12px_rgba(23,21,20,0.24),_0_4px_16px_rgba(0,0,0,0.06)] border border-[#171514]/8 w-[250px] sm:w-[280px] md:w-[310px] lg:w-[340px] xl:w-[370px] transition-shadow duration-300 hover:shadow-[0_30px_70px_-14px_rgba(105,28,53,0.32)] hover:scale-[1.025] cursor-pointer"
+                className="absolute pointer-events-auto rounded-2xl bg-[#FCFAF7] p-3 sm:p-3.5 pb-6 sm:pb-7 shadow-[0_18px_40px_-10px_rgba(23,21,20,0.22),_0_2px_8px_rgba(0,0,0,0.04)] border border-[#171514]/8 w-[250px] sm:w-[280px] md:w-[310px] lg:w-[340px] xl:w-[370px] transition-shadow duration-300 hover:shadow-[0_28px_60px_-12px_rgba(105,28,53,0.3)] hover:scale-[1.025] cursor-pointer transform-gpu will-change-[transform,opacity]"
               >
                 {/* Handcrafted Doodle Pin on Top of Card */}
                 <div
@@ -1131,14 +1124,13 @@ function Index() {
     const lenis = reduce
       ? null
       : new Lenis({
-          duration: 1.1,
+          duration: 1.0,
           easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
           orientation: "vertical",
           gestureOrientation: "vertical",
           smoothWheel: true,
           wheelMultiplier: 1.0,
-          touchMultiplier: 1.2,
-          syncTouch: false,
+          touchMultiplier: 1.0,
         });
 
     let rafCallback: ((time: number) => void) | null = null;
@@ -1149,7 +1141,8 @@ function Index() {
         lenis.raf(time * 1000);
       };
       gsap.ticker.add(rafCallback);
-      gsap.ticker.lagSmoothing(500, 33);
+      // Disable lagSmoothing so Lenis smooth scroll and GSAP timelines never drop frames or stutter
+      gsap.ticker.lagSmoothing(0);
     }
 
     const handleResize = () => {
@@ -1157,6 +1150,7 @@ function Index() {
       ScrollTrigger.refresh();
     };
     window.addEventListener("resize", handleResize, { passive: true });
+    window.addEventListener("load", handleResize, { once: true });
 
     const ctx = gsap.context(() => {
       if (reduce) {
@@ -1273,7 +1267,7 @@ function Index() {
           trigger: "[data-geo]",
           start: "top top",
           end: "bottom bottom",
-          scrub: 0.3,
+          scrub: 0.1,
         },
       });
 

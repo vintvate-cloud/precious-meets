@@ -153,7 +153,7 @@ export function DoorGreetings() {
   }, []);
 
   return (
-    <section className="relative min-h-[85vh] sm:min-h-screen w-full bg-[#FAF7F2] text-[#171514] flex flex-col justify-center items-center py-16 sm:py-24 px-4 sm:px-6 lg:px-8 overflow-hidden select-none">
+    <section className="relative min-h-[85vh] sm:min-h-screen w-full bg-[#FAF7F2] text-[#171514] flex flex-col justify-center items-center py-20 sm:py-28 px-4 sm:px-6 lg:px-8 overflow-hidden select-none">
       <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col items-center justify-center my-auto space-y-8 sm:space-y-12 text-center">
         {/* ========================================================================= */}
         {/* CENTERSTAGE GREETING STATEMENT (Say -> [Language Greeting] -> to 5 new people) */}
@@ -164,23 +164,23 @@ export function DoorGreetings() {
             Say
           </h2>
 
-          {/* Center Animated Greeting */}
+          {/* Center Animated Greeting (Hardware accelerated, zero blur raster lag) */}
           <div className="min-h-[1.2em] flex items-center justify-center my-1 sm:my-2">
             <AnimatePresence mode="wait">
               <motion.span
                 key={activeGreeting.id}
-                initial={{ opacity: 0, y: 24, filter: "blur(10px)", scale: 0.92 }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)", scale: 1 }}
-                exit={{ opacity: 0, y: -24, filter: "blur(10px)", scale: 1.06 }}
+                initial={{ opacity: 0, y: 20, scale: 0.94 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -18, scale: 1.04 }}
                 transition={{
-                  duration: 0.65,
+                  duration: 0.55,
                   ease: [0.16, 1, 0.3, 1],
                 }}
                 style={{
                   fontFamily: activeGreeting.fontFamily,
                   color: activeGreeting.accentColor,
                 }}
-                className="text-[clamp(4.25rem,12vw,10.5rem)] font-normal leading-[1.12] inline-block drop-shadow-sm transition-colors duration-500 py-1"
+                className="text-[clamp(4.25rem,12vw,10.5rem)] font-normal leading-[1.12] inline-block drop-shadow-sm transition-colors duration-500 py-1 transform-gpu will-change-[transform,opacity]"
               >
                 {activeGreeting.native}
               </motion.span>
@@ -197,11 +197,11 @@ export function DoorGreetings() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeGreeting.id}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.4 }}
-                className="flex flex-col items-center text-center space-y-2"
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+                className="flex flex-col items-center text-center space-y-2 transform-gpu will-change-[transform,opacity]"
               >
                 <p className="font-serif italic text-2xl sm:text-3xl md:text-4xl text-[#171514]/85">
                   "{activeGreeting.roman}"

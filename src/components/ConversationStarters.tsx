@@ -154,21 +154,21 @@ export function ConversationStarters() {
   const row2 = [...rowTwoPrompts, ...rowTwoPrompts, ...rowTwoPrompts];
 
   return (
-    <section className="relative w-full bg-[#FAF7F2] py-10 sm:py-14 overflow-hidden">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center mb-6 sm:mb-8">
+    <section className="relative w-full bg-[#FAF7F2] py-16 sm:py-24 overflow-hidden select-none">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center mb-8 sm:mb-10">
         <h2 className="font-display text-3xl sm:text-4xl md:text-5xl text-[#171514] tracking-tight">
           BIG CONVERSATIONS
         </h2>
       </div>
 
       {/* Infinite Horizontal Conveyor Belts (2 Compact Rows Only) */}
-      <div className="relative w-full space-y-2.5 sm:space-y-3">
+      <div className="relative w-full space-y-3 sm:space-y-4 [contain:content]">
         {/* Soft Edge Fade Gradient Masks */}
         <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-20 sm:w-40 md:w-56 bg-gradient-to-r from-[#FAF7F2] via-[#FAF7F2]/85 to-transparent z-10" />
         <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-20 sm:w-40 md:w-56 bg-gradient-to-l from-[#FAF7F2] via-[#FAF7F2]/85 to-transparent z-10" />
 
         {/* Row 1: Drifts Left (Small & Minimal) */}
-        <div className="flex w-max items-center animate-[scrollLeft_55s_linear_infinite] hover:[animation-play-state:paused] will-change-transform">
+        <div className="flex w-max items-center animate-[scrollLeft_55s_linear_infinite] hover:[animation-play-state:paused] transform-gpu will-change-transform">
           {row1.map((item, idx) => (
             <button
               type="button"
@@ -182,7 +182,7 @@ export function ConversationStarters() {
         </div>
 
         {/* Row 2: Drifts Right (Small & Minimal) */}
-        <div className="flex w-max items-center animate-[scrollRight_50s_linear_infinite] hover:[animation-play-state:paused] will-change-transform">
+        <div className="flex w-max items-center animate-[scrollRight_50s_linear_infinite] hover:[animation-play-state:paused] transform-gpu will-change-transform">
           {row2.map((item, idx) => (
             <button
               type="button"
