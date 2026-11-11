@@ -116,8 +116,8 @@ export function HowPhoneMockup() {
     <section
       id="how"
       ref={sectionRef}
-      className={`relative h-[320vh] text-ivory select-none transition-colors duration-1000 ease-in-out ${
-        isNight ? "bg-black" : "bg-[#5F7045]"
+      className={`relative h-[320vh] text-[#F8F2E7] select-none transition-colors duration-1000 ease-in-out ${
+        isNight ? "bg-[#261019]" : "bg-[#5F7045]"
       }`}
     >
       {/* Sticky Full-Viewport Pinning Stage */}
@@ -143,11 +143,13 @@ export function HowPhoneMockup() {
           style={{ opacity: isNight ? 0 : 1 }}
         />
 
-        {/* 2. Pure Black Night Sky (Matches the lower section 100% seamlessly) */}
+        {/* 2. Deep Burgundy Night Sky (Matches the lower section 100% seamlessly) */}
         <div
-          className="absolute inset-0 bg-black transition-opacity duration-1000 ease-in-out"
+          className="absolute inset-0 bg-[#261019] transition-opacity duration-1000 ease-in-out"
           style={{ opacity: isNight ? 1 : 0 }}
-        />
+        >
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(105,28,53,0.34)_0%,_transparent_70%)] pointer-events-none" />
+        </div>
 
         {/* 3. Delicate Twinkling Night Stars */}
         <div
@@ -155,27 +157,27 @@ export function HowPhoneMockup() {
           style={{ opacity: isNight ? 0.75 : 0 }}
         >
           <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12%" cy="14%" r="1" fill="#FFF" className="animate-pulse" />
-            <circle cx="24%" cy="26%" r="1.4" fill="#F4DFC8" />
-            <circle cx="38%" cy="16%" r="0.8" fill="#FFF" />
-            <circle cx="48%" cy="22%" r="1" fill="#EADBB6" className="animate-pulse" />
-            <circle cx="68%" cy="12%" r="1.3" fill="#FFF" />
+            <circle cx="12%" cy="14%" r="1" fill="#F8F2E7" className="animate-pulse" />
+            <circle cx="24%" cy="26%" r="1.4" fill="#C6A568" />
+            <circle cx="38%" cy="16%" r="0.8" fill="#F8F2E7" />
+            <circle cx="48%" cy="22%" r="1" fill="#E8ECD8" className="animate-pulse" />
+            <circle cx="68%" cy="12%" r="1.3" fill="#F8F2E7" />
             <circle cx="82%" cy="18%" r="1.6" fill="#C6A568" className="animate-pulse" />
-            <circle cx="91%" cy="26%" r="0.9" fill="#FFF" />
-            <circle cx="16%" cy="75%" r="1" fill="#FFF" />
-            <circle cx="28%" cy="84%" r="0.8" fill="#EADBB6" />
-            <circle cx="76%" cy="78%" r="1.2" fill="#FFF" className="animate-pulse" />
-            <circle cx="88%" cy="82%" r="1.4" fill="#EADBB6" />
+            <circle cx="91%" cy="26%" r="0.9" fill="#F8F2E7" />
+            <circle cx="16%" cy="75%" r="1" fill="#F8F2E7" />
+            <circle cx="28%" cy="84%" r="0.8" fill="#C6A568" />
+            <circle cx="76%" cy="78%" r="1.2" fill="#F8F2E7" className="animate-pulse" />
+            <circle cx="88%" cy="82%" r="1.4" fill="#E8ECD8" />
           </svg>
         </div>
 
-        {/* 4. Daytime Ambient Backdrop Glows (Disabled in night mode so black stays pure) */}
+        {/* 4. Daytime Ambient Backdrop Glows (Disabled in night mode) */}
         <div
           className="pointer-events-none absolute inset-0 flex items-center justify-center transition-opacity duration-1000"
           style={{ opacity: isNight ? 0 : 1 }}
         >
-          <div className="w-[50vw] h-[50vw] max-w-[650px] max-h-[650px] rounded-full bg-[#C6A568]/10 blur-[160px]" />
-          <div className="w-[35vw] h-[35vw] max-w-[500px] max-h-[500px] rounded-full bg-[#691C35]/12 blur-[140px]" />
+          <div className="w-[50vw] h-[50vw] max-w-[650px] max-h-[650px] rounded-full bg-[#C6A568]/18 blur-[160px]" />
+          <div className="w-[35vw] h-[35vw] max-w-[500px] max-h-[500px] rounded-full bg-[#691C35]/18 blur-[140px]" />
         </div>
 
         {/* Main Viewport Container */}
@@ -213,40 +215,40 @@ export function HowPhoneMockup() {
             <div className="flex flex-col items-center justify-center lg:col-span-4 xl:col-span-4">
               {/* iPhone Frame */}
               <div
-                className="relative w-[260px] sm:w-[275px] md:w-[285px] lg:w-[295px] h-[520px] sm:h-[545px] md:h-[560px] rounded-[44px] bg-[#0E0D0C] p-2.5 shadow-[0_25px_60px_-12px_rgba(0,0,0,0.85),0_0_0_1px_rgba(255,255,255,0.14)_inset,0_0_0_3px_#34312E] transition-all duration-700"
+                className="relative w-[260px] sm:w-[275px] md:w-[285px] lg:w-[295px] h-[520px] sm:h-[545px] md:h-[560px] rounded-[44px] bg-[#1D0B12] p-2.5 shadow-[0_25px_60px_-12px_rgba(38,16,25,0.85),0_0_0_1px_rgba(198,165,104,0.28)_inset,0_0_0_3px_#4B1F2E] transition-all duration-700"
                 style={{
                   boxShadow: isNight
-                    ? "0 25px 60px -12px rgba(0,0,0,0.95), 0 0 50px -10px rgba(198,165,104,0.15)"
+                    ? "0 25px 60px -12px rgba(20,6,11,0.95), 0 0 55px -10px rgba(198,165,104,0.22)"
                     : undefined,
                 }}
               >
                 {/* Hardware Side Buttons */}
-                <div className="absolute -left-[5px] top-24 h-9 w-[3px] rounded-l-sm bg-[#5C554F]" />
-                <div className="absolute -left-[5px] top-36 h-9 w-[3px] rounded-l-sm bg-[#5C554F]" />
-                <div className="absolute -right-[5px] top-28 h-14 w-[3px] rounded-r-sm bg-[#5C554F]" />
+                <div className="absolute -left-[5px] top-24 h-9 w-[3px] rounded-l-sm bg-[#C6A568]/60" />
+                <div className="absolute -left-[5px] top-36 h-9 w-[3px] rounded-l-sm bg-[#C6A568]/60" />
+                <div className="absolute -right-[5px] top-28 h-14 w-[3px] rounded-r-sm bg-[#C6A568]/60" />
 
                 {/* iPhone Inner Display Shell */}
-                <div className="relative h-full w-full overflow-hidden rounded-[36px] bg-[#F7F4EE] text-foreground flex flex-col justify-between shadow-inner">
+                <div className="relative h-full w-full overflow-hidden rounded-[36px] bg-[#F8F2E7] text-[#35392C] flex flex-col justify-between shadow-inner">
                   
                   {/* iOS Status Bar */}
-                  <div className="relative z-30 pt-2 px-5 flex items-center justify-between text-neutral-800 font-mono text-[10px] bg-[#F7F4EE]/90 backdrop-blur-sm border-b border-black/5">
+                  <div className="relative z-30 pt-2 px-5 flex items-center justify-between text-[#35392C] font-mono text-[10px] bg-[#F8F2E7]/90 backdrop-blur-sm border-b border-[#C6A568]/25">
                     <span className="font-bold">9:41</span>
                     
                     {/* Dynamic Island */}
-                    <div className="h-4 w-20 rounded-full bg-black flex items-center justify-end pr-2 gap-1 border border-white/10 shadow-inner">
-                      <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <div className="h-4 w-20 rounded-full bg-[#261019] flex items-center justify-end pr-2 gap-1 border border-[#C6A568]/25 shadow-inner">
+                      <span className="size-1.5 rounded-full bg-[#5F7045] animate-pulse" />
                     </div>
 
                     <div className="flex items-center gap-1.5">
                       <span className="text-[9px] font-semibold">5G</span>
-                      <div className="w-4 h-2 rounded-[2px] border border-neutral-800 p-[1px]">
-                        <div className="h-full w-3 bg-neutral-800 rounded-[1px]" />
+                      <div className="w-4 h-2 rounded-[2px] border border-[#35392C] p-[1px]">
+                        <div className="h-full w-3 bg-[#35392C] rounded-[1px]" />
                       </div>
                     </div>
                   </div>
 
                   {/* Inside Screen Flow: Smooth Cross-fade Based on Scroll Position */}
-                  <div className="relative flex-1 w-full overflow-hidden bg-[#F7F4EE] flex flex-col">
+                  <div className="relative flex-1 w-full overflow-hidden bg-[#F8F2E7] flex flex-col">
                     
                     {/* ======================================================== */}
                     {/* PAGE 1: /onboarding (Complete Your Profile) */}
@@ -260,54 +262,54 @@ export function HowPhoneMockup() {
                     >
                       <div>
                         {/* Mini Navbar */}
-                        <div className="flex items-center justify-between pb-2 mb-2 border-b border-black/5">
-                          <span className="font-display text-xs tracking-tight text-neutral-900 font-semibold">
+                        <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#C6A568]/25">
+                          <span className="font-display text-xs tracking-tight text-[#35392C] font-semibold">
                             Precious <em className="text-[#691C35] not-italic">meets</em>
                           </span>
-                          <span className="font-mono text-[9px] text-[#22301A] font-bold px-2 py-0.5 rounded-full bg-[#22301A]/10">
+                          <span className="font-mono text-[9px] text-[#5F7045] font-bold px-2 py-0.5 rounded-full bg-[#E8ECD8]">
                             /onboarding
                           </span>
                         </div>
 
                         {/* Onboarding Form Card */}
-                        <div className="rounded-2xl border border-neutral-200 bg-white p-3.5 shadow-sm">
-                          <span className="font-mono text-[9px] uppercase tracking-wider text-[#22301A] font-bold block mb-1">
+                        <div className="rounded-2xl border border-[#C6A568]/40 bg-[#FCF8EE] p-3.5 shadow-sm">
+                          <span className="font-mono text-[9px] uppercase tracking-wider text-[#5F7045] font-bold block mb-1">
                             Welcome Onboard
                           </span>
-                          <h3 className="font-display text-lg text-neutral-900 leading-tight">
+                          <h3 className="font-display text-lg text-[#35392C] leading-tight">
                             Complete Your <em className="italic text-[#691C35]">Profile</em>
                           </h3>
-                          <p className="text-[10px] text-neutral-500 mt-1 leading-normal">
+                          <p className="text-[10px] text-[#35392C]/70 mt-1 leading-normal">
                             Just a few essentials before you enter the Social Discovery Quiz.
                           </p>
 
                           <div className="mt-3 space-y-2 text-[10px]">
                             <div>
-                              <label className="font-semibold text-neutral-700 block mb-0.5">
+                              <label className="font-semibold text-[#35392C] block mb-0.5">
                                 Preferred Enclave
                               </label>
-                              <div className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-2.5 py-1.5 text-neutral-800 font-medium flex items-center justify-between">
+                              <div className="w-full rounded-lg border border-[#C6A568]/40 bg-[#F8F2E7] px-2.5 py-1.5 text-[#35392C] font-medium flex items-center justify-between">
                                 <span>Delhi NCR (Mehrauli, Sunder Nursery)</span>
-                                <Compass className="size-3 text-neutral-400" />
+                                <Compass className="size-3 text-[#5F7045]" />
                               </div>
                             </div>
 
                             <div>
-                              <label className="font-semibold text-neutral-700 block mb-0.5">
+                              <label className="font-semibold text-[#35392C] block mb-0.5">
                                 Contact Phone
                               </label>
-                              <div className="w-full rounded-lg border border-neutral-300 bg-white px-2.5 py-1.5 text-neutral-800 font-mono text-[11px] flex items-center gap-1.5">
-                                <span className="text-neutral-400">+91</span>
+                              <div className="w-full rounded-lg border border-[#C6A568]/40 bg-[#FCF8EE] px-2.5 py-1.5 text-[#35392C] font-mono text-[11px] flex items-center gap-1.5">
+                                <span className="text-[#5F7045]">+91</span>
                                 <span>98100 12345</span>
-                                <span className="size-1.5 rounded-full bg-emerald-500 ml-auto" />
+                                <span className="size-1.5 rounded-full bg-[#5F7045] ml-auto" />
                               </div>
                             </div>
 
                             <div>
-                              <label className="font-semibold text-neutral-700 block mb-0.5">
+                              <label className="font-semibold text-[#35392C] block mb-0.5">
                                 One-line about you
                               </label>
-                              <div className="w-full rounded-lg border border-ochre/80 bg-ochre/10 px-2.5 py-1.5 text-neutral-800 text-[10px] italic">
+                              <div className="w-full rounded-lg border border-[#C6A568]/70 bg-[#C6A568]/15 px-2.5 py-1.5 text-[#35392C] text-[10px] italic">
                                 “Architect loving natural wine and jazz.”
                               </div>
                             </div>
@@ -317,7 +319,7 @@ export function HowPhoneMockup() {
 
                       {/* Submit Button */}
                       <div className="pt-2">
-                        <div className="w-full rounded-full bg-[#691C35] text-white py-2.5 px-4 text-[11px] font-semibold text-center shadow-md flex items-center justify-center gap-1.5">
+                        <div className="w-full rounded-full bg-[#691C35] text-[#F8F2E7] py-2.5 px-4 text-[11px] font-semibold text-center shadow-md flex items-center justify-center gap-1.5">
                           <span>Continue to Discovery Quiz</span>
                           <ArrowRight className="size-3" />
                         </div>
@@ -336,56 +338,56 @@ export function HowPhoneMockup() {
                     >
                       <div>
                         {/* Mini Navbar */}
-                        <div className="flex items-center justify-between pb-2 mb-2 border-b border-black/5">
-                          <span className="font-display text-xs tracking-tight text-neutral-900 font-semibold">
+                        <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#C6A568]/25">
+                          <span className="font-display text-xs tracking-tight text-[#35392C] font-semibold">
                             Precious <em className="text-[#691C35] not-italic">meets</em>
                           </span>
-                          <span className="font-mono text-[9px] text-[#22301A] font-bold px-2 py-0.5 rounded-full bg-[#22301A]/10">
+                          <span className="font-mono text-[9px] text-[#5F7045] font-bold px-2 py-0.5 rounded-full bg-[#E8ECD8]">
                             /quiz · 2 of 9
                           </span>
                         </div>
 
                         {/* Progress Bar */}
-                        <div className="h-1.5 w-full bg-neutral-200 rounded-full overflow-hidden mb-2.5">
+                        <div className="h-1.5 w-full bg-[#E8ECD8] rounded-full overflow-hidden mb-2.5">
                           <div className="h-full bg-[#691C35] rounded-full transition-all duration-700" style={{ width: "33%" }} />
                         </div>
 
                         {/* Actual Question from QUIZ_QUESTIONS */}
-                        <div className="rounded-2xl border border-neutral-200 bg-white p-3 shadow-sm">
-                          <span className="font-mono text-[9px] text-[#22301A] uppercase tracking-wider font-bold block mb-1">
+                        <div className="rounded-2xl border border-[#C6A568]/40 bg-[#FCF8EE] p-3 shadow-sm">
+                          <span className="font-mono text-[9px] text-[#5F7045] uppercase tracking-wider font-bold block mb-1">
                             Social Energy Focus
                           </span>
-                          <h3 className="font-display text-xs font-semibold text-neutral-900 leading-snug">
+                          <h3 className="font-display text-xs font-semibold text-[#35392C] leading-snug">
                             At a gathering of unfamiliar people, where do you find your focus?
                           </h3>
 
                           {/* Real Options */}
                           <div className="mt-2.5 space-y-1.5">
-                            <div className="rounded-xl border border-neutral-200 bg-neutral-50/70 p-2 text-[10px] text-neutral-600 flex items-center justify-between">
+                            <div className="rounded-xl border border-[#C6A568]/30 bg-[#F8F2E7] p-2 text-[10px] text-[#35392C]/80 flex items-center justify-between">
                               <div>
-                                <span className="font-medium text-neutral-800 block">Quiet Observer</span>
-                                <span className="text-[9px] text-neutral-500">Taking in the room and listening first</span>
+                                <span className="font-medium text-[#35392C] block">Quiet Observer</span>
+                                <span className="text-[9px] text-[#35392C]/65">Taking in the room and listening first</span>
                               </div>
-                              <span className="size-3.5 rounded-full border border-neutral-300 shrink-0" />
+                              <span className="size-3.5 rounded-full border border-[#C6A568] shrink-0" />
                             </div>
 
                             {/* Selected Option (Gentle Engager) */}
-                            <div className="rounded-xl border-2 border-[#691C35] bg-[#691C35]/10 p-2 text-[10px] text-neutral-900 flex items-center justify-between shadow-sm">
+                            <div className="rounded-xl border-2 border-[#691C35] bg-[#691C35]/10 p-2 text-[10px] text-[#35392C] flex items-center justify-between shadow-sm">
                               <div>
                                 <span className="font-bold text-[#691C35] block">Gentle Engager</span>
-                                <span className="text-[9px] text-neutral-600">Connecting intimately with one or two nearby</span>
+                                <span className="text-[9px] text-[#35392C]/75">Connecting intimately with one or two nearby</span>
                               </div>
-                              <div className="size-4 rounded-full bg-[#691C35] flex items-center justify-center text-white shrink-0">
+                              <div className="size-4 rounded-full bg-[#691C35] flex items-center justify-center text-[#F8F2E7] shrink-0">
                                 <Check className="size-2.5 stroke-[3]" />
                               </div>
                             </div>
 
-                            <div className="rounded-xl border border-neutral-200 bg-neutral-50/70 p-2 text-[10px] text-neutral-600 flex items-center justify-between">
+                            <div className="rounded-xl border border-[#C6A568]/30 bg-[#F8F2E7] p-2 text-[10px] text-[#35392C]/80 flex items-center justify-between">
                               <div>
-                                <span className="font-medium text-neutral-800 block">Active Contributor</span>
-                                <span className="text-[9px] text-neutral-500">Comfortably chiming in on topics</span>
+                                <span className="font-medium text-[#35392C] block">Active Contributor</span>
+                                <span className="text-[9px] text-[#35392C]/65">Comfortably chiming in on topics</span>
                               </div>
-                              <span className="size-3.5 rounded-full border border-neutral-300 shrink-0" />
+                              <span className="size-3.5 rounded-full border border-[#C6A568] shrink-0" />
                             </div>
                           </div>
                         </div>
@@ -393,7 +395,7 @@ export function HowPhoneMockup() {
 
                       {/* Quiz Footer Button */}
                       <div className="pt-2">
-                        <div className="w-full rounded-full bg-[#22301A] text-white py-2.5 px-4 text-[11px] font-semibold text-center shadow-md flex items-center justify-center gap-1.5">
+                        <div className="w-full rounded-full bg-[#5F7045] text-[#F8F2E7] py-2.5 px-4 text-[11px] font-semibold text-center shadow-md flex items-center justify-center gap-1.5">
                           <span>Next Question (3 of 9)</span>
                           <ArrowRight className="size-3" />
                         </div>
@@ -412,49 +414,49 @@ export function HowPhoneMockup() {
                     >
                       <div>
                         {/* Mini Navbar */}
-                        <div className="flex items-center justify-between pb-2 mb-2 border-b border-black/5">
-                          <span className="font-display text-xs tracking-tight text-neutral-900 font-semibold">
+                        <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#C6A568]/25">
+                          <span className="font-display text-xs tracking-tight text-[#35392C] font-semibold">
                             Precious <em className="text-[#691C35] not-italic">meets</em>
                           </span>
-                          <span className="font-mono text-[9px] text-emerald-700 font-bold px-2 py-0.5 rounded-full bg-emerald-100">
+                          <span className="font-mono text-[9px] text-[#5F7045] font-bold px-2 py-0.5 rounded-full bg-[#E8ECD8]">
                             /verify-identity
                           </span>
                         </div>
 
                         {/* Actual Verify Identity Card */}
-                        <div className="rounded-2xl border border-neutral-200 bg-white p-3.5 shadow-sm relative overflow-hidden">
+                        <div className="rounded-2xl border border-[#C6A568]/40 bg-[#FCF8EE] p-3.5 shadow-sm relative overflow-hidden">
                           
-                          <div className="flex items-center gap-1.5 text-[#22301A] mb-1">
-                            <ShieldCheck className="size-3.5 text-emerald-600" />
-                            <span className="font-mono text-[9px] font-bold uppercase tracking-wider text-emerald-800">
+                          <div className="flex items-center gap-1.5 text-[#5F7045] mb-1">
+                            <ShieldCheck className="size-3.5 text-[#5F7045]" />
+                            <span className="font-mono text-[9px] font-bold uppercase tracking-wider text-[#5F7045]">
                               Trust & Safety Protocol
                             </span>
                           </div>
 
-                          <h3 className="font-display text-base text-neutral-900 leading-tight">
+                          <h3 className="font-display text-base text-[#35392C] leading-tight">
                             Aadhaar <em className="italic text-[#691C35]">Identity Verification</em>
                           </h3>
 
                           {/* Real Privacy Notice from verify-identity.tsx */}
-                          <div className="mt-2.5 rounded-xl border border-neutral-200 bg-neutral-50 p-2 text-[9px] text-neutral-600 space-y-1">
-                            <div className="flex items-center gap-1 font-semibold text-neutral-800">
-                              <Lock className="size-2.5 text-emerald-700" />
+                          <div className="mt-2.5 rounded-xl border border-[#C6A568]/35 bg-[#F8F2E7] p-2 text-[9px] text-[#35392C]/80 space-y-1">
+                            <div className="flex items-center gap-1 font-semibold text-[#35392C]">
+                              <Lock className="size-2.5 text-[#5F7045]" />
                               <span>Zero Raw Aadhaar Storage Guarantee</span>
                             </div>
-                            <p className="leading-tight text-neutral-500">
+                            <p className="leading-tight text-[#35392C]/70">
                               In compliance with UIDAI & Indian DPDP Act: no 12-digit numbers or biometrics stored.
                             </p>
                           </div>
 
                           {/* Live Verified Member Status Banner */}
-                          <div className="mt-3 rounded-xl border border-emerald-300 bg-emerald-50/80 p-2.5 text-center">
-                            <div className="mx-auto size-7 rounded-full bg-emerald-600 text-white flex items-center justify-center mb-1 shadow-sm">
+                          <div className="mt-3 rounded-xl border border-[#5F7045]/35 bg-[#E8ECD8] p-2.5 text-center">
+                            <div className="mx-auto size-7 rounded-full bg-[#5F7045] text-[#F8F2E7] flex items-center justify-center mb-1 shadow-sm">
                               <CheckCircle2 className="size-4" />
                             </div>
-                            <span className="font-display text-xs font-bold text-neutral-900 block">
+                            <span className="font-display text-xs font-bold text-[#35392C] block">
                               Verified Member Status
                             </span>
-                            <span className="font-mono text-[9px] text-emerald-700 block mt-0.5">
+                            <span className="font-mono text-[9px] text-[#5F7045] block mt-0.5">
                               DigiLocker Cryptographic XML Validated
                             </span>
                           </div>
@@ -463,7 +465,7 @@ export function HowPhoneMockup() {
 
                       {/* Footer Confirmation */}
                       <div className="pt-2">
-                        <div className="w-full rounded-full bg-emerald-700 text-white py-2.5 px-4 text-[11px] font-semibold text-center shadow-md flex items-center justify-center gap-1.5">
+                        <div className="w-full rounded-full bg-[#5F7045] text-[#F8F2E7] py-2.5 px-4 text-[11px] font-semibold text-center shadow-md flex items-center justify-center gap-1.5">
                           <Check className="size-3" />
                           <span>Eligible for Curated Tables</span>
                         </div>
@@ -482,63 +484,63 @@ export function HowPhoneMockup() {
                     >
                       <div>
                         {/* Mini Navbar */}
-                        <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-black/5">
-                          <span className="font-display text-xs tracking-tight text-neutral-900 font-semibold">
+                        <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-[#C6A568]/25">
+                          <span className="font-display text-xs tracking-tight text-[#35392C] font-semibold">
                             Precious <em className="text-[#691C35] not-italic">meets</em>
                           </span>
-                          <span className="font-mono text-[9px] text-[#22301A] font-bold px-2 py-0.5 rounded-full bg-[#22301A]/10">
+                          <span className="font-mono text-[9px] text-[#5F7045] font-bold px-2 py-0.5 rounded-full bg-[#E8ECD8]">
                             /dashboard
                           </span>
                         </div>
 
                         {/* Official Member Pass Card */}
-                        <div className="relative overflow-hidden rounded-2xl border border-ochre/50 bg-gradient-to-br from-[#1c0d12] via-[#2a131a] to-[#12080c] p-3 text-ivory shadow-lg">
+                        <div className="relative overflow-hidden rounded-2xl border border-[#C6A568]/60 bg-gradient-to-br from-[#691C35] via-[#4A1224] to-[#261019] p-3 text-[#F8F2E7] shadow-lg">
                           
                           {/* Header */}
-                          <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-2">
+                          <div className="flex items-center justify-between border-b border-[#C6A568]/25 pb-2 mb-2">
                             <div className="flex items-center gap-1.5">
-                              <div className="grid size-6 place-items-center rounded-lg bg-ochre/30 border border-ochre/50 text-ochre">
+                              <div className="grid size-6 place-items-center rounded-lg bg-[#C6A568]/25 border border-[#C6A568]/55 text-[#C6A568]">
                                 <Ticket className="size-3" />
                               </div>
                               <div>
-                                <span className="font-mono text-[7px] uppercase tracking-wider text-ochre/90 block">
+                                <span className="font-mono text-[7px] uppercase tracking-wider text-[#C6A568] block">
                                   Digital Member Pass
                                 </span>
-                                <span className="font-display text-xs tracking-tight text-ivory font-bold">
-                                  Precious<em className="text-ochre not-italic font-normal">meets</em>
+                                <span className="font-display text-xs tracking-tight text-[#F8F2E7] font-bold">
+                                  Precious<em className="text-[#C6A568] not-italic font-normal">meets</em>
                                 </span>
                               </div>
                             </div>
 
-                            <span className="inline-flex items-center gap-1 rounded-full bg-forest/30 px-2 py-0.5 text-[8px] font-medium text-emerald-300 border border-emerald-500/30">
-                              <ShieldCheck className="size-2.5 text-emerald-400" /> Aadhaar Verified
+                            <span className="inline-flex items-center gap-1 rounded-full bg-[#5F7045]/40 px-2 py-0.5 text-[8px] font-medium text-[#E8ECD8] border border-[#C6A568]/35">
+                              <ShieldCheck className="size-2.5 text-[#C6A568]" /> Aadhaar Verified
                             </span>
                           </div>
 
                           {/* Member Name */}
                           <div>
-                            <span className="font-mono text-[8px] uppercase tracking-wider text-white/60">
+                            <span className="font-mono text-[8px] uppercase tracking-wider text-[#F8F2E7]/65">
                               Honored Guest
                             </span>
-                            <h4 className="font-display text-sm text-ivory font-medium mt-0.5">
+                            <h4 className="font-display text-sm text-[#F8F2E7] font-medium mt-0.5">
                               Vedant Vyas
                             </h4>
-                            <span className="inline-block mt-1 font-mono text-[8px] text-ochre bg-white/10 px-2 py-0.5 rounded border border-white/10">
+                            <span className="inline-block mt-1 font-mono text-[8px] text-[#C6A568] bg-[#261019]/60 px-2 py-0.5 rounded border border-[#C6A568]/30">
                               ✦ Gentle Engager · Delhi NCR
                             </span>
                           </div>
 
                           {/* Secret Venue & Held Seat Pass */}
-                          <div className="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between">
+                          <div className="mt-2.5 pt-2 border-t border-[#C6A568]/25 flex items-center justify-between">
                             <div>
-                              <span className="font-mono text-[8px] text-white/60 block">Upcoming Meet</span>
-                              <span className="text-[10px] font-semibold text-ivory block">Sunder Nursery Supper</span>
-                              <span className="text-[9px] text-ochre font-mono block">Secret Gate: GATE-402</span>
+                              <span className="font-mono text-[8px] text-[#F8F2E7]/65 block">Upcoming Meet</span>
+                              <span className="text-[10px] font-semibold text-[#F8F2E7] block">Sunder Nursery Supper</span>
+                              <span className="text-[9px] text-[#C6A568] font-mono block">Secret Gate: GATE-402</span>
                             </div>
 
                             {/* Scannable Gate QR Code */}
-                            <div className="size-11 rounded-lg bg-white p-1 flex items-center justify-center shrink-0 shadow-sm">
-                              <QrCode className="size-9 text-neutral-900" />
+                            <div className="size-11 rounded-lg bg-[#FCF8EE] p-1 flex items-center justify-center shrink-0 shadow-sm">
+                              <QrCode className="size-9 text-[#35392C]" />
                             </div>
                           </div>
                         </div>
@@ -546,8 +548,8 @@ export function HowPhoneMockup() {
 
                       {/* Wallet Action Button */}
                       <div className="pt-2">
-                        <div className="w-full rounded-full bg-black border border-white/20 text-white py-2 px-3 text-[10px] font-mono uppercase tracking-wider text-center shadow-md flex items-center justify-center gap-1.5">
-                          <Sparkles className="size-3 text-ochre" />
+                        <div className="w-full rounded-full bg-[#691C35] border border-[#C6A568]/50 text-[#F8F2E7] py-2 px-3 text-[10px] font-mono uppercase tracking-wider text-center shadow-md flex items-center justify-center gap-1.5">
+                          <Sparkles className="size-3 text-[#C6A568]" />
                           <span>Ready for Table · Tap for Pass</span>
                         </div>
                       </div>
@@ -556,8 +558,8 @@ export function HowPhoneMockup() {
                   </div>
 
                   {/* iPhone Home Bar */}
-                  <div className="relative z-30 pb-2 flex justify-center bg-[#F7F4EE]">
-                    <div className="h-1 w-20 rounded-full bg-neutral-400" />
+                  <div className="relative z-30 pb-2 flex justify-center bg-[#F8F2E7]">
+                    <div className="h-1 w-20 rounded-full bg-[#C6A568]/60" />
                   </div>
                 </div>
               </div>
@@ -570,7 +572,7 @@ export function HowPhoneMockup() {
                     type="button"
                     onClick={() => handleStepClick(idx)}
                     className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                      idx === activeStep ? "w-6 bg-ochre" : "w-2 bg-ivory/30 hover:bg-ivory/60"
+                      idx === activeStep ? "w-6 bg-[#C6A568]" : "w-2 bg-[#F8F2E7]/30 hover:bg-[#F8F2E7]/60"
                     }`}
                     title={`Step ${step.num}: ${step.title}`}
                     aria-label={`Go to step ${step.num}`}
@@ -586,10 +588,10 @@ export function HowPhoneMockup() {
                 key={activeStep}
                 className="anim-card-fade"
               >
-                <h3 className="font-display text-2xl sm:text-3xl lg:text-[2rem] text-ochre font-medium leading-snug">
+                <h3 className="font-display text-2xl sm:text-3xl lg:text-[2rem] text-[#C6A568] font-medium leading-snug">
                   {currentStep.title}
                 </h3>
-                <p className="text-sm sm:text-base text-ivory/80 mt-3 leading-relaxed">
+                <p className="text-sm sm:text-base text-[#F8F2E7]/85 mt-3 leading-relaxed">
                   {currentStep.desc}
                 </p>
               </div>
@@ -598,12 +600,12 @@ export function HowPhoneMockup() {
               <div className="mt-8 flex flex-col sm:flex-row lg:flex-col items-center lg:items-start gap-3">
                 <a
                   href="/quiz"
-                  className="inline-flex items-center gap-2 rounded-full bg-burgundy hover:bg-ochre hover:text-ink px-6 py-3 text-xs font-mono uppercase tracking-widest text-ivory shadow-xl transition-all duration-300 hover:scale-105"
+                  className="inline-flex items-center gap-2 rounded-full bg-[#691C35] hover:bg-[#C6A568] hover:text-[#35392C] border border-[#C6A568]/50 px-6 py-3 text-xs font-mono uppercase tracking-widest text-[#F8F2E7] shadow-xl transition-all duration-300 hover:scale-105"
                 >
                   <span>Take the 3-min quiz</span>
                   <ArrowRight className="size-3.5" />
                 </a>
-                <span className="font-mono text-xs text-ivory/60">
+                <span className="font-mono text-xs text-[#E8ECD8]/75">
                   100% Offline · Delhi NCR
                 </span>
               </div>

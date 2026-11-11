@@ -5,7 +5,7 @@ interface SummitAttendeesProps {
   onStageChange?: (stage: 0 | 1 | 2) => void;
 }
 
-const PAL = ["#f472b6", "#fbbf24", "#22d3ee", "#fb923c", "#818cf8", "#34d399"];
+const PAL = ["#C6A568", "#E8ECD8", "#D9708E", "#9DB57B", "#F8F2E7", "#DC9B6B"];
 const WORDS = ["Namaste", "Hi!", "Chai?", "Hello", "Kya haal?", "Welcome"];
 const LOOP = 29; // 29-second extended, perfectly smooth sequential cycle
 
@@ -222,7 +222,7 @@ export function SummitAttendees({ isNight = true, onStageChange }: SummitAttende
       const w = 34 * s;
       const h = 22 * s;
       const cr = 3.5 * s;
-      ctx.fillStyle = "#fffaf0";
+      ctx.fillStyle = "#F8F2E7";
       ctx.beginPath();
       if ("roundRect" in ctx) {
         ctx.roundRect(x - w / 2, y - h / 2, w, h, cr);
@@ -246,17 +246,17 @@ export function SummitAttendees({ isNight = true, onStageChange }: SummitAttende
       }
       ctx.fill();
 
-      // 3. Green Circular Verification Badge
+      // 3. Olive Verification Badge
       const badgeX = x - 8.5 * s;
       const badgeY = y + 2 * s;
       const badgeR = 4.8 * s;
       ctx.beginPath();
       ctx.arc(badgeX, badgeY, badgeR, 0, Math.PI * 2);
-      ctx.fillStyle = "#12a150";
+      ctx.fillStyle = "#5F7045";
       ctx.fill();
 
       // 4. White Checkmark Icon
-      ctx.strokeStyle = "#ffffff";
+      ctx.strokeStyle = "#F8F2E7";
       ctx.lineWidth = 1.4 * s;
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
@@ -267,7 +267,7 @@ export function SummitAttendees({ isNight = true, onStageChange }: SummitAttende
       ctx.stroke();
 
       // 5. Placeholder Text Lines
-      ctx.fillStyle = "#b9b0c4";
+      ctx.fillStyle = "#C6A568";
       const lineX = x - 0.5 * s;
       if ("roundRect" in ctx) {
         ctx.beginPath();
@@ -479,17 +479,17 @@ export function SummitAttendees({ isNight = true, onStageChange }: SummitAttende
         const curY = (person ? person.y - 25 * sc : e.y) - t * 20 * sc;
 
         // Gentle ripple ring below bubble
-        ctx.globalAlpha = (1 - t) * 0.5;
-        ctx.strokeStyle = "#ffd166";
+        ctx.globalAlpha = (1 - t) * 0.55;
+        ctx.strokeStyle = "#C6A568";
         ctx.lineWidth = 1.2;
         ctx.beginPath();
         ctx.ellipse(curX, curY + 11 * sc, t * 40 * sc, t * 12 * sc, 0, 0, Math.PI * 2);
         ctx.stroke();
 
-        // Clean white text bubble pill
+        // Clean cream text bubble pill
         const w = ctx.measureText(e.w).width + 16;
         ctx.globalAlpha = Math.min(1, (1 - t) * 2.2);
-        ctx.fillStyle = "rgba(255, 250, 240, 0.96)";
+        ctx.fillStyle = "rgba(248, 242, 231, 0.96)";
         ctx.beginPath();
         if ("roundRect" in ctx) {
           ctx.roundRect(curX - w / 2, curY - 13, w, 18, 9);
@@ -498,7 +498,7 @@ export function SummitAttendees({ isNight = true, onStageChange }: SummitAttende
         }
         ctx.fill();
 
-        ctx.fillStyle = "#2a1636";
+        ctx.fillStyle = "#691C35";
         ctx.fillText(e.w, curX, curY);
       }
 

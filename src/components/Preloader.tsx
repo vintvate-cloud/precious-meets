@@ -284,7 +284,7 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
         ref={rootRef}
         initial={{ opacity: 1 }}
         exit={{ opacity: 0, transition: { duration: 0.3 } }}
-        className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#F7EFEB] text-[#2D2118] select-none px-4 overflow-hidden"
+        className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#F8F2E7] text-[#35392C] select-none px-4 overflow-hidden"
       >
         {/* Subtle organic ambient glow & grain layer */}
         <div
@@ -292,10 +292,10 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
           className="absolute inset-0 pointer-events-none transition-opacity duration-300"
           style={{
             background:
-              "radial-gradient(circle at 50% 50%, #FCF8F3 0%, #F6ECE2 55%, #EFE4D8 100%)",
+              "radial-gradient(circle at 50% 50%, #FCF8EE 0%, #F8F2E7 58%, #E8ECD8 100%)",
           }}
         >
-          <div className="absolute inset-0 bg-[radial-gradient(#DEC7A8_1px,transparent_1px)] [background-size:24px_24px] opacity-35" />
+          <div className="absolute inset-0 bg-[radial-gradient(#C6A568_1px,transparent_1px)] [background-size:24px_24px] opacity-25" />
         </div>
 
         {/* Stage 1: Architectural Dinner Table Diagram */}
@@ -353,11 +353,11 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
                     cx={s.plateX}
                     cy={s.plateY}
                     r="11.5"
-                    fill="#FFFFFF"
-                    stroke="#3E2C20"
+                    fill="#FCF8EE"
+                    stroke="#35392C"
                     strokeWidth="1.1"
                     style={{
-                      filter: "drop-shadow(0 1px 3px rgba(62,44,32,0.1))",
+                      filter: "drop-shadow(0 1px 3px rgba(53,57,44,0.1))",
                     }}
                   />
                   {/* Inner plate depression */}
@@ -365,8 +365,8 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
                     cx={s.plateX}
                     cy={s.plateY}
                     r="7"
-                    fill="#FAF6F0"
-                    stroke="#DAC9B7"
+                    fill="#F8F2E7"
+                    stroke="#C6A568"
                     strokeWidth="0.7"
                   />
                 </g>
@@ -386,19 +386,19 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
                       width="40"
                       height="18"
                       rx="6"
-                      fill="#FFFFFF"
-                      stroke="#3E2C20"
+                      fill="#FCF8EE"
+                      stroke="#35392C"
                       strokeWidth="1.2"
                       style={{
-                        filter: "drop-shadow(0 2px 6px rgba(62,44,32,0.08))",
+                        filter: "drop-shadow(0 2px 6px rgba(53,57,44,0.08))",
                       }}
                     />
 
                     {/* Burgundy Backrest: Outer half of the chair facing outward */}
                     <path
                       d="M -20 -3 L -20 -4 C -20 -6.76 -17.76 -9 -15 -9 L 15 -9 C 17.76 -9 20 -6.76 20 -4 L 20 -3 Z"
-                      fill="#962838"
-                      stroke="#3E2C20"
+                      fill="#691C35"
+                      stroke="#35392C"
                       strokeWidth="1.2"
                     />
 
@@ -408,7 +408,7 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
                       y1="-3"
                       x2="19.5"
                       y2="-3"
-                      stroke="#3E2C20"
+                      stroke="#35392C"
                       strokeWidth="1"
                     />
                   </g>
@@ -416,28 +416,28 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
               ))}
             </g>
 
-            {/* Central Table Disc: Bevel + Warm Sand/Camel Top (Stays centered & steady) */}
+            {/* Central Table Disc: Bevel + Warm Cream/Gold Top (Stays centered & steady) */}
             <g data-preload-table>
               {/* Outer table edge ring */}
               <circle
                 cx="200"
                 cy="200"
                 r="92"
-                fill="#DFCAAC"
-                stroke="#3E2C20"
+                fill="#E8ECD8"
+                stroke="#C6A568"
                 strokeWidth="1.2"
                 style={{
-                  filter: "drop-shadow(0 4px 16px rgba(62,44,32,0.08))",
+                  filter: "drop-shadow(0 4px 16px rgba(53,57,44,0.1))",
                 }}
               />
-              {/* Main Sand Table Surface */}
+              {/* Main Cream Table Surface */}
               <circle
                 cx="200"
                 cy="200"
                 r="90"
-                fill="#DEC7A8"
-                stroke="#3E2C20"
-                strokeWidth="0.8"
+                fill="#FCF8EE"
+                stroke="#C6A568"
+                strokeWidth="0.9"
               />
             </g>
 
@@ -447,7 +447,7 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
                 x="200"
                 y="190"
                 textAnchor="middle"
-                fill="#3E2C20"
+                fill="#35392C"
                 style={{
                   fontFamily: "'Instrument Serif', serif",
                   fontStyle: "italic",
@@ -461,7 +461,7 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
                 x="200"
                 y="209"
                 textAnchor="middle"
-                fill="#3E2C20"
+                fill="#35392C"
                 style={{
                   fontFamily: "'Instrument Serif', serif",
                   fontStyle: "italic",
@@ -477,8 +477,8 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
                 y1="220"
                 x2="213"
                 y2="220"
-                stroke="#962838"
-                strokeWidth="1.3"
+                stroke="#691C35"
+                strokeWidth="1.4"
                 strokeLinecap="round"
               />
             </g>
@@ -486,7 +486,7 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
 
           {/* Exact Caption from Reference Image */}
           <div data-preload-caption className="flex flex-col items-center gap-1 text-center max-w-sm px-4">
-            <p className="font-sans text-[13px] sm:text-[14px] text-[#5A4535] tracking-wide font-normal leading-relaxed">
+            <p className="font-sans text-[13px] sm:text-[14px] text-[#5F7045] tracking-wide font-medium leading-relaxed">
               Six seats. One table. Pulled up for people who haven&apos;t met &mdash; yet.
             </p>
           </div>

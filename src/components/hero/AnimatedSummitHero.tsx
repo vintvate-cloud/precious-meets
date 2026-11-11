@@ -11,7 +11,7 @@ export function AnimatedSummitHero() {
   return (
     <section
       data-summit-hero
-      className="relative w-full h-[100dvh] max-h-[100dvh] flex flex-col justify-end overflow-hidden select-none bg-[#0b061b]"
+      className="relative w-full h-[100dvh] max-h-[100dvh] flex flex-col justify-end overflow-hidden select-none bg-[#261019]"
     >
       {/* ========================================================================= */}
       {/* 1. BACKGROUND SKYLINE (Starry Purple Night Sky)                           */}
@@ -27,7 +27,7 @@ export function AnimatedSummitHero() {
         </div>
 
         {/* Bottom vignette for promenade & water depth */}
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-[#261019]/75 via-[#261019]/20 to-transparent" />
       </div>
 
       {/* ========================================================================= */}
@@ -89,9 +89,9 @@ export function AnimatedSummitHero() {
           >
             {/* Slide 0: Six strangers. One table. (Initial Wander) */}
             <div className="h-12 sm:h-14 md:h-18 lg:h-20 w-full flex items-center justify-center">
-              <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-[1.08] text-[#FDFBF7] drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]">
+              <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-[1.08] text-[#F8F2E7] drop-shadow-[0_2px_14px_rgba(38,16,25,0.85)]">
                 Six strangers.{" "}
-                <span className="italic font-normal text-[#E5C17D] drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]">
+                <span className="italic font-normal text-[#C6A568] drop-shadow-[0_2px_14px_rgba(38,16,25,0.85)]">
                   One table.
                 </span>
               </h1>
@@ -99,9 +99,9 @@ export function AnimatedSummitHero() {
 
             {/* Slide 1: Everyone is verified here. (Olive Green Accent Text) */}
             <div className="h-12 sm:h-14 md:h-18 lg:h-20 w-full flex items-center justify-center">
-              <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-[1.08] text-[#FDFBF7] drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]">
+              <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-[1.08] text-[#F8F2E7] drop-shadow-[0_2px_14px_rgba(38,16,25,0.85)]">
                 Everyone is{" "}
-                <span className="italic font-normal text-[#8ea852] drop-shadow-[0_2px_14px_rgba(142,168,82,0.7)]">
+                <span className="italic font-normal text-[#A8BF82] drop-shadow-[0_2px_14px_rgba(95,112,69,0.75)]">
                   verified here.
                 </span>
               </h1>
@@ -109,9 +109,9 @@ export function AnimatedSummitHero() {
 
             {/* Slide 2: Six strangers. One table. (Grouping in 6s Assembled) */}
             <div className="h-12 sm:h-14 md:h-18 lg:h-20 w-full flex items-center justify-center">
-              <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-[1.08] text-[#FDFBF7] drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]">
+              <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-[1.08] text-[#F8F2E7] drop-shadow-[0_2px_14px_rgba(38,16,25,0.85)]">
                 Six strangers.{" "}
-                <span className="italic font-normal text-[#E5C17D] drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]">
+                <span className="italic font-normal text-[#C6A568] drop-shadow-[0_2px_14px_rgba(38,16,25,0.85)]">
                   One table.
                 </span>
               </h1>
@@ -135,21 +135,21 @@ export function AnimatedSummitHero() {
           >
             {/* Subtitle 0 */}
             <div className="h-10 sm:h-11 w-full flex items-center justify-center">
-              <p className="text-xs sm:text-sm md:text-base font-sans font-medium leading-relaxed text-[#E2E8F0]/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]">
+              <p className="text-xs sm:text-sm md:text-base font-sans font-medium leading-relaxed text-[#F8F2E7]/90 drop-shadow-[0_2px_8px_rgba(38,16,25,0.85)]">
                 Curated experiences designed for meaningful human connections across Delhi NCR.
               </p>
             </div>
 
             {/* Subtitle 1 */}
             <div className="h-10 sm:h-11 w-full flex items-center justify-center">
-              <p className="text-xs sm:text-sm md:text-base font-sans font-medium leading-relaxed text-[#E2E8F0]/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]">
+              <p className="text-xs sm:text-sm md:text-base font-sans font-medium leading-relaxed text-[#F8F2E7]/90 drop-shadow-[0_2px_8px_rgba(38,16,25,0.85)]">
                 Every member confirms their identity before they ever say hello.
               </p>
             </div>
 
             {/* Subtitle 2 */}
             <div className="h-10 sm:h-11 w-full flex items-center justify-center">
-              <p className="text-xs sm:text-sm md:text-base font-sans font-medium leading-relaxed text-[#E2E8F0]/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]">
+              <p className="text-xs sm:text-sm md:text-base font-sans font-medium leading-relaxed text-[#F8F2E7]/90 drop-shadow-[0_2px_8px_rgba(38,16,25,0.85)]">
                 Curated experiences designed for meaningful human connections across Delhi NCR.
               </p>
             </div>
@@ -159,7 +159,7 @@ export function AnimatedSummitHero() {
         {/* Take the Quiz CTA Button */}
         <Link
           to="/quiz"
-          className="pointer-events-auto mt-4 sm:mt-5 group inline-flex items-center gap-2.5 rounded-full px-6 sm:px-7 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold tracking-wide transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer bg-gradient-to-r from-[#691C35] to-[#832644] text-[#FDFBF7] ring-1 ring-[#E5C17D]/40 shadow-xl shadow-black/50 hover:bg-[#832644] hover:shadow-black/70"
+          className="pointer-events-auto mt-4 sm:mt-5 group inline-flex items-center gap-2.5 rounded-full px-6 sm:px-7 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold tracking-wide transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer bg-[#691C35] text-[#F8F2E7] ring-1 ring-[#C6A568]/65 shadow-xl shadow-[#261019]/60 hover:bg-[#5F7045] hover:ring-[#E8ECD8]/60 hover:shadow-[#261019]/80"
         >
           <span>Take the Quiz</span>
           <ArrowRight className="size-3.5 sm:size-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -172,9 +172,6 @@ export function AnimatedSummitHero() {
       <div className="relative z-30 w-full flex flex-col items-center">
         <SummitAttendees isNight={true} onStageChange={setHeadlineStage} />
       </div>
-
-      {/* Bottom ambient border */}
-      <div className="w-full h-1 bg-gradient-to-r from-transparent via-[#E5C17D]/30 to-transparent" />
     </section>
   );
 }

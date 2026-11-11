@@ -24,9 +24,9 @@ const GREETINGS: GreetingItem[] = [
     region: "Punjab",
     meaning: "Truth is the Timeless Being",
     fontFamily: "'Noto Serif Gurmukhi', serif",
-    accentColor: "#B8860B", // Warm Ochre
-    bgGlow: "rgba(184, 134, 11, 0.16)",
-    textColor: "text-[#B8860B]",
+    accentColor: "#936E2C", // Deep Burnished Gold
+    bgGlow: "rgba(198, 165, 104, 0.2)",
+    textColor: "text-[#936E2C]",
   },
   {
     id: "hindi",
@@ -60,9 +60,9 @@ const GREETINGS: GreetingItem[] = [
     region: "Tamil Nadu",
     meaning: "Humble salutations of warmth",
     fontFamily: "'Noto Serif Tamil', serif",
-    accentColor: "#C2410C", // Terracotta
-    bgGlow: "rgba(194, 65, 12, 0.16)",
-    textColor: "text-[#C2410C]",
+    accentColor: "#7E2440", // Rich Wine Rose
+    bgGlow: "rgba(126, 36, 64, 0.16)",
+    textColor: "text-[#7E2440]",
   },
   {
     id: "bengali",
@@ -72,9 +72,9 @@ const GREETINGS: GreetingItem[] = [
     region: "Bengal",
     meaning: "Reverence, goodwill, and peace",
     fontFamily: "'Noto Serif Bengali', serif",
-    accentColor: "#1E293B", // Midnight Slate
-    bgGlow: "rgba(30, 41, 59, 0.15)",
-    textColor: "text-[#1E293B]",
+    accentColor: "#35392C", // Deep Olive Ink
+    bgGlow: "rgba(53, 57, 44, 0.15)",
+    textColor: "text-[#35392C]",
   },
   {
     id: "rajasthani",
@@ -84,9 +84,9 @@ const GREETINGS: GreetingItem[] = [
     region: "Marwar & Mewar",
     meaning: "May you be blessed with abundant grace",
     fontFamily: "'Rozha One', 'Noto Serif Devanagari', serif",
-    accentColor: "#D97706", // Amber
-    bgGlow: "rgba(217, 119, 6, 0.18)",
-    textColor: "text-[#D97706]",
+    accentColor: "#9A7434", // Antique Brass Gold
+    bgGlow: "rgba(198, 165, 104, 0.22)",
+    textColor: "text-[#9A7434]",
   },
   {
     id: "telugu",
@@ -96,9 +96,9 @@ const GREETINGS: GreetingItem[] = [
     region: "Andhra & Telangana",
     meaning: "Offerings of heartful reverence",
     fontFamily: "'Noto Serif Telugu', 'Mandali', sans-serif",
-    accentColor: "#4D6038", // Forest Sage
-    bgGlow: "rgba(77, 96, 56, 0.18)",
-    textColor: "text-[#4D6038]",
+    accentColor: "#4D5E36", // Forest Olive
+    bgGlow: "rgba(95, 112, 69, 0.18)",
+    textColor: "text-[#4D5E36]",
   },
   {
     id: "french",
@@ -132,9 +132,9 @@ const GREETINGS: GreetingItem[] = [
     region: "The Global Table",
     meaning: "A warm and effortless invitation to connect",
     fontFamily: "'Instrument Serif', serif",
-    accentColor: "#171514",
-    bgGlow: "rgba(23, 21, 20, 0.12)",
-    textColor: "text-[#171514]",
+    accentColor: "#691C35",
+    bgGlow: "rgba(105, 28, 53, 0.14)",
+    textColor: "text-[#691C35]",
   },
 ];
 
@@ -153,14 +153,14 @@ export function DoorGreetings() {
   }, []);
 
   return (
-    <section className="relative min-h-[85vh] sm:min-h-screen w-full bg-[#FAF7F2] text-[#171514] flex flex-col justify-center items-center py-20 sm:py-28 px-4 sm:px-6 lg:px-8 overflow-hidden select-none">
+    <section className="relative min-h-[85vh] sm:min-h-screen w-full bg-[#E8ECD8] text-[#35392C] flex flex-col justify-center items-center py-20 sm:py-28 px-4 sm:px-6 lg:px-8 overflow-hidden select-none">
       <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col items-center justify-center my-auto space-y-8 sm:space-y-12 text-center">
         {/* ========================================================================= */}
         {/* CENTERSTAGE GREETING STATEMENT (Say -> [Language Greeting] -> to 5 new people) */}
         {/* ========================================================================= */}
         <div className="w-full flex flex-col items-center justify-center px-4">
           {/* Top: Say */}
-          <h2 className="font-display text-[clamp(2.5rem,7vw,6.5rem)] font-normal tracking-tight text-[#171514] select-none leading-none mt-2 sm:mt-4">
+          <h2 className="font-display text-[clamp(2.5rem,7vw,6.5rem)] font-normal tracking-tight text-[#35392C] select-none leading-none mt-2 sm:mt-4">
             Say
           </h2>
 
@@ -188,7 +188,7 @@ export function DoorGreetings() {
           </div>
 
           {/* Bottom: to 5 new people */}
-          <span className="font-display text-[clamp(2.5rem,7vw,6.5rem)] font-normal tracking-tight text-[#171514] select-none leading-none mt-1 sm:mt-2">
+          <span className="font-display text-[clamp(2.5rem,7vw,6.5rem)] font-normal tracking-tight text-[#35392C] select-none leading-none mt-1 sm:mt-2">
             to 5 new people
           </span>
 
@@ -203,13 +203,13 @@ export function DoorGreetings() {
                 transition={{ duration: 0.35, ease: "easeOut" }}
                 className="flex flex-col items-center text-center space-y-2 transform-gpu will-change-[transform,opacity]"
               >
-                <p className="font-serif italic text-2xl sm:text-3xl md:text-4xl text-[#171514]/85">
+                <p className="font-serif italic text-2xl sm:text-3xl md:text-4xl text-[#691C35]">
                   "{activeGreeting.roman}"
-                  <span className="font-sans not-italic text-xs sm:text-sm font-mono uppercase tracking-widest text-[#171514]/40 ml-3">
+                  <span className="font-sans not-italic text-xs sm:text-sm font-mono uppercase tracking-widest text-[#5F7045] ml-3">
                     ({activeGreeting.language})
                   </span>
                 </p>
-                <div className="flex items-center gap-2 text-xs sm:text-sm font-sans text-[#171514]/65">
+                <div className="flex items-center gap-2 text-xs sm:text-sm font-sans text-[#35392C]/80">
                   <Sparkles className="size-3.5 text-[#C6A568] shrink-0" />
                   <span className="italic font-normal">{activeGreeting.meaning}</span>
                 </div>

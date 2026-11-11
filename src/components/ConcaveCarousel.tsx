@@ -389,30 +389,30 @@ export const ConcaveCarousel = forwardRef<ConcaveCarouselRef, ConcaveCarouselPro
             }}
             className={`relative size-full overflow-hidden ${
               item.quote
-                ? "bg-gradient-to-br from-[#1C2016] via-[#13160F] to-[#0C0E0A] border border-white/10 p-6 sm:p-7 flex flex-col justify-between"
-                : "bg-neutral-900 border border-white/10"
-            } shadow-[0_16px_36px_rgba(0,0,0,0.6)] transition-all duration-300`}
+                ? "bg-gradient-to-br from-[#691C35] via-[#4A1224] to-[#2B0A15] border border-[#C6A568]/40 p-6 sm:p-7 flex flex-col justify-between"
+                : "bg-[#261019] border border-[#C6A568]/30"
+            } shadow-[0_18px_40px_rgba(20,5,10,0.65)] transition-all duration-300`}
           >
             {item.quote ? (
               <>
                 {/* Top Row: Stars + Quote Glyph */}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1 text-ochre text-xs sm:text-sm">
+                  <div className="flex items-center gap-1 text-[#C6A568] text-xs sm:text-sm">
                     {"★".repeat(item.rating || 5)}
                   </div>
-                  <span className="font-display italic text-3xl sm:text-4xl text-ochre/30 select-none leading-none">
+                  <span className="font-display italic text-3xl sm:text-4xl text-[#C6A568]/45 select-none leading-none">
                     “
                   </span>
                 </div>
 
                 {/* Middle: Testimonial Quote */}
-                <p className="font-sans text-xs sm:text-sm md:text-[14px] leading-relaxed text-ivory/95 font-light my-auto line-clamp-4 select-none">
+                <p className="font-sans text-xs sm:text-sm md:text-[14px] leading-relaxed text-[#F8F2E7]/95 font-light my-auto line-clamp-4 select-none">
                   “{item.quote}”
                 </p>
 
                 {/* Bottom: Member Profile */}
-                <div className="flex items-center gap-3 pt-3.5 border-t border-white/10 mt-auto">
-                  <div className="size-9 rounded-full bg-ochre/15 border border-ochre/30 flex items-center justify-center text-ochre font-mono font-semibold text-xs shrink-0 select-none">
+                <div className="flex items-center gap-3 pt-3.5 border-t border-[#C6A568]/25 mt-auto">
+                  <div className="size-9 rounded-full bg-[#C6A568]/20 border border-[#C6A568]/45 flex items-center justify-center text-[#C6A568] font-mono font-semibold text-xs shrink-0 select-none">
                     {item.author
                       ? item.author
                           .split(" ")
@@ -422,11 +422,11 @@ export const ConcaveCarousel = forwardRef<ConcaveCarouselRef, ConcaveCarouselPro
                       : "PM"}
                   </div>
                   <div className="min-w-0 flex-1 text-left">
-                    <h4 className="font-sans font-semibold text-xs sm:text-sm text-ivory truncate select-none">
+                    <h4 className="font-sans font-semibold text-xs sm:text-sm text-[#F8F2E7] truncate select-none">
                       {item.author}
                     </h4>
                     {item.role && (
-                      <p className="font-sans text-[11px] text-ivory/60 truncate select-none">
+                      <p className="font-sans text-[11px] text-[#E8ECD8]/75 truncate select-none">
                         {item.role}
                       </p>
                     )}

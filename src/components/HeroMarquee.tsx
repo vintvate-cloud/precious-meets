@@ -10,7 +10,16 @@ import {
   Smile,
 } from "lucide-react";
 
-const marqueeItems = [
+type MarqueeTone = "forest" | "burgundy" | "ochre";
+
+interface MarqueeItem {
+  text: string;
+  tag: string;
+  icon: typeof ShieldCheck;
+  tone: MarqueeTone;
+}
+
+const marqueeItems: MarqueeItem[] = [
   {
     text: "100% Offline Aadhaar Verified",
     tag: "Safety First",
@@ -61,6 +70,24 @@ const marqueeItems = [
   },
 ];
 
+const toneStyles: Record<
+  MarqueeTone,
+  { icon: string; tag: string }
+> = {
+  forest: {
+    icon: "bg-[#5F7045]/15 border-[#5F7045]/30 text-[#5F7045]",
+    tag: "bg-[#5F7045] text-[#F8F2E7] border-[#5F7045]",
+  },
+  burgundy: {
+    icon: "bg-[#691C35]/12 border-[#691C35]/28 text-[#691C35]",
+    tag: "bg-[#691C35] text-[#F8F2E7] border-[#691C35]",
+  },
+  ochre: {
+    icon: "bg-[#C6A568]/25 border-[#C6A568]/60 text-[#7A5922]",
+    tag: "bg-[#C6A568] text-[#35392C] border-[#C6A568]",
+  },
+};
+
 export function HeroMarquee() {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -71,39 +98,44 @@ export function HeroMarquee() {
     <section
       ref={containerRef}
       aria-label="Precious Meets core pillars"
-      className="relative w-full overflow-hidden border-y border-black/10 dark:border-white/10 bg-[#16060B] text-ivory py-4 sm:py-5 z-20 select-none shadow-[0_10px_30px_rgba(0,0,0,0.15)]"
+      className="relative w-full overflow-hidden bg-[#E8ECD8] text-[#35392C] py-4 sm:py-5 z-20 select-none"
     >
-      {/* Background ambient glow effect */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-burgundy/25 via-transparent to-transparent pointer-events-none" />
+      {/* Subtle warm antique gold highlight */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(198,165,104,0.14)_0%,_transparent_70%)] pointer-events-none" />
 
       {/* Subtle edge fade masks */}
-      <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-r from-[#16060B] to-transparent z-10" />
-      <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-l from-[#16060B] to-transparent z-10" />
+      <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-r from-[#E8ECD8] to-transparent z-10" />
+      <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-l from-[#E8ECD8] to-transparent z-10" />
 
       {/* Marquee Track */}
       <div className="flex w-max items-center animate-[marquee_45s_linear_infinite] hover:[animation-play-state:paused] will-change-transform">
         {loopItems.map((item, idx) => {
           const Icon = item.icon;
+          const tone = toneStyles[item.tone];
           return (
             <div
               key={`${item.text}-${idx}`}
               className="inline-flex items-center gap-3 sm:gap-4 px-5 sm:px-8 group cursor-default"
             >
               {/* Badge Icon */}
-              <span className="flex size-7 sm:size-8 items-center justify-center rounded-full bg-white/10 border border-white/15 text-ochre shadow-xs transition-transform duration-300 group-hover:scale-110">
+              <span
+                className={`flex size-7 sm:size-8 items-center justify-center rounded-full border shadow-2xs transition-transform duration-300 group-hover:scale-110 ${tone.icon}`}
+              >
                 <Icon className="size-3.5 sm:size-4" />
               </span>
 
               {/* Text Pill */}
-              <span className="font-sans text-xs sm:text-sm font-semibold tracking-wide text-ivory/90 group-hover:text-white transition-colors flex items-center gap-2">
+              <span className="font-sans text-xs sm:text-sm font-semibold tracking-wide text-[#35392C] group-hover:text-[#691C35] transition-colors flex items-center gap-2">
                 {item.text}
-                <span className="hidden sm:inline-block rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-ochre/85 border border-white/10">
+                <span
+                  className={`hidden sm:inline-block rounded-full px-2.5 py-0.5 text-[10px] font-mono uppercase tracking-wider border ${tone.tag}`}
+                >
                   {item.tag}
                 </span>
               </span>
 
               {/* Elegant Separator Glyph */}
-              <span className="ml-3 sm:ml-5 text-ochre/40 text-xs sm:text-sm font-serif select-none">
+              <span className="ml-3 sm:ml-5 text-[#691C35]/70 text-xs sm:text-sm font-serif select-none">
                 ✦
               </span>
             </div>

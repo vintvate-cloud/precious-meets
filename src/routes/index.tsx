@@ -23,7 +23,7 @@ import footerBg from "@/assets/footer-bg.jpg";
 import { ConcaveCarousel } from "@/components/ConcaveCarousel";
 import { HowPhoneMockup } from "@/components/HowPhoneMockup";
 import { HeroSection } from "@/components/HeroSection";
-import { AnimatedSummitHero } from "@/components/hero/AnimatedSummitHero";
+import { LuxuryTableHero } from "@/components/hero/LuxuryTableHero";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -195,8 +195,9 @@ function Statement() {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-[#FAF7F2] select-none py-20 sm:py-28 lg:py-36 px-4 sm:px-6 lg:px-8 overflow-hidden"
+      className="relative bg-[#691C35] select-none py-20 sm:py-28 lg:py-36 px-4 sm:px-6 lg:px-8 overflow-hidden"
     >
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(198,165,104,0.12)_0%,_transparent_68%)]" />
 
       <div className="relative z-10 w-full max-w-[98vw] lg:max-w-[96vw] mx-auto flex flex-col items-center text-center px-1 sm:px-2">
         <h2 className="w-full font-display text-[6.5vw] sm:text-[4.8vw] md:text-[3.9vw] lg:text-[3.3vw] xl:text-[3.5vw] 2xl:text-[3.7vw] leading-[1.16] sm:leading-[1.2] tracking-tight select-none">
@@ -205,11 +206,10 @@ function Statement() {
             return (
               <span
                 key={lIdx}
-                className={`block w-full ${
-                  line.isBurgundyItalic
-                    ? "italic font-serif text-burgundy pt-1 sm:pt-2"
-                    : "text-ink"
-                } ${lIdx === 0 ? "sm:whitespace-nowrap" : ""}`}
+                className={`block w-full ${line.isBurgundyItalic
+                    ? "italic font-serif text-[#C6A568] pt-1 sm:pt-2"
+                    : "text-[#F8F2E7]"
+                  } ${lIdx === 0 ? "sm:whitespace-nowrap" : ""}`}
               >
                 {words.map((word, wIdx) => (
                   <span
@@ -227,7 +227,7 @@ function Statement() {
 
         {/* Clean Luxury CTA Button */}
         <div data-statement-cta className="relative mt-8 sm:mt-12 flex flex-col items-center">
-          <CtaButton tone="burgundy" href="/quiz">Find your table</CtaButton>
+          <CtaButton tone="gold" href="/quiz">Find your table</CtaButton>
         </div>
       </div>
     </section>
@@ -245,7 +245,7 @@ const tableSeats = [
 
 function Geometry() {
   return (
-    <section data-geo className="relative h-[270vh] bg-[#FAF7F2] text-ink select-none will-change-transform">
+    <section data-geo className="relative h-[270vh] bg-[#E8ECD8] text-[#35392C] select-none will-change-transform">
       <div className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden px-[4vw] transform-gpu">
         <div className="grid h-full w-full max-w-6xl grid-cols-1 items-center gap-8 lg:grid-cols-2">
           {/* Left Column: Architectural Dinner Table Diagram based on reference image */}
@@ -262,10 +262,10 @@ function Geometry() {
                   cx="300"
                   cy="300"
                   r="132"
-                  fill="#E6D5BF"
-                  stroke="#7D674E"
-                  strokeWidth="1.5"
-                  style={{ filter: "drop-shadow(0 6px 16px rgba(80,60,30,0.08))" }}
+                  fill="#F8F2E7"
+                  stroke="#C6A568"
+                  strokeWidth="1.75"
+                  style={{ filter: "drop-shadow(0 8px 20px rgba(53,57,44,0.12))" }}
                 />
 
                 {/* Center Table Inscription Quote from Reference Image */}
@@ -274,7 +274,7 @@ function Geometry() {
                     x="300"
                     y="288"
                     textAnchor="middle"
-                    fill="#3B281B"
+                    fill="#35392C"
                     style={{ fontFamily: "'Instrument Serif', serif", fontStyle: "italic", fontSize: "23px", letterSpacing: "0.01em" }}
                   >
                     Every friend was
@@ -283,7 +283,7 @@ function Geometry() {
                     x="300"
                     y="315"
                     textAnchor="middle"
-                    fill="#3B281B"
+                    fill="#691C35"
                     style={{ fontFamily: "'Instrument Serif', serif", fontStyle: "italic", fontSize: "23px", letterSpacing: "0.01em" }}
                   >
                     once a stranger.
@@ -293,8 +293,8 @@ function Geometry() {
                     y1="329"
                     x2="316"
                     y2="329"
-                    stroke="#691C35"
-                    strokeWidth="1.5"
+                    stroke="#C6A568"
+                    strokeWidth="1.75"
                     strokeLinecap="round"
                   />
                 </g>
@@ -310,23 +310,23 @@ function Geometry() {
                       {/* Left: Fork (Delicate, reduced size) */}
                       <g data-cutlery-fork transform="translate(-22, 0)">
                         {/* Fork handle */}
-                        <line x1="0" y1="-1" x2="0" y2="11" stroke="#7D674E" strokeWidth="0.9" strokeLinecap="round" />
+                        <line x1="0" y1="-1" x2="0" y2="11" stroke="#9C7A3C" strokeWidth="0.95" strokeLinecap="round" />
                         {/* Fork shoulder curve */}
-                        <path d="M -2.4 -2.8 Q 0 -0.8 2.4 -2.8" fill="none" stroke="#7D674E" strokeWidth="0.85" strokeLinecap="round" />
+                        <path d="M -2.4 -2.8 Q 0 -0.8 2.4 -2.8" fill="none" stroke="#9C7A3C" strokeWidth="0.9" strokeLinecap="round" />
                         {/* 3 Fork tines */}
-                        <line x1="-2.4" y1="-10" x2="-2.4" y2="-2.8" stroke="#7D674E" strokeWidth="0.75" strokeLinecap="round" />
-                        <line x1="0" y1="-10" x2="0" y2="-1.2" stroke="#7D674E" strokeWidth="0.75" strokeLinecap="round" />
-                        <line x1="2.4" y1="-10" x2="2.4" y2="-2.8" stroke="#7D674E" strokeWidth="0.75" strokeLinecap="round" />
+                        <line x1="-2.4" y1="-10" x2="-2.4" y2="-2.8" stroke="#9C7A3C" strokeWidth="0.8" strokeLinecap="round" />
+                        <line x1="0" y1="-10" x2="0" y2="-1.2" stroke="#9C7A3C" strokeWidth="0.8" strokeLinecap="round" />
+                        <line x1="2.4" y1="-10" x2="2.4" y2="-2.8" stroke="#9C7A3C" strokeWidth="0.8" strokeLinecap="round" />
                       </g>
 
                       {/* Right: Spoon (Delicate, reduced size) */}
                       <g data-cutlery-spoon transform="translate(22, 0)">
                         {/* Spoon handle */}
-                        <line x1="0" y1="-1" x2="0" y2="11" stroke="#7D674E" strokeWidth="0.9" strokeLinecap="round" />
+                        <line x1="0" y1="-1" x2="0" y2="11" stroke="#9C7A3C" strokeWidth="0.95" strokeLinecap="round" />
                         {/* Spoon bowl */}
-                        <ellipse cx="0" cy="-5.5" rx="3.2" ry="5.2" fill="#FAF6EF" stroke="#7D674E" strokeWidth="0.85" />
+                        <ellipse cx="0" cy="-5.5" rx="3.2" ry="5.2" fill="#FCF8EE" stroke="#9C7A3C" strokeWidth="0.9" />
                         {/* Inner reflection accent */}
-                        <path d="M -1.4 -7.5 Q -2 -5.5 -1 -3.5" fill="none" stroke="#D2C1AC" strokeWidth="0.6" strokeLinecap="round" />
+                        <path d="M -1.4 -7.5 Q -2 -5.5 -1 -3.5" fill="none" stroke="#C6A568" strokeWidth="0.6" strokeLinecap="round" />
                       </g>
                     </g>
 
@@ -336,25 +336,25 @@ function Geometry() {
                         cx="0"
                         cy="0"
                         r="17"
-                        fill="#FFFFFF"
-                        stroke="#D2C1AC"
+                        fill="#FCF8EE"
+                        stroke="#C6A568"
                         strokeWidth="1.2"
-                        style={{ filter: "drop-shadow(0 2px 3px rgba(60,40,20,0.08))" }}
+                        style={{ filter: "drop-shadow(0 2px 3px rgba(53,57,44,0.1))" }}
                       />
                       <circle
                         cx="0"
                         cy="0"
                         r="11"
-                        fill="#FAF6EF"
-                        stroke="#DFCFC0"
+                        fill="#F8F2E7"
+                        stroke="#D8C299"
                         strokeWidth="0.8"
                       />
                       <circle
                         cx="0"
                         cy="0"
                         r="7"
-                        fill="#FFFFFF"
-                        opacity="0.5"
+                        fill="#FCF8EE"
+                        opacity="0.7"
                       />
                     </g>
                   </g>
@@ -374,16 +374,16 @@ function Geometry() {
                         width="56"
                         height="26"
                         rx="8"
-                        fill="#FFFFFF"
-                        stroke="#3E2C20"
+                        fill="#FCF8EE"
+                        stroke="#35392C"
                         strokeWidth="1.5"
-                        style={{ filter: "drop-shadow(0 3px 8px rgba(62,44,32,0.1))" }}
+                        style={{ filter: "drop-shadow(0 3px 8px rgba(53,57,44,0.12))" }}
                       />
                       {/* Burgundy Backrest: Outer half of the chair facing outward */}
                       <path
                         d="M -28 -4 L -28 -5 C -28 -9.4 -23.4 -13 -19 -13 L 19 -13 C 23.4 -13 28 -9.4 28 -5 L 28 -4 Z"
-                        fill="#962838"
-                        stroke="#3E2C20"
+                        fill="#691C35"
+                        stroke="#35392C"
                         strokeWidth="1.5"
                       />
                       {/* Seat Cushion Divider Line */}
@@ -392,7 +392,7 @@ function Geometry() {
                         y1="-4"
                         x2="27.5"
                         y2="-4"
-                        stroke="#3E2C20"
+                        stroke="#35392C"
                         strokeWidth="1.2"
                       />
                       {/* Special YOU pill badge on Seat 0 */}
@@ -405,6 +405,8 @@ function Geometry() {
                             height="14"
                             rx="7"
                             fill="#691C35"
+                            stroke="#C6A568"
+                            strokeWidth="0.9"
                           />
                           <text
                             x="0"
@@ -423,7 +425,7 @@ function Geometry() {
               </svg>
             </div>
             {/* Architectural caption */}
-            <p data-table-caption className="mt-4 label-mono text-[11px] text-muted-foreground tracking-widest text-center">
+            <p data-table-caption className="mt-4 label-mono text-[11px] text-[#5F7045] tracking-widest text-center font-medium">
               Six seats. One table. Pulled up for people who haven't met yet.
             </p>
           </div>
@@ -432,7 +434,7 @@ function Geometry() {
           <div className="relative flex h-[35vh] w-full items-center justify-start pl-0 lg:h-full lg:pl-10">
             {/* Frame 1 */}
             <div data-geo-text="0" className="absolute w-full">
-              <h3 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-[5.2vw] leading-[1.06] text-ink">
+              <h3 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-[5.2vw] leading-[1.06] text-[#35392C]">
                 You,<br />
                 somewhere in<br />
                 Delhi.
@@ -440,17 +442,17 @@ function Geometry() {
             </div>
             {/* Frame 2 */}
             <div data-geo-text="1" className="absolute w-full opacity-0">
-              <h3 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-[5.2vw] leading-[1.06] text-ink">
+              <h3 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-[5.2vw] leading-[1.06] text-[#35392C]">
                 Five others, just<br />
                 as new here.
               </h3>
             </div>
             {/* Frame 3 */}
             <div data-geo-text="2" className="absolute w-full opacity-0">
-              <h3 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-[5.2vw] leading-[1.06] text-ink">
+              <h3 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-[5.2vw] leading-[1.06] text-[#35392C]">
                 One table. One<br />
                 empty chair.<br />
-                <span className="italic text-burgundy">Sunday, 7 PM.</span>
+                <span className="italic text-[#691C35]">Sunday, 7 PM.</span>
               </h3>
             </div>
           </div>
@@ -460,10 +462,10 @@ function Geometry() {
         <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 z-20 pointer-events-auto">
           <a
             href="/quiz"
-            className="group flex items-center gap-3 rounded-full bg-burgundy py-2.5 pl-6 pr-2 text-xs font-mono uppercase tracking-widest text-ivory shadow-lg transition-all hover:bg-ink hover:scale-105"
+            className="group flex items-center gap-3 rounded-full bg-[#691C35] border border-[#C6A568]/55 py-2.5 pl-6 pr-2 text-xs font-mono uppercase tracking-widest text-[#F8F2E7] shadow-lg transition-all hover:bg-[#5F7045] hover:scale-105"
           >
             <span>Take the quiz</span>
-            <span className="grid size-7 place-items-center rounded-full bg-ivory text-burgundy transition-transform group-hover:translate-x-0.5">
+            <span className="grid size-7 place-items-center rounded-full bg-[#F8F2E7] text-[#691C35] transition-transform group-hover:translate-x-0.5">
               <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14" />
                 <path d="m12 5 7 7-7 7" />
@@ -597,7 +599,7 @@ const galleryPostcards = [
     title: "The Geometry of Six",
     location: "Sunder Nursery Pavilion",
     time: "7:30 PM",
-    pinColor: "#2D3E28", // Forest Green
+    pinColor: "#5F7045", // Brand Olive
     pinTilt: -5,
     desktop: { top: "8%", left: "68%", rotate: -3 },
     mobile: { top: "36%", left: "8%", rotate: -3, width: "260px" },
@@ -609,7 +611,7 @@ const galleryPostcards = [
     title: "Breaking Bread",
     location: "Hauz Khas Terraces",
     time: "8:58 PM",
-    pinColor: "#B85A3B", // Warm Terracotta
+    pinColor: "#8E354A", // Rose Wine
     pinTilt: 8,
     desktop: { top: "51%", left: "5%", rotate: 4 },
     mobile: { top: "48%", left: "22%", rotate: 5, width: "260px" },
@@ -621,7 +623,7 @@ const galleryPostcards = [
     title: "Sanctuary from the Rush",
     location: "Lodhi Verandas",
     time: "10:10 PM",
-    pinColor: "#1E2A38", // Deep Ink Navy
+    pinColor: "#35392C", // Deep Olive Ink
     pinTilt: -6,
     desktop: { top: "49%", left: "37%", rotate: -2 },
     mobile: { top: "60%", left: "6%", rotate: -2, width: "260px" },
@@ -735,7 +737,7 @@ function Collage() {
       .to(
         "[data-stories-watermark-sub]",
         {
-          color: "rgba(248, 242, 231, 0.65)",
+          color: "rgba(232, 236, 216, 0.85)",
           duration: 0.9,
           ease: "power2.inOut",
         },
@@ -744,7 +746,7 @@ function Collage() {
       .to(
         "[data-stories-watermark-title]",
         {
-          color: "rgba(248, 242, 231, 0.32)",
+          color: "rgba(248, 242, 231, 0.36)",
           duration: 0.9,
           ease: "power2.inOut",
         },
@@ -753,7 +755,7 @@ function Collage() {
       .to(
         "[data-stories-watermark-em]",
         {
-          color: "rgba(198, 165, 104, 0.7)",
+          color: "rgba(198, 165, 104, 0.85)",
           duration: 0.9,
           ease: "power2.inOut",
         },
@@ -835,7 +837,7 @@ function Collage() {
       .to(
         "[data-stories-watermark-sub]",
         {
-          color: "rgba(23, 21, 20, 0.4)",
+          color: "rgba(95, 112, 69, 0.75)",
           duration: 0.8,
           ease: "power2.inOut",
         },
@@ -844,7 +846,7 @@ function Collage() {
       .to(
         "[data-stories-watermark-title]",
         {
-          color: "rgba(23, 21, 20, 0.2)",
+          color: "rgba(53, 57, 44, 0.22)",
           duration: 0.8,
           ease: "power2.inOut",
         },
@@ -853,7 +855,7 @@ function Collage() {
       .to(
         "[data-stories-watermark-em]",
         {
-          color: "rgba(105, 28, 53, 0.25)",
+          color: "rgba(105, 28, 53, 0.42)",
           duration: 0.8,
           ease: "power2.inOut",
         },
@@ -876,12 +878,12 @@ function Collage() {
     <section
       id="stories"
       ref={sectionRef}
-      className="relative h-[340vh] bg-[#FAF7F2] select-none -mt-px will-change-transform"
+      className="relative h-[340vh] bg-[#F8F2E7] select-none -mt-px will-change-transform"
     >
       {/* Sticky Fullscreen Pinboard Stage */}
       <div
         ref={stageRef}
-        className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-[#FAF7F2] px-3 sm:px-6 transform-gpu"
+        className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-[#F8F2E7] px-3 sm:px-6 transform-gpu"
       >
         {/* Fullscreen Forest Green Background Layer (GPU-composited opacity) */}
         <div
@@ -892,7 +894,7 @@ function Collage() {
         {/* Soft Vignette Overlay for rich photographic moodboard depth */}
         <div
           data-stories-vignette
-          className="pointer-events-none absolute inset-0 opacity-0 bg-[radial-gradient(circle_at_center,transparent_40%,rgba(15,22,12,0.45)_100%)] will-change-[opacity]"
+          className="pointer-events-none absolute inset-0 opacity-0 bg-[radial-gradient(circle_at_center,transparent_40%,rgba(28,38,19,0.45)_100%)] will-change-[opacity]"
         />
 
         {/* Atmospheric Candlelight Glow in Center (Optimized blurs for 60fps performance) */}
@@ -900,26 +902,26 @@ function Collage() {
           data-stories-glow
           className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 will-change-[opacity,transform]"
         >
-          <div className="w-[60vw] h-[60vw] max-w-[650px] max-h-[650px] rounded-full bg-[#C6A568]/20 blur-[64px] pointer-events-none" />
-          <div className="w-[40vw] h-[40vw] max-w-[450px] max-h-[450px] rounded-full bg-[#691C35]/16 blur-[48px] pointer-events-none" />
+          <div className="w-[60vw] h-[60vw] max-w-[650px] max-h-[650px] rounded-full bg-[#C6A568]/24 blur-[64px] pointer-events-none" />
+          <div className="w-[40vw] h-[40vw] max-w-[450px] max-h-[450px] rounded-full bg-[#691C35]/20 blur-[48px] pointer-events-none" />
         </div>
 
         {/* Ambient Pinboard Watermark Title (Visible on blank canvas before cards land) */}
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center px-4 select-none">
           <span
             data-stories-watermark-sub
-            className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.28em] text-[#171514]/40 mb-3"
+            className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.28em] text-[#5F7045]/75 mb-3"
           >
             Moments From The Table · Delhi NCR
           </span>
           <h2
             data-stories-watermark-title
-            className="font-display text-4xl sm:text-6xl md:text-7xl lg:text-8xl text-[#171514]/20 tracking-tight leading-none"
+            className="font-display text-4xl sm:text-6xl md:text-7xl lg:text-8xl text-[#35392C]/22 tracking-tight leading-none"
           >
             Six strangers.<br />
             <em
               data-stories-watermark-em
-              className="font-serif italic text-burgundy/25"
+              className="font-serif italic text-[#691C35]/42"
             >
               Stories that linger.
             </em>
@@ -941,7 +943,7 @@ function Collage() {
                   width: isMobile ? card.mobile.width : undefined,
                   willChange: "transform, opacity",
                 }}
-                className="absolute pointer-events-auto rounded-2xl bg-[#FCFAF7] p-3 sm:p-3.5 pb-6 sm:pb-7 shadow-[0_18px_40px_-10px_rgba(23,21,20,0.22),_0_2px_8px_rgba(0,0,0,0.04)] border border-[#171514]/8 w-[250px] sm:w-[280px] md:w-[310px] lg:w-[340px] xl:w-[370px] transition-shadow duration-300 hover:shadow-[0_28px_60px_-12px_rgba(105,28,53,0.3)] hover:scale-[1.025] cursor-pointer transform-gpu will-change-[transform,opacity]"
+                className="absolute pointer-events-auto rounded-2xl bg-[#FCF8EE] p-3 sm:p-3.5 pb-6 sm:pb-7 shadow-[0_18px_40px_-10px_rgba(38,16,25,0.24),_0_2px_8px_rgba(0,0,0,0.04)] border border-[#C6A568]/45 w-[250px] sm:w-[280px] md:w-[310px] lg:w-[340px] xl:w-[370px] transition-shadow duration-300 hover:shadow-[0_28px_60px_-12px_rgba(105,28,53,0.35)] hover:scale-[1.025] cursor-pointer transform-gpu will-change-[transform,opacity]"
               >
                 {/* Handcrafted Doodle Pin on Top of Card */}
                 <div
@@ -953,7 +955,7 @@ function Collage() {
                 </div>
 
                 {/* Postcard Image Frame */}
-                <div className="aspect-[4/3] w-full overflow-hidden rounded-xl bg-ink/5 relative">
+                <div className="aspect-[4/3] w-full overflow-hidden rounded-xl bg-[#E8ECD8]/60 relative">
                   <img
                     src={card.src}
                     alt={card.alt}
@@ -961,20 +963,20 @@ function Collage() {
                     loading="lazy"
                   />
                   {/* Subtle inner shadow for tactile photograph print feel */}
-                  <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-black/10" />
+                  <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-[#C6A568]/25" />
                 </div>
 
                 {/* Postcard Handwritten / Editorial Caption */}
                 <div className="mt-3 px-1.5 flex items-baseline justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="font-display text-base sm:text-lg text-ink leading-tight truncate">
+                    <p className="font-display text-base sm:text-lg text-[#35392C] leading-tight truncate">
                       {card.title}
                     </p>
-                    <p className="font-mono text-[9px] sm:text-[10px] text-ink/60 uppercase tracking-wider truncate mt-0.5">
+                    <p className="font-mono text-[9px] sm:text-[10px] text-[#5F7045] uppercase tracking-wider truncate mt-0.5">
                       {card.location}
                     </p>
                   </div>
-                  <span className="shrink-0 font-mono text-[10px] sm:text-xs text-burgundy font-semibold">
+                  <span className="shrink-0 font-mono text-[10px] sm:text-xs text-[#691C35] font-semibold">
                     {card.time}
                   </span>
                 </div>
@@ -993,18 +995,19 @@ function How() {
 
 function CuratedGallerySection() {
   return (
-    <section className="relative w-full pt-14 pb-8 bg-black text-white overflow-hidden">
+    <section className="relative w-full pt-14 pb-8 bg-[#261019] text-[#F8F2E7] overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(105,28,53,0.34)_0%,_transparent_70%)]" />
       {/* Testimonial Section Header */}
-      <div className="max-w-4xl mx-auto text-center mb-6 px-4">
-        <p className="label-mono mb-2 text-ochre font-semibold uppercase tracking-widest text-xs">
+      <div className="relative z-10 max-w-4xl mx-auto text-center mb-6 px-4">
+        <p className="label-mono mb-2 text-[#C6A568] font-semibold uppercase tracking-widest text-xs">
           Voices from the Table
         </p>
-        <h2 className="font-display text-4xl sm:text-5xl md:text-6xl text-ivory leading-tight">
-          What happens when <em className="text-ochre">strangers break bread.</em>
+        <h2 className="font-display text-4xl sm:text-5xl md:text-6xl text-[#F8F2E7] leading-tight">
+          What happens when <em className="text-[#C6A568]">strangers break bread.</em>
         </h2>
       </div>
 
-      <div className="w-full">
+      <div className="relative z-10 w-full">
         <ConcaveCarousel
           items={testimonials}
           aspect={1.38}
@@ -1038,7 +1041,7 @@ function Footer() {
   return (
     <footer
       id="join"
-      className="relative min-h-screen w-full flex flex-col justify-center items-center bg-[#150409] px-[4vw] py-20 text-ivory overflow-hidden -mt-1"
+      className="relative min-h-screen w-full flex flex-col justify-center items-center bg-[#261019] px-[4vw] py-20 text-[#F8F2E7] overflow-hidden -mt-1"
     >
       {/* Background Image Layer: Pure high-visibility velvet dinner table */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
@@ -1048,12 +1051,12 @@ function Footer() {
           alt="Precious Meets Table"
           className="w-full h-full object-cover object-center scale-110"
         />
-        {/* Crisp subtle dark vignette */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/45" />
+        {/* Crisp subtle burgundy-night vignette */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#261019]/90 via-[#261019]/35 to-[#261019]" />
       </div>
 
       <div className="relative z-10 max-w-6xl w-full mx-auto flex flex-col items-center justify-center text-center my-auto">
-        <p className="label-mono text-ochre uppercase tracking-widest font-semibold mb-6">
+        <p className="label-mono text-[#C6A568] uppercase tracking-widest font-semibold mb-6">
           Every meet matters. Every seat is held.
         </p>
 
@@ -1062,9 +1065,9 @@ function Footer() {
           <div className="relative inline-block">
             <h2
               data-footer-wordmark
-              className="font-display text-[14vw] sm:text-[13vw] md:text-[11vw] leading-[0.9] tracking-tight text-ivory select-none"
+              className="font-display text-[14vw] sm:text-[13vw] md:text-[11vw] leading-[0.9] tracking-tight text-[#F8F2E7] select-none"
             >
-              Precious <em className="text-ochre not-italic">Meets</em>
+              Precious <em className="text-[#C6A568] not-italic">Meets</em>
             </h2>
 
             {/* Playful Animated SVG Underline */}
@@ -1086,7 +1089,7 @@ function Footer() {
         </div>
 
         <div className="mt-12 flex flex-wrap justify-center gap-4">
-          <CtaButton tone="burgundy" href="/quiz">Take the Quiz</CtaButton>
+          <CtaButton tone="burgundy" href="/quiz" className="ring-1 ring-[#C6A568]/55">Take the Quiz</CtaButton>
           <CtaButton tone="ivory" href="/philosophy">Our Safety Philosophy</CtaButton>
         </div>
       </div>
@@ -1124,14 +1127,14 @@ function Index() {
     const lenis = reduce
       ? null
       : new Lenis({
-          duration: 1.0,
-          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-          orientation: "vertical",
-          gestureOrientation: "vertical",
-          smoothWheel: true,
-          wheelMultiplier: 1.0,
-          touchMultiplier: 1.0,
-        });
+        duration: 1.0,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        orientation: "vertical",
+        gestureOrientation: "vertical",
+        smoothWheel: true,
+        wheelMultiplier: 1.0,
+        touchMultiplier: 1.0,
+      });
 
     let rafCallback: ((time: number) => void) | null = null;
     if (lenis) {
@@ -1387,7 +1390,7 @@ function Index() {
       <Preloader onComplete={handlePreloaderComplete} />
       <Navbar />
       <main>
-        <AnimatedSummitHero />
+        <LuxuryTableHero />
         <HeroMarquee />
         <Statement />
         <Collage />
@@ -1406,9 +1409,9 @@ function Index() {
             <button
               type="button"
               aria-label="24/7 Safety SOS & Host Escort"
-              className="flex items-center gap-2 rounded-full bg-red-700 hover:bg-red-800 text-white px-4 py-3 text-xs font-bold shadow-2xl transition-all hover:scale-105 active:scale-95 cursor-pointer border border-red-500/50"
+              className="flex items-center gap-2 rounded-full bg-[#691C35] hover:bg-[#5F7045] text-[#F8F2E7] px-4 py-3 text-xs font-bold shadow-2xl transition-all hover:scale-105 active:scale-95 cursor-pointer border border-[#C6A568]/80"
             >
-              <ShieldAlert className="size-4 animate-pulse text-white" />
+              <ShieldAlert className="size-4 animate-pulse text-[#C6A568]" />
               <span>24/7 Safety SOS</span>
             </button>
           }

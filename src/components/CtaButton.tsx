@@ -1,13 +1,14 @@
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type Tone = "burgundy" | "ink" | "ivory" | "forest";
+type Tone = "burgundy" | "ink" | "ivory" | "forest" | "gold";
 
 const tones: Record<Tone, { shell: string; dot: string }> = {
   burgundy: { shell: "bg-burgundy text-ivory hover:bg-ink", dot: "bg-ivory text-burgundy" },
   ink: { shell: "bg-ink text-ivory hover:bg-burgundy", dot: "bg-ivory text-ink" },
   forest: { shell: "bg-forest text-ivory hover:bg-ink", dot: "bg-ivory text-forest" },
   ivory: { shell: "bg-ivory text-ink hover:bg-ochre", dot: "bg-ink text-ivory" },
+  gold: { shell: "bg-ochre text-[#35392C] hover:bg-ivory hover:text-burgundy", dot: "bg-burgundy text-ivory" },
 };
 
 export function CtaButton({
