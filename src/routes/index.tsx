@@ -206,10 +206,11 @@ function Statement() {
             return (
               <span
                 key={lIdx}
-                className={`block w-full ${line.isBurgundyItalic
+                className={`block w-full ${
+                  line.isBurgundyItalic
                     ? "italic font-serif text-[#C6A568] pt-1 sm:pt-2"
                     : "text-[#F8F2E7]"
-                  } ${lIdx === 0 ? "sm:whitespace-nowrap" : ""}`}
+                } ${lIdx === 0 ? "sm:whitespace-nowrap" : ""}`}
               >
                 {words.map((word, wIdx) => (
                   <span
@@ -1127,14 +1128,14 @@ function Index() {
     const lenis = reduce
       ? null
       : new Lenis({
-        duration: 1.0,
-        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        orientation: "vertical",
-        gestureOrientation: "vertical",
-        smoothWheel: true,
-        wheelMultiplier: 1.0,
-        touchMultiplier: 1.0,
-      });
+          duration: 1.0,
+          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          orientation: "vertical",
+          gestureOrientation: "vertical",
+          smoothWheel: true,
+          wheelMultiplier: 1.0,
+          touchMultiplier: 1.0,
+        });
 
     let rafCallback: ((time: number) => void) | null = null;
     if (lenis) {
