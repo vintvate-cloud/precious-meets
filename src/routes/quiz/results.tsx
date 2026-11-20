@@ -9,6 +9,7 @@ import { ApplicationsService } from "@/lib/applications-service";
 import { VerificationsService } from "@/lib/verifications-service";
 import { CryptoService } from "@/lib/crypto-service";
 import { openRazorpaySubscriptionCheckout } from "@/lib/razorpay-client";
+import { RazorpaySubscriptionModal } from "@/components/RazorpaySubscriptionModal";
 import { supabase } from "@/lib/supabase";
 import {
 
@@ -42,7 +43,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/quiz/results")({
   head: () => ({
     meta: [
-      { title: "Your Vibe Profile & Membership — Precious Meets" },
+      { title: "Your Vibe Profile & Membership | Precious Meets" },
       {
         name: "description",
         content: "Discover your conversational archetype, social insights, and unlock curated table access.",
@@ -68,6 +69,7 @@ export function QuizResultsPage() {
   const [instagram, setInstagram] = useState<string | undefined>(undefined);
   const [linkedin, setLinkedin] = useState<string | undefined>(undefined);
   const [paying, setPaying] = useState(false);
+  const [fallbackModalOpen, setFallbackModalOpen] = useState(false);
   const [paidDossier, setPaidDossier] = useState<{ memberId: string; paymentId: string; invoiceNumber: string } | null>(null);
 
   // Success Dialog State
@@ -210,7 +212,7 @@ export function QuizResultsPage() {
     setPaying(true);
 
     try {
-      // Launch the ACTUAL Razorpay payment gateway checkout modal
+      // Launch Razorpay payment gateway checkout modal with automatic script blocker fallback
       await openRazorpaySubscriptionCheckout({
         name: name.trim(),
         email: email.trim(),
@@ -224,14 +226,20 @@ export function QuizResultsPage() {
             signature: result.signature,
           });
         },
-        onError: (err) => {
+        onError: (err, isScriptBlocked) => {
           setPaying(false);
-          toast.info(err || "Payment cancelled. You can retry whenever you are ready.");
+          if (isScriptBlocked) {
+            toast.info("Browser ad-blocker detected. Opening direct secure checkout modal...");
+            setFallbackModalOpen(true);
+          } else {
+            toast.info(err || "Payment cancelled. You can retry whenever you are ready.");
+          }
         },
       });
     } catch (err: any) {
       setPaying(false);
-      toast.error(err.message || "Failed to initialize Razorpay gateway.");
+      setFallbackModalOpen(true);
+      toast.info("Opening direct secure checkout modal...");
     }
   };
 
@@ -883,6 +891,29 @@ export function QuizResultsPage() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Resilient Fallback Checkout Modal (Fires automatically if external Razorpay script is blocked by AdBlocker/Brave) */}
+      <RazorpaySubscriptionModal
+        open={fallbackModalOpen}
+        onOpenChange={setFallbackModalOpen}
+        userName={name.trim()}
+        userEmail={email.trim()}
+        userPhone={phone.trim()}
+        amountInr={1999}
+        planTitle="Precious Meets Membership"
+        onSuccess={(result) => {
+          setFallbackModalOpen(false);
+          handleRazorpaySuccess({
+            paymentId: result.paymentId,
+            orderId: result.orderId,
+            signature: result.signature,
+          });
+        }}
+        onError={(err) => {
+          setFallbackModalOpen(false);
+          toast.info(err);
+        }}
+      />
 
       <Footer />
     </div>

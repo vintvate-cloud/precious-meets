@@ -7,8 +7,8 @@ import { MapPin, Calendar, Users, Utensils, ArrowUpRight } from "lucide-react";
 export const Route = createFileRoute("/experiences/")({
   head: () => ({
     meta: [
-      { title: "Curated Meets & Shared Tables — Precious Meets" },
-      { name: "description", content: "Discover upcoming dinners, slow coffee meets, and evening gatherings across Delhi NCR." },
+      { title: "Curated Meets & Shared Tables | Precious Meets" },
+      { name: "description", content: "Discover upcoming dinners, slow coffee meets, and evening gatherings." },
     ],
   }),
   component: ExperiencesPage,
@@ -84,7 +84,7 @@ function ExperiencesPage() {
             Curated Experiences for <em className="italic text-burgundy">Curious Minds</em>
           </h1>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            Every gathering is intentionally sized to 4–6 attendees, paired by compatibility, and hosted at authentic local culinary gems.
+            Every gathering is intentionally sized to 4 to 6 attendees, paired by compatibility, and hosted at authentic local culinary gems.
           </p>
         </div>
 

@@ -32,7 +32,7 @@ export const Route = createFileRoute("/verify-identity")({
   }),
   head: () => ({
     meta: [
-      { title: "Identity Verification — Precious Meets" },
+      { title: "Identity Verification | Precious Meets" },
       {
         name: "description",
         content: "Consent-based offline identity verification for table safety.",

@@ -31,7 +31,7 @@ function syncDatabaseCacheNamespace(currentUrl: string) {
   if (typeof window === "undefined" || !window.localStorage) return;
   try {
     const DB_CACHE_VERSION_KEY = "precious_meets_db_cache_version";
-    const EXPECTED_VERSION = `v2_db_${currentUrl}`;
+    const EXPECTED_VERSION = `v6_live_supabase_${currentUrl}`;
     const storedVersion = localStorage.getItem(DB_CACHE_VERSION_KEY);
 
     if (storedVersion !== EXPECTED_VERSION) {
@@ -43,6 +43,7 @@ function syncDatabaseCacheNamespace(currentUrl: string) {
         "precious_meets_verification_queue_v1",
         "precious_meets_verification_queue",
         "precious_meets_member_rsvps",
+        "precious_meets_deleted_users_blacklist_v1",
       ];
       keysToPurge.forEach((key) => localStorage.removeItem(key));
       localStorage.setItem(DB_CACHE_VERSION_KEY, EXPECTED_VERSION);

@@ -4,7 +4,7 @@ import { Navbar } from "@/components/Navbar";
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacy Policy — Precious Meets" },
+      { title: "Privacy Policy | Precious Meets" },
       { name: "description", content: "Privacy policy and DPDP Act compliance notes for Precious Meets." },
     ],
   }),

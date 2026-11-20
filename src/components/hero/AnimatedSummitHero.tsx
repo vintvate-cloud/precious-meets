@@ -21,7 +21,7 @@ export function AnimatedSummitHero() {
         <div className="absolute -inset-x-3 inset-y-0 translate-x-[5px]">
           <img
             src={heroDelhiSkylineNight}
-            alt="Delhi Skyline Hero Background — Starry Purple Night"
+            alt="Delhi Skyline Hero Background | Starry Purple Night"
             className="absolute -top-8 -bottom-8 inset-x-0 w-full h-[calc(100%+64px)] object-cover object-bottom translate-y-1.5 sm:translate-y-3 md:translate-y-4 brightness-105 saturate-[1.1]"
           />
         </div>

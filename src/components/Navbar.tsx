@@ -163,9 +163,6 @@ export function Navbar() {
                   <Compass className="size-4 text-forest" />
                   <span>The Philosophy</span>
                 </div>
-                <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-forest/15 text-forest font-semibold">
-                  Women-First
-                </span>
               </Link>
 
               {/* 2. How It Works */}
@@ -178,22 +175,7 @@ export function Navbar() {
                 <span>How It Works</span>
               </Link>
 
-              {/* 3. Safety & SOS */}
-              <Link
-                to="/safety"
-                onClick={() => setOpen(false)}
-                className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
-              >
-                <div className="flex items-center gap-2.5">
-                  <ShieldAlert className="size-4 text-red-600" />
-                  <span>24/7 Safety & SOS</span>
-                </div>
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-red-100 text-red-700 font-semibold">
-                  Emergency
-                </span>
-              </Link>
-
-              {/* 4. FAQs */}
+              {/* 3. FAQs */}
               <Link
                 to="/faq"
                 onClick={() => setOpen(false)}
@@ -208,7 +190,7 @@ export function Navbar() {
                 </span>
               </Link>
 
-              {/* 5 & 6. Terms of Service & Privacy Policy */}
+              {/* 4 & 5. Terms of Service & Privacy Policy */}
               <div className="border-t border-[#171514]/10 my-1 pt-1.5 space-y-1">
                 <Link
                   to="/terms"
@@ -229,7 +211,7 @@ export function Navbar() {
                 </Link>
               </div>
 
-              {/* Member Session */}
+              {/* Member Session / Sign In */}
               {isMemberAuthenticated ? (
                 <div className="border-t border-[#171514]/10 my-1 pt-1.5 space-y-1">
                   <div className="px-3 py-1 flex items-center justify-between">
@@ -278,6 +260,23 @@ export function Navbar() {
                   <span>Member Sign In</span>
                 </Link>
               )}
+
+              {/* 24/7 Safety & SOS (Shifted to the bottom below Member Sign In) */}
+              <div className="border-t border-[#171514]/10 my-1 pt-1.5">
+                <Link
+                  to="/safety"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <ShieldAlert className="size-4 text-red-600" />
+                    <span>24/7 Safety & SOS</span>
+                  </div>
+                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-red-100 text-red-700 font-semibold">
+                    Emergency
+                  </span>
+                </Link>
+              </div>
             </div>
           </div>
         )}

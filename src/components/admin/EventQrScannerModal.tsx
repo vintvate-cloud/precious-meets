@@ -589,7 +589,7 @@ export function EventQrScannerModal({
                         Strict Table Protocol Enforced
                       </span>
                       <h3 className="font-display text-xl sm:text-2xl text-destructive font-semibold">
-                        Entry Denied — Not Seated at This Table
+                        Entry Denied: Not Seated at This Table
                       </h3>
                       <p className="text-xs text-destructive/90 mt-1 leading-relaxed">
                         {scanResult.message}

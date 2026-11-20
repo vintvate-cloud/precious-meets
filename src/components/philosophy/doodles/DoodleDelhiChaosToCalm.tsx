@@ -37,7 +37,7 @@ export function DoodleDelhiChaosToCalm({ className = "w-full h-auto" }: DoodlePr
         {/* Label */}
         <rect x="18" y="14" width="132" height="20" rx="10" fill="#EF4444" />
         <text x="84" y="27.5" textAnchor="middle" fill="#FFFDF9" fontFamily="monospace" fontSize="8" fontWeight="800">
-          DELHI PUBLIC CHAOS
+          PUBLIC VENUE NOISE
         </text>
 
         {/* Anonymous Catfish Mask (Crossed Out) */}
@@ -60,24 +60,20 @@ export function DoodleDelhiChaosToCalm({ className = "w-full h-auto" }: DoodlePr
           {/* Loud Speaker horn blast */}
           <path d="M 38 12 L 44 8 V 22 L 38 18 Z" fill="#991B1B" />
           <path d="M 46 10 Q 50 15 46 20" stroke="#DC2626" strokeWidth="1.5" fill="none" />
-          <text x="22" y="52" textAnchor="middle" fill="#991B1B" fontFamily="sans-serif" fontSize="7.5" fontWeight="700">Loud / On Guard</text>
+          <text x="22" y="52" textAnchor="middle" fill="#991B1B" fontFamily="sans-serif" fontSize="7.5" fontWeight="700">Loud / Noisy</text>
         </g>
 
-        {/* Delhi Traffic & Anxious Journey Doodle */}
-        <g transform="translate(205, 62)">
-          {/* Cab / Car sketch */}
-          <rect x="0" y="14" width="36" height="16" rx="4" fill="#FDE047" stroke="#713F12" strokeWidth="1.2" />
-          <path d="M 6 14 L 10 6 H 26 L 30 14 Z" fill="#FEF08A" stroke="#713F12" strokeWidth="1.2" />
-          <circle cx="8" cy="30" r="4" fill="#1F2937" />
-          <circle cx="28" cy="30" r="4" fill="#1F2937" />
-          {/* Cab anxious thinking bubble */}
-          <text x="18" y="52" textAnchor="middle" fill="#B45309" fontFamily="sans-serif" fontSize="7.5" fontWeight="700">Late Cab Stress</text>
+        {/* Superficial Banter & Unscreened Crowd */}
+        <g transform="translate(205, 60)">
+          <rect x="0" y="10" width="36" height="24" rx="6" fill="#FEE2E2" stroke="#DC2626" strokeWidth="1.2" />
+          <path d="M 8 20 H 28 M 12 25 H 24" stroke="#DC2626" strokeWidth="1.5" strokeLinecap="round" />
+          <text x="18" y="52" textAnchor="middle" fill="#B45309" fontFamily="sans-serif" fontSize="7.5" fontWeight="700">Surface Talk</text>
         </g>
 
         {/* Bottom Reality Checklist Note */}
         <path d="M 25 140 H 255" stroke="#FCA5A5" strokeWidth="1" strokeDasharray="3 3" />
         <text x="140" y="162" textAnchor="middle" fill="#991B1B" fontFamily="serif" fontStyle="italic" fontSize="10">
-          "Constantly calculating exits, travel routes & safety"
+          "Constantly on guard in chaotic, unpredictable nightlife"
         </text>
       </g>
 
@@ -125,12 +121,12 @@ export function DoodleDelhiChaosToCalm({ className = "w-full h-auto" }: DoodlePr
           PRECIOUS MEETS SANCTUARY
         </text>
 
-        {/* Verified Attendee Badges (HER & HIM) */}
+        {/* Verified Attendee Badges */}
         <g transform="translate(42, 60)">
           <circle cx="16" cy="16" r="14" fill="#FCE7F3" stroke="#BE185D" strokeWidth="1.8" />
           <circle cx="16" cy="13" r="4.5" fill="#BE185D" />
           <path d="M 10 25 C 10 20 22 20 22 25" fill="#BE185D" />
-          <text x="16" y="44" textAnchor="middle" fill="#BE185D" fontFamily="sans-serif" fontSize="7.5" fontWeight="800">Verified Her</text>
+          <text x="16" y="44" textAnchor="middle" fill="#BE185D" fontFamily="sans-serif" fontSize="7.5" fontWeight="800">Verified Guest</text>
         </g>
 
         {/* Intimate Candle Table in center */}

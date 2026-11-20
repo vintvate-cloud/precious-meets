@@ -153,6 +153,8 @@ export class EventsService {
           "evt_delhi_vinyl",
           "evt_hauzkhas_afterdark",
           "evt_sunder_nursery_past",
+          "evt_mehrauli_supper_curated",
+          "evt_delhi_salon_curated",
         ]);
         const legacyMockCodes = new Set([
           "COURTYARD-902",
@@ -170,10 +172,10 @@ export class EventsService {
           )
           .map((evt) => ({
             ...evt,
-            // Clean any mock attendee IDs (att_01..08) from seat slots
+            // Clean any mock attendee IDs from seat slots
             seats: Array.isArray(evt.seats)
               ? evt.seats.map((seatId) =>
-                  seatId && typeof seatId === "string" && seatId.startsWith("att_0") ? null : seatId
+                  seatId && typeof seatId === "string" && (seatId.startsWith("att_0") || seatId.startsWith("app_1")) ? null : seatId
                 )
               : [null, null, null, null, null, null],
           }));
@@ -183,7 +185,6 @@ export class EventsService {
         }
         return cleaned;
       }
-      localStorage.setItem(STORAGE_EVENTS_KEY, JSON.stringify(INITIAL_EVENTS));
       return INITIAL_EVENTS;
     } catch (e) {
       console.error("[EventsService] Failed to load events from storage:", e);
@@ -842,7 +843,7 @@ export class EventsService {
             name: attendee.name,
             experienceTitle: event.title,
             date: event.dateDisplay,
-            venue: `${event.venueName} (${event.venueAddress}) — Gate PIN: ${event.secretAccessCode}`,
+            venue: `${event.venueName} (${event.venueAddress}) | Gate PIN: ${event.secretAccessCode}`,
             host: event.hostName,
             reference: `MEET-${event.secretAccessCode}-${attendee.id.slice(-4).toUpperCase()}`,
             dashboardUrl,

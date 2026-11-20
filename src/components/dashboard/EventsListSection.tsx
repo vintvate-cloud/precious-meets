@@ -412,7 +412,7 @@ export function EventsListSection({
 
             <div className="rounded-xl bg-sage/20 p-3 text-[11px] text-muted-foreground text-center">
               <p>
-                Venue: <strong>{selectedPass.venueName}</strong> — {selectedPass.venueAddress}
+                Venue: <strong>{selectedPass.venueName}</strong> · {selectedPass.venueAddress}
               </p>
               <p className="mt-0.5 text-[10px]">Strict arrival window: 10 minutes prior to table seating.</p>
             </div>

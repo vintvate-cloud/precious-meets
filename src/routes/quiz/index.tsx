@@ -32,7 +32,7 @@ import { QuizTableAtmosphere } from "@/components/quiz/QuizTableAtmosphere";
 export const Route = createFileRoute("/quiz/")({
   head: () => ({
     meta: [
-      { title: "Social Discovery Quiz & Table Reservation — Precious Meets" },
+      { title: "Social Discovery Quiz & Table Reservation | Precious Meets" },
       {
         name: "description",
         content: "Discover your conversational archetype, verified with 100% Offline Aadhaar for safe, curated dining in Delhi NCR.",

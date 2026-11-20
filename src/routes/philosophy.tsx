@@ -40,11 +40,11 @@ import {
 export const Route = createFileRoute("/philosophy")({
   head: () => ({
     meta: [
-      { title: "The Philosophy — Women's Safety & Aadhaar Verification | Precious Meets" },
+      { title: "The Philosophy · Trust, Safety & Verification | Precious Meets" },
       {
         name: "description",
         content:
-          "Why Precious Meets was built: Uncompromising women-first security, 100% Offline Aadhaar verification, and intimate dinner tables for Delhi NCR.",
+          "Why Precious Meets was built: Uncompromising identity verification, curated small-group dinners, and architectural safety for meaningful conversation.",
       },
     ],
   }),
@@ -92,8 +92,8 @@ export function PhilosophyPage() {
     },
     {
       metric: "50:50",
-      label: "Guaranteed Gender Parity",
-      sub: "No Woman Left Isolated",
+      label: "Curated Group Parity",
+      sub: "Balanced Table Chemistry",
       icon: <Users className="size-4 text-forest" />,
     },
     {
@@ -104,9 +104,9 @@ export function PhilosophyPage() {
     },
     {
       metric: "< 180s",
-      label: "Guardian Host Response",
-      sub: "Live 24/7 Safety Beacon",
-      icon: <ShieldAlert className="size-4 text-red-600" />,
+      label: "Guardian Host Presence",
+      sub: "Dedicated On-Site Host",
+      icon: <ShieldAlert className="size-4 text-burgundy" />,
     },
   ];
 
@@ -119,11 +119,25 @@ export function PhilosophyPage() {
       highlight: true,
     },
     {
-      feature: "Security & Comfort for Women",
-      nightlife: "Chaotic crowds, persistent unsolicited approaches",
-      apps: "Unpredictable 1-on-1 private risk with strangers",
-      precious: "Guaranteed 50:50 balance & present guardian host",
+      feature: "Venue Type & Policy",
+      nightlife: "Noisy, crowded clubs and bars",
+      apps: "Arbitrary public cafes or lounges",
+      precious: "Curated private dining rooms (strictly no clubs)",
       highlight: true,
+    },
+    {
+      feature: "Social Balance & Atmosphere",
+      nightlife: "Chaotic crowds, unsolicited approaches",
+      apps: "Unpredictable 1-on-1 private risk with strangers",
+      precious: "Balanced group dynamic & dedicated table host",
+      highlight: true,
+    },
+    {
+      feature: "Atmosphere & Acoustics",
+      nightlife: "Ear-splitting music, corporate posturing",
+      apps: "Surface-level transactional interrogation",
+      precious: "Candlelight, unhurried dining, deep conversation",
+      highlight: false,
     },
     {
       feature: "Misconduct Accountability",
@@ -134,23 +148,9 @@ export function PhilosophyPage() {
     },
     {
       feature: "Emergency Escalation",
-      nightlife: "Busy bouncers at outer club gate only",
+      nightlife: "Bouncers at outer gate only",
       apps: "Support ticket / delayed automated email",
       precious: "Discreet one-tap SOS beacon with on-site host",
-      highlight: true,
-    },
-    {
-      feature: "Atmosphere & Acoustics",
-      nightlife: "Ear-splitting music, corporate posturing",
-      apps: "Surface-level transactional interrogation",
-      precious: "Candlelight, unhurried wine, intellectual depth",
-      highlight: false,
-    },
-    {
-      feature: "Venue Exclusivity",
-      nightlife: "Open public chaos with zero screening",
-      apps: "Arbitrary public cafes or private lounges",
-      precious: "Vetted heritage bistros (Mehrauli, HKV, Khan Mkt)",
       highlight: false,
     },
   ];
@@ -158,27 +158,27 @@ export function PhilosophyPage() {
   const faqs = [
     {
       q: "How does Precious Meets verify and protect my uploaded Aadhaar card?",
-      a: "Every attendee uploads a clear photo or document of their official Aadhaar card alongside a matching recent personal portrait photo. Our internal curation team reviews both to verify legal full name, age, and Delhi NCR residence while confirming that the face matches the ID. Your documents are stored in secure encrypted storage, used exclusively for safety vetting, and are NEVER shown publicly to other guests or sold to third parties.",
+      a: "Every attendee uploads a photo of their official Aadhaar card alongside a matching recent personal photo. Our internal curation team reviews both to verify legal identity and confirm the face match. Your documents are stored in secure encrypted vaults, used solely for safety vetting, and are never shared publicly.",
     },
     {
       q: "Can someone catfish or use someone else's Aadhaar card?",
-      a: "Strictly impossible. We mandate dual verification: the attendee must upload their official Aadhaar card AND a current selfie/portrait. If the face in the personal portrait does not match the photo on the government ID, the application is immediately declined. There are zero anonymous profiles and zero fake personas at our tables.",
+      a: "Strictly impossible. We mandate dual verification: an official government ID and a matching personal photo. If they do not align, the application is declined immediately. There are zero anonymous guests at our tables.",
     },
     {
       q: "Can someone bring an unverified plus-one to the table?",
-      a: "Never. Every single person sitting at a Precious Meets table must independently complete our Social Discovery Quiz and pass our Aadhaar ID and face-match verification. There are zero exceptions, zero uninvited drop-ins, and zero walk-ins. This absolute screening is why our tables are Delhi's safest spaces.",
+      a: "Never. Every attendee sitting at a Precious Meets table must independently pass our Discovery Quiz and ID verification. Zero uninvited drop-ins and zero walk-ins ensure a safe, trusted room.",
     },
     {
       q: "How are Guardian Table Hosts chosen and trained?",
-      a: "Our hosts are experienced cultural ambassadors and hospitality veterans thoroughly background-checked and trained in active conversational moderation and conflict de-escalation. They coordinate smooth arrivals, foster natural introductions, and immediately enforce our zero-tolerance safety code.",
+      a: "Our hosts are experienced cultural ambassadors thoroughly background-checked and trained in active conversational moderation, hospitality, and conflict de-escalation.",
     },
     {
       q: "What happens if someone makes an attendee feel uncomfortable?",
-      a: "We maintain an uncompromising Zero-Tolerance Code. If any attendee exhibits predatory behavior, non-consensual contact, harassment, or invasive interrogation, our host immediately intervenes and escorts them out. That person receives an irreversible, Aadhaar-linked lifetime ban from all future tables.",
+      a: "We maintain an uncompromising Zero-Tolerance Code. If any attendee exhibits harassment, invasive questioning, or breaches consent, our host immediately intervenes and escorts them out. That person receives a permanent, Aadhaar-linked lifetime ban.",
     },
     {
-      q: "How does the 24/7 Safety SOS Beacon work during the dinner?",
-      a: "From the moment your table begins until you safely reach home, a discreet SOS button is live on your private member dashboard. Tapping it instantly pings your on-site Guardian Host, alerts our emergency concierge, and can notify your designated emergency contacts with live venue coordinates.",
+      q: "How does the Safety SOS Beacon work during the dinner?",
+      a: "From the moment your table begins until you conclude your evening, a discreet SOS button is accessible on your private dashboard to immediately notify your on-site Guardian Host and safety concierge if needed.",
     },
   ];
 
@@ -200,7 +200,7 @@ export function PhilosophyPage() {
           <div className="flex items-center gap-3">
             <span className="inline-flex items-center gap-2 rounded-full border border-burgundy/25 bg-burgundy/5 px-4 py-1.5 text-xs font-mono uppercase tracking-widest text-burgundy">
               <span className="size-2 rounded-full bg-burgundy animate-pulse" />
-              THE PRECIOUS MEETS SAFETY CODE · DELHI NCR
+              THE PRECIOUS MEETS SAFETY CODE
             </span>
             <VerifiedStampDoodle className="hidden sm:block w-32 h-auto shrink-0 -my-3" />
           </div>
@@ -209,7 +209,7 @@ export function PhilosophyPage() {
           <h1 className="font-display mt-8 text-4xl sm:text-6xl md:text-7xl lg:text-8xl leading-[1.02] tracking-tight text-foreground max-w-5xl">
             Connection demands courage.
             <br />
-            In Delhi, it demands{" "}
+            It starts with{" "}
             <em className="italic text-burgundy font-serif font-normal underline decoration-burgundy/30 underline-offset-8">
               uncompromising safety
             </em>
@@ -218,7 +218,7 @@ export function PhilosophyPage() {
 
           {/* Subtitle with High Readability */}
           <p className="mt-8 text-base sm:text-xl lg:text-2xl text-muted-foreground font-light leading-relaxed max-w-3xl">
-            Delhi is an electric metropolis of 33 million stories, yet finding safe, authentic connection often feels exhausting—especially for women. Precious Meets was built to dismantle that exhaustion with real-world architectural safety.
+            Finding authentic connection shouldn't feel exhausting or defensive. Precious Meets was built to create an intentional sanctuary with real-world architectural safety.
           </p>
 
           {/* 4-Metric Proof Ribbon (Full-Width Responsive Grid) */}
@@ -256,14 +256,14 @@ export function PhilosophyPage() {
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-12">
             <div>
               <span className="label-mono text-xs uppercase tracking-widest text-forest font-bold">
-                THE CONTRAST · URBAN EXHAUSTION TO PEACE
+                THE CONTRAST · NOISE TO SANCTUARY
               </span>
               <h2 className="font-display mt-2 text-3xl sm:text-5xl text-foreground max-w-2xl leading-tight">
-                Why Delhi needs an intentional sanctuary for dinner
+                An intentional sanctuary for conversation
               </h2>
             </div>
             <p className="max-w-md text-xs sm:text-sm text-muted-foreground leading-relaxed">
-              Every woman living in Delhi NCR understands the mental calculus of an evening out. Here is how our table removes that defensive burden forever.
+              Meeting new people should never feel unpredictable or unsafe. Here is how our table removes the defensive burden so you can simply enjoy the evening.
             </p>
           </div>
 
@@ -282,7 +282,7 @@ export function PhilosophyPage() {
                 Physical Sanctuary
               </h3>
               <p className="mt-2 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                No loud decibels, no rowdy public bar crowds, and no unvetted outsiders. Dinners take place in reserved private enclaves in Mehrauli, Hauz Khas, and Central Delhi.
+                Strictly no clubs. Dinners take place in private dining rooms and quiet heritage bistros. Loud music and confined spaces are still to decide to ensure calm acoustics and open room flow.
               </p>
             </div>
 
@@ -294,7 +294,7 @@ export function PhilosophyPage() {
                 Social Sanctuary
               </h3>
               <p className="mt-2 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Strict 50:50 gender balance means women never feel outnumbered or trapped in male-dominated banter. Conversation is moderated with warmth, emotional intelligence, and equal airtime.
+                Balanced group chemistry with equal voices. Conversation is moderated with warmth, emotional curiosity, and mutual respect by our dedicated table host.
               </p>
             </div>
 
@@ -303,10 +303,10 @@ export function PhilosophyPage() {
                 03
               </div>
               <h3 className="font-display mt-4 text-xl text-foreground">
-                Legal & Real-World Recourse
+                Real-World Recourse
               </h3>
               <p className="mt-2 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Because every attendee is verified with their official Aadhaar Card and matching face photo, zero predatory anonymity exists. Any breach of consent triggers an irreversible lifetime ban.
+                Because every guest is verified with an official Aadhaar Card and matching face photo, zero predatory anonymity exists. Any breach of boundaries triggers a permanent lifetime ban.
               </p>
             </div>
           </div>
@@ -352,7 +352,7 @@ export function PhilosophyPage() {
                 </p>
 
                 <p className="mt-4 text-xs sm:text-sm leading-relaxed text-muted-foreground">
-                  Every attendee uploads their official government Aadhaar card alongside a matching recent personal portrait photo. Our curation team manually audits and cross-matches both to confirm legal name, age, and Delhi NCR residence before any table seat is confirmed.
+                  Every attendee uploads their official government Aadhaar card alongside a matching recent personal portrait photo. Our curation team manually audits and cross-matches both to confirm legal name and age before any table seat is confirmed.
                 </p>
 
                 <ul className="mt-4 space-y-2 text-xs sm:text-sm text-foreground/90 font-medium">
@@ -362,11 +362,11 @@ export function PhilosophyPage() {
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="size-4 text-forest shrink-0" />
-                    <span>Documents stored in private encrypted storage—never shared or made public</span>
+                    <span>Documents stored in private encrypted storage, never shared or made public</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="size-4 text-forest shrink-0" />
-                    <span>Cross-checked against Delhi NCR residence and legal age</span>
+                    <span>Cross-checked for legal age and authenticated identity</span>
                   </li>
                 </ul>
               </div>
@@ -377,7 +377,7 @@ export function PhilosophyPage() {
               </div>
             </div>
 
-            {/* Pillar 2: 50:50 Gender Parity */}
+            {/* Pillar 2: Balanced Parity & Chemistry */}
             <div className="group rounded-3xl border border-border/80 bg-card p-6 sm:p-8 lg:p-10 shadow-xs hover:border-forest/40 hover:shadow-md transition-all flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between">
@@ -385,33 +385,33 @@ export function PhilosophyPage() {
                     <Users className="size-3.5" /> PILLAR 02 · SOCIAL BALANCE
                   </span>
                   <span className="text-[11px] font-mono text-muted-foreground uppercase">
-                    Strict 50:50 Parity
+                    Balanced Parity
                   </span>
                 </div>
 
                 <h3 className="font-display mt-5 text-2xl sm:text-3xl text-foreground">
-                  Women-First Seating Parity
+                  Table Harmony & Balanced Parity
                 </h3>
                 <p className="mt-1 text-xs sm:text-sm font-medium text-forest">
                   Equal Voices, Mutual Respect, Zero Isolation
                 </p>
 
                 <p className="mt-4 text-xs sm:text-sm leading-relaxed text-muted-foreground">
-                  Delhi's nightlife often leaves women on high alert in male-dominated rooms. At Precious Meets, every 6-person dinner table is curated with exact 50:50 gender parity.
+                  Social dinners often suffer from unbalanced dynamics or dominating egos. At Precious Meets, each 6-person dinner table is curated with thoughtful group balance and mutual consideration.
                 </p>
 
                 <ul className="mt-4 space-y-2 text-xs sm:text-sm text-foreground/90 font-medium">
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="size-4 text-forest shrink-0" />
-                    <span>Strict 3 women and 3 men seating configuration</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="size-4 text-forest shrink-0" />
-                    <span>No single woman is ever left isolated at a table</span>
+                    <span>Curated group balance so no guest ever feels isolated</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="size-4 text-forest shrink-0" />
                     <span>Screened for emotional intelligence and conversational warmth</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="size-4 text-forest shrink-0" />
+                    <span>Strict moderation for generous listening and equal airtime</span>
                   </li>
                 </ul>
               </div>
@@ -422,41 +422,41 @@ export function PhilosophyPage() {
               </div>
             </div>
 
-            {/* Pillar 3: Vetted Enclaves & Guardian Hosts */}
+            {/* Pillar 3: Vetted Enclaves (Strictly No Clubs) */}
             <div className="group rounded-3xl border border-border/80 bg-card p-6 sm:p-8 lg:p-10 shadow-xs hover:border-ochre/40 hover:shadow-md transition-all flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between">
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-ochre/15 px-3 py-1 text-xs font-mono font-semibold text-ochre">
-                    <Shield className="size-3.5" /> PILLAR 03 · CUSTODIANSHIP
+                    <Shield className="size-3.5" /> PILLAR 03 · VENUES
                   </span>
                   <span className="text-[11px] font-mono text-muted-foreground uppercase">
-                    Dedicated Host on Site
+                    Strictly No Clubs
                   </span>
                 </div>
 
                 <h3 className="font-display mt-5 text-2xl sm:text-3xl text-foreground">
-                  Vetted Enclaves & Guardian Hosts
+                  Curated Private Dining Enclaves
                 </h3>
                 <p className="mt-1 text-xs sm:text-sm font-medium text-ochre">
-                  Protected Spaces, Dedicated Presence
+                  Protected Spaces, Dedicated Host Presence
                 </p>
 
                 <p className="mt-4 text-xs sm:text-sm leading-relaxed text-muted-foreground">
-                  No public commotion. Dinners take place in private dining rooms of reputable heritage restaurants in Mehrauli, Hauz Khas Village, and Central Delhi. Dedicated hosts preside throughout the evening.
+                  Strictly no nightclubs, loud bars, or unvetted public chaos. Dinners take place in private dining rooms of vetted heritage bistros. Loud music and confined spaces are actively evaluated to guarantee comfort.
                 </p>
 
                 <ul className="mt-4 space-y-2 text-xs sm:text-sm text-foreground/90 font-medium">
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="size-4 text-forest shrink-0" />
-                    <span>Host coordinates smooth arrival, introductions, and seating</span>
+                    <span>Venues policy: Strictly no clubs; quiet private dining rooms only</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="size-4 text-forest shrink-0" />
-                    <span>Private, well-lit spaces with verified transit access</span>
+                    <span>Acoustics & layout: Loud music and confined spaces under evaluation</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="size-4 text-forest shrink-0" />
-                    <span>Discreet intervention if boundaries or comfort are challenged</span>
+                    <span>Dedicated on-site host coordinates smooth arrivals and seating</span>
                   </li>
                 </ul>
               </div>
@@ -467,41 +467,41 @@ export function PhilosophyPage() {
               </div>
             </div>
 
-            {/* Pillar 4: 24/7 Safety SOS Beacon */}
-            <div className="group rounded-3xl border border-border/80 bg-card p-6 sm:p-8 lg:p-10 shadow-xs hover:border-red-500/40 hover:shadow-md transition-all flex flex-col justify-between">
+            {/* Pillar 4: Discreet Safety SOS (Positioned as quiet backstop) */}
+            <div className="group rounded-3xl border border-border/80 bg-card p-6 sm:p-8 lg:p-10 shadow-xs hover:border-burgundy/40 hover:shadow-md transition-all flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-red-100 dark:bg-red-950/40 px-3 py-1 text-xs font-mono font-semibold text-red-600">
-                    <PhoneCall className="size-3.5" /> PILLAR 04 · EMERGENCY ESCALATION
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-burgundy/10 px-3 py-1 text-xs font-mono font-semibold text-burgundy">
+                    <PhoneCall className="size-3.5" /> PILLAR 04 · QUIET ESCALATION
                   </span>
                   <span className="text-[11px] font-mono text-muted-foreground uppercase">
-                    24/7 Live Helpline
+                    Discreet SOS
                   </span>
                 </div>
 
                 <h3 className="font-display mt-5 text-2xl sm:text-3xl text-foreground">
-                  Discreet Live SOS Beacon
+                  Discreet Live Safety Beacon
                 </h3>
-                <p className="mt-1 text-xs sm:text-sm font-medium text-red-600">
-                  One-Tap Immediate On-Site & Helpline Trigger
+                <p className="mt-1 text-xs sm:text-sm font-medium text-burgundy">
+                  Immediate On-Site Host Alert & Concierge Backstop
                 </p>
 
                 <p className="mt-4 text-xs sm:text-sm leading-relaxed text-muted-foreground">
-                  Every attendee possesses an active safety beacon in their web dashboard. If you ever feel uneasy, one discreet tap immediately alerts your on-site host and our emergency response concierge.
+                  Attendees have access to a discreet safety beacon on their web dashboard. If at any moment you feel uneasy, one silent tap notifies your on-site Guardian Host without causing public awkwardness.
                 </p>
 
                 <ul className="mt-4 space-y-2 text-xs sm:text-sm text-foreground/90 font-medium">
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="size-4 text-forest shrink-0" />
-                    <span>Instant silent notification sent directly to host's device</span>
+                    <span>Silent, instant notification sent directly to host's device</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="size-4 text-forest shrink-0" />
-                    <span>Live venue coordinate link dispatch to personal emergency contacts</span>
+                    <span>Pre-arranged dignified exit protocol without social friction</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="size-4 text-forest shrink-0" />
-                    <span>Pre-arranged dignified exit protocol without social awkwardness</span>
+                    <span>Live emergency concierge standby throughout the evening</span>
                   </li>
                 </ul>
               </div>
@@ -515,13 +515,69 @@ export function PhilosophyPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="rounded-full border-red-500/40 text-xs font-semibold text-red-600 hover:bg-red-50 cursor-pointer"
+                        className="rounded-full border-burgundy/30 text-xs font-semibold text-burgundy hover:bg-burgundy/5 cursor-pointer"
                       >
-                        <ShieldAlert className="size-3.5 text-red-600" /> Test Live Safety Beacon Demo
+                        <ShieldAlert className="size-3.5 text-burgundy" /> Safety Beacon Demo
                       </Button>
                     }
                   />
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Table Architecture & Active Discussion Points */}
+          <div className="mt-14 rounded-3xl border border-ochre/35 bg-ochre/5 p-6 sm:p-8 lg:p-10">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-ochre/20">
+              <div>
+                <span className="font-mono text-xs uppercase tracking-widest text-ochre font-bold">
+                  POLICY & OPERATIONAL ARCHITECTURE
+                </span>
+                <h3 className="font-display mt-1 text-2xl sm:text-3xl text-foreground">
+                  Standards & Active Discussion Topics
+                </h3>
+              </div>
+              <span className="inline-flex items-center gap-2 rounded-full bg-ochre/15 px-3 py-1 text-xs font-mono font-medium text-ochre">
+                <span className="size-2 rounded-full bg-ochre animate-pulse" />
+                Under Evaluation
+              </span>
+            </div>
+
+            <div className="mt-6 grid gap-6 sm:grid-cols-3">
+              <div className="rounded-2xl border border-ochre/20 bg-background/80 p-5 shadow-xs">
+                <span className="font-mono text-xs font-bold text-burgundy uppercase tracking-wider">
+                  Table Ratio
+                </span>
+                <h4 className="font-display mt-2 text-lg text-foreground">
+                  Strict 3 Women + 3 Men
+                </h4>
+                <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
+                  Currently under discussion: Enforcing a strict 3 women and 3 men seating configuration for every 6-person dinner table to maintain absolute gender parity.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-ochre/20 bg-background/80 p-5 shadow-xs">
+                <span className="font-mono text-xs font-bold text-forest uppercase tracking-wider">
+                  Table Duration
+                </span>
+                <h4 className="font-display mt-2 text-lg text-foreground">
+                  3-Hour Unhurried Dinner
+                </h4>
+                <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
+                  Currently under discussion: Setting a protected 3-hour dinner window ensuring slow dining, ample pauses, and relaxed, deep conversation without feeling rushed.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-ochre/20 bg-background/80 p-5 shadow-xs">
+                <span className="font-mono text-xs font-bold text-ochre uppercase tracking-wider">
+                  Venue Selection
+                </span>
+                <h4 className="font-display mt-2 text-lg text-foreground">
+                  Transit Access & Atmosphere
+                </h4>
+                <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
+                  Strictly no clubs. Loud music and confined spaces are still to decide. Venue criteria prioritizing well-lit, direct transit access for safe arrivals and departures.
+                </p>
               </div>
             </div>
           </div>
@@ -604,10 +660,10 @@ export function PhilosophyPage() {
               DEFINITIVE CONTRAST
             </span>
             <h2 className="font-display mt-2 text-3xl sm:text-5xl text-foreground">
-              How Precious Meets Compares in Delhi
+              How Precious Meets Compares
             </h2>
             <p className="mt-3 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-              An uncompromising, honest comparison between standard Delhi social nightlife, dating apps, and the Precious Meets sanctuary.
+              An honest comparison between noisy public nightlife, dating apps, and our curated dinner tables.
             </p>
           </div>
 
@@ -616,7 +672,7 @@ export function PhilosophyPage() {
             <table className="w-full text-left border-collapse text-xs sm:text-sm">
               <thead>
                 <tr className="border-b border-border/80 bg-sage/20 text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
-                  <th className="p-4 sm:p-6 font-semibold">Safety Dimension</th>
+                  <th className="p-4 sm:p-6 font-semibold">Dimension</th>
                   <th className="p-4 sm:p-6 font-semibold">Public Bars & Clubs</th>
                   <th className="p-4 sm:p-6 font-semibold">Dating & Social Apps</th>
                   <th className="p-4 sm:p-6 font-bold bg-burgundy/10 text-burgundy">
@@ -782,7 +838,7 @@ export function PhilosophyPage() {
       <section className="w-full bg-gradient-to-br from-[#2D0D17] via-[#1F070F] to-[#120308] py-24 px-6 sm:px-12 lg:px-20 text-ivory text-center">
         <div className="mx-auto max-w-4xl">
           <span className="label-mono text-xs uppercase tracking-widest text-[#C8963E] font-bold">
-            CURATED DELHI NCR DINNER TABLES
+            CURATED DINNER TABLES
           </span>
           <h2 className="font-display mt-4 text-3xl sm:text-5xl lg:text-6xl text-ivory leading-tight">
             Your seat is protected.
@@ -790,7 +846,7 @@ export function PhilosophyPage() {
             Your evening is sacred.
           </h2>
           <p className="mx-auto mt-6 max-w-xl text-sm sm:text-base text-ivory/80 leading-relaxed font-light">
-            Take our 9-question Social Discovery Quiz today. Complete basic contact details to unlock your verified seat in Delhi NCR.
+            Take our 9-question Social Discovery Quiz today. Complete basic contact details to unlock your verified seat at our next table.
           </p>
 
           <div className="mt-10 flex flex-wrap justify-center gap-4">

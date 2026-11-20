@@ -7,7 +7,7 @@ import { ShieldCheck, ShieldAlert, Lock, UserCheck, Heart, AlertOctagon } from "
 export const Route = createFileRoute("/safety")({
   head: () => ({
     meta: [
-      { title: "Safety Protocol & Trust — Precious Meets" },
+      { title: "Safety Protocol & Trust | Precious Meets" },
       { name: "description", content: "Real-world safety, emergency SOS beacons, and identity verification standards." },
     ],
   }),

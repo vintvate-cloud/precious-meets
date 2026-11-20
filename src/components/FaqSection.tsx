@@ -11,12 +11,6 @@ interface FaqItem {
 
 const faqs: FaqItem[] = [
   {
-    id: "verification",
-    question: "How does offline Aadhaar verification work?",
-    answer:
-      "Every guest completes a secure government DigiLocker check before a seat is confirmed. No biometrics are ever stored, ensuring 100% vetted identities and zero fake or anonymous profiles.",
-  },
-  {
     id: "solo-arrival",
     question: "Can I come alone, or should I bring a friend?",
     answer:
@@ -24,7 +18,7 @@ const faqs: FaqItem[] = [
   },
   {
     id: "safety",
-    question: "How do you ensure women-first safety at every table?",
+    question: "How do you ensure safety and balanced ratios at every table?",
     answer:
       "We maintain a balanced 50:50 ratio, host exclusively in private vetted heritage venues, have dedicated Guardian Hosts on site, and offer 24/7 SOS desk support.",
   },
@@ -41,21 +35,15 @@ const faqs: FaqItem[] = [
       "You choose your neighborhood when booking. The secret venue address, entrance code, and host coordinates unlock in your Member Dashboard 24 hours prior.",
   },
   {
-    id: "dietary",
-    question: "What if I have dietary preferences or allergies?",
-    answer:
-      "Every dinner features seasonal four-course tasting menus with artisan vegetarian, vegan, and Jain tracks prepared individually according to your quiz preferences.",
-  },
-  {
     id: "cancellation",
     question: "What is your cancellation and credit policy?",
     answer:
-      "Notify us at least 48 hours in advance and your pass credit is preserved for 90 days to rebook any upcoming table across Delhi NCR.",
+      "Notify us at least 48 hours in advance and your pass credit is preserved for 90 days to rebook any upcoming table.",
   },
 ];
 
 export function FaqSection() {
-  const [openId, setOpenId] = useState<string | null>("verification");
+  const [openId, setOpenId] = useState<string | null>("solo-arrival");
 
   const toggleFaq = (id: string) => {
     setOpenId((prev) => (prev === id ? null : id));

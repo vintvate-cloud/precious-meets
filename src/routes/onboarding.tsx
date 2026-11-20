@@ -10,7 +10,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/onboarding")({
   head: () => ({
     meta: [
-      { title: "Welcome & Onboarding — Precious Meets" },
+      { title: "Welcome & Onboarding | Precious Meets" },
       { name: "description", content: "Complete your onboarding preferences." },
     ],
   }),

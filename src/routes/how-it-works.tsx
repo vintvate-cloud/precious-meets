@@ -6,7 +6,7 @@ import { Sparkles, Users, Utensils, ShieldCheck, ArrowRight } from "lucide-react
 export const Route = createFileRoute("/how-it-works")({
   head: () => ({
     meta: [
-      { title: "How It Works — Precious Meets" },
+      { title: "How It Works | Precious Meets" },
       { name: "description", content: "The philosophy, matching mechanics, and table rituals behind Precious Meets." },
     ],
   }),
@@ -24,7 +24,7 @@ function HowItWorksPage() {
     {
       num: "02",
       title: "Psychometric Table Curation",
-      desc: "Our matching engine curates tables of 4–6 compatible people. We balance energy levels to ensure everyone speaks, listens, and feels at ease.",
+      desc: "Our matching engine curates tables of 4 to 6 compatible people. We balance energy levels to ensure everyone speaks, listens, and feels at ease.",
       icon: <Users className="size-6 text-forest" />,
     },
     {

@@ -39,8 +39,8 @@ const marqueeItems: MarqueeItem[] = [
     tone: "ochre",
   },
   {
-    text: "Women-First Seating & Guardian Hosts",
-    tag: "Zero Predators",
+    text: "Balanced Seating & Guardian Hosts",
+    tag: "Protected Tables",
     icon: HeartHandshake,
     tone: "forest",
   },

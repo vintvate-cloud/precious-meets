@@ -62,7 +62,7 @@ type AdminTab = "users" | "events" | "verifications" | "incidents" | "overview";
 export const Route = createFileRoute("/admin/")({
   head: () => ({
     meta: [
-      { title: "Admin Operations & Seating Console — Precious Meets" },
+      { title: "Admin Operations & Seating Console | Precious Meets" },
       {
         name: "description",
         content: "Executive management for curated meets, 6-seat table assignments, attendee passes, and SOS safety.",

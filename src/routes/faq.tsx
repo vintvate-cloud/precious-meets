@@ -21,13 +21,13 @@ import {
 export const Route = createFileRoute("/faq")({
   head: () => ({
     meta: [
-      { title: "Frequently Asked Questions — Precious Meets" },
+      { title: "Frequently Asked Questions | Precious Meets" },
       {
         name: "description",
         content:
-          "Everything you need to know about offline Aadhaar verification, women-first safety, table curation, secret venues, and dining etiquette in Delhi NCR.",
+          "Everything you need to know about offline identity verification, safety, table curation, secret venues, and dining etiquette.",
       },
-      { property: "og:title", content: "FAQ — Precious Meets" },
+      { property: "og:title", content: "FAQ | Precious Meets" },
       {
         property: "og:description",
         content: "Answers to common questions about safety, curation, solo arrival, and table experiences.",
@@ -49,20 +49,12 @@ interface FaqItem {
 
 const FAQ_DATA: FaqItem[] = [
   {
-    id: "verification",
-    category: "safety",
-    question: "How does offline Aadhaar verification work?",
-    answer:
-      "Every guest completes a secure government DigiLocker verification before a table pass is confirmed. We never store raw Aadhaar numbers or biometrics. This guarantees zero fake profiles, eliminates anonymity, and ensures that everyone at your table is legally accountable.",
-    tags: ["aadhaar", "digilocker", "identity", "verification", "security"],
-  },
-  {
     id: "women-safety",
     category: "safety",
-    question: "How do you ensure women-first safety at every table?",
+    question: "How do you ensure safety and balanced ratios at every table?",
     answer:
-      "Safety is engineered into our DNA. We maintain a strict 50:50 gender balance, host exclusively in private, vetted heritage venues with private entrances, have trained Guardian Hosts present throughout the evening, and offer a real-time 24/7 SOS desk with emergency dispatch.",
-    tags: ["women", "safety", "ratio", "guardian", "sos", "night"],
+      "Safety is engineered into our DNA. We maintain a balanced 50:50 gender balance, host exclusively in private, vetted heritage venues with private entrances, have trained Guardian Hosts present throughout the evening, and offer a real-time 24/7 SOS desk with emergency dispatch.",
+    tags: ["safety", "ratio", "guardian", "sos", "night"],
   },
   {
     id: "misbehavior",
@@ -101,16 +93,8 @@ const FAQ_DATA: FaqItem[] = [
     category: "experience",
     question: "When and where do I receive the venue details?",
     answer:
-      "You select your preferred neighborhood (such as Mehrauli, Chanakyapuri, Hauz Khas, or Sunder Nursery) when reserving your pass. The secret heritage venue address, private entry instructions, and host contact are unlocked in your Member Dashboard exactly 24 hours before your meet.",
-    tags: ["venue", "location", "address", "secret", "delhi", "timing"],
-  },
-  {
-    id: "dietary",
-    category: "experience",
-    question: "What if I have dietary preferences, allergies, or prefer Jain food?",
-    answer:
-      "Every dinner features seasonal four-course artisan menus crafted in partnership with renowned chefs. Dedicated vegetarian, vegan, Jain, and gluten-sensitive tracks are prepared individually based on the dietary preferences submitted during your quiz and booking.",
-    tags: ["food", "diet", "jain", "vegan", "vegetarian", "allergies", "menu"],
+      "You select your preferred neighborhood when reserving your pass. The secret heritage venue address, private entry instructions, and host contact are unlocked in your Member Dashboard exactly 24 hours before your meet.",
+    tags: ["venue", "location", "address", "secret", "timing"],
   },
   {
     id: "conversation-flow",
@@ -133,7 +117,7 @@ const FAQ_DATA: FaqItem[] = [
     category: "booking",
     question: "What is your cancellation and credit policy?",
     answer:
-      "If your schedule changes, simply notify us at least 48 hours in advance via your dashboard. Your full pass value will be credited to your account and remains valid for 90 days to rebook any upcoming table across Delhi NCR.",
+      "If your schedule changes, simply notify us at least 48 hours in advance via your dashboard. Your full pass value will be credited to your account and remains valid for 90 days to rebook any upcoming table.",
     tags: ["cancellation", "refund", "reschedule", "credits", "policy"],
   },
 ];
@@ -149,7 +133,7 @@ const CATEGORIES: { id: Category; label: string }[] = [
 function FaqPage() {
   const [selectedCategory, setSelectedCategory] = useState<Category>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [openId, setOpenId] = useState<string | null>("verification");
+  const [openId, setOpenId] = useState<string | null>("women-safety");
 
   const filteredFaqs = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -370,7 +354,7 @@ function FaqPage() {
                 className="inline-flex items-center gap-1.5 hover:text-forest transition-colors"
               >
                 <MessageCircle className="size-3.5 text-forest" />
-                <span>WhatsApp Guest Concierge (10 AM – 8 PM)</span>
+                <span>WhatsApp Guest Concierge (10 AM to 8 PM)</span>
               </a>
             </div>
           </div>

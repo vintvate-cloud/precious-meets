@@ -11,7 +11,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/dashboard/safety")({
   head: () => ({
     meta: [
-      { title: "Safety & Emergency Hub — Precious Meets" },
+      { title: "Safety & Emergency Hub | Precious Meets" },
       { name: "description", content: "Emergency safety tools, SOS incident reports, and attendee moderation." },
     ],
   }),

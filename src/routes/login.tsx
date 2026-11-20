@@ -29,7 +29,7 @@ export const Route = createFileRoute("/login")({
   },
   head: () => ({
     meta: [
-      { title: "Sign In — Precious Meets" },
+      { title: "Sign In | Precious Meets" },
       {
         name: "description",
         content: "Sign in with your credentials to access your bookings and matched tables.",

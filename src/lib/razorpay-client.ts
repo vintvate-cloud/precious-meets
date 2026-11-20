@@ -11,7 +11,7 @@ export interface RazorpaySubscriptionOptions {
     signature: string;
     memberId: string;
   }) => void;
-  onError: (error: string) => void;
+  onError: (error: string, isScriptBlocked?: boolean) => void;
 }
 
 export function loadRazorpayScript(): Promise<boolean> {
@@ -28,7 +28,10 @@ export function loadRazorpayScript(): Promise<boolean> {
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
     script.async = true;
     script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
+    script.onerror = () => {
+      console.warn("Razorpay checkout.js blocked or failed to load. Likely blocked by AdBlocker/Brave Shields.");
+      resolve(false);
+    };
     document.body.appendChild(script);
   });
 }
@@ -74,23 +77,28 @@ export async function openRazorpaySubscriptionCheckout(options: RazorpaySubscrip
         },
         modal: {
           ondismiss: function () {
-            options.onError("Payment cancelled. You can retry whenever you are ready.");
+            options.onError("Payment cancelled. You can retry whenever you are ready.", false);
           },
         },
       });
 
       rzp.on("payment.failed", function (response: any) {
-        options.onError(response.error?.description || "Payment failed at gateway.");
+        options.onError(response.error?.description || "Payment failed at gateway.", false);
       });
 
       rzp.open();
       return;
     } catch (e: any) {
       console.error("Razorpay checkout initialization failed:", e);
-      options.onError(e.message || "Failed to launch Razorpay gateway.");
+      // If modal failed to launch, flag script blocked
+      options.onError(e.message || "Failed to launch Razorpay gateway.", true);
       return;
     }
   }
 
-  options.onError("Razorpay payment gateway script could not be loaded. Please check your internet connection.");
+  // Script blocked by AdBlocker/Brave Shields
+  options.onError(
+    "Razorpay gateway script was blocked by browser shields or an ad blocker. Launching secure fallback gateway.",
+    true
+  );
 }

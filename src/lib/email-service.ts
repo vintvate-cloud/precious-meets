@@ -113,7 +113,7 @@ export class EmailService {
       case "sos_incident_alert":
         return `[CRITICAL SOS] Emergency Incident Reported (${data.incidentReference || "Alert"})`;
       case "application_approved":
-        return "Welcome to Precious Meets — Your Application is Officially Approved ✨";
+        return "Welcome to Precious Meets | Your Application is Officially Approved ✨";
       case "application_rejected":
         return "Update regarding your Precious Meets Membership Application";
       case "member_credentials":
@@ -415,7 +415,7 @@ export class EmailService {
             <p style="color: #4a453f; font-size: 13px; line-height: 1.6;">
               ${
                 data.refundNote ||
-                "If your payment was processed, a full 100% refund has been initiated back to your original payment method via Razorpay within 3–5 business days."
+                "If your payment was processed, a full 100% refund has been initiated back to your original payment method via Razorpay within 3 to 5 business days."
               }
             </p>
 

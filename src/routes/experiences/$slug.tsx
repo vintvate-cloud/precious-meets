@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/experiences/$slug")({
   head: () => ({
     meta: [
-      { title: "Experience Details — Precious Meets" },
+      { title: "Experience Details | Precious Meets" },
       { name: "description", content: "Curated supper club and table experience details." },
     ],
   }),

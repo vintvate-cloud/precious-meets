@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/dashboard/bookings")({
   head: () => ({
     meta: [
-      { title: "My Bookings — Precious Meets" },
+      { title: "My Bookings | Precious Meets" },
       { name: "description", content: "Your upcoming and past curated table reservations." },
     ],
   }),

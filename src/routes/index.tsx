@@ -32,9 +32,9 @@ if (typeof window !== "undefined") {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Precious Meets — Every meet matters | Safe Curated Tables in Delhi NCR" },
-      { name: "description", content: "Curated real-world meetups, shared meals and meaningful conversations. 100% Offline Aadhaar verified with women-first safety in Delhi NCR." },
-      { property: "og:title", content: "Precious Meets — Every meet matters" },
+      { title: "Precious Meets · Every meet matters | Safe Curated Tables" },
+      { name: "description", content: "Curated real-world meetups, shared meals and meaningful conversations. 100% Offline Aadhaar verified with architectural safety and curated dinner tables." },
+      { property: "og:title", content: "Precious Meets · Every meet matters" },
       { property: "og:description", content: "Share a table, discover unexpected perspectives, and make room for connections that matter." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

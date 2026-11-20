@@ -32,7 +32,7 @@ import {
 export const Route = createFileRoute("/dashboard/")({
   head: () => ({
     meta: [
-      { title: "Member Dashboard — Precious Meets" },
+      { title: "Member Dashboard | Precious Meets" },
       {
         name: "description",
         content: "Curated member dashboard for verified meets and table passes.",
@@ -478,7 +478,7 @@ export function DashboardPage() {
             <div className="flex items-center gap-2.5">
               <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
               <span className="font-semibold text-[#E5C17D]">Admin Session Preview</span>
-              <span className="hidden sm:inline text-white/50 font-mono text-[11px]">— Logged in as Administrator</span>
+              <span className="hidden sm:inline text-white/50 font-mono text-[11px]">· Logged in as Administrator</span>
             </div>
             <Link
               to="/admin"

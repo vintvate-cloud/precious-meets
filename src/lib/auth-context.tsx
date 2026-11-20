@@ -44,6 +44,17 @@ const LOCAL_STORAGE_SUBSCRIPTION_KEY = "precious_meets_subscription";
 export const LOCAL_STORAGE_SESSION_TIMESTAMP_KEY = "precious_meets_session_timestamp";
 export const SESSION_MAX_AGE_MS = 36 * 60 * 60 * 1000; // 36 hours in milliseconds
 
+export function verifyAdminPassword(password: string): boolean {
+  if (!password || typeof password !== "string") return false;
+  const configuredAdminPassword =
+    (typeof process !== "undefined" && (process.env?.["VITE_ADMIN_PASSWORD"] || process.env?.["ADMIN_PASSWORD"])) ||
+    (import.meta as any).env?.["VITE_ADMIN_PASSWORD"] ||
+    (import.meta as any).env?.["ADMIN_PASSWORD"] ||
+    "PreciousAdmin2026!";
+
+  return password.trim() === configuredAdminPassword.trim();
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any | null>(null);
   const [profile, setProfile] = useState<DatabaseProfile | null>(null);
@@ -316,47 +327,73 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // 1. Executive Admin Verification
     if (cleanEmail === "admin@preciousmeets.com") {
-      if (password === "11111111" || password.length >= 8) {
-        const adminUser = {
-          id: "pm_admin_master",
-          email: "admin@preciousmeets.com",
-          user_metadata: {
-            full_name: "Precious Meets Executive Admin",
-            name: "Admin",
-            role: "admin",
-          },
-        };
-        const adminProfile: DatabaseProfile = {
-          id: "pm_admin_master",
-          email: "admin@preciousmeets.com",
-          full_name: "Precious Meets Executive Admin",
-          display_name: "Admin",
-          avatar_url:
-            "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
-          bio: "Executive Operations and Table Matchmaker at Precious Meets.",
-          city: "Delhi NCR",
-          phone: "+91 98100 12345",
-          role: "admin",
-          membership_status: "active",
-          identity_verified: true,
-          identity_status: "verified",
-          onboarding_completed: true,
-          quiz_completed: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
+      const configuredAdminPassword =
+        (typeof process !== "undefined" && (process.env?.["VITE_ADMIN_PASSWORD"] || process.env?.["ADMIN_PASSWORD"])) ||
+        (import.meta as any).env?.["VITE_ADMIN_PASSWORD"] ||
+        (import.meta as any).env?.["ADMIN_PASSWORD"] ||
+        "PreciousAdmin2026!";
 
-        setUser(adminUser);
-        setProfile(adminProfile);
-        localStorage.setItem(
-          LOCAL_STORAGE_MOCK_USER_KEY,
-          JSON.stringify({ user: adminUser, profile: adminProfile }),
-        );
-        recordSessionStart();
-        return { error: null };
-      } else {
-        return { error: new Error("Invalid admin password. Access denied.") };
+      let adminAuthenticated = false;
+
+      // Check if Supabase Auth has an admin account matching this password
+      try {
+        const { error: sbAdminError } = await supabase.auth.signInWithPassword({
+          email: cleanEmail,
+          password: password.trim(),
+        });
+        if (!sbAdminError) {
+          adminAuthenticated = true;
+        }
+      } catch {
+        // Fallback to configured secret
       }
+
+      // Check configured administrator password
+      if (!adminAuthenticated && verifyAdminPassword(password)) {
+        adminAuthenticated = true;
+      }
+
+      if (!adminAuthenticated) {
+        return { error: new Error("Invalid administrator password. Access denied.") };
+      }
+
+      const adminUser = {
+        id: "pm_admin_master",
+        email: "admin@preciousmeets.com",
+        user_metadata: {
+          full_name: "Precious Meets Executive Admin",
+          name: "Admin",
+          role: "admin",
+        },
+      };
+      const adminProfile: DatabaseProfile = {
+        id: "pm_admin_master",
+        email: "admin@preciousmeets.com",
+        full_name: "Precious Meets Executive Admin",
+        display_name: "Admin",
+        avatar_url:
+          "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
+        bio: "Executive Operations and Table Matchmaker at Precious Meets.",
+        city: "Delhi NCR",
+        phone: "+91 98100 12345",
+        role: "admin",
+        membership_status: "active",
+        identity_verified: true,
+        identity_status: "verified",
+        onboarding_completed: true,
+        quiz_completed: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      setUser(adminUser);
+      setProfile(adminProfile);
+      localStorage.setItem(
+        LOCAL_STORAGE_MOCK_USER_KEY,
+        JSON.stringify({ user: adminUser, profile: adminProfile }),
+      );
+      recordSessionStart();
+      return { error: null };
     }
 
     // 2. Member Status Verification directly from Supabase Database

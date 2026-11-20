@@ -590,7 +590,7 @@ export function UserDossierModal({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="rounded-2xl border border-border/80 bg-card p-5 space-y-3">
                   <h4 className="font-mono text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-                    Conversational Dynamics (0–100)
+                    Conversational Dynamics (0 to 100)
                   </h4>
 
                   {[

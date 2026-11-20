@@ -4,7 +4,7 @@ import { Navbar } from "@/components/Navbar";
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "Terms of Service — Precious Meets" },
+      { title: "Terms of Service | Precious Meets" },
       { name: "description", content: "Terms of service, table etiquette, and cancellation policy." },
     ],
   }),

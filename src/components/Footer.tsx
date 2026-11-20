@@ -24,7 +24,7 @@ export function Footer() {
             <ul className="mt-4 space-y-2.5 text-sm">
               <li>
                 <Link to="/philosophy" className="text-muted-foreground hover:text-burgundy font-medium">
-                  Philosophy & Women Safety
+                  The Philosophy
                 </Link>
               </li>
               <li>

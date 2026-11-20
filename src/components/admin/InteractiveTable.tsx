@@ -699,7 +699,7 @@ export function InteractiveTable({
             Secret Venue Coordinates
           </span>
           <p className="leading-relaxed">
-            <strong className="text-foreground">{event.venueName}</strong> — {event.venueAddress}
+            <strong className="text-foreground">{event.venueName}</strong> · {event.venueAddress}
           </p>
           <p className="text-[11px] font-mono text-forest">
             Gate Access Code: <strong>{event.secretAccessCode}</strong>

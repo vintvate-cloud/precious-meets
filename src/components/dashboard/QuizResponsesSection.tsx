@@ -55,7 +55,7 @@ export function QuizResponsesSection() {
 
   const getOptionLabel = (q: QuizQuestion, answerValue: any) => {
     if (answerValue === null || answerValue === undefined) {
-      return <span className="text-muted-foreground">—</span>;
+      return <span className="text-muted-foreground">-</span>;
     }
 
     if (q.type === "slider") {
@@ -147,15 +147,15 @@ export function QuizResponsesSection() {
           </div>
           <div>
             <span className="text-muted-foreground block text-[11px]">Primary Phone</span>
-            <span className="font-semibold text-foreground">{contact.phone || profile?.phone || "—"}</span>
+            <span className="font-semibold text-foreground">{contact.phone || profile?.phone || "-"}</span>
           </div>
           <div>
             <span className="text-muted-foreground block text-[11px]">Contact Email</span>
-            <span className="font-semibold text-foreground">{contact.email || user?.email || "—"}</span>
+            <span className="font-semibold text-foreground">{contact.email || user?.email || "-"}</span>
           </div>
           <div>
             <span className="text-muted-foreground block text-[11px]">Postal Pincode</span>
-            <span className="font-semibold text-foreground">{contact.pincode || "—"}</span>
+            <span className="font-semibold text-foreground">{contact.pincode || "-"}</span>
           </div>
         </div>
       </div>

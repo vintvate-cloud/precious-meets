@@ -36,7 +36,7 @@ const rowOnePrompts: PromptItem[] = [
     category: "lifestyle",
     tag: "Escape Route",
     colorClass: "bg-[#E8ECD8] text-[#35392C] border-[#5F7045]/40 hover:bg-[#DCE2C6]",
-    insight: "Reveals how you recharge—whether you crave cool solitude and pine mist or rhythmic open waves and horizon.",
+    insight: "Reveals how you recharge, whether you crave cool solitude and pine mist or rhythmic open waves and horizon.",
   },
   {
     text: "Last trip you loved?",
@@ -67,7 +67,7 @@ const rowTwoPrompts: PromptItem[] = [
     category: "soul",
     tag: "Childhood Spark",
     colorClass: "bg-[#691C35] text-[#F8F2E7] border-[#C6A568]/60 hover:bg-[#541529]",
-    insight: "Astronaut, palaeontologist, or train conductor—brings out the purest childhood spark and unscripted wonder.",
+    insight: "Astronaut, palaeontologist, or train conductor, bringing out the purest childhood spark and unscripted wonder.",
   },
   {
     text: "A book you keep recommending?",

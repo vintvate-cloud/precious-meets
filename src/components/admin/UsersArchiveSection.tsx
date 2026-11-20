@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   MemberApplication,
   ApplicationsService,
+  computeMembershipExpiryInfo,
 } from "@/lib/applications-service";
 import { VerificationsService } from "@/lib/verifications-service";
 import { EventsService } from "@/lib/events-service";
@@ -24,6 +25,9 @@ import {
   KeyRound,
   Instagram,
   Linkedin,
+  Download,
+  Calendar,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -33,7 +37,7 @@ export function UsersArchiveSection() {
   const [applications, setApplications] = useState<MemberApplication[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<
-    "all" | "pending_review" | "reuploaded" | "approved" | "rejected"
+    "all" | "pending_review" | "reuploaded" | "approved" | "rejected" | "expiring_soon"
   >("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedApplication, setSelectedApplication] =
@@ -50,15 +54,15 @@ export function UsersArchiveSection() {
 
     const refreshFromLocal = () => {
       const cached = ApplicationsService.getApplications();
-      if (mounted && cached && cached.length > 0) {
+      if (mounted && Array.isArray(cached)) {
         setApplications(cached);
       }
     };
 
     const refreshData = async () => {
       try {
-        const realApps = await ApplicationsService.fetchApplicationsFromDb();
-        if (mounted && realApps && realApps.length > 0) {
+        const realApps = await ApplicationsService.fetchApplicationsFromDb(true);
+        if (mounted && Array.isArray(realApps)) {
           setApplications(realApps);
         }
       } catch (e) {
@@ -109,7 +113,10 @@ export function UsersArchiveSection() {
 
   // Active Applications (strictly excluding any deleted users)
   const activeApplications = applications.filter(
-    (app) => !isDeletedUser(app.applicantEmail, app.id)
+    (app) =>
+      !app.reviewDecisionNotes?.includes("PERMANENTLY_DELETED") &&
+      !app.scores?.is_deleted &&
+      !isDeletedUser(app.applicantEmail, app.id)
   );
 
   // Metrics
@@ -131,6 +138,77 @@ export function UsersArchiveSection() {
   const reuploadedCount = activeApplications.filter(
     (a) => a.identityStatus === "reuploaded",
   ).length;
+  const expiringSoonCount = activeApplications.filter(
+    (a) => computeMembershipExpiryInfo(a).isExpiringSoon,
+  ).length;
+
+  const handleExportExcel = () => {
+    try {
+      const exportRows = activeApplications.map((app) => {
+        const exp = computeMembershipExpiryInfo(app);
+        return {
+          "Member ID": app.applicationReference || "N/A",
+          "Full Name": app.applicantName || "N/A",
+          "Email Address": app.applicantEmail || "N/A",
+          "Phone Number": app.applicantPhone || "N/A",
+          "City": app.applicantCity || "N/A",
+          "Vibe Archetype": app.archetypeTitle || "N/A",
+          "Sign Up Date": app.createdAt ? new Date(app.createdAt).toLocaleDateString("en-IN") : "N/A",
+          "Application Status": app.status,
+          "Membership Status": app.membershipStatus,
+          "Membership Plan": app.paymentPlanTitle || "Annual Founding Membership",
+          "Tenure (Months)": exp.tenureMonths,
+          "Membership Start Date": exp.startDate ? new Date(exp.startDate).toLocaleDateString("en-IN") : "N/A",
+          "Membership Expiry Date": exp.expiryDateFormatted,
+          "Days Until Expiry": exp.daysRemaining,
+          "Expiry Alert State": exp.statusLabel,
+          "Aadhaar Status": app.identityStatus,
+          "Payment Status": app.paymentStatus,
+          "Amount (INR)": app.paymentAmountInr || 1999,
+          "Razorpay Payment ID": app.razorpayPaymentId || "N/A",
+          "Invoice Number": app.invoiceNumber || "N/A",
+        };
+      });
+
+      if (exportRows.length === 0) {
+        toast.error("No member data to export.");
+        return;
+      }
+
+      // Generate CSV with UTF-8 BOM so Microsoft Excel immediately opens with clean columns and encoding
+      const headers = Object.keys(exportRows[0]);
+      const csvContent =
+        "\uFEFF" +
+        [
+          headers.join(","),
+          ...exportRows.map((row) =>
+            headers
+              .map((header) => {
+                const val = (row as any)[header] ?? "";
+                const str = String(val).replace(/"/g, '""');
+                return `"${str}"`;
+              })
+              .join(",")
+          ),
+        ].join("\r\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const dateStr = new Date().toISOString().split("T")[0];
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Precious_Meets_Members_Directory_${dateStr}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast.success(`Exported ${exportRows.length} member records to Excel.`);
+    } catch (err: any) {
+      console.error("Excel export error:", err);
+      toast.error("Failed to generate Excel sheet: " + err.message);
+    }
+  };
 
   // Filtered List
   const filteredApplications = activeApplications.filter((app) => {
@@ -143,6 +221,9 @@ export function UsersArchiveSection() {
       if (!isAwaitingAction) return false;
     } else if (filter === "reuploaded") {
       if (app.identityStatus !== "reuploaded") return false;
+    } else if (filter === "expiring_soon") {
+      const exp = computeMembershipExpiryInfo(app);
+      if (!exp.isExpiringSoon) return false;
     } else if (filter !== "all" && app.status !== filter) {
       return false;
     }
@@ -260,11 +341,11 @@ export function UsersArchiveSection() {
       )}
 
       {/* ========================================================================= */}
-      {/* 2. TOOLBAR: SEARCH & STATUS FILTER CHIPS                                   */}
+      {/* 2. TOOLBAR: SEARCH & STATUS FILTER CHIPS + EXCEL EXPORT                   */}
       {/* ========================================================================= */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-y border-border/80 py-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-y border-border/80 py-4">
         {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
           {[
             { id: "all", label: "All Files", count: totalCount },
             {
@@ -272,6 +353,15 @@ export function UsersArchiveSection() {
               label: "Awaiting Action",
               count: pendingCount,
             },
+            ...(expiringSoonCount > 0
+              ? [
+                  {
+                    id: "expiring_soon",
+                    label: "Expiring Soon",
+                    count: expiringSoonCount,
+                  },
+                ]
+              : []),
             ...(reuploadedCount > 0
               ? [
                   {
@@ -295,9 +385,13 @@ export function UsersArchiveSection() {
                 filter === tab.id
                   ? tab.id === "reuploaded"
                     ? "bg-blue-700 text-ivory shadow-xs ring-1 ring-blue-700/20"
+                    : tab.id === "expiring_soon"
+                    ? "bg-amber-600 text-ivory shadow-xs ring-1 ring-amber-600/20"
                     : "bg-foreground text-background shadow-xs ring-1 ring-foreground/20"
                   : tab.id === "reuploaded"
                   ? "border border-blue-500/30 bg-blue-50/50 text-blue-700 hover:bg-blue-100/60"
+                  : tab.id === "expiring_soon"
+                  ? "border border-amber-500/30 bg-amber-50/50 text-amber-800 hover:bg-amber-100/60"
                   : "border border-border/80 bg-card text-muted-foreground hover:bg-sage/40 hover:text-foreground"
               }`}
             >
@@ -308,6 +402,8 @@ export function UsersArchiveSection() {
                     ? "bg-background text-foreground"
                     : tab.id === "reuploaded"
                     ? "bg-blue-200 text-blue-900"
+                    : tab.id === "expiring_soon"
+                    ? "bg-amber-200 text-amber-900"
                     : "bg-muted text-muted-foreground"
                 }`}
               >
@@ -317,16 +413,30 @@ export function UsersArchiveSection() {
           ))}
         </div>
 
-        {/* Search Input */}
-        <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by name, email, dossier #..."
-            className="w-full rounded-full border border-border/80 bg-card py-1.5 pl-9 pr-3 text-xs text-foreground outline-none transition-all placeholder:text-muted-foreground/60 focus:border-burgundy focus:ring-1 focus:ring-burgundy"
-          />
+        {/* Search & Export Actions */}
+        <div className="flex items-center gap-2.5 w-full lg:w-auto">
+          {/* Download Excel Button */}
+          <Button
+            onClick={handleExportExcel}
+            variant="outline"
+            size="sm"
+            className="rounded-full border-[#C6A568]/60 bg-[#FAF7F2] text-[#35392C] hover:bg-[#691C35] hover:text-white transition-all text-xs font-semibold px-4 h-9 gap-2 cursor-pointer shadow-xs shrink-0"
+          >
+            <Download className="size-3.5 text-[#C6A568]" />
+            <span>Download Excel Directory</span>
+          </Button>
+
+          {/* Search Input */}
+          <div className="relative flex-1 lg:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search members..."
+              className="w-full rounded-full border border-border/80 bg-card py-1.5 pl-9 pr-3 text-xs text-foreground outline-none transition-all placeholder:text-muted-foreground/60 focus:border-burgundy focus:ring-1 focus:ring-burgundy"
+            />
+          </div>
         </div>
       </div>
 
@@ -496,6 +606,43 @@ export function UsersArchiveSection() {
                       {app.archetypeTitle}
                     </div>
                   </div>
+
+                  {/* Membership Tenure & Expiration Status */}
+                  {(() => {
+                    const expiry = computeMembershipExpiryInfo(app);
+                    return (
+                      <div className="rounded-xl bg-[#FAF7F2] p-2.5 border border-border/80 space-y-1">
+                        <div className="flex items-center justify-between text-[10px] font-mono">
+                          <span className="text-muted-foreground flex items-center gap-1 font-semibold">
+                            <Calendar className="size-3 text-burgundy" />
+                            <span>TENURE: {expiry.tenureMonths}M</span>
+                          </span>
+                          <span
+                            className={`rounded-full px-2 py-0.5 font-bold uppercase text-[9px] ${
+                              expiry.isExpiringSoon
+                                ? "bg-amber-500/20 text-amber-800 ring-1 ring-amber-500/40 animate-pulse"
+                                : expiry.isExpired
+                                ? "bg-destructive/15 text-destructive font-bold"
+                                : "bg-forest/15 text-forest"
+                            }`}
+                          >
+                            {expiry.statusLabel}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-[10px] pt-1 border-t border-border/40 font-mono">
+                          <span className="text-muted-foreground">Expires:</span>
+                          <span className="font-semibold text-foreground">
+                            {expiry.expiryDateFormatted}
+                            {expiry.isExpiringSoon && (
+                              <span className="text-amber-700 font-bold ml-1">
+                                ({expiry.daysRemaining}d left)
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   {/* 4 Member Status Checks */}
                   <div className="grid grid-cols-4 gap-1 pt-1 text-[9px] font-mono">
