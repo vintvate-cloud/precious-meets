@@ -166,7 +166,7 @@ export function QuizResultsPage() {
         if (rawPaid) {
           try {
             setPaidDossier(JSON.parse(rawPaid));
-          } catch (e) { }
+          } catch (e) {}
         }
       }
     };
@@ -322,7 +322,7 @@ export function QuizResultsPage() {
             if (!effectiveUserPhotoUrl && parsed.userPhotoUrl) effectiveUserPhotoUrl = parsed.userPhotoUrl;
             if (!effectiveUserPhotoName && parsed.userPhotoFileName) effectiveUserPhotoName = parsed.userPhotoFileName;
           }
-        } catch (e) { }
+        } catch (e) {}
       }
 
       if (!effectiveEmail && user?.email) {
@@ -363,12 +363,12 @@ export function QuizResultsPage() {
         archetypeTraits: profile?.archetype?.keyTraits || [],
         scores: profile?.dimensions
           ? {
-            socialEnergy: profile.dimensions.socialEnergy,
-            conversationDepth: profile.dimensions.conversationDepth,
-            playfulness: profile.dimensions.playfulness,
-            curiosity: profile.dimensions.curiosity,
-            adventure: profile.dimensions.adventure,
-          }
+              socialEnergy: profile.dimensions.socialEnergy,
+              conversationDepth: profile.dimensions.conversationDepth,
+              playfulness: profile.dimensions.playfulness,
+              curiosity: profile.dimensions.curiosity,
+              adventure: profile.dimensions.adventure,
+            }
           : undefined,
         dietary: profile?.dimensions?.dietary,
         allergies: profile?.dimensions?.allergies,

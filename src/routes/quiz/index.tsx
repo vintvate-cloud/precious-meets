@@ -608,10 +608,11 @@ export function QuizPage() {
                               whileTap={{ scale: 0.985 }}
                               disabled={isAutoAdvancing}
                               onClick={() => handleSingleSelect(currentQ.id, opt.value)}
-                              className={`group flex items-start justify-between rounded-xl border p-3.5 sm:p-4 text-left transition-colors cursor-pointer ${isSelected
+                              className={`group flex items-start justify-between rounded-xl border p-3.5 sm:p-4 text-left transition-colors cursor-pointer ${
+                                isSelected
                                   ? "border-burgundy bg-card shadow-sm ring-1 ring-burgundy"
                                   : "border-border/80 bg-card/70 hover:border-burgundy/40 hover:bg-card"
-                                }`}
+                              }`}
                             >
                               <div className="pr-2">
                                 <p className="text-sm font-medium text-foreground transition-colors group-hover:text-burgundy">
@@ -630,10 +631,11 @@ export function QuizPage() {
                                     : { scale: 1 }
                                 }
                                 transition={{ duration: 0.22 }}
-                                className={`grid size-5 shrink-0 place-items-center rounded-full border transition-colors mt-0.5 ${isSelected
+                                className={`grid size-5 shrink-0 place-items-center rounded-full border transition-colors mt-0.5 ${
+                                  isSelected
                                     ? "border-burgundy bg-burgundy text-ivory shadow-xs"
                                     : "border-border/80 bg-background"
-                                  }`}
+                                }`}
                               >
                                 {isSelected && <Check className="size-3" />}
                               </motion.div>
@@ -673,10 +675,11 @@ export function QuizPage() {
                               whileHover={{ scale: 1.012, y: -1 }}
                               whileTap={{ scale: 0.985 }}
                               onClick={toggle}
-                              className={`flex items-center justify-between rounded-xl border p-3 text-left text-sm transition-colors cursor-pointer ${isSelected
+                              className={`flex items-center justify-between rounded-xl border p-3 text-left text-sm transition-colors cursor-pointer ${
+                                isSelected
                                   ? "border-burgundy bg-card font-medium text-foreground ring-1 ring-burgundy shadow-xs"
                                   : "border-border/80 bg-card/70 text-muted-foreground hover:border-burgundy/40 hover:bg-card hover:text-foreground"
-                                }`}
+                              }`}
                             >
                               <span className="text-xs sm:text-sm">{opt.label}</span>
                               <motion.div
@@ -686,10 +689,11 @@ export function QuizPage() {
                                     : { scale: 1 }
                                 }
                                 transition={{ duration: 0.2 }}
-                                className={`grid size-4 shrink-0 place-items-center rounded border transition-colors ${isSelected
+                                className={`grid size-4 shrink-0 place-items-center rounded border transition-colors ${
+                                  isSelected
                                     ? "border-burgundy bg-burgundy text-ivory shadow-xs"
                                     : "border-border/80 bg-background"
-                                  }`}
+                                }`}
                               >
                                 {isSelected && <Check className="size-3" />}
                               </motion.div>
@@ -731,336 +735,336 @@ export function QuizPage() {
                 </div>
               )}
 
-              {/* ------------------------------------------------------------- */}
-              {/* CASE B: FINAL STEP (Generous, slightly larger content)       */}
-              {/* ------------------------------------------------------------- */}
-              {isContactStep && (
-                <div className="w-full space-y-4 sm:space-y-5">
-                  <div className="text-center space-y-1.5">
-                    <motion.h1
-                      initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
-                      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                      transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
-                      className="font-display text-3xl sm:text-4xl text-foreground leading-tight"
-                    >
-                      Hold your seat at the <em className="italic text-burgundy">table</em>
-                    </motion.h1>
-                    <motion.p
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.32, delay: 0.06 }}
-                      className="mx-auto max-w-lg text-sm sm:text-[15px] leading-relaxed text-muted-foreground"
-                    >
-                      Basic details for curated table matching and 100% Offline Aadhaar verification via DigiLocker.
-                    </motion.p>
+          {/* ------------------------------------------------------------- */}
+          {/* CASE B: FINAL STEP (Generous, slightly larger content)       */}
+          {/* ------------------------------------------------------------- */}
+          {isContactStep && (
+            <div className="w-full space-y-4 sm:space-y-5">
+              <div className="text-center space-y-1.5">
+                <motion.h1
+                  initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
+                  className="font-display text-3xl sm:text-4xl text-foreground leading-tight"
+                >
+                  Hold your seat at the <em className="italic text-burgundy">table</em>
+                </motion.h1>
+                <motion.p
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.32, delay: 0.06 }}
+                  className="mx-auto max-w-lg text-sm sm:text-[15px] leading-relaxed text-muted-foreground"
+                >
+                  Basic details for curated table matching and 100% Offline Aadhaar verification via DigiLocker.
+                </motion.p>
+              </div>
+
+              {/* Generous Contact Form Card */}
+              <div className="rounded-2xl border border-border/80 bg-card p-5 sm:p-7 shadow-xs space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {/* Full Name */}
+                  <div>
+                    <label className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-foreground">
+                      <User className="size-4 text-burgundy" /> Full Name (as per Aadhaar ID)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Aisha Mehra"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="mt-1.5 w-full rounded-xl border border-input bg-background py-3 px-3.5 text-sm sm:text-base text-foreground focus:border-burgundy focus:outline-none focus:ring-1 focus:ring-burgundy"
+                    />
                   </div>
 
-                  {/* Generous Contact Form Card */}
-                  <div className="rounded-2xl border border-border/80 bg-card p-5 sm:p-7 shadow-xs space-y-4">
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      {/* Full Name */}
-                      <div>
-                        <label className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-foreground">
-                          <User className="size-4 text-burgundy" /> Full Name (as per Aadhaar ID)
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="e.g. Aisha Mehra"
-                          value={fullName}
-                          onChange={(e) => setFullName(e.target.value)}
-                          className="mt-1.5 w-full rounded-xl border border-input bg-background py-3 px-3.5 text-sm sm:text-base text-foreground focus:border-burgundy focus:outline-none focus:ring-1 focus:ring-burgundy"
-                        />
-                      </div>
-
-                      {/* Mobile Number */}
-                      <div>
-                        <label className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-foreground">
-                          <Phone className="size-4 text-forest" /> Mobile Number
-                        </label>
-                        <div className="mt-1.5 flex rounded-xl border border-input bg-background overflow-hidden focus-within:border-burgundy focus-within:ring-1 focus-within:ring-burgundy">
-                          <span className="flex items-center px-3.5 text-sm font-mono font-semibold bg-sage/30 text-muted-foreground border-r border-border/60">
-                            +91
-                          </span>
-                          <input
-                            type="tel"
-                            maxLength={10}
-                            placeholder="9876543210"
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
-                            className="w-full py-3 px-3.5 text-sm sm:text-base text-foreground bg-transparent focus:outline-none"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      {/* Pincode */}
-                      <div>
-                        <label className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-foreground">
-                          <MapPin className="size-4 text-ochre" /> Delhi NCR Pincode
-                        </label>
-                        <input
-                          type="text"
-                          maxLength={6}
-                          placeholder="e.g. 110001"
-                          value={pincode}
-                          onChange={(e) => setPincode(e.target.value.replace(/\D/g, ""))}
-                          className="mt-1.5 w-full rounded-xl border border-input bg-background py-3 px-3.5 text-sm sm:text-base text-foreground focus:border-burgundy focus:outline-none focus:ring-1 focus:ring-burgundy"
-                        />
-                      </div>
-
-                      {/* Email */}
-                      <div>
-                        <label className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-foreground">
-                          <Mail className="size-4 text-burgundy" /> Email Address
-                        </label>
-                        <input
-                          type="email"
-                          placeholder="you@domain.com"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="mt-1.5 w-full rounded-xl border border-input bg-background py-3 px-3.5 text-sm sm:text-base text-foreground focus:border-burgundy focus:outline-none focus:ring-1 focus:ring-burgundy"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      {/* Instagram (Mandatory) */}
-                      <div>
-                        <label className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-foreground">
-                          <Instagram className="size-4 text-pink-500" />
-                          <span>Instagram Handle / Profile</span>
-                          <span className="text-burgundy text-xs font-bold">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="@handle or instagram.com/..."
-                          value={instagram}
-                          onChange={(e) => setInstagram(e.target.value)}
-                          className="mt-1.5 w-full rounded-xl border border-input bg-background py-3 px-3.5 text-sm sm:text-base text-foreground focus:border-burgundy focus:outline-none focus:ring-1 focus:ring-burgundy"
-                        />
-                      </div>
-
-                      {/* LinkedIn (Optional) */}
-                      <div>
-                        <label className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-foreground">
-                          <Linkedin className="size-4 text-blue-600" />
-                          <span>LinkedIn Profile</span>
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="linkedin.com/in/..."
-                          value={linkedin}
-                          onChange={(e) => setLinkedin(e.target.value)}
-                          className="mt-1.5 w-full rounded-xl border border-input bg-background py-3 px-3.5 text-sm sm:text-base text-foreground focus:border-burgundy focus:outline-none focus:ring-1 focus:ring-burgundy"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Aadhaar Card Upload Field */}
-                    <div className="space-y-2 pt-2 border-t border-border/70">
-                      <div className="flex items-center justify-between">
-                        <label className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-foreground">
-                          <ShieldCheck className="size-4 text-forest" />
-                          <span>Upload Aadhaar Card (Front / Full)</span>
-                          <span className="text-burgundy text-xs font-bold">*</span>
-                        </label>
-                        <span className="text-[11px] font-mono text-muted-foreground">
-                          JPG, PNG, PDF (Max 10MB)
-                        </span>
-                      </div>
-
+                  {/* Mobile Number */}
+                  <div>
+                    <label className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-foreground">
+                      <Phone className="size-4 text-forest" /> Mobile Number
+                    </label>
+                    <div className="mt-1.5 flex rounded-xl border border-input bg-background overflow-hidden focus-within:border-burgundy focus-within:ring-1 focus-within:ring-burgundy">
+                      <span className="flex items-center px-3.5 text-sm font-mono font-semibold bg-sage/30 text-muted-foreground border-r border-border/60">
+                        +91
+                      </span>
                       <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*,application/pdf"
-                        onChange={handleAadhaarFileChange}
-                        className="hidden"
+                        type="tel"
+                        maxLength={10}
+                        placeholder="9876543210"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
+                        className="w-full py-3 px-3.5 text-sm sm:text-base text-foreground bg-transparent focus:outline-none"
                       />
-
-                      {!aadhaarFileUrl ? (
-                        <div
-                          onClick={() => !isProcessingFile && fileInputRef.current?.click()}
-                          className="group relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border/90 bg-muted/20 p-4 sm:p-5 text-center hover:border-burgundy/60 hover:bg-sage/10 transition-all duration-200 cursor-pointer"
-                        >
-                          {isProcessingFile ? (
-                            <div className="flex flex-col items-center gap-2 py-2">
-                              <Loader2 className="size-6 animate-spin text-burgundy" />
-                              <p className="text-xs sm:text-sm font-medium text-foreground">
-                                Processing & optimizing document...
-                              </p>
-                            </div>
-                          ) : (
-                            <>
-                              <div className="size-10 rounded-full bg-sage/30 flex items-center justify-center text-forest group-hover:bg-burgundy/10 group-hover:text-burgundy transition-colors">
-                                <UploadCloud className="size-5" />
-                              </div>
-                              <p className="mt-2 text-xs sm:text-sm font-semibold text-foreground">
-                                Click to upload Aadhaar card
-                              </p>
-                              <p className="mt-0.5 text-[11px] text-muted-foreground">
-                                Required for 100% offline identity verification. Stored securely.
-                              </p>
-                            </>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="rounded-2xl border border-forest/30 bg-forest/5 p-3 sm:p-4 flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-3 min-w-0">
-                            {aadhaarFileUrl.startsWith("data:image/") ? (
-                              <div className="relative size-12 shrink-0 rounded-xl overflow-hidden border border-border shadow-xs bg-card">
-                                <img
-                                  src={aadhaarFileUrl}
-                                  alt="Aadhaar Preview"
-                                  className="size-full object-cover"
-                                />
-                              </div>
-                            ) : (
-                              <div className="size-12 shrink-0 rounded-xl bg-burgundy/10 flex items-center justify-center text-burgundy border border-burgundy/20">
-                                <FileText className="size-6" />
-                              </div>
-                            )}
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-1.5">
-                                <CheckCircle2 className="size-3.5 text-forest shrink-0" />
-                                <p className="text-xs sm:text-sm font-semibold text-foreground truncate">
-                                  {aadhaarFileName || "Aadhaar_Document_Uploaded"}
-                                </p>
-                              </div>
-                              <p className="text-[11px] text-forest font-medium mt-0.5">
-                                ✓ Aadhaar attached for verification
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => fileInputRef.current?.click()}
-                              className="h-8 px-2.5 text-xs text-foreground hover:bg-muted cursor-pointer"
-                            >
-                              Change
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={handleRemoveAadhaar}
-                              className="h-8 px-2 text-xs text-destructive hover:bg-destructive/10 cursor-pointer"
-                              title="Remove file"
-                            >
-                              <Trash2 className="size-3.5" />
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Personal Photo Upload Field */}
-                    <div className="space-y-2 pt-2 border-t border-border/70">
-                      <div className="flex items-center justify-between">
-                        <label className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-foreground">
-                          <Camera className="size-4 text-burgundy" />
-                          <span>Upload Your Own Photo (Recent Portrait / Selfie)</span>
-                          <span className="text-burgundy text-xs font-bold">*</span>
-                        </label>
-                        <span className="text-[11px] font-mono text-muted-foreground">
-                          JPG, PNG (Max 10MB)
-                        </span>
-                      </div>
-
-                      <input
-                        ref={userPhotoInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleUserPhotoChange}
-                        className="hidden"
-                      />
-
-                      {!userPhotoUrl ? (
-                        <div
-                          onClick={() => !isProcessingUserPhoto && userPhotoInputRef.current?.click()}
-                          className="group relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border/90 bg-muted/20 p-4 sm:p-5 text-center hover:border-burgundy/60 hover:bg-sage/10 transition-all duration-200 cursor-pointer"
-                        >
-                          {isProcessingUserPhoto ? (
-                            <div className="flex flex-col items-center gap-2 py-2">
-                              <Loader2 className="size-6 animate-spin text-burgundy" />
-                              <p className="text-xs sm:text-sm font-medium text-foreground">
-                                Processing & optimizing photo...
-                              </p>
-                            </div>
-                          ) : (
-                            <>
-                              <div className="size-10 rounded-full bg-burgundy/10 flex items-center justify-center text-burgundy group-hover:bg-burgundy/20 transition-colors">
-                                <Camera className="size-5" />
-                              </div>
-                              <p className="mt-2 text-xs sm:text-sm font-semibold text-foreground">
-                                Click to upload your photo
-                              </p>
-                              <p className="mt-0.5 text-[11px] text-muted-foreground">
-                                Clear face photo used for Aadhaar cross-verification and curated table host matching.
-                              </p>
-                            </>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="rounded-2xl border border-burgundy/30 bg-burgundy/5 p-3 sm:p-4 flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="relative size-12 shrink-0 rounded-xl overflow-hidden border border-border shadow-xs bg-card">
-                              <img
-                                src={userPhotoUrl}
-                                alt="Your Photo Preview"
-                                className="size-full object-cover"
-                              />
-                            </div>
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-1.5">
-                                <CheckCircle2 className="size-3.5 text-forest shrink-0" />
-                                <p className="text-xs sm:text-sm font-semibold text-foreground truncate">
-                                  {userPhotoFileName || "Your_Photo.jpg"}
-                                </p>
-                              </div>
-                              <p className="text-[11px] text-burgundy font-medium mt-0.5">
-                                ✓ Your personal photo attached
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => userPhotoInputRef.current?.click()}
-                              className="h-8 px-2.5 text-xs text-foreground hover:bg-muted cursor-pointer"
-                            >
-                              Change
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={handleRemoveUserPhoto}
-                              className="h-8 px-2 text-xs text-destructive hover:bg-destructive/10 cursor-pointer"
-                              title="Remove photo"
-                            >
-                              <Trash2 className="size-3.5" />
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Safety Assurance */}
-                    <div className="flex items-center justify-center gap-2 pt-1.5 text-xs sm:text-[13px] text-muted-foreground text-center">
-                      <ShieldCheck className="size-4 text-forest shrink-0" />
-                      <span>100% Offline Aadhaar verification via DigiLocker. Never spammed or sold.</span>
                     </div>
                   </div>
                 </div>
-              )}
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {/* Pincode */}
+                  <div>
+                    <label className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-foreground">
+                      <MapPin className="size-4 text-ochre" /> Delhi NCR Pincode
+                    </label>
+                    <input
+                      type="text"
+                      maxLength={6}
+                      placeholder="e.g. 110001"
+                      value={pincode}
+                      onChange={(e) => setPincode(e.target.value.replace(/\D/g, ""))}
+                      className="mt-1.5 w-full rounded-xl border border-input bg-background py-3 px-3.5 text-sm sm:text-base text-foreground focus:border-burgundy focus:outline-none focus:ring-1 focus:ring-burgundy"
+                    />
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <label className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-foreground">
+                      <Mail className="size-4 text-burgundy" /> Email Address
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="you@domain.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="mt-1.5 w-full rounded-xl border border-input bg-background py-3 px-3.5 text-sm sm:text-base text-foreground focus:border-burgundy focus:outline-none focus:ring-1 focus:ring-burgundy"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {/* Instagram (Mandatory) */}
+                  <div>
+                    <label className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-foreground">
+                      <Instagram className="size-4 text-pink-500" />
+                      <span>Instagram Handle / Profile</span>
+                      <span className="text-burgundy text-xs font-bold">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="@handle or instagram.com/..."
+                      value={instagram}
+                      onChange={(e) => setInstagram(e.target.value)}
+                      className="mt-1.5 w-full rounded-xl border border-input bg-background py-3 px-3.5 text-sm sm:text-base text-foreground focus:border-burgundy focus:outline-none focus:ring-1 focus:ring-burgundy"
+                    />
+                  </div>
+
+                  {/* LinkedIn (Optional) */}
+                  <div>
+                    <label className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-foreground">
+                      <Linkedin className="size-4 text-blue-600" />
+                      <span>LinkedIn Profile</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="linkedin.com/in/..."
+                      value={linkedin}
+                      onChange={(e) => setLinkedin(e.target.value)}
+                      className="mt-1.5 w-full rounded-xl border border-input bg-background py-3 px-3.5 text-sm sm:text-base text-foreground focus:border-burgundy focus:outline-none focus:ring-1 focus:ring-burgundy"
+                    />
+                  </div>
+                </div>
+
+                  {/* Aadhaar Card Upload Field */}
+                  <div className="space-y-2 pt-2 border-t border-border/70">
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-foreground">
+                        <ShieldCheck className="size-4 text-forest" />
+                        <span>Upload Aadhaar Card (Front / Full)</span>
+                        <span className="text-burgundy text-xs font-bold">*</span>
+                      </label>
+                      <span className="text-[11px] font-mono text-muted-foreground">
+                        JPG, PNG, PDF (Max 10MB)
+                      </span>
+                    </div>
+
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*,application/pdf"
+                      onChange={handleAadhaarFileChange}
+                      className="hidden"
+                    />
+
+                    {!aadhaarFileUrl ? (
+                      <div
+                        onClick={() => !isProcessingFile && fileInputRef.current?.click()}
+                        className="group relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border/90 bg-muted/20 p-4 sm:p-5 text-center hover:border-burgundy/60 hover:bg-sage/10 transition-all duration-200 cursor-pointer"
+                      >
+                        {isProcessingFile ? (
+                          <div className="flex flex-col items-center gap-2 py-2">
+                            <Loader2 className="size-6 animate-spin text-burgundy" />
+                            <p className="text-xs sm:text-sm font-medium text-foreground">
+                              Processing & optimizing document...
+                            </p>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="size-10 rounded-full bg-sage/30 flex items-center justify-center text-forest group-hover:bg-burgundy/10 group-hover:text-burgundy transition-colors">
+                              <UploadCloud className="size-5" />
+                            </div>
+                            <p className="mt-2 text-xs sm:text-sm font-semibold text-foreground">
+                              Click to upload Aadhaar card
+                            </p>
+                            <p className="mt-0.5 text-[11px] text-muted-foreground">
+                              Required for 100% offline identity verification. Stored securely.
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="rounded-2xl border border-forest/30 bg-forest/5 p-3 sm:p-4 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          {aadhaarFileUrl.startsWith("data:image/") ? (
+                            <div className="relative size-12 shrink-0 rounded-xl overflow-hidden border border-border shadow-xs bg-card">
+                              <img
+                                src={aadhaarFileUrl}
+                                alt="Aadhaar Preview"
+                                className="size-full object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="size-12 shrink-0 rounded-xl bg-burgundy/10 flex items-center justify-center text-burgundy border border-burgundy/20">
+                              <FileText className="size-6" />
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <CheckCircle2 className="size-3.5 text-forest shrink-0" />
+                              <p className="text-xs sm:text-sm font-semibold text-foreground truncate">
+                                {aadhaarFileName || "Aadhaar_Document_Uploaded"}
+                              </p>
+                            </div>
+                            <p className="text-[11px] text-forest font-medium mt-0.5">
+                              ✓ Aadhaar attached for verification
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="h-8 px-2.5 text-xs text-foreground hover:bg-muted cursor-pointer"
+                          >
+                            Change
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleRemoveAadhaar}
+                            className="h-8 px-2 text-xs text-destructive hover:bg-destructive/10 cursor-pointer"
+                            title="Remove file"
+                          >
+                            <Trash2 className="size-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Personal Photo Upload Field */}
+                  <div className="space-y-2 pt-2 border-t border-border/70">
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-foreground">
+                        <Camera className="size-4 text-burgundy" />
+                        <span>Upload Your Own Photo (Recent Portrait / Selfie)</span>
+                        <span className="text-burgundy text-xs font-bold">*</span>
+                      </label>
+                      <span className="text-[11px] font-mono text-muted-foreground">
+                        JPG, PNG (Max 10MB)
+                      </span>
+                    </div>
+
+                    <input
+                      ref={userPhotoInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleUserPhotoChange}
+                      className="hidden"
+                    />
+
+                    {!userPhotoUrl ? (
+                      <div
+                        onClick={() => !isProcessingUserPhoto && userPhotoInputRef.current?.click()}
+                        className="group relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border/90 bg-muted/20 p-4 sm:p-5 text-center hover:border-burgundy/60 hover:bg-sage/10 transition-all duration-200 cursor-pointer"
+                      >
+                        {isProcessingUserPhoto ? (
+                          <div className="flex flex-col items-center gap-2 py-2">
+                            <Loader2 className="size-6 animate-spin text-burgundy" />
+                            <p className="text-xs sm:text-sm font-medium text-foreground">
+                              Processing & optimizing photo...
+                            </p>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="size-10 rounded-full bg-burgundy/10 flex items-center justify-center text-burgundy group-hover:bg-burgundy/20 transition-colors">
+                              <Camera className="size-5" />
+                            </div>
+                            <p className="mt-2 text-xs sm:text-sm font-semibold text-foreground">
+                              Click to upload your photo
+                            </p>
+                            <p className="mt-0.5 text-[11px] text-muted-foreground">
+                              Clear face photo used for Aadhaar cross-verification and curated table host matching.
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="rounded-2xl border border-burgundy/30 bg-burgundy/5 p-3 sm:p-4 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="relative size-12 shrink-0 rounded-xl overflow-hidden border border-border shadow-xs bg-card">
+                            <img
+                              src={userPhotoUrl}
+                              alt="Your Photo Preview"
+                              className="size-full object-cover"
+                            />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <CheckCircle2 className="size-3.5 text-forest shrink-0" />
+                              <p className="text-xs sm:text-sm font-semibold text-foreground truncate">
+                                {userPhotoFileName || "Your_Photo.jpg"}
+                              </p>
+                            </div>
+                            <p className="text-[11px] text-burgundy font-medium mt-0.5">
+                              ✓ Your personal photo attached
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => userPhotoInputRef.current?.click()}
+                            className="h-8 px-2.5 text-xs text-foreground hover:bg-muted cursor-pointer"
+                          >
+                            Change
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleRemoveUserPhoto}
+                            className="h-8 px-2 text-xs text-destructive hover:bg-destructive/10 cursor-pointer"
+                            title="Remove photo"
+                          >
+                            <Trash2 className="size-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                {/* Safety Assurance */}
+                <div className="flex items-center justify-center gap-2 pt-1.5 text-xs sm:text-[13px] text-muted-foreground text-center">
+                  <ShieldCheck className="size-4 text-forest shrink-0" />
+                  <span>100% Offline Aadhaar verification via DigiLocker. Never spammed or sold.</span>
+                </div>
+              </div>
+            </div>
+          )}
             </motion.div>
           </AnimatePresence>
         </motion.div>
