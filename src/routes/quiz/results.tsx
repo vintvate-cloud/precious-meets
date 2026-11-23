@@ -53,10 +53,57 @@ export const Route = createFileRoute("/quiz/results")({
   component: QuizResultsPage,
 });
 
+const DEFAULT_FALLBACK_PROFILE: SocialProfileScores = {
+  algorithmVersion: "v1.0.0",
+  archetype: {
+    title: "The Curious Flâneur",
+    description:
+      "You balance thoughtful observation with warm conversation, drawn to authentic stories and hidden creative corners.",
+    keyTraits: ["Observant", "Culture Enthusiast", "Unhurried Listener"],
+    seatingSynergy:
+      "The quintessential table chameleon; harmonizes naturally across any group composition with easy grace and unhurried charm.",
+    conversationalGift:
+      "You read the room with subtle wisdom and find authentic common ground with companions from every walk of life.",
+    idealAmbience:
+      "Artisanal supper club with a curated heritage menu, warm candlelight, soft vinyl acoustics, and eclectic kindred spirits.",
+    compatibilityRating: 96,
+  },
+  dimensions: {
+    socialEnergy: 68,
+    conversationDepth: 84,
+    playfulness: 72,
+    curiosity: 88,
+    adventure: 75,
+    sharedInterests: ["Culinary Heritage & Wine", "Philosophy & Psychology", "Literature & Cinema"],
+    dietary: "Vegetarian",
+    allergies: [],
+    boundaries: [],
+    preferredCity: "Delhi NCR",
+  },
+  quizAnswers: [],
+};
+
+const getInitialProfile = (): SocialProfileScores => {
+  if (typeof window !== "undefined") {
+    try {
+      const raw = localStorage.getItem("precious_meets_latest_profile");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.archetype && parsed?.dimensions) {
+          return parsed;
+        }
+      }
+    } catch {
+      // Ignore JSON error
+    }
+  }
+  return DEFAULT_FALLBACK_PROFILE;
+};
+
 export function QuizResultsPage() {
   const navigate = useNavigate();
   const { user, profile: authProfile, isSubscribed, subscription, activateSubscription } = useAuth();
-  const [profile, setProfile] = useState<SocialProfileScores | null>(null);
+  const [profile, setProfile] = useState<SocialProfileScores>(getInitialProfile);
 
   // Subscription Checkout Form State
   const [name, setName] = useState(authProfile?.display_name || user?.user_metadata?.full_name || "");
@@ -119,7 +166,7 @@ export function QuizResultsPage() {
         if (rawPaid) {
           try {
             setPaidDossier(JSON.parse(rawPaid));
-          } catch (e) {}
+          } catch (e) { }
         }
       }
     };
@@ -128,46 +175,36 @@ export function QuizResultsPage() {
   }, [email, user?.email]);
 
   useEffect(() => {
-    const raw = localStorage.getItem("precious_meets_latest_profile");
-    if (raw) {
-      try {
-        setProfile(JSON.parse(raw));
-      } catch (e) {
-        // Ignore JSON error
-      }
-    } else {
-      // Default fallback profile if user accessed directly without completing quiz
-      const fallback: SocialProfileScores = {
-        algorithmVersion: "v1.0.0",
-        archetype: {
-          title: "The Curious Flâneur",
-          description:
-            "You balance thoughtful observation with warm conversation, drawn to authentic stories and hidden creative corners.",
-          keyTraits: ["Observant", "Culture Enthusiast", "Unhurried Listener"],
-          seatingSynergy:
-            "The quintessential table chameleon; harmonizes naturally across any group composition with easy grace and unhurried charm.",
-          conversationalGift:
-            "You read the room with subtle wisdom and find authentic common ground with companions from every walk of life.",
-          idealAmbience:
-            "Artisanal supper club with a curated heritage menu, warm candlelight, soft vinyl acoustics, and eclectic kindred spirits.",
-          compatibilityRating: 96,
-        },
-        dimensions: {
-          socialEnergy: 68,
-          conversationDepth: 84,
-          playfulness: 72,
-          curiosity: 88,
-          adventure: 75,
-          sharedInterests: ["Culinary Heritage & Wine", "Philosophy & Psychology", "Literature & Cinema"],
-          dietary: "Vegetarian",
-          allergies: [],
-          boundaries: [],
-          preferredCity: "Delhi NCR",
-        },
-        quizAnswers: [],
-      };
-      setProfile(fallback);
+    // 1. Force native scroll position to top
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" as any });
+
+    // 2. Ensure body/html overflow and touch action are never locked on iOS
+    if (typeof document !== "undefined") {
+      document.documentElement.style.overflowY = "auto";
+      document.body.style.overflowY = "auto";
+      document.body.style.position = "";
+      document.documentElement.classList.remove("lenis-stopped");
     }
+
+    // 3. Re-verify saved profile from localStorage if present
+    try {
+      const raw = localStorage.getItem("precious_meets_latest_profile");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.archetype && parsed?.dimensions) {
+          setProfile(parsed);
+        }
+      }
+    } catch {
+      // Ignore
+    }
+
+    // 4. Secondary micro-tick reset for iOS Safari viewport geometry sync
+    const timer = setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" as any });
+    }, 50);
+
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -285,7 +322,7 @@ export function QuizResultsPage() {
             if (!effectiveUserPhotoUrl && parsed.userPhotoUrl) effectiveUserPhotoUrl = parsed.userPhotoUrl;
             if (!effectiveUserPhotoName && parsed.userPhotoFileName) effectiveUserPhotoName = parsed.userPhotoFileName;
           }
-        } catch (e) {}
+        } catch (e) { }
       }
 
       if (!effectiveEmail && user?.email) {
@@ -326,12 +363,12 @@ export function QuizResultsPage() {
         archetypeTraits: profile?.archetype?.keyTraits || [],
         scores: profile?.dimensions
           ? {
-              socialEnergy: profile.dimensions.socialEnergy,
-              conversationDepth: profile.dimensions.conversationDepth,
-              playfulness: profile.dimensions.playfulness,
-              curiosity: profile.dimensions.curiosity,
-              adventure: profile.dimensions.adventure,
-            }
+            socialEnergy: profile.dimensions.socialEnergy,
+            conversationDepth: profile.dimensions.conversationDepth,
+            playfulness: profile.dimensions.playfulness,
+            curiosity: profile.dimensions.curiosity,
+            adventure: profile.dimensions.adventure,
+          }
           : undefined,
         dietary: profile?.dimensions?.dietary,
         allergies: profile?.dimensions?.allergies,
@@ -406,30 +443,16 @@ export function QuizResultsPage() {
     }
   };
 
-  if (!profile) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-ivory px-4 text-center">
-        <h1 className="font-display text-3xl">Calculating Your Vibe Profile...</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Curating your conversational archetype and complementary seating.
-        </p>
-        <Link
-          to="/quiz"
-          className="mt-6 rounded-full bg-burgundy px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-ivory hover:bg-burgundy/90"
-        >
-          Take the 10-Question Quiz
-        </Link>
-      </div>
-    );
-  }
-
   const { archetype, dimensions } = profile;
 
   return (
-    <div className="flex min-h-screen flex-col bg-ivory text-foreground">
+    <div
+      className="flex min-h-[100dvh] w-full flex-col bg-ivory text-foreground relative touch-pan-y"
+      style={{ WebkitOverflowScrolling: "touch" }}
+    >
       <Navbar />
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-6 pb-28 pt-28">
+      <main className="mx-auto w-full max-w-5xl flex-1 px-6 pb-28 pt-28 touch-pan-y">
         {/* Step Progression Breadcrumb */}
         <div className="mx-auto mb-8 flex max-w-md items-center justify-center gap-3 text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
           <span className="text-forest">1. Quiz Completed</span>
@@ -440,7 +463,7 @@ export function QuizResultsPage() {
         </div>
 
         {/* Hero Section: Archetype & Vibe */}
-        <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-card p-8 sm:p-12 shadow-sm text-center">
+        <div className="relative rounded-3xl border border-border/80 bg-card p-8 sm:p-12 shadow-sm text-center">
           <div className="inline-flex items-center gap-2 rounded-full bg-sage/70 px-4 py-1.5 text-xs font-semibold text-forest">
             <Sparkles className="size-3.5 text-ochre" /> Social Chemistry Archetype · Precious Algorithm v1.0
           </div>
